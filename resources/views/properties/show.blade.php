@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ $property->title ?: 'Property Details' }} - Property Scraper</title>
+    <title>{{ $property->title ?: 'Property Details' }} - LET CONNECT</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -393,34 +393,33 @@
 <body class="bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen">
     @include('layouts.properties-navigation')
     <div class="min-h-screen">
-        <!-- Enhanced Header -->
-        <header class="gradient-header shadow-2xl">
-            <div class="header-content max-w-7xl mx-auto px-6 lg:px-8">
-                <div class="flex justify-between items-center py-8">
-                    <div class="flex items-center space-x-6">
+
+
+        <!-- Property Header Section -->
+        <div class="bg-white border-b border-gray-200 shadow-sm">
+            <div class="max-w-7xl mx-auto px-6 lg:px-8 py-8">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-4">
                         <a href="{{ route('properties.index') }}" 
-                           class="bg-gradient-to-r from-gray-100 to-gray-200 p-3 rounded-full border border-gray-300 shadow-md hover:scale-110 transition-transform duration-300">
-                            <i class="fas fa-arrow-left text-xl text-gray-700"></i>
+                           class="text-gray-500 hover:text-gray-700 transition-colors duration-200">
+                            <i class="fas fa-arrow-left text-xl"></i>
                         </a>
-                        <div class="flex items-center space-x-4">
-                            <div class="bg-gradient-to-r from-gray-100 to-gray-200 p-4 rounded-full border border-gray-300 shadow-md">
-                                <i class="fas fa-home text-2xl text-gray-700"></i>
-                            </div>
-                            <h1 class="text-4xl font-bold text-white">Property Scraper</h1>
+                        <div class="h-8 w-px bg-gray-300"></div>
+                        <h1 class="text-3xl font-bold text-gray-900">
+                            {{ $property->title ?: 'Property Details' }}
+                        </h1>
+                    </div>
+                    @if($property->status)
+                        <div class="status-badge status-{{ $property->status === 'available' ? 'available' : 'rented' }}">
+                            <i class="fas fa-{{ $property->status === 'available' ? 'check-circle' : 'clock' }} mr-2"></i>
+                            {{ ucfirst($property->status) }}
                         </div>
-                    </div>
-                    <div class="bg-gradient-to-r from-gray-100 to-gray-200 px-6 py-3 rounded-full border border-gray-300 shadow-md">
-                        <a href="{{ $property->url }}" target="_blank" 
-                           class="text-gray-700 hover:text-blue-600 transition-colors duration-300 flex items-center space-x-2">
-                            <i class="fas fa-external-link-alt"></i>
-                            <span class="font-medium">View Original</span>
-                        </a>
-                    </div>
+                    @endif
                 </div>
             </div>
-        </header>
+        </div>
 
-        <main class="max-w-7xl mx-auto px-6 lg:px-8 py-12">
+        <main class="max-w-7xl mx-auto px-6 lg:px-8 py-8">
             @if(session('success'))
                 <div class="success-message animate-fade-in">
                     <div class="flex items-center space-x-3">
@@ -430,14 +429,10 @@
                 </div>
             @endif
             
-            <!-- Enhanced Property Header -->
-            <div class="property-card p-10 mb-10 animate-slide-up">
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-10">
-                    <div class="lg:col-span-2 space-y-8">
-                        <h1 class="text-5xl font-bold text-gray-900 leading-tight">
-                            {{ $property->title ?: 'Property Title Not Available' }}
-                        </h1>
-                        
+            <!-- Property Overview Card -->
+            <div class="property-card p-8 mb-8 animate-slide-up">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <div class="lg:col-span-2 space-y-6">
                         <div class="flex items-center space-x-4">
                             <i class="fas fa-map-marker-alt text-red-500 text-2xl"></i>
                             @if($property->latitude && $property->longitude && $property->latitude !== 'N/A' && $property->longitude !== 'N/A')
@@ -482,17 +477,6 @@
                                 Available: {{ $property->available_date }}
                             </div>
                         @endif
-                        
-                        <div class="status-badge text-center text-lg font-semibold
-                            @if($property->status == 'available') status-available
-                            @elseif($property->status == 'rented') status-rented
-                            @elseif($property->status == 'unavailable') status-unavailable
-                            @elseif($property->status == 'on_hold') status-on_hold
-                            @else status-available
-                            @endif">
-                            <i class="fas fa-info-circle mr-2"></i>
-                            Status: {{ ucfirst($property->status ?: 'Available') }}
-                        </div>
                     </div>
                 </div>
             </div>
@@ -708,17 +692,11 @@
                                 <i class="fas fa-edit"></i>
                                 Edit Property
                             </a>
-                            
-                            <a href="{{ $property->url }}" target="_blank" 
-                               class="secondary-button w-full justify-center">
-                                <i class="fas fa-external-link-alt"></i>
-                                View Original Listing
-                            </a>
                             @else
                             <div class="text-center p-4 bg-gray-50 rounded-lg">
                                 <p class="text-gray-600 text-sm">
                                     <i class="fas fa-lock mr-2"></i>
-                                    Sign in as an agent to edit properties and view original listings
+                                    Sign in as an agent to edit properties
                                 </p>
                                 <a href="{{ route('login') }}" class="inline-block mt-3 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
                                     Agent Login

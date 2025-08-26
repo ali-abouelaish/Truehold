@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Property Scraper - Find Your Perfect Home</title>
+    <title>LET CONNECT - Find Your Perfect Home</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -298,32 +298,30 @@
 <body class="bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen">
     @include('layouts.properties-navigation')
     <div class="min-h-screen">
-        <!-- Enhanced Header -->
-        <header class="gradient-header shadow-2xl">
-            <div class="header-content max-w-7xl mx-auto px-6 lg:px-8">
-                <div class="flex justify-between items-center py-8">
-                    <div class="flex items-center space-x-6">
-                        <div class="bg-gradient-to-r from-gray-100 to-gray-200 p-4 rounded-full border border-gray-300 shadow-md">
-                            <i class="fas fa-home text-2xl text-gray-700"></i>
+
+
+        <!-- Property Listing Header -->
+        <div class="bg-white border-b border-gray-200 shadow-sm">
+            <div class="max-w-7xl mx-auto px-6 lg:px-8 py-6">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-4">
+                        <h1 class="text-2xl font-bold text-gray-900">Property Listings</h1>
+                        <div class="h-6 w-px bg-gray-300"></div>
+                        <div class="text-gray-600">
+                            <i class="fas fa-home mr-2"></i>{{ $properties->total() }} properties found
                         </div>
-                        <span>Property Scraper</span>
                     </div>
-                    <div class="flex items-center space-x-6">
-                        <div class="bg-gradient-to-r from-gray-100 to-gray-200 px-6 py-3 rounded-full border border-gray-300 shadow-md">
-                            <span class="text-gray-700 font-semibold text-lg">
-                                <i class="fas fa-home mr-2"></i>{{ $properties->total() }} properties found
-                            </span>
-                        </div>
-                        <a href="{{ route('admin.dashboard') }}" class="bg-gradient-to-r from-gray-100 to-gray-200 px-6 py-3 rounded-full border border-gray-300 shadow-md text-gray-700 hover:scale-105 transition-transform duration-300">
-                            <i class="fas fa-cog mr-2"></i>Admin Dashboard
+                    <div class="flex items-center space-x-4">
+                        <a href="{{ route('admin.dashboard') }}" class="text-gray-600 hover:text-gray-800 font-medium transition-colors duration-200">
+                            <i class="fas fa-cog mr-2"></i>Admin
                         </a>
-                        <a href="{{ route('properties.map') }}" class="action-button">
+                        <a href="{{ route('properties.map') }}" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors">
                             <i class="fas fa-map-marked-alt mr-2"></i>Map View
                         </a>
                     </div>
                 </div>
             </div>
-        </header>
+        </div>
 
         <!-- Success Messages -->
         @if(session('success'))
