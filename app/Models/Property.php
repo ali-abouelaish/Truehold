@@ -323,4 +323,59 @@ class Property extends Model
         
         return $query;
     }
+
+    // Static method to get company color for consistent coloring across the application
+    public static function getCompanyColor($company)
+    {
+        if (!$company || $company === 'N/A' || $company === '') {
+            return ['fill' => '#6b7280', 'stroke' => '#ffffff']; // Gray for unknown
+        }
+        
+        // Define color scheme for different companies
+        $companyColors = [
+            'iFlatShare' => ['fill' => '#3b82f6', 'stroke' => '#ffffff'], // Blue
+            'AK&PROPERTIES' => ['fill' => '#ef4444', 'stroke' => '#ffffff'], // Red
+            'Banksia Limited' => ['fill' => '#10b981', 'stroke' => '#ffffff'], // Green
+            'Built Asset Management Limited' => ['fill' => '#f59e0b', 'stroke' => '#ffffff'], // Amber
+            'Capital Living' => ['fill' => '#8b5cf6', 'stroke' => '#ffffff'], // Purple
+            'JD Corp Management' => ['fill' => '#ec4899', 'stroke' => '#ffffff'], // Pink
+            'North Kensington Property Consultants' => ['fill' => '#06b6d4', 'stroke' => '#ffffff'], // Cyan
+            'Pisoria Ltd' => ['fill' => '#84cc16', 'stroke' => '#ffffff'], // Lime
+            'UK London Flat' => ['fill' => '#f97316', 'stroke' => '#ffffff'], // Orange
+            'COME TO LONDON LIMITED' => ['fill' => '#6366f1', 'stroke' => '#ffffff'], // Indigo
+        ];
+        
+        // Check for exact matches first
+        if (isset($companyColors[$company])) {
+            return $companyColors[$company];
+        }
+        
+        // Check for partial matches
+        foreach ($companyColors as $key => $color) {
+            if (stripos($company, $key) !== false || stripos($key, $company) !== false) {
+                return $color;
+            }
+        }
+        
+        // Generate a consistent color based on company name hash
+        $hash = 0;
+        for ($i = 0; $i < strlen($company); $i++) {
+            $hash = (($hash << 5) - $hash + ord($company[$i])) & 0xFFFFFFFF;
+        }
+        
+        $colors = [
+            ['fill' => '#3b82f6', 'stroke' => '#ffffff'], // Blue
+            ['fill' => '#ef4444', 'stroke' => '#ffffff'], // Red
+            ['fill' => '#10b981', 'stroke' => '#ffffff'], // Green
+            ['fill' => '#f59e0b', 'stroke' => '#ffffff'], // Amber
+            ['fill' => '#8b5cf6', 'stroke' => '#ffffff'], // Purple
+            ['fill' => '#ec4899', 'stroke' => '#ffffff'], // Pink
+            ['fill' => '#06b6d4', 'stroke' => '#ffffff'], // Cyan
+            ['fill' => '#84cc16', 'stroke' => '#ffffff'], // Lime
+            ['fill' => '#f97316', 'stroke' => '#ffffff'], // Orange
+            ['fill' => '#6366f1', 'stroke' => '#ffffff'], // Indigo
+        ];
+        
+        return $colors[abs($hash) % count($colors)];
+    }
 }

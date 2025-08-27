@@ -49,7 +49,7 @@ class PropertyController extends Controller
         $locations = Property::distinct()->pluck('location')->filter()->sort()->values();
         $propertyTypes = Property::distinct()->pluck('property_type')->filter()->sort()->values();
         $availableDates = Property::distinct()->pluck('available_date')->filter()->sort()->values();
-        $managementCompanies = auth()->check() ? Property::distinct()->pluck('management_company')->filter()->sort()->values() : collect();
+        $managementCompanies = Property::distinct()->pluck('management_company')->filter()->sort()->values();
 
         $properties = $query->latest()->paginate(20);
 
@@ -123,7 +123,7 @@ class PropertyController extends Controller
         $locations = Property::distinct()->pluck('location')->filter()->sort()->values();
         $propertyTypes = Property::distinct()->pluck('property_type')->sort()->values();
         $availableDates = Property::distinct()->pluck('available_date')->sort()->values();
-        $managementCompanies = auth()->check() ? Property::distinct()->pluck('management_company')->filter()->sort()->values() : collect();
+        $managementCompanies = Property::distinct()->pluck('management_company')->filter()->sort()->values();
 
         // Limit properties to prevent performance issues
         $properties = $query->limit(100)->get();

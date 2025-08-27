@@ -2,7 +2,10 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <title>{{ $property->title ?: 'Property Details' }} - LET CONNECT</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
@@ -388,6 +391,119 @@
             from { opacity: 0; transform: translateY(40px); }
             to { opacity: 1; transform: translateY(0); }
         }
+        
+        /* Mobile-first responsive design */
+        @media (max-width: 767px) {
+            .property-card {
+                border-radius: 16px;
+                margin-bottom: 1rem;
+            }
+            
+            .property-card .p-8 {
+                padding: 1.5rem;
+            }
+            
+            .price-display {
+                padding: 1.5rem;
+                border-radius: 16px;
+            }
+            
+            .price-display .text-6xl {
+                font-size: 2.5rem;
+            }
+            
+            .feature-badge, .status-badge {
+                padding: 0.5rem 1rem;
+                font-size: 0.875rem;
+            }
+            
+            .action-button, .secondary-button, .success-button {
+                padding: 0.75rem 1rem;
+                font-size: 0.875rem;
+                min-height: 44px;
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .grid.grid-cols-1.lg\\:grid-cols-3 {
+                gap: 1.5rem;
+            }
+            
+            .space-y-6 > * + * {
+                margin-top: 1.5rem;
+            }
+        }
+        
+        /* Small screens */
+        @media (max-width: 640px) {
+            .property-card .p-8 {
+                padding: 1rem;
+            }
+            
+            .price-display {
+                padding: 1rem;
+            }
+            
+            .price-display .text-6xl {
+                font-size: 2rem;
+            }
+            
+            .feature-badge, .status-badge {
+                padding: 0.5rem 0.75rem;
+                font-size: 0.8rem;
+            }
+            
+            .text-2xl {
+                font-size: 1.25rem;
+            }
+            
+            .text-3xl {
+                font-size: 1.5rem;
+            }
+        }
+        
+        /* Very small screens */
+        @media (max-width: 375px) {
+            .property-card .p-8 {
+                padding: 0.75rem;
+            }
+            
+            .price-display {
+                padding: 0.75rem;
+            }
+            
+            .price-display .text-6xl {
+                font-size: 1.75rem;
+            }
+        }
+        
+        /* Touch-friendly improvements */
+        @media (max-width: 767px) {
+            button, select, input, a {
+                min-height: 44px;
+                min-width: 44px;
+            }
+            
+            .property-card {
+                -webkit-tap-highlight-color: transparent;
+            }
+            
+            .property-card:active {
+                transform: scale(0.98);
+            }
+            
+            .grid.gap-8 {
+                gap: 1.5rem;
+            }
+        }
+        
+        /* High DPI displays */
+        @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+            .property-image {
+                image-rendering: -webkit-optimize-contrast;
+                image-rendering: crisp-edges;
+            }
+        }
     </style>
 </head>
 <body class="bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen">
@@ -397,20 +513,20 @@
 
         <!-- Property Header Section -->
         <div class="bg-white border-b border-gray-200 shadow-sm">
-            <div class="max-w-7xl mx-auto px-6 lg:px-8 py-8">
-                <div class="flex items-center justify-between">
-                    <div class="flex items-center space-x-4">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
+                <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between space-y-3 sm:space-y-0">
+                    <div class="flex items-center space-x-3 sm:space-x-4">
                         <a href="{{ route('properties.index') }}" 
                            class="text-gray-500 hover:text-gray-700 transition-colors duration-200">
-                            <i class="fas fa-arrow-left text-xl"></i>
+                            <i class="fas fa-arrow-left text-lg sm:text-xl"></i>
                         </a>
-                        <div class="h-8 w-px bg-gray-300"></div>
-                        <h1 class="text-3xl font-bold text-gray-900">
-                            {{ $property->title ?: 'Property Details' }}
+                        <div class="hidden sm:block h-8 w-px bg-gray-300"></div>
+                        <h1 class="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">
+                            {{ Str::limit($property->title ?: 'Property Details', 50) }}
                         </h1>
                     </div>
                     @if($property->status)
-                        <div class="status-badge status-{{ $property->status === 'available' ? 'available' : 'rented' }}">
+                        <div class="status-badge status-{{ $property->status === 'available' ? 'available' : 'rented' }} text-sm sm:text-base">
                             <i class="fas fa-{{ $property->status === 'available' ? 'check-circle' : 'clock' }} mr-2"></i>
                             {{ ucfirst($property->status) }}
                         </div>
@@ -419,36 +535,36 @@
             </div>
         </div>
 
-        <main class="max-w-7xl mx-auto px-6 lg:px-8 py-8">
+        <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
             @if(session('success'))
                 <div class="success-message animate-fade-in">
                     <div class="flex items-center space-x-3">
-                        <i class="fas fa-check-circle text-2xl"></i>
-                        <span class="text-lg font-semibold">{{ session('success') }}</span>
+                        <i class="fas fa-check-circle text-xl sm:text-2xl"></i>
+                        <span class="text-base sm:text-lg font-semibold">{{ session('success') }}</span>
                     </div>
                 </div>
             @endif
             
             <!-- Property Overview Card -->
-            <div class="property-card p-8 mb-8 animate-slide-up">
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                    <div class="lg:col-span-2 space-y-6">
-                        <div class="flex items-center space-x-4">
-                            <i class="fas fa-map-marker-alt text-red-500 text-2xl"></i>
+            <div class="property-card p-4 sm:p-6 lg:p-8 mb-6 sm:mb-8 animate-slide-up">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
+                    <div class="lg:col-span-2 space-y-4 sm:space-y-6">
+                        <div class="flex items-center space-x-3 sm:space-x-4">
+                            <i class="fas fa-map-marker-alt text-red-500 text-xl sm:text-2xl"></i>
                             @if($property->latitude && $property->longitude && $property->latitude !== 'N/A' && $property->longitude !== 'N/A')
                                 <a href="https://www.google.com/maps?q={{ $property->latitude }},{{ $property->longitude }}" 
                                    target="_blank" 
-                                   class="text-2xl font-semibold text-gray-700 hover:text-blue-600 transition-colors duration-300 hover:underline">
+                                   class="text-lg sm:text-xl lg:text-2xl font-semibold text-gray-700 hover:text-blue-600 transition-colors duration-300 hover:underline">
                                     {{ $property->location ?: 'Location not specified' }}
-                                    <i class="fas fa-external-link-alt ml-3 text-lg opacity-75"></i>
+                                    <i class="fas fa-external-link-alt ml-2 sm:ml-3 text-base sm:text-lg opacity-75"></i>
                                 </a>
                             @else
-                                <span class="text-2xl font-semibold text-gray-700">{{ $property->location ?: 'Location not specified' }}</span>
+                                <span class="text-lg sm:text-xl lg:text-2xl font-semibold text-gray-700">{{ $property->location ?: 'Location not specified' }}</span>
                             @endif
                         </div>
                         
                         @if($property->property_type)
-                            <div class="feature-badge inline-block">
+                            <div class="feature-badge inline-block text-sm sm:text-base">
                                 <i class="fas fa-home mr-2"></i>
                                 {{ $property->property_type }}
                             </div>
@@ -456,7 +572,7 @@
                         
                         @auth
                         <div class="pt-4">
-                            <a href="{{ route('admin.properties.edit', $property) }}" class="action-button">
+                            <a href="{{ route('admin.properties.edit', $property) }}" class="action-button w-full sm:w-auto">
                                 <i class="fas fa-edit"></i>
                                 Edit Property
                             </a>
@@ -464,15 +580,15 @@
                         @endauth
                     </div>
                     
-                    <div class="space-y-6">
+                    <div class="space-y-4 sm:space-y-6">
                         <div class="price-display">
-                            <div class="text-6xl font-bold mb-2 leading-none">
+                            <div class="text-4xl sm:text-5xl lg:text-6xl font-bold mb-2 leading-none">
                                 {{ $property->formatted_price }}
                             </div>
                         </div>
                         
                         @if($property->available_date && $property->available_date !== 'N/A')
-                            <div class="bg-green-100 text-green-800 px-6 py-4 rounded-16 font-semibold text-center shadow-lg">
+                            <div class="bg-green-100 text-green-800 px-4 sm:px-6 py-3 sm:py-4 rounded-12 sm:rounded-16 font-semibold text-center shadow-lg text-sm sm:text-base">
                                 <i class="fas fa-calendar mr-2"></i>
                                 Available: {{ $property->available_date }}
                             </div>
@@ -639,7 +755,6 @@
                     @endif
 
                     <!-- Management Company -->
-                    @auth
                     @if($property->management_company && $property->management_company !== 'N/A')
                         <div class="property-card p-8">
                             <h2 class="text-2xl font-bold text-gray-900 mb-6 flex items-center space-x-3">
@@ -653,7 +768,6 @@
                             </div>
                         </div>
                     @endif
-                    @endauth
 
                     <!-- Enhanced Location Information -->
                     @if($property->latitude && $property->longitude && $property->latitude !== 'N/A' && $property->longitude !== 'N/A')
@@ -692,19 +806,6 @@
                                 <i class="fas fa-edit"></i>
                                 Edit Property
                             </a>
-                            @else
-                            <div class="text-center p-4 bg-gray-50 rounded-lg">
-                                <p class="text-gray-600 text-sm">
-                                    <i class="fas fa-lock mr-2"></i>
-                                    Sign in as an agent to edit properties
-                                </p>
-                                <a href="{{ route('login') }}" class="inline-block mt-3 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-                                    Agent Login
-                                </a>
-                                <p class="text-xs text-gray-500 mt-2">
-                                    Contact your administrator to create an agent account
-                                </p>
-                            </div>
                             @endauth
                             
                             <button onclick="shareProperty()" 
@@ -712,6 +813,14 @@
                                 <i class="fas fa-share"></i>
                                 Share Property
                             </button>
+                            
+                            @if($property->url)
+                            <a href="{{ $property->url }}" target="_blank" 
+                               class="secondary-button w-full justify-center">
+                                <i class="fas fa-external-link-alt"></i>
+                                View Original Listing
+                            </a>
+                            @endif
                         </div>
                     </div>
                 </div>

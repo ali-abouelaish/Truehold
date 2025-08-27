@@ -2,7 +2,10 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <title>Property Map - Property Scraper</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
@@ -36,20 +39,35 @@
     </style>
     
     <style>
+        /* Mobile-first responsive design */
         #map {
-            height: calc(100vh - 200px);
-            min-height: 500px;
+            height: calc(100vh - 120px);
+            min-height: 400px;
             width: 100%;
             border-radius: 8px;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
             background: #f8f9fa;
         }
         
+        @media (min-width: 768px) {
+            #map {
+                height: calc(100vh - 200px);
+                min-height: 500px;
+            }
+        }
+        
         .map-container {
             position: relative;
             width: 100%;
-            height: calc(100vh - 200px);
-            min-height: 500px;
+            height: calc(100vh - 120px);
+            min-height: 400px;
+        }
+        
+        @media (min-width: 768px) {
+            .map-container {
+                height: calc(100vh - 200px);
+                min-height: 500px;
+            }
         }
         
         .map-loading {
@@ -69,16 +87,81 @@
             transform: scale(1.1);
         }
         
+        /* Mobile-first map controls */
         .map-controls {
             position: absolute;
-            top: 20px;
-            right: 20px;
+            top: 10px;
+            right: 10px;
             z-index: 1000;
             background: white;
-            padding: 16px;
+            padding: 12px;
             border-radius: 8px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.15);
             border: 1px solid #e5e7eb;
+            max-width: 280px;
+            width: calc(100vw - 20px);
+        }
+        
+        @media (min-width: 640px) {
+            .map-controls {
+                top: 20px;
+                right: 20px;
+                padding: 16px;
+                max-width: 320px;
+                width: auto;
+            }
+        }
+        
+        @media (min-width: 768px) {
+            .map-controls {
+                max-width: 350px;
+            }
+        }
+        
+        /* Mobile-friendly company legend */
+        .company-legend {
+            max-height: 120px;
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: #cbd5e1 #f1f5f9;
+        }
+        
+        .company-legend::-webkit-scrollbar {
+            width: 4px;
+        }
+        
+        .company-legend::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 2px;
+        }
+        
+        .company-legend::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 2px;
+        }
+        
+        .company-legend::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+        
+        @media (min-width: 768px) {
+            .company-legend {
+                max-height: 200px;
+            }
+        }
+        
+        /* Mobile-friendly buttons */
+        .map-controls .formal-button {
+            padding: 10px 16px;
+            font-size: 13px;
+            min-height: 44px; /* Touch-friendly height */
+        }
+        
+        @media (min-width: 640px) {
+            .map-controls .formal-button {
+                padding: 12px 20px;
+                font-size: 14px;
+            }
         }
         
         .image-modal {
@@ -96,29 +179,47 @@
         }
         
         .image-modal img {
-            max-width: 90%;
-            max-height: 90%;
+            max-width: 95%;
+            max-height: 95%;
             object-fit: contain;
             border-radius: 8px;
             box-shadow: 0 20px 40px rgba(0,0,0,0.5);
         }
         
+        @media (min-width: 640px) {
+            .image-modal img {
+                max-width: 90%;
+                max-height: 90%;
+            }
+        }
+        
         .image-modal-close {
             position: absolute;
-            top: 20px;
-            right: 20px;
+            top: 15px;
+            right: 15px;
             background: rgba(0, 0, 0, 0.7);
             color: white;
             border: none;
-            font-size: 24px;
+            font-size: 20px;
             cursor: pointer;
             padding: 8px;
             border-radius: 50%;
-            width: 40px;
-            height: 40px;
+            width: 36px;
+            height: 36px;
             display: flex;
             align-items: center;
             justify-content: center;
+            min-height: 44px; /* Touch-friendly */
+        }
+        
+        @media (min-width: 640px) {
+            .image-modal-close {
+                top: 20px;
+                right: 20px;
+                font-size: 24px;
+                width: 40px;
+                height: 40px;
+            }
         }
         
         .property-count-badge {
@@ -127,17 +228,160 @@
             border-radius: 8px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.1);
             backdrop-filter: blur(10px);
+            padding: 8px 12px;
+            font-size: 12px;
+        }
+        
+        @media (min-width: 640px) {
+            .property-count-badge {
+                padding: 12px 16px;
+                font-size: 14px;
+            }
         }
         
         .formal-button {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             border: none;
             transition: all 0.3s ease;
+            min-height: 44px; /* Touch-friendly height */
         }
         
         .formal-button:hover {
             transform: translateY(-2px);
             box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+        }
+        
+        /* Mobile-friendly price labels */
+        .price-label {
+            font-size: 10px;
+            padding: 1px 4px;
+        }
+        
+        @media (min-width: 640px) {
+            .price-label {
+                font-size: 11px;
+                padding: 2px 6px;
+            }
+        }
+        
+        /* Mobile-friendly filter collapse */
+        .filter-toggle {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: 600;
+            color: #475569;
+            margin-bottom: 16px;
+        }
+        
+        @media (min-width: 768px) {
+            .filter-toggle {
+                display: none;
+            }
+        }
+        
+        .filters-collapsible {
+            display: none;
+        }
+        
+        @media (min-width: 768px) {
+            .filters-collapsible {
+                display: block;
+            }
+        }
+        
+        .filters-collapsible.show {
+            display: block;
+        }
+        
+        /* Mobile-friendly info windows */
+        .gm-style .gm-style-iw-c {
+            max-width: 280px !important;
+            padding: 0 !important;
+        }
+        
+        .gm-style .gm-style-iw-d {
+            overflow: hidden !important;
+        }
+        
+        @media (min-width: 640px) {
+            .gm-style .gm-style-iw-c {
+                max-width: 320px !important;
+            }
+        }
+        
+        /* Mobile touch improvements */
+        @media (max-width: 767px) {
+            /* Ensure touch targets are at least 44px */
+            button, select, input, a {
+                min-height: 44px;
+                min-width: 44px;
+            }
+            
+            /* Improve mobile scrolling */
+            .map-container {
+                -webkit-overflow-scrolling: touch;
+            }
+            
+            /* Mobile-friendly spacing */
+            .map-controls {
+                max-height: 70vh;
+                overflow-y: auto;
+            }
+            
+            /* Mobile-friendly company legend */
+            .company-legend {
+                max-height: 100px;
+            }
+            
+            /* Mobile-friendly buttons */
+            .map-controls .formal-button {
+                min-height: 48px;
+                font-size: 14px;
+            }
+        }
+        
+        /* Landscape mobile improvements */
+        @media (max-width: 767px) and (orientation: landscape) {
+            .map-controls {
+                max-height: 50vh;
+            }
+            
+            .company-legend {
+                max-height: 80px;
+            }
+        }
+        
+        /* Very small screens */
+        @media (max-width: 375px) {
+            .map-controls {
+                max-width: calc(100vw - 20px);
+                right: 10px;
+                left: 10px;
+                width: auto;
+            }
+            
+            .property-count-badge {
+                bottom: 10px;
+                left: 10px;
+                right: 10px;
+                text-align: center;
+            }
+        }
+        
+        /* High DPI displays */
+        @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+            .price-label {
+                font-weight: 500;
+            }
+            
+            .map-controls .formal-button {
+                font-weight: 600;
+            }
         }
     </style>
 </head>
@@ -146,14 +390,14 @@
     <div class="min-h-screen">
         <!-- Header -->
         <header class="bg-white shadow-sm border-b border-gray-200">
-            <div class="max-w-7xl mx-auto px-6 lg:px-8 py-4">
-                <div class="flex justify-between items-center">
-                    <h1 class="text-2xl font-bold text-gray-900">Property Map</h1>
-                    <nav class="flex space-x-4">
-                        <a href="{{ route('properties.index') }}" class="text-gray-600 hover:text-gray-900 font-medium">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-4">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-3 sm:space-y-0">
+                    <h1 class="text-xl sm:text-2xl font-bold text-gray-900">Property Map</h1>
+                    <nav class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4">
+                        <a href="{{ route('properties.index') }}" class="text-gray-600 hover:text-gray-900 font-medium text-sm sm:text-base">
                             <i class="fas fa-th-large mr-2"></i>List View
                         </a>
-                        <a href="{{ route('properties.map') }}" class="text-blue-600 font-medium">
+                        <a href="{{ route('properties.map') }}" class="text-blue-600 font-medium text-sm sm:text-base">
                             <i class="fas fa-map mr-2"></i>Map View
                         </a>
                     </nav>
@@ -162,145 +406,142 @@
         </header>
 
         <!-- Search Filters -->
-        <div class="bg-white border-b border-gray-200 px-6 lg:px-8 py-6">
+        <div class="bg-white border-b border-gray-200 px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
             <div class="max-w-7xl mx-auto">
-                <div class="flex justify-between items-center mb-6">
-                    <h2 class="text-xl font-semibold text-gray-800">Search Filters</h2>
-                    <a href="{{ route('properties.index') }}" class="text-blue-600 hover:text-blue-800 font-medium">
+                <!-- Mobile filter toggle -->
+                <button type="button" class="filter-toggle" onclick="toggleFilters()">
+                    <i class="fas fa-filter mr-2"></i>
+                    <span id="filterToggleText">Show Filters</span>
+                    <i class="fas fa-chevron-down ml-2" id="filterToggleIcon"></i>
+                </button>
+                
+                <div class="flex justify-between items-center mb-4 sm:mb-6">
+                    <h2 class="text-lg sm:text-xl font-semibold text-gray-800">Search Filters</h2>
+                    <a href="{{ route('properties.index') }}" class="text-blue-600 hover:text-blue-800 font-medium text-sm sm:text-base">
                         <i class="fas fa-th-large mr-2"></i>Switch to List View
                     </a>
                 </div>
-                <form method="GET" action="{{ route('properties.map') }}" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">Location</label>
-                        <select name="location" class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 py-3 px-4">
-                            <option value="">All Locations</option>
-                            @foreach($locations as $location)
-                                <option value="{{ $location }}" {{ request('location') == $location ? 'selected' : '' }}>
-                                    {{ $location }}
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
-                    
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">Property Type</label>
-                        <select name="property_type" class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 py-3 px-4">
-                            <option value="">All Types</option>
-                            @foreach($propertyTypes as $type)
-                                <option value="{{ $type }}" {{ request('property_type') == $type ? 'selected' : '' }}>
-                                    {{ $type }}
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
-                    
-                    @auth
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">Management Company</label>
-                        <select name="management_company" class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 py-3 px-4">
-                            <option value="">All Companies</option>
-                            @foreach($managementCompanies as $company)
-                                <option value="{{ $company }}" {{ request('management_company') == $company ? 'selected' : '' }}>
-                                    {{ $company }}
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
-                    @endauth
-                    
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">London Area</label>
-                        <select name="london_area" class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 py-3 px-4">
-                            <option value="">All Areas</option>
-                            <option value="central" {{ request('london_area') == 'central' ? 'selected' : '' }}>Central London</option>
-                            <option value="east" {{ request('london_area') == 'east' ? 'selected' : '' }}>East London</option>
-                            <option value="north" {{ request('london_area') == 'north' ? 'selected' : '' }}>North London</option>
-                            <option value="south" {{ request('london_area') == 'south' ? 'selected' : '' }}>South London</option>
-                            <option value="west" {{ request('london_area') == 'west' ? 'selected' : '' }}>West London</option>
-                        </select>
-                    </div>
-                </form>
                 
-                <!-- Second row of filters -->
-                <form method="GET" action="{{ route('properties.map') }}" class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">Min Price</label>
-                        <input type="number" name="min_price" value="{{ request('min_price') }}" 
-                               placeholder="£0" class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 py-3 px-4">
-                    </div>
+                <div class="filters-collapsible" id="filtersContent">
+                    <form method="GET" action="{{ route('properties.map') }}" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Location</label>
+                            <select name="location" class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 py-2 sm:py-3 px-3 sm:px-4 text-sm sm:text-base">
+                                <option value="">All Locations</option>
+                                @foreach($locations as $location)
+                                    <option value="{{ $location }}" {{ request('location') == $location ? 'selected' : '' }}>
+                                        {{ $location }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Property Type</label>
+                            <select name="property_type" class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 py-2 sm:py-3 px-3 sm:px-4 text-sm sm:text-base">
+                                <option value="">All Types</option>
+                                @foreach($propertyTypes as $type)
+                                    <option value="{{ $type }}" {{ request('property_type') == $type ? 'selected' : '' }}>
+                                        {{ $type }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Management Company</label>
+                            <select name="management_company" class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 py-2 sm:py-3 px-3 sm:px-4 text-sm sm:text-base">
+                                <option value="">All Companies</option>
+                                @foreach($managementCompanies as $company)
+                                    <option value="{{ $company }}" {{ request('location') == $company ? 'selected' : '' }}>
+                                        {{ $company }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">London Area</label>
+                            <select name="london_area" class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 py-2 sm:py-3 px-3 sm:px-4 text-sm sm:text-base">
+                                <option value="">All Areas</option>
+                                <option value="central" {{ request('london_area') == 'central' ? 'selected' : '' }}>Central London</option>
+                                <option value="east" {{ request('london_area') == 'east' ? 'selected' : '' }}>East London</option>
+                                <option value="north" {{ request('london_area') == 'north' ? 'selected' : '' }}>North London</option>
+                                <option value="south" {{ request('london_area') == 'south' ? 'selected' : '' }}>South London</option>
+                                <option value="west" {{ request('london_area') == 'west' ? 'selected' : '' }}>West London</option>
+                            </select>
+                        </div>
+                    </form>
                     
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">Max Price</label>
-                        <input type="number" name="max_price" value="{{ request('max_price') }}" 
-                               placeholder="£5000" class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 py-3 px-4">
-                    </div>
-                    
-                    <div class="flex items-end">
-                        <button type="submit" class="w-full formal-button text-white px-6 py-3 rounded-lg font-medium shadow-lg">
-                            <i class="fas fa-search mr-2"></i>Search
-                        </button>
-                    </div>
-                </form>
+                    <!-- Second row of filters -->
+                    <form method="GET" action="{{ route('properties.map') }}" class="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 mt-4 sm:mt-6">
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Min Price</label>
+                            <input type="number" name="min_price" value="{{ request('min_price') }}" 
+                                   placeholder="£0" class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 py-2 sm:py-3 px-3 sm:px-4 text-sm sm:text-base">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Max Price</label>
+                            <input type="number" name="max_price" value="{{ request('max_price') }}" 
+                                   placeholder="£5000" class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 py-2 sm:py-3 px-3 sm:px-4 text-sm sm:text-base">
+                        </div>
+                        
+                        <div class="flex items-end">
+                            <button type="submit" class="w-full formal-button text-white px-4 sm:px-6 py-2 sm:py-3 rounded-lg font-medium shadow-lg text-sm sm:text-base">
+                                <i class="fas fa-search mr-2"></i>Search
+                            </button>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
 
         <!-- Map Container -->
-        <main class="max-w-7xl mx-auto px-6 lg:px-8 py-8">
+        <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
             <div class="map-container">
                 <!-- Map Controls -->
                 <div class="map-controls">
-                    <div class="flex flex-col space-y-3">
-                                                 <button id="fitBounds" class="formal-button text-white px-4 py-2 rounded-lg text-sm font-medium shadow-md">
-                             <i class="fas fa-crosshairs mr-2"></i>Fit All
-                         </button>
-                         
-                         <button id="focusLondon" class="formal-button text-white px-4 py-2 rounded-lg text-sm font-medium shadow-md">
-                             <i class="fas fa-map-marker-alt mr-2"></i>Focus London
-                         </button>
+                    <div class="flex flex-col space-y-2 sm:space-y-3">
+                        <button id="fitBounds" class="formal-button text-white px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium shadow-md">
+                            <i class="fas fa-crosshairs mr-1 sm:mr-2"></i>
+                            <span class="hidden sm:inline">Fit All</span>
+                            <span class="sm:hidden">Fit</span>
+                        </button>
                         
-                        @auth
+                        <button id="focusLondon" class="formal-button text-white px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium shadow-md">
+                            <i class="fas fa-map-marker-alt mr-1 sm:mr-2"></i>
+                            <span class="hidden sm:inline">Focus London</span>
+                            <span class="sm:hidden">London</span>
+                        </button>
+                        
                         <!-- Company Legend -->
-                        <div class="company-legend bg-white p-3 rounded-lg shadow-md border border-gray-200">
-                            <h4 class="text-sm font-semibold text-gray-800 mb-2">Company Colors</h4>
+                        <div class="company-legend bg-white p-2 sm:p-3 rounded-lg shadow-md border border-gray-200">
+                            <h4 class="text-xs sm:text-sm font-semibold text-gray-800 mb-2">Company Colors</h4>
                             <div class="space-y-1 text-xs">
-                                <div class="flex items-center">
-                                    <div class="w-3 h-3 rounded-full bg-blue-500 mr-2"></div>
-                                    <span>iFlatShare</span>
-                                </div>
-                                <div class="flex items-center">
-                                    <div class="w-3 h-3 rounded-full bg-red-500 mr-2"></div>
-                                    <span>AK&PROPERTIES</span>
-                                </div>
-                                <div class="flex items-center">
-                                    <div class="w-3 h-3 rounded-full bg-green-500 mr-2"></div>
-                                    <span>Banksia Limited</span>
-                                </div>
-                                <div class="flex items-center">
-                                    <div class="w-3 h-3 rounded-full bg-amber-500 mr-2"></div>
-                                    <span>Built Asset Management</span>
-                                </div>
-                                <div class="flex items-center">
-                                    <div class="w-3 h-3 rounded-full bg-purple-500 mr-2"></div>
-                                    <span>Capital Living</span>
-                                </div>
-                                <div class="flex items-center">
-                                    <div class="w-3 h-3 rounded-full bg-gray-500 mr-2"></div>
-                                    <span>Other/Unknown</span>
-                                </div>
+                                @foreach($managementCompanies as $company)
+                                    @if($company && $company !== 'N/A' && $company !== '')
+                                        <div class="flex items-center">
+                                            @php
+                                                $companyColor = \App\Models\Property::getCompanyColor($company);
+                                            @endphp
+                                            <div class="w-2 sm:w-3 h-2 sm:h-3 rounded-full mr-1 sm:mr-2 flex-shrink-0" style="background-color: {{ $companyColor['fill'] }}; border: 1px solid {{ $companyColor['stroke'] }};"></div>
+                                            <span class="truncate text-xs">{{ $company }}</span>
+                                        </div>
+                                    @endif
+                                @endforeach
                             </div>
                         </div>
-                        @endauth
                     </div>
                 </div>
 
                 <!-- Map -->
                 <div id="map">
                     <div id="mapLoading" class="map-loading">
-                        <div class="text-center">
-                            <i class="fas fa-spinner fa-spin text-4xl text-blue-600 mb-4"></i>
-                            <p class="text-gray-600">Loading map...</p>
-                            <p class="text-sm text-gray-500 mt-2">This may take a few seconds</p>
+                        <div class="text-center px-4">
+                            <i class="fas fa-spinner fa-spin text-3xl sm:text-4xl text-blue-600 mb-3 sm:mb-4"></i>
+                            <p class="text-gray-600 text-sm sm:text-base">Loading map...</p>
+                            <p class="text-xs sm:text-sm text-gray-500 mt-2">This may take a few seconds</p>
                         </div>
                     </div>
                 </div>
@@ -309,9 +550,9 @@
                 <div id="properties-data" data-properties="{{ json_encode($properties) }}" style="display: none;"></div>
                 
                 <!-- Property Count Badge -->
-                <div class="absolute bottom-6 left-6 property-count-badge px-6 py-3 rounded-lg">
-                    <div class="text-sm text-gray-700">
-                        <i class="fas fa-map-marker-alt text-red-500 mr-2"></i>
+                <div class="absolute bottom-4 sm:bottom-6 left-4 sm:left-6 property-count-badge px-3 sm:px-6 py-2 sm:py-3 rounded-lg">
+                    <div class="text-xs sm:text-sm text-gray-700">
+                        <i class="fas fa-map-marker-alt text-red-500 mr-1 sm:mr-2"></i>
                         <span class="font-semibold">{{ $properties->count() }}</span> properties
                     </div>
                 </div>
@@ -616,14 +857,18 @@
                 return { fill: '#6b7280', stroke: '#ffffff' }; // Gray for unknown
             }
             
-            // Define color scheme for different companies
+            // Define color scheme for different companies - matching the PHP model
             const companyColors = {
                 'iFlatShare': { fill: '#3b82f6', stroke: '#ffffff' }, // Blue
                 'AK&PROPERTIES': { fill: '#ef4444', stroke: '#ffffff' }, // Red
                 'Banksia Limited': { fill: '#10b981', stroke: '#ffffff' }, // Green
                 'Built Asset Management Limited': { fill: '#f59e0b', stroke: '#ffffff' }, // Amber
                 'Capital Living': { fill: '#8b5cf6', stroke: '#ffffff' }, // Purple
-                'N/A': { fill: '#6b7280', stroke: '#ffffff' } // Gray
+                'JD Corp Management': { fill: '#ec4899', stroke: '#ffffff' }, // Pink
+                'North Kensington Property Consultants': { fill: '#06b6d4', stroke: '#ffffff' }, // Cyan
+                'Pisoria Ltd': { fill: '#84cc16', stroke: '#ffffff' }, // Lime
+                'UK London Flat': { fill: '#f97316', stroke: '#ffffff' }, // Orange
+                'COME TO LONDON LIMITED': { fill: '#6366f1', stroke: '#ffffff' }, // Indigo
             };
             
             // Check for exact matches first
@@ -678,18 +923,30 @@
                 
                 const companyColor = getCompanyColor(property.management_company);
                 
+                // Helper function to show field only if it has a meaningful value
+                const showField = (value, label, icon = '') => {
+                    if (value && value !== 'N/A' && value !== '' && value !== 'null' && value !== 'undefined') {
+                        return `<div style="color: #666; margin-bottom: 4px; font-size: 12px;">
+                            ${icon ? `<i class="fas fa-${icon}" style="color: #6b7280; margin-right: 4px;"></i>` : ''}
+                            <strong>${label}:</strong> ${value}
+                        </div>`;
+                    }
+                    return '';
+                };
+                
                 return `
                 <div style="padding: 8px; max-width: 300px;">
                     ${photo}
-                    <h3 style="font-weight: bold; font-size: 16px; margin-bottom: 8px;">${property.title}</h3>
-                    <div style="color: #666; margin-bottom: 8px;">
-                        <i class="fas fa-map-marker-alt" style="color: #ef4444; margin-right: 4px;"></i>
-                        ${property.location || 'Location not specified'}
-                    </div>
+                    <h3 style="font-weight: bold; font-size: 16px; margin-bottom: 8px;">${property.title || 'Property'}</h3>
+                    
+                    ${showField(property.location, 'Location', 'map-marker-alt')}
+                    
                     <div style="font-size: 18px; font-weight: bold; color: #2563eb; margin-bottom: 8px;">
-                        ${property.formatted_price}
+                        ${property.formatted_price || 'Price not specified'}
                     </div>
+                    
                     ${property.property_type ? `<span style="background: #dbeafe; color: #1e40af; padding: 2px 8px; border-radius: 12px; font-size: 12px; font-weight: 500;">${property.property_type}</span>` : ''}
+                    
                     ${property.management_company && property.management_company !== 'N/A' ? `
                         <div style="margin-top: 8px; margin-bottom: 8px;">
                             <span style="background: ${companyColor.fill}; color: white; padding: 4px 8px; border-radius: 12px; font-size: 12px; font-weight: 500;">
@@ -697,13 +954,22 @@
                             </span>
                         </div>
                     ` : ''}
-                                         <div style="margin-top: 12px;">
-                         <a href="/properties/${property.id}" style="background: #1f2937; color: white; padding: 6px 12px; border-radius: 6px; text-decoration: none; font-size: 14px; display: inline-block;">
-                             <i class="fas fa-info-circle" style="margin-right: 4px;"></i>View Details
-                         </a>
-                     </div>
-                 </div>
-             `;
+                    
+                    ${showField(property.available_date, 'Available', 'calendar')}
+                    ${showField(property.amenities, 'Amenities', 'star')}
+                    ${showField(property.furnishings, 'Furnishings', 'couch')}
+                    ${showField(property.bills_included, 'Bills Included', 'bolt')}
+                    ${showField(property.balcony_roof_terrace, 'Outdoor Space', 'tree')}
+                    ${showField(property.garden_patio, 'Garden/Patio', 'leaf')}
+                    ${showField(property.parking, 'Parking', 'car')}
+                    
+                    <div style="margin-top: 12px;">
+                        <a href="/properties/${property.id}" style="background: #1f2937; color: white; padding: 6px 12px; border-radius: 6px; text-decoration: none; font-size: 14px; display: inline-block;">
+                            <i class="fas fa-info-circle" style="margin-right: 4px;"></i>View Details
+                        </a>
+                    </div>
+                </div>
+            `;
             } catch (error) {
                 console.error('Error creating info window content:', error, property);
                 return `
@@ -893,7 +1159,26 @@
             }
         });
         
-                 // Button event listeners
+                 // Filter toggle functionality
+        function toggleFilters() {
+            const filtersContent = document.getElementById('filtersContent');
+            const filterToggleText = document.getElementById('filterToggleText');
+            const filterToggleIcon = document.getElementById('filterToggleIcon');
+            
+            if (filtersContent.classList.contains('show')) {
+                filtersContent.classList.remove('show');
+                filterToggleText.textContent = 'Show Filters';
+                filterToggleIcon.classList.remove('fa-chevron-up');
+                filterToggleIcon.classList.add('fa-chevron-down');
+            } else {
+                filtersContent.classList.add('show');
+                filterToggleText.textContent = 'Hide Filters';
+                filterToggleIcon.classList.remove('fa-chevron-down');
+                filterToggleIcon.classList.add('fa-chevron-up');
+            }
+        }
+        
+        // Button event listeners
          document.addEventListener('DOMContentLoaded', function() {
              setTimeout(() => {
                  const fitBoundsBtn = document.getElementById('fitBounds');
@@ -943,6 +1228,30 @@
                          }
                      });
                  }
+                 
+                 // Initialize filters state for mobile
+                 if (window.innerWidth < 768) {
+                     const filtersContent = document.getElementById('filtersContent');
+                     if (filtersContent) {
+                         filtersContent.classList.remove('show');
+                     }
+                 }
+                 
+                 // Handle orientation change for mobile
+                 window.addEventListener('orientationchange', function() {
+                     setTimeout(function() {
+                         if (map) {
+                             google.maps.event.trigger(map, 'resize');
+                         }
+                     }, 500);
+                 });
+                 
+                 // Handle window resize for responsive behavior
+                 window.addEventListener('resize', function() {
+                     if (map) {
+                         google.maps.event.trigger(map, 'resize');
+                     }
+                 });
              }, 500);
          });
     </script>
