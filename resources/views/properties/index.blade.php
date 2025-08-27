@@ -487,9 +487,15 @@
                         </div>
                     </div>
                     <div class="flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-4 w-full sm:w-auto">
+                        @auth
                         <a href="{{ route('admin.dashboard') }}" class="text-gray-600 hover:text-gray-800 font-medium transition-colors duration-200 text-sm sm:text-base">
                             <i class="fas fa-cog mr-2"></i>Admin
                         </a>
+                        @else
+                        <a href="{{ route('login') }}" class="text-gray-600 hover:text-gray-800 font-medium transition-colors duration-200 text-sm sm:text-base">
+                            <i class="fas fa-sign-in-alt mr-2"></i>Login
+                        </a>
+                        @endauth
                         <a href="{{ route('properties.map') }}" class="bg-blue-600 hover:bg-blue-700 text-white px-3 sm:px-4 py-2 rounded-lg font-medium transition-colors text-sm sm:text-base">
                             <i class="fas fa-map-marked-alt mr-2"></i>Map View
                         </a>
@@ -910,7 +916,69 @@
             const filterForm = document.getElementById('filterForm');
             filterForm.reset();
             sessionStorage.removeItem('propertyFilters');
-            filterForm.submit();
+            // Redirect to base URL without any parameters
+            window.location.href = '{{ route("properties.index") }}';
+        }
+
+        // Apply filters function
+        function applyFilters() {
+            const filterForm = document.getElementById('filterForm');
+            const formData = new FormData(filterForm);
+            const params = new URLSearchParams();
+            
+            // Only add non-empty values to URL
+            for (let [key, value] of formData.entries()) {
+                if (value && value.trim() !== '') {
+                    params.append(key, value);
+                }
+            }
+            
+            // Build the URL and redirect
+            const url = '{{ route("properties.index") }}' + (params.toString() ? '?' + params.toString() : '');
+            window.location.href = url;
+        }
+
+        // Update filters automatically when select/input changes
+        function updateFilters() {
+            // Store current filter state
+            const filterForm = document.getElementById('filterForm');
+            const formData = new FormData(filterForm);
+            const filters = {};
+            
+            for (let [key, value] of formData.entries()) {
+                if (value && value.trim() !== '') {
+                    filters[key] = value;
+                }
+            }
+            
+            sessionStorage.setItem('propertyFilters', JSON.stringify(filters));
+        }
+
+        // Reset individual filter to default
+        function resetIndividualFilter() {
+            const filterForm = document.getElementById('filterForm');
+            const formData = new FormData(filterForm);
+            const params = new URLSearchParams();
+            
+            // Get current URL parameters
+            const urlParams = new URLSearchParams(window.location.search);
+            
+            // Remove one parameter at a time (user can click multiple times)
+            let removed = false;
+            for (let [key, value] of formData.entries()) {
+                if (value && value.trim() !== '' && !removed) {
+                    // Remove this filter
+                    removed = true;
+                    continue;
+                }
+                if (value && value.trim() !== '') {
+                    params.append(key, value);
+                }
+            }
+            
+            // Build the URL and redirect
+            const url = '{{ route("properties.index") }}' + (params.toString() ? '?' + params.toString() : '');
+            window.location.href = url;
         }
 
         function scrollToTop() {

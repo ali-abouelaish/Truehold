@@ -394,6 +394,15 @@
                 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-3 sm:space-y-0">
                     <h1 class="text-xl sm:text-2xl font-bold text-gray-900">Property Map</h1>
                     <nav class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4">
+                        @auth
+                        <a href="{{ route('admin.dashboard') }}" class="text-gray-600 hover:text-gray-800 font-medium text-sm sm:text-base">
+                            <i class="fas fa-cog mr-2"></i>Admin
+                        </a>
+                        @else
+                        <a href="{{ route('login') }}" class="text-gray-600 hover:text-gray-800 font-medium text-sm sm:text-base">
+                            <i class="fas fa-sign-in-alt mr-2"></i>Login
+                        </a>
+                        @endauth
                         <a href="{{ route('properties.index') }}" class="text-gray-600 hover:text-gray-900 font-medium text-sm sm:text-base">
                             <i class="fas fa-th-large mr-2"></i>List View
                         </a>
@@ -417,9 +426,14 @@
                 
                 <div class="flex justify-between items-center mb-4 sm:mb-6">
                     <h2 class="text-lg sm:text-xl font-semibold text-gray-800">Search Filters</h2>
-                    <a href="{{ route('properties.index') }}" class="text-blue-600 hover:text-blue-800 font-medium text-sm sm:text-base">
-                        <i class="fas fa-th-large mr-2"></i>Switch to List View
-                    </a>
+                    <div class="flex items-center space-x-3">
+                        <a href="{{ route('properties.map') }}" class="text-gray-600 hover:text-gray-800 font-medium text-sm sm:text-base">
+                            <i class="fas fa-times mr-2"></i>Clear Filters
+                        </a>
+                        <a href="{{ route('properties.index') }}" class="text-blue-600 hover:text-blue-800 font-medium text-sm sm:text-base">
+                            <i class="fas fa-th-large mr-2"></i>Switch to List View
+                        </a>
+                    </div>
                 </div>
                 
                 <div class="filters-collapsible" id="filtersContent">
@@ -453,7 +467,7 @@
                             <select name="management_company" class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 py-2 sm:py-3 px-3 sm:px-4 text-sm sm:text-base">
                                 <option value="">All Companies</option>
                                 @foreach($managementCompanies as $company)
-                                    <option value="{{ $company }}" {{ request('location') == $company ? 'selected' : '' }}>
+                                    <option value="{{ $company }}" {{ request('management_company') == $company ? 'selected' : '' }}>
                                         {{ $company }}
                                     </option>
                                 @endforeach
@@ -487,10 +501,13 @@
                                    placeholder="£5000" class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 py-2 sm:py-3 px-3 sm:px-4 text-sm sm:text-base">
                         </div>
                         
-                        <div class="flex items-end">
-                            <button type="submit" class="w-full formal-button text-white px-4 sm:px-6 py-2 sm:py-3 rounded-lg font-medium shadow-lg text-sm sm:text-base">
+                        <div class="flex items-end space-x-2">
+                            <button type="submit" class="flex-1 formal-button text-white px-4 sm:px-6 py-2 sm:py-3 rounded-lg font-medium shadow-lg text-sm sm:text-base">
                                 <i class="fas fa-search mr-2"></i>Search
                             </button>
+                            <a href="{{ route('properties.map') }}" class="px-4 sm:px-6 py-2 sm:py-3 bg-gray-500 hover:bg-gray-600 text-white rounded-lg font-medium shadow-lg text-sm sm:text-base transition-colors duration-200">
+                                <i class="fas fa-times mr-2"></i>Clear
+                            </a>
                         </div>
                     </form>
                 </div>
