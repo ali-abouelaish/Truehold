@@ -551,15 +551,13 @@
                     <div class="lg:col-span-2 space-y-4 sm:space-y-6">
                         <div class="flex items-center space-x-3 sm:space-x-4">
                             <i class="fas fa-map-marker-alt text-red-500 text-xl sm:text-2xl"></i>
-                            @if($property->latitude && $property->longitude && $property->latitude !== 'N/A' && $property->longitude !== 'N/A' && auth()->check())
+                            @if($property->latitude && $property->longitude && $property->latitude !== 'N/A' && $property->longitude !== 'N/A')
                                 <a href="https://www.google.com/maps?q={{ $property->latitude }},{{ $property->longitude }}" 
                                    target="_blank" 
                                    class="text-lg sm:text-xl lg:text-2xl font-semibold text-gray-700 hover:text-blue-600 transition-colors duration-300 hover:underline">
                                     {{ $property->location ?: 'Location not specified' }}
                                     <i class="fas fa-external-link-alt ml-2 sm:ml-3 text-base sm:text-lg opacity-75"></i>
                                 </a>
-                            @elseif($property->latitude && $property->longitude && $property->latitude !== 'N/A' && $property->longitude !== 'N/A')
-                                <span class="text-lg sm:text-xl lg:text-2xl font-semibold text-gray-700">{{ $property->location ?: 'Location not specified' }}</span>
                             @else
                                 <span class="text-lg sm:text-xl lg:text-2xl font-semibold text-gray-700">{{ $property->location ?: 'Location not specified' }}</span>
                             @endif
@@ -757,7 +755,7 @@
                     @endif
 
                     <!-- Management Company -->
-                    @if($property->management_company && $property->management_company !== 'N/A')
+                    @if($property->management_company && $property->management_company !== 'N/A' && auth()->check())
                         <div class="property-card p-8">
                             <h2 class="text-2xl font-bold text-gray-900 mb-6 flex items-center space-x-3">
                                 <div class="bg-purple-100 p-3 rounded-full">
@@ -769,10 +767,24 @@
                                 <p class="text-gray-700 font-medium">{{ $property->management_company }}</p>
                             </div>
                         </div>
+                    @elseif($property->management_company && $property->management_company !== 'N/A')
+                        <div class="property-card p-8">
+                            <h2 class="text-2xl font-bold text-gray-900 mb-6 flex items-center space-x-3">
+                                <div class="bg-purple-100 p-3 rounded-full">
+                                    <i class="fas fa-building text-purple-600 text-xl"></i>
+                                </div>
+                                <span>Management Company</span>
+                            </h2>
+                            <div class="bg-gray-100 border border-gray-300 text-gray-600 px-6 py-4 rounded-lg text-center">
+                                <i class="fas fa-lock text-2xl mb-3"></i>
+                                <p class="mb-2">Management company information is available to registered users.</p>
+                                <a href="{{ route('login') }}" class="font-medium text-blue-600 hover:text-blue-800">Login to view company details</a>
+                            </div>
+                        </div>
                     @endif
 
                     <!-- Enhanced Location Information -->
-                    @if($property->latitude && $property->longitude && $property->latitude !== 'N/A' && $property->longitude !== 'N/A' && auth()->check())
+                    @if($property->latitude && $property->longitude && $property->latitude !== 'N/A' && $property->longitude !== 'N/A')
                         <div class="property-card p-8">
                             <h2 class="text-2xl font-bold text-gray-900 mb-6 flex items-center space-x-3">
                                 <div class="bg-orange-100 p-3 rounded-full">
@@ -790,20 +802,6 @@
                                class="maps-button">
                                 <i class="fas fa-map-marked-alt mr-2"></i>Open in Google Maps
                             </a>
-                        </div>
-                    @elseif($property->latitude && $property->longitude && $property->latitude !== 'N/A' && $property->longitude !== 'N/A')
-                        <div class="property-card p-8">
-                            <h2 class="text-2xl font-bold text-gray-900 mb-6 flex items-center space-x-3">
-                                <div class="bg-orange-100 p-3 rounded-full">
-                                    <i class="fas fa-map-marker-alt text-orange-600 text-xl"></i>
-                                </div>
-                                <span>Location</span>
-                            </h2>
-                            <div class="bg-gray-100 border border-gray-300 text-gray-600 px-6 py-4 rounded-lg text-center">
-                                <i class="fas fa-lock text-2xl mb-3"></i>
-                                <p class="mb-2">Exact location and coordinates are available to registered users.</p>
-                                <a href="{{ route('login') }}" class="font-medium text-blue-600 hover:text-blue-800">Login to view precise location</a>
-                            </div>
                         </div>
                     @endif
 

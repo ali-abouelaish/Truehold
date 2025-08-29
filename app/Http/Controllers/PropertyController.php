@@ -14,6 +14,16 @@ class PropertyController extends Controller
     {
         $query = Property::query();
 
+        // Apply search functionality
+        if ($request->filled('search')) {
+            $searchTerm = $request->search;
+            $query->where(function($q) use ($searchTerm) {
+                $q->where('title', 'like', "%{$searchTerm}%")
+                  ->orWhere('description', 'like', "%{$searchTerm}%")
+                  ->orWhere('location', 'like', "%{$searchTerm}%");
+            });
+        }
+
         // Apply filters
         if ($request->filled('location')) {
             $query->byLocation($request->location);
@@ -87,6 +97,16 @@ class PropertyController extends Controller
     {
         // Enhanced coordinate validation query using the scope
         $query = Property::query()->withValidCoordinates();
+
+        // Apply search functionality
+        if ($request->filled('search')) {
+            $searchTerm = $request->search;
+            $query->where(function($q) use ($searchTerm) {
+                $q->where('title', 'like', "%{$searchTerm}%")
+                  ->orWhere('description', 'like', "%{$searchTerm}%")
+                  ->orWhere('location', 'like', "%{$searchTerm}%");
+            });
+        }
 
         // Apply filters
         if ($request->filled('location')) {

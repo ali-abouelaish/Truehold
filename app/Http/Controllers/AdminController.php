@@ -269,4 +269,83 @@ class AdminController extends Controller
 
         return response()->json(['error' => 'No image uploaded'], 400);
     }
+
+    // Client Management Methods
+    public function clients()
+    {
+        $clients = \App\Models\Client::with('agent')->latest()->paginate(20);
+        $agents = \App\Models\Agent::all();
+        $nationalities = \App\Models\Client::distinct()->pluck('nationality')->filter()->sort()->values();
+        
+        return view('admin.clients.index', compact('clients', 'agents', 'nationalities'));
+    }
+
+    public function createClient()
+    {
+        $agents = \App\Models\Agent::all();
+        return view('admin.clients.create', compact('agents'));
+    }
+
+    public function storeClient(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'full_name' => 'required|string|max:255',
+            'date_of_birth' => 'nullable|date|before:today',
+            'phone_number' => 'nullable|string|max:20',
+            'email' => 'nullable|email|max:255',
+            'nationality' => 'nullable|string|max:100',
+            'current_address' => 'nullable|string',
+            'company_university_name' => 'nullable|string|max:255',
+            'company_university_address' => 'nullable|string',
+            'position_role' => 'nullable|string|max:255',
+            'agent_id' => 'nullable|exists:agents,id',
+        ]);
+
+        if ($validator->fails()) {
+            return back()->withErrors($validator)->withInput();
+        }
+
+        \App\Models\Client::create($request->all());
+
+        return redirect()->route('admin.clients')
+            ->with('success', 'Client created successfully!');
+    }
+
+    public function editClient(\App\Models\Client $client)
+    {
+        $agents = \App\Models\Agent::all();
+        return view('admin.clients.edit', compact('client', 'agents'));
+    }
+
+    public function updateClient(Request $request, \App\Models\Client $client)
+    {
+        $validator = Validator::make($request->all(), [
+            'full_name' => 'required|string|max:255',
+            'date_of_birth' => 'nullable|date|before:today',
+            'phone_number' => 'nullable|string|max:20',
+            'email' => 'nullable|email|max:255',
+            'nationality' => 'nullable|string|max:100',
+            'current_address' => 'nullable|string',
+            'company_university_name' => 'nullable|string|max:255',
+            'company_university_address' => 'nullable|string',
+            'position_role' => 'nullable|string|max:255',
+            'agent_id' => 'nullable|exists:agents,id',
+        ]);
+
+        if ($validator->fails()) {
+            return back()->withErrors($validator)->withInput();
+        }
+
+        $client->update($request->all());
+
+        return redirect()->route('admin.clients')
+            ->with('success', 'Client updated successfully!');
+    }
+
+    public function destroyClient(\App\Models\Client $client)
+    {
+        $client->delete();
+        return redirect()->route('admin.clients')
+            ->with('success', 'Client deleted successfully!');
+    }
 }

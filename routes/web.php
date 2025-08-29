@@ -56,6 +56,14 @@ Route::middleware('auth')->prefix('admin')->group(function () {
     Route::get('/users/{user}/edit', [AdminController::class, 'editUser'])->name('admin.users.edit');
     Route::put('/users/{user}', [AdminController::class, 'updateUser'])->name('admin.users.update');
     Route::delete('/users/{user}', [AdminController::class, 'destroyUser'])->name('admin.users.destroy');
+    
+    // Client Management Routes
+    Route::get('/clients', [AdminController::class, 'clients'])->name('admin.clients');
+    Route::get('/clients/create', [AdminController::class, 'createClient'])->name('admin.clients.create');
+    Route::post('/clients', [AdminController::class, 'storeClient'])->name('admin.clients.store');
+    Route::get('/clients/{client}/edit', [AdminController::class, 'editClient'])->name('admin.clients.edit');
+    Route::put('/clients/{client}', [AdminController::class, 'updateClient'])->name('admin.clients.update');
+    Route::delete('/clients/{client}', [AdminController::class, 'destroyClient'])->name('admin.clients.destroy');
 });
 
 // Logout route

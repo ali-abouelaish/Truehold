@@ -3,17 +3,19 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Property extends Model
 {
     protected $fillable = [
-        'url', 'title', 'location', 'latitude', 'longitude', 'price', 'description',
-        'property_type', 'available_date', 'photo_count', 'first_photo_url', 'all_photos',
-        'photos', 'contact_info', 'management_company', 'amenities', 'age', 'ages', 'any_pets',
-        'available', 'balcony_roof_terrace', 'bills_included', 'broadband_included',
-        'couples_allowed', 'deposit', 'deposit_room_1', 'deposit_room_2', 'deposit_room_3',
-        'deposit_room_4', 'disabled_access', 'furnishings', 'garage', 'garden_patio',
-        'gender', 'living_room', 'max_age', 'maximum_term', 'min_age', 'minimum_term', 'number', 'status'
+        'link', 'title', 'location', 'latitude', 'longitude', 'price', 'description',
+        'property_type', 'available_date', 'min_term', 'max_term', 'deposit', 'bills_included',
+        'furnishings', 'parking', 'garden', 'broadband', 'housemates', 'total_rooms',
+        'smoker', 'pets', 'occupation', 'gender', 'couples_ok', 'smoking_ok', 'pets_ok',
+        'pref_occupation', 'references', 'min_age', 'max_age', 'photo_count', 'first_photo_url',
+        'all_photos', 'photos', 'contact_info', 'management_company', 'amenities',
+        'balcony_roof_terrace', 'disabled_access', 'living_room', 'maximum_term', 'minimum_term',
+        'status', 'agent_id'
     ];
 
     protected $casts = [
@@ -42,6 +44,22 @@ class Property extends Model
         }
         
         return [];
+    }
+
+    /**
+     * Get the property URL (link).
+     */
+    public function getUrlAttribute()
+    {
+        return $this->link;
+    }
+
+    /**
+     * Set the property URL (link).
+     */
+    public function setUrlAttribute($value)
+    {
+        $this->attributes['link'] = $value;
     }
 
     // Get original photos as an array (for thumbnails)
@@ -377,5 +395,57 @@ class Property extends Model
         ];
         
         return $colors[abs($hash) % count($colors)];
+    }
+
+    /**
+     * Get the agent that manages this property.
+     */
+    public function agent(): BelongsTo
+    {
+        return $this->belongsTo(Agent::class);
+    }
+
+    /**
+     * Check if the property has an assigned agent.
+     */
+    public function hasAgent(): bool
+    {
+        return $this->agent()->exists();
+    }
+
+    /**
+     * Get the agent's display name for this property.
+     */
+    public function getAgentDisplayNameAttribute(): string
+    {
+        if (!$this->agent) {
+            return 'No agent assigned';
+        }
+        
+        return $this->agent->display_name;
+    }
+
+    /**
+     * Get the agent's contact information for this property.
+     */
+    public function getAgentContactAttribute(): string
+    {
+        if (!$this->agent) {
+            return 'N/A';
+        }
+        
+        return $this->agent->primary_contact;
+    }
+
+    /**
+     * Get the agent's email for this property.
+     */
+    public function getAgentEmailAttribute(): string
+    {
+        if (!$this->agent) {
+            return 'N/A';
+        }
+        
+        return $this->agent->primary_email;
     }
 }

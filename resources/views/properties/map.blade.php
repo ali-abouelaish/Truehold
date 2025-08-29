@@ -436,6 +436,31 @@
                     </div>
                 </div>
                 
+                <!-- Search Bar -->
+                <div class="mb-6">
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <i class="fas fa-search text-gray-400"></i>
+                        </div>
+                        <input type="text" 
+                               name="search" 
+                               value="{{ request('search') }}" 
+                               placeholder="Search properties by title, description, or location..." 
+                               class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm sm:text-base">
+                        <div class="absolute inset-y-0 right-0 pr-3 flex items-center">
+                            @if(request('search'))
+                                <a href="{{ route('properties.map') }}" class="text-gray-400 hover:text-gray-600">
+                                    <i class="fas fa-times"></i>
+                                </a>
+                            @endif
+                        </div>
+                    </div>
+                    <div class="mt-2 text-xs text-gray-500">
+                        <i class="fas fa-info-circle mr-1"></i>
+                        Search through property titles, descriptions, and locations
+                    </div>
+                </div>
+                
                 <div class="filters-collapsible" id="filtersContent">
                     <form method="GET" action="{{ route('properties.map') }}" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
                         <div>
@@ -462,6 +487,7 @@
                             </select>
                         </div>
                         
+                        @auth
                         <div>
                             <label class="block text-sm font-semibold text-gray-700 mb-2">Management Company</label>
                             <select name="management_company" class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 py-2 sm:py-3 px-3 sm:px-4 text-sm sm:text-base">
@@ -473,6 +499,7 @@
                                 @endforeach
                             </select>
                         </div>
+                        @endauth
                         
                         <div>
                             <label class="block text-sm font-semibold text-gray-700 mb-2">London Area</label>
@@ -532,6 +559,7 @@
                             <span class="sm:hidden">London</span>
                         </button>
                         
+                        @auth
                         <!-- Company Legend -->
                         <div class="company-legend bg-white p-2 sm:p-3 rounded-lg shadow-md border border-gray-200">
                             <h4 class="text-xs sm:text-sm font-semibold text-gray-800 mb-2">Company Colors</h4>
@@ -549,6 +577,16 @@
                                 @endforeach
                             </div>
                         </div>
+                        @else
+                        <!-- Login Prompt for Company Legend -->
+                        <div class="bg-gray-100 border border-gray-300 text-gray-600 px-3 py-2 rounded-lg shadow-md border border-gray-200">
+                            <div class="text-center">
+                                <i class="fas fa-lock text-sm mb-1"></i>
+                                <p class="text-xs">Company info available to registered users</p>
+                                <a href="{{ route('login') }}" class="text-blue-600 hover:text-blue-800 text-xs font-medium">Login</a>
+                            </div>
+                        </div>
+                        @endauth
                     </div>
                 </div>
 

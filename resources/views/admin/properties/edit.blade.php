@@ -15,6 +15,11 @@
                class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium">
                 <i class="fas fa-eye mr-2"></i>View Property
             </a>
+            <button type="button" 
+                    onclick="openDeleteModal()"
+                    class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-medium">
+                <i class="fas fa-trash mr-2"></i>Delete Property
+            </button>
             <a href="{{ route('admin.properties') }}" 
                class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg font-medium">
                 <i class="fas fa-arrow-left mr-2"></i>Back to Properties
@@ -22,6 +27,34 @@
         </div>
     </div>
 </div>
+
+<!-- Success Message -->
+@if(session('success'))
+    <div class="mb-6 bg-green-50 border border-green-200 rounded-lg p-4">
+        <div class="flex">
+            <div class="flex-shrink-0">
+                <i class="fas fa-check-circle text-green-400"></i>
+            </div>
+            <div class="ml-3">
+                <p class="text-sm font-medium text-green-800">{{ session('success') }}</p>
+            </div>
+        </div>
+    </div>
+@endif
+
+<!-- Error Message -->
+@if(session('error'))
+    <div class="mb-6 bg-red-50 border border-red-200 rounded-lg p-4">
+        <div class="flex">
+            <div class="flex-shrink-0">
+                <i class="fas fa-exclamation-circle text-red-400"></i>
+            </div>
+            <div class="ml-3">
+                <p class="text-sm font-medium text-red-800">{{ session('error') }}</p>
+            </div>
+        </div>
+    </div>
+@endif
 
 <!-- Property Edit Form -->
 <div class="bg-white rounded-lg shadow-sm border border-gray-200">
@@ -210,11 +243,11 @@
         </div>
         
         <!-- Current Photos -->
-        @if($property->photos)
+        @if($property->photos && is_array($property->photos) && count($property->photos) > 0)
         <div>
             <label class="block text-sm font-medium text-gray-700 mb-2">Current Photos</label>
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                @foreach(json_decode($property->photos) as $index => $photo)
+                @foreach($property->photos as $index => $photo)
                 <div class="relative group">
                     <img src="{{ $photo }}" alt="Property Photo {{ $index + 1 }}" 
                          class="w-full h-24 object-cover rounded-lg border">
@@ -276,6 +309,39 @@
     </form>
 </div>
 
+<!-- Delete Confirmation Modal -->
+<div id="deleteModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
+    <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+        <div class="mt-3 text-center">
+            <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100">
+                <i class="fas fa-exclamation-triangle text-red-600 text-xl"></i>
+            </div>
+            <h3 class="text-lg font-medium text-gray-900 mt-4">Delete Property</h3>
+            <div class="mt-2 px-7 py-3">
+                <p class="text-sm text-gray-500">
+                    Are you sure you want to delete "<strong>{{ $property->title }}</strong>"? 
+                    This action cannot be undone and will permanently remove the property from the system.
+                </p>
+            </div>
+            <div class="flex justify-center space-x-3 mt-4">
+                <button type="button" 
+                        onclick="closeDeleteModal()"
+                        class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded-lg font-medium">
+                    Cancel
+                </button>
+                <form method="POST" action="{{ route('admin.properties.destroy', $property) }}" class="inline">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit" 
+                            class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-medium">
+                        <i class="fas fa-trash mr-2"></i>Delete Property
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- Property Statistics -->
 <div class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
     <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
@@ -325,5 +391,30 @@ function removePhoto(index) {
         }
     }
 }
+
+function openDeleteModal() {
+    document.getElementById('deleteModal').classList.remove('hidden');
+}
+
+function closeDeleteModal() {
+    document.getElementById('deleteModal').classList.add('hidden');
+}
+
+// Close modal when clicking outside
+document.addEventListener('DOMContentLoaded', function() {
+    const modal = document.getElementById('deleteModal');
+    modal.addEventListener('click', function(e) {
+        if (e.target === modal) {
+            closeDeleteModal();
+        }
+    });
+    
+    // Close modal with Escape key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            closeDeleteModal();
+        }
+    });
+});
 </script>
 @endsection

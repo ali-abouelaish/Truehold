@@ -4,6 +4,7 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
@@ -44,5 +45,37 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    /**
+     * Get the agent profile associated with the user.
+     */
+    public function agent(): HasOne
+    {
+        return $this->hasOne(Agent::class);
+    }
+
+    /**
+     * Check if the user is an agent.
+     */
+    public function isAgent(): bool
+    {
+        return $this->agent()->exists();
+    }
+
+    /**
+     * Check if the user is a verified agent.
+     */
+    public function isVerifiedAgent(): bool
+    {
+        return $this->agent && $this->agent->is_verified;
+    }
+
+    /**
+     * Check if the user is a featured agent.
+     */
+    public function isFeaturedAgent(): bool
+    {
+        return $this->agent && $this->agent->is_featured;
     }
 }

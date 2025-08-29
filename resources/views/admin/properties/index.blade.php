@@ -15,6 +15,20 @@
     </a>
 </div>
 
+<!-- Success Message -->
+@if(session('success'))
+    <div class="mb-6 bg-green-50 border border-green-200 rounded-lg p-4">
+        <div class="flex">
+            <div class="flex-shrink-0">
+                <i class="fas fa-check-circle text-green-400"></i>
+            </div>
+            <div class="ml-3">
+                <p class="text-sm font-medium text-green-800">{{ session('success') }}</p>
+            </div>
+        </div>
+    </div>
+@endif
+
 <!-- Filters -->
 <div class="bg-white rounded-lg shadow-sm border border-gray-200 mb-6">
     <div class="px-6 py-4 border-b border-gray-200">
