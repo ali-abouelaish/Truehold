@@ -8,14 +8,13 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class Property extends Model
 {
     protected $fillable = [
-        'link', 'title', 'location', 'latitude', 'longitude', 'price', 'description',
+        'link', 'title', 'location', 'latitude', 'longitude', 'status', 'price', 'description',
         'property_type', 'available_date', 'min_term', 'max_term', 'deposit', 'bills_included',
         'furnishings', 'parking', 'garden', 'broadband', 'housemates', 'total_rooms',
         'smoker', 'pets', 'occupation', 'gender', 'couples_ok', 'smoking_ok', 'pets_ok',
         'pref_occupation', 'references', 'min_age', 'max_age', 'photo_count', 'first_photo_url',
         'all_photos', 'photos', 'contact_info', 'management_company', 'amenities',
-        'balcony_roof_terrace', 'disabled_access', 'living_room', 'maximum_term', 'minimum_term',
-        'status', 'agent_id'
+        'balcony_roof_terrace', 'disabled_access', 'living_room', 'agent_id'
     ];
 
     protected $casts = [
@@ -24,6 +23,18 @@ class Property extends Model
         'photo_count' => 'integer',
         'photos' => 'array',
     ];
+
+    /**
+     * Set the photos attribute - ensure it's always stored as JSON
+     */
+    public function setPhotosAttribute($value)
+    {
+        if (is_array($value)) {
+            $this->attributes['photos'] = json_encode($value);
+        } else {
+            $this->attributes['photos'] = $value;
+        }
+    }
 
     // Get all photos as an array (from photos column)
     public function getPhotosArrayAttribute()
