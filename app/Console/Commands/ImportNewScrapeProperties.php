@@ -90,17 +90,28 @@ class ImportNewScrapeProperties extends Command
             // Clean and validate data
             $cleanedData = $this->cleanData($data);
             
+            // Ensure we have a 'link' field (map 'url' to 'link' if needed)
+            if (isset($cleanedData['url']) && !isset($cleanedData['link'])) {
+                $cleanedData['link'] = $cleanedData['url'];
+            }
+            
+            // Remove 'url' field if it exists since database only has 'link'
+            unset($cleanedData['url']);
+            
+            // Handle both 'url' and 'link' field names
+            $linkField = $cleanedData['link'] ?? $cleanedData['url'] ?? null;
+            
             // Skip if essential data is missing
-            if (empty($cleanedData['link']) || empty($cleanedData['title'])) {
-                $this->warn("Row $rowCount: Missing essential data (link or title)");
+            if (empty($linkField) || empty($cleanedData['title'])) {
+                $this->warn("Row $rowCount: Missing essential data (url/link or title)");
                 $errorCount++;
                 continue;
             }
             
             // Check if property already exists (by link)
             $existingProperty = null;
-            if (!empty($cleanedData['link'])) {
-                $existingProperty = Property::where('link', $cleanedData['link'])->first();
+            if (!empty($linkField)) {
+                $existingProperty = Property::where('link', $linkField)->first();
             }
 
             if ($existingProperty) {
@@ -230,6 +241,29 @@ class ImportNewScrapeProperties extends Command
         $value = preg_replace('/[\x{1F1E0}-\x{1F1FF}]/u', '', $value); // Flag symbols
         $value = preg_replace('/[\x{2600}-\x{26FF}]/u', '', $value);   // Misc symbols
         $value = preg_replace('/[\x{2700}-\x{27BF}]/u', '', $value);   // Dingbats
+        $value = preg_replace('/[\x{1F000}-\x{1F02F}]/u', '', $value); // Mahjong tiles
+        $value = preg_replace('/[\x{1F0A0}-\x{1F0FF}]/u', '', $value); // Playing cards
+        $value = preg_replace('/[\x{1F200}-\x{1F2FF}]/u', '', $value); // Enclosed characters
+        $value = preg_replace('/[\x{1F700}-\x{1F77F}]/u', '', $value); // Alchemical symbols
+        $value = preg_replace('/[\x{1F780}-\x{1F7FF}]/u', '', $value); // Geometric shapes extended
+        $value = preg_replace('/[\x{1F800}-\x{1F8FF}]/u', '', $value); // Supplemental arrows-C
+        $value = preg_replace('/[\x{1F900}-\x{1F9FF}]/u', '', $value); // Supplemental symbols and pictographs
+        $value = preg_replace('/[\x{1FA00}-\x{1FA6F}]/u', '', $value); // Chess symbols
+        $value = preg_replace('/[\x{1FA70}-\x{1FAFF}]/u', '', $value); // Symbols and pictographs extended-A
+        
+        // Remove additional problematic characters that cause MySQL errors
+        $value = preg_replace('/[\x{2000}-\x{206F}]/u', ' ', $value); // General punctuation
+        $value = preg_replace('/[\x{2070}-\x{209F}]/u', '', $value);  // Superscripts and subscripts
+        $value = preg_replace('/[\x{20A0}-\x{20CF}]/u', '', $value);  // Currency symbols
+        $value = preg_replace('/[\x{2100}-\x{214F}]/u', '', $value);  // Letterlike symbols
+        $value = preg_replace('/[\x{2190}-\x{21FF}]/u', '', $value);  // Arrows
+        $value = preg_replace('/[\x{2200}-\x{22FF}]/u', '', $value);  // Mathematical operators
+        $value = preg_replace('/[\x{2300}-\x{23FF}]/u', '', $value);  // Miscellaneous technical
+        $value = preg_replace('/[\x{2400}-\x{243F}]/u', '', $value);  // Control pictures
+        $value = preg_replace('/[\x{2440}-\x{245F}]/u', '', $value);  // Optical character recognition
+        $value = preg_replace('/[\x{2460}-\x{24FF}]/u', '', $value);  // Enclosed alphanumerics
+        $value = preg_replace('/[\x{25A0}-\x{25FF}]/u', '', $value);  // Geometric shapes
+        $value = preg_replace('/[\x{2B00}-\x{2BFF}]/u', '', $value);  // Miscellaneous symbols and arrows
         
         // Remove other problematic characters that cause database errors
         $value = str_replace([
