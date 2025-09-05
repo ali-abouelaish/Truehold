@@ -684,31 +684,29 @@
     <script src="https://unpkg.com/@googlemaps/markerclusterer/dist/index.min.js?v=1.0.0&t={{ time() }}&r={{ rand(1000, 9999) }}"></script>
     
     <script id="map-script-{{ uniqid() }}">
-        (function() {
-            'use strict';
-            
-            console.log('🧪 Basic script test - if you see this, JavaScript is working');
-            console.log('🚀 Map script loaded!');
-            console.log('🕒 Script loaded at:', new Date().toISOString());
-            console.log('🔄 Cache busting timestamp:', Date.now());
-            console.log('🆔 Unique script ID:', '{{ uniqid() }}');
-            console.log('🔧 Script version:', '2.0.0');
-            console.log('🎲 Random number:', {{ rand(10000, 99999) }});
-            
-            // Simple test - properties will be loaded later
-            console.log('🧪 Basic script loaded successfully');
-            console.log('📊 Properties will be loaded when DOM is ready');
-            
-            let map = null;
-            let markers = [];
-            let markerClusterer = null;
-            let infoWindow = null;
-            let allProperties = [];
-            let clusteringEnabled = true;
+        console.log('🧪 Basic script test - if you see this, JavaScript is working');
+        console.log('🚀 Map script loaded!');
+        console.log('🕒 Script loaded at:', new Date().toISOString());
+        console.log('🔄 Cache busting timestamp:', Date.now());
+        console.log('🆔 Unique script ID:', '{{ uniqid() }}');
+        console.log('🔧 Script version:', '2.0.0');
+        console.log('🎲 Random number:', {{ rand(10000, 99999) }});
+        
+        // Simple test - properties will be loaded later
+        console.log('🧪 Basic script loaded successfully');
+        console.log('📊 Properties will be loaded when DOM is ready');
+        
+        // Global variables for map functionality
+        let map = null;
+        let markers = [];
+        let markerClusterer = null;
+        let infoWindow = null;
+        let allProperties = [];
+        let clusteringEnabled = true;
         
         console.log('📋 Variables initialized:', { map, markers: markers.length, infoWindow });
         
-        // Make initMap globally accessible
+        // Make initMap globally accessible immediately
         window.initMap = function() {
             console.log('🎯 Google Maps API loaded, initializing map...');
             
@@ -1735,7 +1733,6 @@
                 }
              }, 500);
          });
-        })(); // End of IIFE
     </script>
 </body>
 </html>
