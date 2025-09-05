@@ -1,0 +1,687 @@
+@extends('layouts.admin')
+
+@section('title', 'Edit Rental Code')
+
+@section('content')
+<div class="container-fluid">
+    <!-- Header Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2 class="h3 mb-0 text-gray-800">
+                        <i class="fas fa-edit text-warning me-2"></i>Edit Rental Code
+                    </h2>
+                    <p class="text-muted mb-0">Update rental code: <strong>{{ $rentalCode->rental_code }}</strong></p>
+                </div>
+                <div class="btn-group">
+                    <a href="{{ route('rental-codes.show', $rentalCode) }}" class="btn btn-outline-info">
+                        <i class="fas fa-eye me-1"></i> View Details
+                    </a>
+                    <a href="{{ route('rental-codes.index') }}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left me-1"></i> Back to List
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Current Status Banner -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="alert alert-{{ $rentalCode->status === 'completed' ? 'success' : ($rentalCode->status === 'approved' ? 'info' : ($rentalCode->status === 'cancelled' ? 'danger' : 'warning')) }} d-flex justify-content-between align-items-center">
+                <div class="d-flex align-items-center">
+                    <i class="fas fa-{{ $rentalCode->status === 'completed' ? 'check-circle' : ($rentalCode->status === 'approved' ? 'thumbs-up' : ($rentalCode->status === 'cancelled' ? 'times-circle' : 'clock')) }} fa-2x me-3"></i>
+                    <div>
+                        <h5 class="mb-0">Current Status: {{ ucfirst($rentalCode->status) }}</h5>
+                        <small>Last updated: {{ $rentalCode->updated_at->format('d/m/Y H:i') }}</small>
+                    </div>
+                </div>
+                <div class="text-end">
+                    <div class="h4 mb-0">£{{ number_format($rentalCode->consultation_fee, 2) }}</div>
+                    <small>Consultation Fee</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <form action="{{ route('rental-codes.update', $rentalCode) }}" method="POST" id="editRentalCodeForm">
+        @csrf
+        @method('PUT')
+        
+        <!-- Tab Navigation -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+                        <ul class="nav nav-tabs nav-fill" id="editTabs" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active" id="rental-tab" data-bs-toggle="tab" data-bs-target="#rental" type="button" role="tab">
+                                    <i class="fas fa-key me-2"></i>Rental Info
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="client-tab" data-bs-toggle="tab" data-bs-target="#client" type="button" role="tab">
+                                    <i class="fas fa-user me-2"></i>Client Details
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="agent-tab" data-bs-toggle="tab" data-bs-target="#agent" type="button" role="tab">
+                                    <i class="fas fa-user-tie me-2"></i>Agent Info
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="status-tab" data-bs-toggle="tab" data-bs-target="#status" type="button" role="tab">
+                                    <i class="fas fa-cog me-2"></i>Status & Notes
+                                </button>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab Content -->
+        <div class="tab-content" id="editTabContent">
+            <!-- Rental Information Tab -->
+            <div class="tab-pane fade show active" id="rental" role="tabpanel">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card shadow">
+                            <div class="card-header bg-primary text-white">
+                                <h5 class="card-title mb-0">
+                                    <i class="fas fa-key me-2"></i>Rental Information
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group mb-3">
+                                            <label for="rental_code" class="form-label">
+                                                Rental Code <span class="text-danger">*</span>
+                                            </label>
+                                            <div class="input-group">
+                                                <span class="input-group-text"><i class="fas fa-key"></i></span>
+                                                <input type="text" class="form-control @error('rental_code') is-invalid @enderror" 
+                                                       id="rental_code" name="rental_code" 
+                                                       value="{{ old('rental_code', $rentalCode->rental_code) }}" required>
+                                            </div>
+                                            @error('rental_code')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+                                        
+                                        <div class="form-group mb-3">
+                                            <label for="rental_date" class="form-label">
+                                                Rental Date <span class="text-danger">*</span>
+                                            </label>
+                                            <div class="input-group">
+                                                <span class="input-group-text"><i class="fas fa-calendar"></i></span>
+                                                <input type="date" class="form-control @error('rental_date') is-invalid @enderror" 
+                                                       id="rental_date" name="rental_date" 
+                                                       value="{{ old('rental_date', $rentalCode->rental_date) }}" required>
+                                            </div>
+                                            @error('rental_date')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+                                        
+                                        <div class="form-group mb-3">
+                                            <label for="consultation_fee" class="form-label">
+                                                Consultation Fee <span class="text-danger">*</span>
+                                            </label>
+                                            <div class="input-group">
+                                                <span class="input-group-text">£</span>
+                                                <input type="number" step="0.01" class="form-control @error('consultation_fee') is-invalid @enderror" 
+                                                       id="consultation_fee" name="consultation_fee" 
+                                                       value="{{ old('consultation_fee', $rentalCode->consultation_fee) }}" required>
+                                            </div>
+                                            @error('consultation_fee')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="col-md-6">
+                                        <div class="form-group mb-3">
+                                            <label for="payment_method" class="form-label">
+                                                Payment Method <span class="text-danger">*</span>
+                                            </label>
+                                            <div class="input-group">
+                                                <span class="input-group-text"><i class="fas fa-credit-card"></i></span>
+                                                <select class="form-select @error('payment_method') is-invalid @enderror" 
+                                                        id="payment_method" name="payment_method" required>
+                                                    <option value="">Select payment method</option>
+                                                    <option value="Cash" {{ old('payment_method', $rentalCode->payment_method) == 'Cash' ? 'selected' : '' }}>Cash</option>
+                                                    <option value="Transfer" {{ old('payment_method', $rentalCode->payment_method) == 'Transfer' ? 'selected' : '' }}>Transfer</option>
+                                                </select>
+                                            </div>
+                                            @error('payment_method')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+                                        
+                                        <div class="form-group mb-3">
+                                            <label for="property" class="form-label">Property</label>
+                                            <div class="input-group">
+                                                <span class="input-group-text"><i class="fas fa-building"></i></span>
+                                                <input type="text" class="form-control @error('property') is-invalid @enderror" 
+                                                       id="property" name="property" 
+                                                       value="{{ old('property', $rentalCode->property) }}">
+                                            </div>
+                                            @error('property')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+                                        
+                                        <div class="form-group mb-3">
+                                            <label for="licensor" class="form-label">Licensor</label>
+                                            <div class="input-group">
+                                                <span class="input-group-text"><i class="fas fa-user-tie"></i></span>
+                                                <input type="text" class="form-control @error('licensor') is-invalid @enderror" 
+                                                       id="licensor" name="licensor" 
+                                                       value="{{ old('licensor', $rentalCode->licensor) }}">
+                                            </div>
+                                            @error('licensor')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Client Information Tab -->
+            <div class="tab-pane fade" id="client" role="tabpanel">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card shadow">
+                            <div class="card-header bg-info text-white">
+                                <h5 class="card-title mb-0">
+                                    <i class="fas fa-user me-2"></i>Client Information
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group mb-3">
+                                            <label for="client_full_name" class="form-label">
+                                                Full Name <span class="text-danger">*</span>
+                                            </label>
+                                            <div class="input-group">
+                                                <span class="input-group-text"><i class="fas fa-user"></i></span>
+                                                <input type="text" class="form-control @error('client_full_name') is-invalid @enderror" 
+                                                       id="client_full_name" name="client_full_name" 
+                                                       value="{{ old('client_full_name', $rentalCode->client ? $rentalCode->client->full_name : $rentalCode->client_full_name) }}" required>
+                                            </div>
+                                            @error('client_full_name')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+                                        
+                                        <div class="form-group mb-3">
+                                            <label for="client_date_of_birth" class="form-label">
+                                                Date of Birth <span class="text-danger">*</span>
+                                            </label>
+                                            <div class="input-group">
+                                                <span class="input-group-text"><i class="fas fa-birthday-cake"></i></span>
+                                                <input type="date" class="form-control @error('client_date_of_birth') is-invalid @enderror" 
+                                                       id="client_date_of_birth" name="client_date_of_birth" 
+                                                       value="{{ old('client_date_of_birth', $rentalCode->client ? $rentalCode->client->date_of_birth?->format('Y-m-d') : $rentalCode->client_date_of_birth) }}" required>
+                                            </div>
+                                            @error('client_date_of_birth')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+                                        
+                                        <div class="form-group mb-3">
+                                            <label for="client_phone_number" class="form-label">
+                                                Phone Number <span class="text-danger">*</span>
+                                            </label>
+                                            <div class="input-group">
+                                                <span class="input-group-text"><i class="fas fa-phone"></i></span>
+                                                <input type="tel" class="form-control @error('client_phone_number') is-invalid @enderror" 
+                                                       id="client_phone_number" name="client_phone_number" 
+                                                       value="{{ old('client_phone_number', $rentalCode->client ? $rentalCode->client->phone_number : $rentalCode->client_phone_number) }}" required>
+                                            </div>
+                                            @error('client_phone_number')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+                                        
+                                        <div class="form-group mb-3">
+                                            <label for="client_email" class="form-label">
+                                                Email <span class="text-danger">*</span>
+                                            </label>
+                                            <div class="input-group">
+                                                <span class="input-group-text"><i class="fas fa-envelope"></i></span>
+                                                <input type="email" class="form-control @error('client_email') is-invalid @enderror" 
+                                                       id="client_email" name="client_email" 
+                                                       value="{{ old('client_email', $rentalCode->client ? $rentalCode->client->email : $rentalCode->client_email) }}" required>
+                                            </div>
+                                            @error('client_email')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+                                        
+                                        <div class="form-group mb-3">
+                                            <label for="client_nationality" class="form-label">
+                                                Nationality <span class="text-danger">*</span>
+                                            </label>
+                                            <div class="input-group">
+                                                <span class="input-group-text"><i class="fas fa-flag"></i></span>
+                                                <input type="text" class="form-control @error('client_nationality') is-invalid @enderror" 
+                                                       id="client_nationality" name="client_nationality" 
+                                                       value="{{ old('client_nationality', $rentalCode->client ? $rentalCode->client->nationality : $rentalCode->client_nationality) }}" required>
+                                            </div>
+                                            @error('client_nationality')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="col-md-6">
+                                        <div class="form-group mb-3">
+                                            <label for="client_current_address" class="form-label">
+                                                Current Address <span class="text-danger">*</span>
+                                            </label>
+                                            <div class="input-group">
+                                                <span class="input-group-text"><i class="fas fa-map-marker-alt"></i></span>
+                                                <textarea class="form-control @error('client_current_address') is-invalid @enderror" 
+                                                          id="client_current_address" name="client_current_address" 
+                                                          rows="3" required>{{ old('client_current_address', $rentalCode->client ? $rentalCode->client->current_address : $rentalCode->client_current_address) }}</textarea>
+                                            </div>
+                                            @error('client_current_address')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+                                        
+                                        <div class="form-group mb-3">
+                                            <label for="client_company_university_name" class="form-label">Company/University Name</label>
+                                            <div class="input-group">
+                                                <span class="input-group-text"><i class="fas fa-building"></i></span>
+                                                <input type="text" class="form-control @error('client_company_university_name') is-invalid @enderror" 
+                                                       id="client_company_university_name" name="client_company_university_name" 
+                                                       value="{{ old('client_company_university_name', $rentalCode->client ? $rentalCode->client->company_university_name : $rentalCode->client_company_university_name) }}">
+                                            </div>
+                                            @error('client_company_university_name')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+                                        
+                                        <div class="form-group mb-3">
+                                            <label for="client_company_university_address" class="form-label">Company/University Address</label>
+                                            <div class="input-group">
+                                                <span class="input-group-text"><i class="fas fa-map-marker-alt"></i></span>
+                                                <textarea class="form-control @error('client_company_university_address') is-invalid @enderror" 
+                                                          id="client_company_university_address" name="client_company_university_address" 
+                                                          rows="3">{{ old('client_company_university_address', $rentalCode->client ? $rentalCode->client->company_university_address : $rentalCode->client_company_university_address) }}</textarea>
+                                            </div>
+                                            @error('client_company_university_address')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+                                        
+                                        <div class="form-group mb-3">
+                                            <label for="client_position_role" class="form-label">Position/Role</label>
+                                            <div class="input-group">
+                                                <span class="input-group-text"><i class="fas fa-briefcase"></i></span>
+                                                <input type="text" class="form-control @error('client_position_role') is-invalid @enderror" 
+                                                       id="client_position_role" name="client_position_role" 
+                                                       value="{{ old('client_position_role', $rentalCode->client ? $rentalCode->client->position_role : $rentalCode->client_position_role) }}">
+                                            </div>
+                                            @error('client_position_role')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Agent Information Tab -->
+            <div class="tab-pane fade" id="agent" role="tabpanel">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card shadow">
+                            <div class="card-header bg-success text-white">
+                                <h5 class="card-title mb-0">
+                                    <i class="fas fa-user-tie me-2"></i>Agent Information
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group mb-3">
+                                            <label for="rent_by_agent" class="form-label">
+                                                Rent By Agent <span class="text-danger">*</span>
+                                            </label>
+                                            <div class="input-group">
+                                                <span class="input-group-text"><i class="fas fa-user-tie"></i></span>
+                                                <select class="form-select @error('rent_by_agent') is-invalid @enderror" 
+                                                        id="rent_by_agent" name="rent_by_agent" required>
+                                                    <option value="">Select agent</option>
+                                                    @foreach($agentUsers as $user)
+                                                        <option value="{{ $user->name }}" 
+                                                                {{ old('rent_by_agent', $rentalCode->rent_by_agent) == $user->name ? 'selected' : '' }}>
+                                                            {{ $user->name }}
+                                                            @if($user->agent && $user->agent->company_name)
+                                                                ({{ $user->agent->company_name }})
+                                                            @endif
+                                                        </option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                            @error('rent_by_agent')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="col-md-6">
+                                        <div class="form-group mb-3">
+                                            <label for="client_by_agent" class="form-label">
+                                                Client By Agent <span class="text-danger">*</span>
+                                            </label>
+                                            <div class="input-group">
+                                                <span class="input-group-text"><i class="fas fa-user-tie"></i></span>
+                                                <input type="text" class="form-control @error('client_by_agent') is-invalid @enderror" 
+                                                       id="client_by_agent" name="client_by_agent" 
+                                                       value="{{ old('client_by_agent', $rentalCode->client_by_agent) }}" 
+                                                       placeholder="Enter agent name" required>
+                                            </div>
+                                            @error('client_by_agent')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Status & Notes Tab -->
+            <div class="tab-pane fade" id="status" role="tabpanel">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card shadow">
+                            <div class="card-header bg-warning text-dark">
+                                <h5 class="card-title mb-0">
+                                    <i class="fas fa-cog me-2"></i>Status & Additional Information
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group mb-3">
+                                            <label for="status" class="form-label">
+                                                Status <span class="text-danger">*</span>
+                                            </label>
+                                            <div class="input-group">
+                                                <span class="input-group-text"><i class="fas fa-flag"></i></span>
+                                                <select class="form-select @error('status') is-invalid @enderror" 
+                                                        id="status" name="status" required>
+                                                    <option value="pending" {{ old('status', $rentalCode->status) == 'pending' ? 'selected' : '' }}>Pending</option>
+                                                    <option value="approved" {{ old('status', $rentalCode->status) == 'approved' ? 'selected' : '' }}>Approved</option>
+                                                    <option value="completed" {{ old('status', $rentalCode->status) == 'completed' ? 'selected' : '' }}>Completed</option>
+                                                    <option value="cancelled" {{ old('status', $rentalCode->status) == 'cancelled' ? 'selected' : '' }}>Cancelled</option>
+                                                </select>
+                                            </div>
+                                            @error('status')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="col-md-6">
+                                        <div class="form-group mb-3">
+                                            <label class="form-label">Record Information</label>
+                                            <div class="info-display">
+                                                <div class="info-item">
+                                                    <strong>Created:</strong> {{ $rentalCode->created_at->format('d/m/Y H:i') }}
+                                                </div>
+                                                <div class="info-item">
+                                                    <strong>Last Updated:</strong> {{ $rentalCode->updated_at->format('d/m/Y H:i') }}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="row">
+                                    <div class="col-12">
+                                        <div class="form-group mb-3">
+                                            <label for="notes" class="form-label">Additional Notes</label>
+                                            <div class="input-group">
+                                                <span class="input-group-text"><i class="fas fa-sticky-note"></i></span>
+                                                <textarea class="form-control @error('notes') is-invalid @enderror" 
+                                                          id="notes" name="notes" 
+                                                          rows="4" placeholder="Enter any additional notes or comments">{{ old('notes', $rentalCode->notes) }}</textarea>
+                                            </div>
+                                            @error('notes')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <button type="button" class="btn btn-outline-secondary" onclick="resetForm()">
+                                    <i class="fas fa-undo me-1"></i> Reset Changes
+                                </button>
+                            </div>
+                            <div class="btn-group">
+                                <a href="{{ route('rental-codes.show', $rentalCode) }}" class="btn btn-outline-secondary">
+                                    <i class="fas fa-times me-1"></i> Cancel
+                                </a>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save me-1"></i> Update Rental Code
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<style>
+.nav-tabs .nav-link {
+    border: none;
+    border-bottom: 3px solid transparent;
+    color: #6c757d;
+    font-weight: 500;
+    padding: 1rem 1.5rem;
+    transition: all 0.3s ease;
+}
+
+.nav-tabs .nav-link:hover {
+    border-color: #dee2e6;
+    color: #495057;
+}
+
+.nav-tabs .nav-link.active {
+    border-bottom-color: #007bff;
+    color: #007bff;
+    background-color: transparent;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.input-group-text {
+    background-color: #f8f9fa;
+    border-color: #ced4da;
+    min-width: 45px;
+    justify-content: center;
+}
+
+.form-control:focus,
+.form-select:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+.card {
+    border: none;
+    box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+}
+
+.card-header {
+    border-bottom: 1px solid #e3e6f0;
+    font-weight: 600;
+}
+
+.info-display {
+    background-color: #f8f9fa;
+    padding: 1rem;
+    border-radius: 0.375rem;
+    border-left: 4px solid #007bff;
+}
+
+.info-item {
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.info-item:last-child {
+    margin-bottom: 0;
+}
+
+.btn {
+    border-radius: 0.375rem;
+    font-weight: 500;
+}
+
+.alert {
+    border: none;
+    border-radius: 0.5rem;
+}
+
+@media (max-width: 768px) {
+    .nav-tabs .nav-link {
+        padding: 0.75rem 1rem;
+        font-size: 0.9rem;
+    }
+    
+    .btn-group {
+        flex-direction: column;
+        width: 100%;
+    }
+    
+    .btn-group .btn {
+        margin-bottom: 0.5rem;
+    }
+}
+</style>
+
+<script>
+// Form reset functionality
+function resetForm() {
+    if (confirm('Are you sure you want to reset all changes? This will restore the original values.')) {
+        document.getElementById('editRentalCodeForm').reset();
+        // Restore original values
+        @foreach($rentalCode->getAttributes() as $key => $value)
+            @if($value !== null)
+                document.getElementById('{{ $key }}').value = '{{ $value }}';
+            @endif
+        @endforeach
+    }
+}
+
+// Auto-save functionality (optional)
+let autoSaveTimeout;
+document.querySelectorAll('input, select, textarea').forEach(field => {
+    field.addEventListener('change', function() {
+        clearTimeout(autoSaveTimeout);
+        autoSaveTimeout = setTimeout(() => {
+            // Implement auto-save logic here if needed
+            console.log('Auto-save triggered');
+        }, 2000);
+    });
+});
+
+// Form validation
+document.getElementById('editRentalCodeForm').addEventListener('submit', function(e) {
+    const requiredFields = this.querySelectorAll('[required]');
+    let isValid = true;
+    
+    requiredFields.forEach(field => {
+        if (!field.value.trim()) {
+            field.classList.add('is-invalid');
+            isValid = false;
+        } else {
+            field.classList.remove('is-invalid');
+        }
+    });
+    
+    if (!isValid) {
+        e.preventDefault();
+        alert('Please fill in all required fields.');
+        // Switch to the first tab with errors
+        const firstInvalidField = this.querySelector('.is-invalid');
+        if (firstInvalidField) {
+            const tabId = firstInvalidField.closest('.tab-pane').id;
+            const tabButton = document.querySelector(`[data-bs-target="#${tabId}"]`);
+            if (tabButton) {
+                tabButton.click();
+            }
+        }
+    }
+});
+
+// Real-time validation
+document.querySelectorAll('input[required], select[required], textarea[required]').forEach(field => {
+    field.addEventListener('blur', function() {
+        if (this.value.trim()) {
+            this.classList.remove('is-invalid');
+            this.classList.add('is-valid');
+        } else {
+            this.classList.remove('is-valid');
+            this.classList.add('is-invalid');
+        }
+    });
+});
+
+// Tab change tracking
+document.querySelectorAll('[data-bs-toggle="tab"]').forEach(tab => {
+    tab.addEventListener('shown.bs.tab', function(e) {
+        // Track which tab was visited
+        localStorage.setItem('lastEditTab', e.target.getAttribute('data-bs-target'));
+    });
+});
+
+// Restore last visited tab
+document.addEventListener('DOMContentLoaded', function() {
+    const lastTab = localStorage.getItem('lastEditTab');
+    if (lastTab) {
+        const tabButton = document.querySelector(`[data-bs-target="${lastTab}"]`);
+        if (tabButton) {
+            tabButton.click();
+        }
+    }
+});
+</script>
+@endsection

@@ -5,15 +5,37 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\PropertyController;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\RentalCodeController;
 
 Route::get('/', function () {
     return redirect('/properties');
 });
 
+
 // Public routes - no authentication required
 Route::get('/properties', [PropertyController::class, 'index'])->name('properties.index');
 Route::get('/properties/map', [PropertyController::class, 'map'])->name('properties.map');
 Route::get('/properties/{property}', [PropertyController::class, 'show'])->name('properties.show');
+
+// Temporary public route for testing rental code generation
+Route::get('/test-rental-code', function () {
+    try {
+        $lastRentalCode = \App\Models\RentalCode::orderBy('id', 'desc')->first();
+        
+        if (!$lastRentalCode) {
+            $nextNumber = 1;
+        } else {
+            preg_match('/CC(\d+)/', $lastRentalCode->rental_code, $matches);
+            $nextNumber = isset($matches[1]) ? (int)$matches[1] + 1 : 1;
+        }
+        
+        $newCode = 'CC' . str_pad($nextNumber, 4, '0', STR_PAD_LEFT);
+        
+        return response()->json(['code' => $newCode]);
+    } catch (\Exception $e) {
+        return response()->json(['error' => 'Failed to generate rental code: ' . $e->getMessage()], 500);
+    }
+});
 
 // Authentication routes
 Route::middleware('guest')->group(function () {
@@ -64,6 +86,10 @@ Route::middleware('auth')->prefix('admin')->group(function () {
     Route::get('/clients/{client}/edit', [AdminController::class, 'editClient'])->name('admin.clients.edit');
     Route::put('/clients/{client}', [AdminController::class, 'updateClient'])->name('admin.clients.update');
     Route::delete('/clients/{client}', [AdminController::class, 'destroyClient'])->name('admin.clients.destroy');
+    
+    // Rental Code Management Routes
+    Route::resource('rental-codes', RentalCodeController::class);
+    Route::get('/rental-codes/generate-code', [RentalCodeController::class, 'generateCode'])->name('rental-codes.generate-code');
 });
 
 // Logout route

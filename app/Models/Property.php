@@ -11,7 +11,7 @@ class Property extends Model
         'link', 'title', 'location', 'latitude', 'longitude', 'status', 'price', 'description',
         'property_type', 'available_date', 'min_term', 'max_term', 'deposit', 'bills_included',
         'furnishings', 'parking', 'garden', 'broadband', 'housemates', 'total_rooms',
-        'smoker', 'pets', 'occupation', 'gender', 'couples_ok', 'smoking_ok', 'pets_ok',
+        'smoker', 'pets', 'occupation', 'gender', 'couples_ok', 'couples_allowed', 'smoking_ok', 'pets_ok',
         'pref_occupation', 'references', 'min_age', 'max_age', 'photo_count', 'first_photo_url',
         'all_photos', 'photos', 'contact_info', 'management_company', 'amenities',
         'balcony_roof_terrace', 'disabled_access', 'living_room', 'agent_id'
@@ -319,6 +319,30 @@ class Property extends Model
         if (!$company) return $query;
         
         return $query->where('management_company', 'like', "%{$company}%");
+    }
+
+    // Scope for filtering by couples allowed
+    public function scopeByCouplesAllowed($query, $couplesAllowed)
+    {
+        if (!$couplesAllowed) return $query;
+        
+        if ($couplesAllowed === 'yes') {
+            return $query->where(function($q) {
+                $q->where('couples_ok', 'like', '%yes%')
+                  ->orWhere('couples_ok', 'like', '%couples%')
+                  ->orWhere('couples_ok', 'like', '%allowed%')
+                  ->orWhere('couples_ok', 'like', '%welcome%');
+            });
+        } elseif ($couplesAllowed === 'no') {
+            return $query->where(function($q) {
+                $q->where('couples_ok', 'like', '%no%')
+                  ->orWhere('couples_ok', 'like', '%not%')
+                  ->orWhere('couples_ok', 'like', '%single%')
+                  ->orWhere('couples_ok', 'like', '%individual%');
+            });
+        }
+        
+        return $query;
     }
 
     // Scope for filtering by London borough (approximate using coordinates)

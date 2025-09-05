@@ -626,7 +626,7 @@
                         </div>
                         
                         <!-- Second row of filters -->
-                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
                             <div>
                                 <label class="filter-label text-sm sm:text-base">Min Price</label>
                                 <input type="number" name="min_price" value="{{ request('min_price') }}" 
@@ -637,6 +637,15 @@
                                 <label class="filter-label text-sm sm:text-base">Max Price</label>
                                 <input type="number" name="max_price" value="{{ request('max_price') }}" 
                                        placeholder="£5000" class="filter-input w-full text-sm sm:text-base">
+                            </div>
+                            
+                            <div>
+                                <label class="filter-label text-sm sm:text-base">Couples Allowed</label>
+                                <select name="couples_allowed" class="filter-input w-full text-sm sm:text-base">
+                                    <option value="">All Properties</option>
+                                    <option value="yes" {{ request('couples_allowed') == 'yes' ? 'selected' : '' }}>Couples Welcome</option>
+                                    <option value="no" {{ request('couples_allowed') == 'no' ? 'selected' : '' }}>Singles Only</option>
+                                </select>
                             </div>
                             
                             <div class="flex flex-col sm:flex-row items-end space-y-2 sm:space-y-0 sm:space-x-3">
@@ -656,7 +665,7 @@
         <!-- Properties Gallery -->
         <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
             <!-- Enhanced Filter Summary -->
-            @if(request('search') || request('location') || request('property_type') || request('min_price') || request('max_price') || request('available_date') || request('management_company') || request('london_area'))
+            @if(request('search') || request('location') || request('property_type') || request('min_price') || request('max_price') || request('available_date') || request('management_company') || request('london_area') || request('couples_allowed'))
                 <div class="mb-6 sm:mb-8 p-4 sm:p-6 bg-blue-50 border border-blue-200 rounded-16 sm:rounded-20 animate-fade-in">
                     <h3 class="text-lg sm:text-xl font-bold text-blue-800 mb-3 sm:mb-4 flex items-center space-x-2">
                         <i class="fas fa-filter text-blue-600"></i>
@@ -701,6 +710,11 @@
                         @if(request('available_date'))
                             <span class="filter-badge text-xs sm:text-sm">
                                 <i class="fas fa-calendar"></i>Available: {{ request('available_date') }}
+                            </span>
+                        @endif
+                        @if(request('couples_allowed'))
+                            <span class="filter-badge text-xs sm:text-sm">
+                                <i class="fas fa-heart"></i>Couples: {{ request('couples_allowed') == 'yes' ? 'Welcome' : 'Singles Only' }}
                             </span>
                         @endif
                     </div>
@@ -896,7 +910,7 @@
             }
 
             // Auto-submit form when select filters change
-            const filterSelects = document.querySelectorAll('select[name="location"], select[name="property_type"], select[name="management_company"], select[name="london_area"]');
+            const filterSelects = document.querySelectorAll('select[name="location"], select[name="property_type"], select[name="management_company"], select[name="london_area"], select[name="couples_allowed"]');
             filterSelects.forEach(select => {
                 select.addEventListener('change', function() {
                     // Auto-submit for immediate feedback

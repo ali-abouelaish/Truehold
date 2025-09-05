@@ -14,13 +14,44 @@ class AgentUserSeeder extends Seeder
      */
     public function run(): void
     {
-        // Create a test agent user
-        User::create([
-            'name' => 'Test Agent',
-            'email' => 'agent@test.com',
-            'password' => Hash::make('password123'),
-        ]);
+        // Create test agent users
+        $agents = [
+            [
+                'name' => 'John Smith',
+                'email' => 'john.smith@test.com',
+                'password' => Hash::make('password123'),
+                'role' => 'agent',
+            ],
+            [
+                'name' => 'Sarah Johnson',
+                'email' => 'sarah.johnson@test.com',
+                'password' => Hash::make('password123'),
+                'role' => 'agent',
+            ],
+            [
+                'name' => 'Mike Wilson',
+                'email' => 'mike.wilson@test.com',
+                'password' => Hash::make('password123'),
+                'role' => 'agent',
+            ],
+            [
+                'name' => 'Lisa Brown',
+                'email' => 'lisa.brown@test.com',
+                'password' => Hash::make('password123'),
+                'role' => 'agent',
+            ],
+        ];
 
-        $this->command->info('Test agent user created: agent@test.com / password123');
+        foreach ($agents as $agentData) {
+            User::updateOrCreate(
+                ['email' => $agentData['email']],
+                $agentData
+            );
+        }
+
+        $this->command->info('Agent users created/updated:');
+        foreach ($agents as $agent) {
+            $this->command->info("- {$agent['name']} ({$agent['email']}) - password: password123");
+        }
     }
 }

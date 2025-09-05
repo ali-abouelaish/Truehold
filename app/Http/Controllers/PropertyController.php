@@ -55,6 +55,10 @@ class PropertyController extends Controller
             $query->byLondonArea($request->london_area);
         }
 
+        if ($request->filled('couples_allowed')) {
+            $query->byCouplesAllowed($request->couples_allowed);
+        }
+
         // Get unique values for filter dropdowns
         $locations = Property::distinct()->pluck('location')->filter()->sort()->values();
         $propertyTypes = Property::distinct()->pluck('property_type')->filter()->sort()->values();
@@ -137,6 +141,10 @@ class PropertyController extends Controller
 
         if ($request->filled('london_area')) {
             $query->byLondonArea($request->london_area);
+        }
+
+        if ($request->filled('couples_allowed')) {
+            $query->byCouplesAllowed($request->couples_allowed);
         }
 
         // Get unique values for filter dropdowns

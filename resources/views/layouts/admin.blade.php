@@ -13,6 +13,9 @@
     <!-- Font Awesome -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
     <!-- Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     
@@ -125,6 +128,16 @@
                    class="sidebar-item flex items-center px-4 py-3 text-gray-700 hover:text-blue-600 {{ request()->routeIs('admin.clients.create') ? 'active' : '' }}">
                     <i class="fas fa-user-plus sidebar-icon mr-3 text-lg"></i>
                     <span class="sidebar-text">Add Client</span>
+                </a>
+
+                <div class="px-4 mt-6 mb-4">
+                    <span class="sidebar-text text-xs font-semibold text-gray-500 uppercase tracking-wider">Rental Codes</span>
+                </div>
+                
+                <a href="{{ route('rental-codes.index') }}" 
+                   class="sidebar-item flex items-center px-4 py-3 text-gray-700 hover:text-blue-600 {{ request()->routeIs('rental-codes*') ? 'active' : '' }}">
+                    <i class="fas fa-key sidebar-icon mr-3 text-lg"></i>
+                    <span class="sidebar-text">Manage Rental Codes</span>
                 </a>
 
                 <div class="px-4 mt-6 mb-4">
@@ -256,5 +269,8 @@
         window.addEventListener('resize', checkScreenSize);
         checkScreenSize();
     </script>
+    
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

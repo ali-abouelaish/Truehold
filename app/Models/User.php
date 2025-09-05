@@ -22,6 +22,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'role',
     ];
 
     /**
@@ -77,5 +78,29 @@ class User extends Authenticatable
     public function isFeaturedAgent(): bool
     {
         return $this->agent && $this->agent->is_featured;
+    }
+
+    /**
+     * Check if the user has a specific role.
+     */
+    public function hasRole(string $role): bool
+    {
+        return $this->role === $role;
+    }
+
+    /**
+     * Check if the user is an admin.
+     */
+    public function isAdmin(): bool
+    {
+        return $this->role === 'admin';
+    }
+
+    /**
+     * Check if the user is an agent (by role or agent profile).
+     */
+    public function isAgentByRole(): bool
+    {
+        return $this->role === 'agent';
     }
 }

@@ -39,10 +39,10 @@
     </style>
     
     <style>
-        /* Mobile-first responsive design */
+        /* Mobile-first responsive design - Bigger map */
         #map {
-            height: calc(100vh - 120px);
-            min-height: 400px;
+            height: calc(100vh - 80px);
+            min-height: 500px;
             width: 100%;
             border-radius: 8px;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
@@ -51,22 +51,36 @@
         
         @media (min-width: 768px) {
             #map {
-                height: calc(100vh - 200px);
-                min-height: 500px;
+                height: calc(100vh - 120px);
+                min-height: 600px;
+            }
+        }
+        
+        @media (min-width: 1024px) {
+            #map {
+                height: calc(100vh - 100px);
+                min-height: 700px;
             }
         }
         
         .map-container {
             position: relative;
             width: 100%;
-            height: calc(100vh - 120px);
-            min-height: 400px;
+            height: calc(100vh - 80px);
+            min-height: 500px;
         }
         
         @media (min-width: 768px) {
             .map-container {
-                height: calc(100vh - 200px);
-                min-height: 500px;
+                height: calc(100vh - 120px);
+                min-height: 600px;
+            }
+        }
+        
+        @media (min-width: 1024px) {
+            .map-container {
+                height: calc(100vh - 100px);
+                min-height: 700px;
             }
         }
         
@@ -390,24 +404,24 @@
     <div class="min-h-screen">
         <!-- Header -->
         <header class="bg-white shadow-sm border-b border-gray-200">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-4">
-                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-3 sm:space-y-0">
-                    <h1 class="text-xl sm:text-2xl font-bold text-gray-900">Property Map</h1>
-                    <nav class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2 sm:py-3">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-2 sm:space-y-0">
+                    <h1 class="text-lg sm:text-xl font-bold text-gray-900">Property Map</h1>
+                    <nav class="flex flex-col sm:flex-row space-y-1 sm:space-y-0 sm:space-x-4">
                         @auth
-                        <a href="{{ route('admin.dashboard') }}" class="text-gray-600 hover:text-gray-800 font-medium text-sm sm:text-base">
-                            <i class="fas fa-cog mr-2"></i>Admin
+                        <a href="{{ route('admin.dashboard') }}" class="text-gray-600 hover:text-gray-800 font-medium text-sm">
+                            <i class="fas fa-cog mr-1"></i>Admin
                         </a>
                         @else
-                        <a href="{{ route('login') }}" class="text-gray-600 hover:text-gray-800 font-medium text-sm sm:text-base">
-                            <i class="fas fa-sign-in-alt mr-2"></i>Login
+                        <a href="{{ route('login') }}" class="text-gray-600 hover:text-gray-800 font-medium text-sm">
+                            <i class="fas fa-sign-in-alt mr-1"></i>Login
                         </a>
                         @endauth
-                        <a href="{{ route('properties.index') }}" class="text-gray-600 hover:text-gray-900 font-medium text-sm sm:text-base">
-                            <i class="fas fa-th-large mr-2"></i>List View
+                        <a href="{{ route('properties.index') }}" class="text-gray-600 hover:text-gray-900 font-medium text-sm">
+                            <i class="fas fa-th-large mr-1"></i>List View
                         </a>
-                        <a href="{{ route('properties.map') }}" class="text-blue-600 font-medium text-sm sm:text-base">
-                            <i class="fas fa-map mr-2"></i>Map View
+                        <a href="{{ route('properties.map') }}" class="text-blue-600 font-medium text-sm">
+                            <i class="fas fa-map mr-1"></i>Map View
                         </a>
                     </nav>
                 </div>
@@ -415,7 +429,7 @@
         </header>
 
         <!-- Search Filters -->
-        <div class="bg-white border-b border-gray-200 px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
+        <div class="bg-white border-b border-gray-200 px-4 sm:px-6 lg:px-8 py-3 sm:py-4">
             <div class="max-w-7xl mx-auto">
                 <!-- Mobile filter toggle -->
                 <button type="button" class="filter-toggle" onclick="toggleFilters()">
@@ -512,6 +526,15 @@
                                 <option value="west" {{ request('london_area') == 'west' ? 'selected' : '' }}>West London</option>
                             </select>
                         </div>
+                        
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Couples Allowed</label>
+                            <select name="couples_allowed" class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 py-2 sm:py-3 px-3 sm:px-4 text-sm sm:text-base">
+                                <option value="">All Properties</option>
+                                <option value="yes" {{ request('couples_allowed') == 'yes' ? 'selected' : '' }}>Couples Welcome</option>
+                                <option value="no" {{ request('couples_allowed') == 'no' ? 'selected' : '' }}>Singles Only</option>
+                            </select>
+                        </div>
                     </form>
                     
                     <!-- Second row of filters -->
@@ -542,11 +565,25 @@
         </div>
 
         <!-- Map Container -->
-        <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
+        <main class="w-full px-2 sm:px-4 py-2 sm:py-4">
             <div class="map-container">
                 <!-- Map Controls -->
                 <div class="map-controls">
                     <div class="flex flex-col space-y-2 sm:space-y-3">
+                        <!-- Search Box -->
+                        <div class="search-box bg-white p-2 rounded-lg shadow-md border border-gray-200">
+                            <div class="relative">
+                                <input type="text" id="mapSearch" placeholder="Search locations..." 
+                                       class="w-full px-3 py-2 pr-8 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                <div class="absolute inset-y-0 right-0 pr-2 flex items-center">
+                                    <i class="fas fa-search text-gray-400"></i>
+                                </div>
+                            </div>
+                            <div id="searchResults" class="mt-2 max-h-40 overflow-y-auto hidden">
+                                <!-- Search results will be populated here -->
+                            </div>
+                        </div>
+                        
                         <button id="fitBounds" class="formal-button text-white px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium shadow-md">
                             <i class="fas fa-crosshairs mr-1 sm:mr-2"></i>
                             <span class="hidden sm:inline">Fit All</span>
@@ -557,6 +594,12 @@
                             <i class="fas fa-map-marker-alt mr-1 sm:mr-2"></i>
                             <span class="hidden sm:inline">Focus London</span>
                             <span class="sm:hidden">London</span>
+                        </button>
+                        
+                        <button id="toggleClustering" class="formal-button text-white px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium shadow-md">
+                            <i class="fas fa-layer-group mr-1 sm:mr-2"></i>
+                            <span class="hidden sm:inline">Toggle Clustering</span>
+                            <span class="sm:hidden">Cluster</span>
                         </button>
                         
                         @auth
@@ -625,6 +668,8 @@
 
     <!-- Google Maps JS -->
     <script src="https://maps.googleapis.com/maps/api/js?key={{ config('services.google.maps_api_key', 'YOUR_API_KEY') }}&libraries=places"></script>
+    <!-- Marker Clustering Library -->
+    <script src="https://unpkg.com/@googlemaps/markerclusterer/dist/index.min.js"></script>
     
     <script>
         console.log('🧪 Basic script test - if you see this, JavaScript is working');
@@ -636,7 +681,10 @@
         
         let map = null;
         let markers = [];
+        let markerClusterer = null;
         let infoWindow = null;
+        let allProperties = [];
+        let clusteringEnabled = true;
         
         console.log('📋 Variables initialized:', { map, markers: markers.length, infoWindow });
         
@@ -693,17 +741,20 @@
                     const propertiesData = document.getElementById('properties-data');
                     if (propertiesData && propertiesData.dataset.properties) {
                         properties = JSON.parse(propertiesData.dataset.properties);
+                        allProperties = properties; // Store for search functionality
                         console.log('🚀 Properties loaded from data attribute:', properties.length);
                         console.log('📋 Properties data sample:', properties.slice(0, 3));
                     } else {
                         console.log('📋 No properties data found in data attribute');
                         properties = [];
+                        allProperties = [];
                     }
                 } catch (error) {
                     console.error('❌ Error loading properties data:', error);
                     console.error('❌ Error message:', error.message);
                     console.error('❌ Error stack:', error.stack);
                     properties = [];
+                    allProperties = [];
                 }
                 
                 // Check if properties have the expected structure
@@ -778,7 +829,6 @@
                         // Create marker
                         const marker = new google.maps.Marker({
                             position: position,
-                            map: map,
                             title: property.title,
                             icon: {
                                 path: google.maps.SymbolPath.CIRCLE,
@@ -848,6 +898,40 @@
                         console.error(`❌ Error creating marker for property ${index}:`, error, property);
                     }
                 });
+                
+                // Create marker clusterer
+                if (typeof MarkerClusterer !== 'undefined') {
+                    markerClusterer = new MarkerClusterer(map, markers, {
+                        imagePath: 'https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m',
+                        gridSize: 50,
+                        maxZoom: 15,
+                        styles: [
+                            {
+                                textColor: 'white',
+                                url: 'https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m1.png',
+                                height: 53,
+                                width: 53
+                            },
+                            {
+                                textColor: 'white',
+                                url: 'https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m2.png',
+                                height: 56,
+                                width: 56
+                            },
+                            {
+                                textColor: 'white',
+                                url: 'https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m3.png',
+                                height: 66,
+                                width: 66
+                            }
+                        ]
+                    });
+                    console.log('✅ Marker clusterer created');
+                } else {
+                    console.log('⚠️ MarkerClusterer not available, showing individual markers');
+                    // Fallback: add markers directly to map
+                    markers.forEach(marker => marker.setMap(map));
+                }
                 
                 console.log('Properties added to map:', propertiesWithCoords.length);
                 console.log('📊 Final Marker Summary:');
@@ -1269,6 +1353,11 @@
                              } else {
                                  map.fitBounds(bounds, 50);
                              }
+                             
+                             // If using clustering, refresh the clusterer
+                             if (markerClusterer) {
+                                 markerClusterer.repaint();
+                             }
                          }
                      });
                  }
@@ -1307,6 +1396,105 @@
                          google.maps.event.trigger(map, 'resize');
                      }
                  });
+                 
+                 // Search functionality
+                 const mapSearch = document.getElementById('mapSearch');
+                 const searchResults = document.getElementById('searchResults');
+                 
+                 if (mapSearch) {
+                     mapSearch.addEventListener('input', function() {
+                         const query = this.value.toLowerCase().trim();
+                         if (query.length < 2) {
+                             searchResults.classList.add('hidden');
+                             return;
+                         }
+                         
+                         // Search through properties
+                         const results = allProperties.filter(property => {
+                             return (property.title && property.title.toLowerCase().includes(query)) ||
+                                    (property.location && property.location.toLowerCase().includes(query)) ||
+                                    (property.description && property.description.toLowerCase().includes(query));
+                         });
+                         
+                         if (results.length > 0) {
+                             searchResults.innerHTML = results.slice(0, 5).map(property => `
+                                 <div class="search-result p-2 hover:bg-gray-100 cursor-pointer border-b border-gray-200 last:border-b-0" 
+                                      data-lat="${property.latitude}" data-lng="${property.longitude}" data-title="${property.title}">
+                                     <div class="font-medium text-sm">${property.title}</div>
+                                     <div class="text-xs text-gray-600">${property.location}</div>
+                                     <div class="text-xs text-blue-600">${property.formatted_price || 'Price N/A'}</div>
+                                 </div>
+                             `).join('');
+                             searchResults.classList.remove('hidden');
+                             
+                             // Add click handlers to search results
+                             searchResults.querySelectorAll('.search-result').forEach(result => {
+                                 result.addEventListener('click', function() {
+                                     const lat = parseFloat(this.dataset.lat);
+                                     const lng = parseFloat(this.dataset.lng);
+                                     const title = this.dataset.title;
+                                     
+                                     if (!isNaN(lat) && !isNaN(lng)) {
+                                         map.setCenter({ lat: lat, lng: lng });
+                                         map.setZoom(15);
+                                         
+                                         // Find and click the corresponding marker
+                                         const marker = markers.find(m => {
+                                             const pos = m.getPosition();
+                                             return Math.abs(pos.lat() - lat) < 0.0001 && Math.abs(pos.lng() - lng) < 0.0001;
+                                         });
+                                         
+                                         if (marker) {
+                                             google.maps.event.trigger(marker, 'click');
+                                         }
+                                         
+                                         searchResults.classList.add('hidden');
+                                         mapSearch.value = title;
+                                     }
+                                 });
+                             });
+                         } else {
+                             searchResults.innerHTML = '<div class="p-2 text-sm text-gray-500">No properties found</div>';
+                             searchResults.classList.remove('hidden');
+                         }
+                     });
+                     
+                     // Hide search results when clicking outside
+                     document.addEventListener('click', function(e) {
+                         if (!mapSearch.contains(e.target) && !searchResults.contains(e.target)) {
+                             searchResults.classList.add('hidden');
+                         }
+                     });
+                 }
+                 
+                 // Clustering toggle functionality
+                 const toggleClusteringBtn = document.getElementById('toggleClustering');
+                 if (toggleClusteringBtn) {
+                     toggleClusteringBtn.addEventListener('click', function() {
+                         clusteringEnabled = !clusteringEnabled;
+                         
+                         if (clusteringEnabled) {
+                             // Enable clustering
+                             if (markerClusterer) {
+                                 markerClusterer.setMap(map);
+                             } else if (typeof MarkerClusterer !== 'undefined') {
+                                 markerClusterer = new MarkerClusterer(map, markers, {
+                                     imagePath: 'https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m',
+                                     gridSize: 50,
+                                     maxZoom: 15
+                                 });
+                             }
+                             this.innerHTML = '<i class="fas fa-layer-group mr-1 sm:mr-2"></i><span class="hidden sm:inline">Disable Clustering</span><span class="sm:hidden">Uncluster</span>';
+                         } else {
+                             // Disable clustering
+                             if (markerClusterer) {
+                                 markerClusterer.setMap(null);
+                             }
+                             markers.forEach(marker => marker.setMap(map));
+                             this.innerHTML = '<i class="fas fa-layer-group mr-1 sm:mr-2"></i><span class="hidden sm:inline">Enable Clustering</span><span class="sm:hidden">Cluster</span>';
+                         }
+                     });
+                 }
              }, 500);
          });
     </script>
