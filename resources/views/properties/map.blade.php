@@ -1142,6 +1142,464 @@
             }
         };
         
+        // Always define initMap function first, regardless of duplicate execution
+        if (typeof window.initMap === 'undefined') {
+            window.initMap = function() {
+                console.log('🎯 Google Maps API loaded, initializing map...');
+                
+                if (typeof google === 'undefined' || typeof google.maps === 'undefined') {
+                    console.error('Google Maps not loaded');
+                    showSimpleFallback('Google Maps library failed to load');
+                    return;
+                }
+                
+                console.log('Google Maps loaded, initializing map...');
+                
+                const mapContainer = document.getElementById('map');
+                if (!mapContainer) {
+                    console.error('Map container not found');
+                    return;
+                }
+                
+                // Add timeout to prevent infinite loading
+                const loadingTimeout = setTimeout(() => {
+                    console.log('Loading timeout reached, showing fallback');
+                    showSimpleFallback('Map is taking too long to load. This usually happens when there are many properties. Try filtering by location.');
+                }, 8000); // 8 second timeout
+                
+                try {
+                    // Clear loading spinner
+                    mapContainer.innerHTML = '';
+                    
+                    // Create map with Google Maps
+                    map = new google.maps.Map(mapContainer, {
+                        center: { lat: 51.505, lng: -0.09 }, // London coordinates
+                        zoom: 10,
+                        mapTypeId: google.maps.MapTypeId.ROADMAP,
+                        mapTypeControl: true,
+                        streetViewControl: true,
+                        fullscreenControl: true,
+                        zoomControl: true,
+                        styles: [
+                            {
+                                featureType: 'poi',
+                                elementType: 'labels',
+                                stylers: [{ visibility: 'off' }]
+                            }
+                        ]
+                    });
+                    console.log('Map created:', map);
+                    
+                    // Get properties data - load from a data attribute instead
+                    let properties = [];
+                    try {
+                        console.log('🧪 Attempting to load properties from data attribute...');
+                        const propertiesData = document.getElementById('properties-data');
+                        if (propertiesData && propertiesData.dataset.properties) {
+                            const rawProperties = JSON.parse(propertiesData.dataset.properties);
+                            
+                            // Clean and validate properties data
+                            properties = rawProperties.filter(property => {
+                                // Check if property exists and has required fields
+                                if (!property || typeof property !== 'object') {
+                                    console.warn('Invalid property object:', property);
+                                    return false;
+                                }
+                                
+                                // Ensure all string fields are properly handled
+                                const cleanProperty = {
+                                    id: property.id || null,
+                                    title: property.title || 'Untitled Property',
+                                    location: property.location || 'Location not specified',
+                                    latitude: property.latitude || null,
+                                    longitude: property.longitude || null,
+                                    price: property.price || null,
+                                    formatted_price: property.formatted_price || 'Price not specified',
+                                    property_type: property.property_type || null,
+                                    management_company: property.management_company || null,
+                                    available_date: property.available_date || null,
+                                    amenities: property.amenities || null,
+                                    furnishings: property.furnishings || null,
+                                    bills_included: property.bills_included || null,
+                                    balcony_roof_terrace: property.balcony_roof_terrace || null,
+                                    garden_patio: property.garden_patio || null,
+                                    parking: property.parking || null,
+                                    description: property.description || null,
+                                    high_quality_photos_array: property.high_quality_photos_array || null,
+                                    all_photos_array: property.all_photos_array || null,
+                                    first_photo_url: property.first_photo_url || null
+                                };
+                                
+                                // Replace the original property with cleaned version
+                                Object.assign(property, cleanProperty);
+                                
+                                return true;
+                            });
+                            
+                            allProperties = properties; // Store for search functionality
+                            console.log('🚀 Properties loaded and cleaned from data attribute:', properties.length);
+                            console.log('📋 Properties data sample:', properties.slice(0, 3));
+                        } else {
+                            console.log('📋 No properties data found in data attribute');
+                            properties = [];
+                            allProperties = [];
+                        }
+                    } catch (error) {
+                        console.error('❌ Error loading properties data:', error);
+                        console.error('❌ Error message:', error.message);
+                        console.error('❌ Error stack:', error.stack);
+                        properties = [];
+                        allProperties = [];
+                    }
+                    
+                    // Check if properties have the expected structure
+                    if (properties.length > 0) {
+                        const firstProp = properties[0];
+                        console.log('🔍 First property structure:', {
+                            hasId: 'id' in firstProp,
+                            hasTitle: 'title' in firstProp,
+                            hasLocation: 'location' in firstProp,
+                            hasLatitude: 'latitude' in firstProp,
+                            hasLongitude: 'longitude' in firstProp,
+                            latitude: firstProp.latitude,
+                            longitude: firstProp.longitude
+                        });
+                    }
+                    
+                    // Debug: Log property coordinates to see the geographic spread
+                    const propertiesWithCoords = properties.filter(p => {
+                        try {
+                            // Check if property exists and has valid coordinates
+                            if (!p || typeof p !== 'object') {
+                                return false;
+                            }
+                            
+                            const lat = p.latitude;
+                            const lng = p.longitude;
+                            
+                            // Check if coordinates exist and are valid numbers
+                            if (!lat || !lng) {
+                                return false;
+                            }
+                            
+                            const latNum = parseFloat(lat);
+                            const lngNum = parseFloat(lng);
+                            
+                            // Check if parsed numbers are valid and within reasonable bounds
+                            if (isNaN(latNum) || isNaN(lngNum)) {
+                                return false;
+                            }
+                            
+                            // Check if coordinates are within reasonable geographic bounds
+                            if (latNum < -90 || latNum > 90 || lngNum < -180 || lngNum > 180) {
+                                console.warn('Property has invalid coordinates:', p.id, latNum, lngNum);
+                                return false;
+                            }
+                            
+                            return true;
+                        } catch (error) {
+                            console.warn('Error filtering property:', p, error);
+                            return false;
+                        }
+                    });
+                    console.log('Properties with coordinates:', propertiesWithCoords.length);
+                    
+                    if (propertiesWithCoords.length > 0) {
+                        const lats = propertiesWithCoords.map(p => parseFloat(p.latitude));
+                        const lngs = propertiesWithCoords.map(p => parseFloat(p.longitude));
+                        const minLat = Math.min(...lats);
+                        const maxLat = Math.max(...lats);
+                        const minLng = Math.min(...lngs);
+                        const maxLng = Math.max(...lngs);
+                        console.log('Geographic bounds:', { minLat, maxLat, minLng, maxLng });
+                        console.log('Latitude range:', maxLat - minLat);
+                        console.log('Longitude range:', maxLng - minLng);
+                    }
+                    
+                    // Create bounds object and markers array
+                    const bounds = new google.maps.LatLngBounds();
+                    // Clear global markers array and use it
+                    markers.length = 0;
+                    
+                    // Create info window
+                    const infoWindow = new google.maps.InfoWindow();
+                    
+                    // Add properties as markers
+                    console.log('🔍 Starting to create markers for all properties...');
+                    console.log(`📊 Total properties to process: ${propertiesWithCoords.length}`);
+                    let markerCount = 0;
+                    
+                    propertiesWithCoords.forEach((property, index) => {
+                        try {
+                            console.log(`📍 Creating marker ${index + 1}/${propertiesWithCoords.length}:`);
+                            console.log(`   ID: ${property.id || 'N/A'}`);
+                            console.log(`   Title: ${property.title || 'Untitled'}`);
+                            console.log(`   Location: ${property.location || 'Unknown'}`);
+                            
+                            // Safely parse coordinates with null checks
+                            const lat = property.latitude ? parseFloat(property.latitude) : null;
+                            const lng = property.longitude ? parseFloat(property.longitude) : null;
+                            
+                            if (!lat || !lng || isNaN(lat) || isNaN(lng)) {
+                                console.warn(`Skipping property ${property.id} - invalid coordinates:`, lat, lng);
+                                return;
+                            }
+                            
+                            const position = { lat, lng };
+                            console.log(`   Coordinates: ${position.lat}, ${position.lng}`);
+                            console.log(`   Price: ${property.price || 'N/A'}`);
+                            
+                            // Get company color with null handling
+                            const companyColor = getCompanyColor(property.management_company);
+                            
+                            // Create marker with safe defaults
+                            const marker = new google.maps.Marker({
+                                position: position,
+                                title: property.title || 'Property',
+                                icon: {
+                                    path: google.maps.SymbolPath.CIRCLE,
+                                    scale: 8,
+                                    fillColor: companyColor.fill,
+                                    fillOpacity: 1,
+                                    strokeColor: companyColor.stroke,
+                                    strokeWeight: 2
+                                }
+                            });
+                            
+                            // Add price label using a custom overlay
+                            const priceLabel = new google.maps.OverlayView();
+                            priceLabel.onAdd = function() {
+                                const div = document.createElement('div');
+                                div.className = 'price-label';
+                                
+                                // Format price with comprehensive null handling
+                                let priceText = 'Price N/A';
+                                
+                                try {
+                                    // Check if property exists and has price data
+                                    if (property && property.price && property.price !== 'N/A' && property.price !== '' && property.price !== null && property.price !== undefined) {
+                                        // If price is a number, format it as currency
+                                        const priceNum = parseFloat(property.price);
+                                        if (!isNaN(priceNum) && priceNum > 0) {
+                                            priceText = `£${priceNum.toLocaleString()}`;
+                                        } else if (typeof property.price === 'string' && property.price.trim() !== '') {
+                                            // If it's already a formatted string, use it
+                                            priceText = property.price.trim();
+                                        }
+                                    } else if (property && property.formatted_price && property.formatted_price !== 'N/A' && property.formatted_price !== '' && property.formatted_price !== null && property.formatted_price !== undefined) {
+                                        priceText = property.formatted_price;
+                                    }
+                                } catch (error) {
+                                    console.warn('Error formatting price for property:', property.id, error);
+                                    priceText = 'Price N/A';
+                                }
+                                
+                                div.textContent = priceText;
+                                div.style.position = 'absolute';
+                                div.style.zIndex = '1000';
+                                this.div_ = div;
+                                
+                                try {
+                                    const panes = this.getPanes();
+                                    if (panes && panes.overlayImage) {
+                                        panes.overlayImage.appendChild(div);
+                                    }
+                                } catch (error) {
+                                    console.warn('Error adding price label to map:', error);
+                                }
+                            };
+                            
+                            priceLabel.draw = function() {
+                                try {
+                                    const projection = this.getProjection();
+                                    if (!projection || !marker || !this.div_) {
+                                        return;
+                                    }
+                                    
+                                    const position = projection.fromLatLngToDivPixel(marker.getPosition());
+                                    if (!position) {
+                                        return;
+                                    }
+                                    
+                                    const div = this.div_;
+                                    if (div && div.offsetWidth && div.offsetHeight) {
+                                        div.style.left = (position.x - div.offsetWidth / 2) + 'px';
+                                        div.style.top = (position.y - div.offsetHeight - 20) + 'px';
+                                    }
+                                } catch (error) {
+                                    console.warn('Error drawing price label:', error);
+                                }
+                            };
+                            
+                            priceLabel.setMap(map);
+                            
+                            // Create info window content with null handling
+                            const infoContent = createInfoWindowContent(property);
+                            
+                            // Add click event with null checks
+                            marker.addListener('click', function() {
+                                try {
+                                    if (infoWindow && infoContent) {
+                                        infoWindow.setContent(infoContent);
+                                        infoWindow.open(map, marker);
+                                    }
+                                } catch (error) {
+                                    console.warn('Error opening info window:', error);
+                                }
+                            });
+                            
+                            // Add to bounds with null checks
+                            try {
+                                if (bounds && position && position.lat && position.lng) {
+                                    bounds.extend(position);
+                                }
+                                if (markers && Array.isArray(markers)) {
+                                    markers.push(marker);
+                                }
+                            } catch (error) {
+                                console.warn('Error adding marker to bounds or markers array:', error);
+                            }
+                            
+                            markerCount++;
+                            console.log(`   ✅ Marker ${markerCount} created and added to map`);
+                        } catch (error) {
+                            console.error(`❌ Error creating marker for property ${index}:`, error, property);
+                        }
+                    });
+                    
+                    // Create marker clusterer with null handling
+                    try {
+                        if (typeof MarkerClusterer !== 'undefined' && map && markers && markers.length > 0) {
+                            markerClusterer = new MarkerClusterer(map, markers, {
+                                imagePath: 'https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m',
+                                gridSize: 50,
+                                maxZoom: 15,
+                                styles: [
+                                    {
+                                        textColor: 'white',
+                                        url: 'https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m1.png',
+                                        height: 53,
+                                        width: 53
+                                    },
+                                    {
+                                        textColor: 'white',
+                                        url: 'https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m2.png',
+                                        height: 56,
+                                        width: 56
+                                    },
+                                    {
+                                        textColor: 'white',
+                                        url: 'https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m3.png',
+                                        height: 66,
+                                        width: 66
+                                    }
+                                ]
+                            });
+                            console.log('✅ Marker clusterer created');
+                        } else {
+                            console.log('⚠️ MarkerClusterer not available or no markers, showing individual markers');
+                            // Fallback: add markers directly to map with null checks
+                            if (markers && Array.isArray(markers) && map) {
+                                markers.forEach(marker => {
+                                    try {
+                                        if (marker && typeof marker.setMap === 'function') {
+                                            marker.setMap(map);
+                                        }
+                                    } catch (error) {
+                                        console.warn('Error adding marker to map:', error);
+                                    }
+                                });
+                            }
+                        }
+                    } catch (error) {
+                        console.error('Error creating marker clusterer:', error);
+                        // Fallback: add markers directly to map
+                        if (markers && Array.isArray(markers) && map) {
+                            markers.forEach(marker => {
+                                try {
+                                    if (marker && typeof marker.setMap === 'function') {
+                                        marker.setMap(map);
+                                    }
+                                } catch (error) {
+                                    console.warn('Error adding marker to map:', error);
+                                }
+                            });
+                        }
+                    }
+                    
+                    console.log('Properties added to map:', propertiesWithCoords.length);
+                    console.log('📊 Final Marker Summary:');
+                    console.log(`   Total properties with coordinates: ${propertiesWithCoords.length}`);
+                    console.log(`   Markers created: ${markerCount}`);
+                    console.log(`   Global markers array length: ${markers.length}`);
+                    console.log(`   Bounds extended: ${bounds.isEmpty() ? 'No' : 'Yes'}`);
+                    
+                    if (markers.length > 0) {
+                        console.log('   ✅ Global markers array is populated correctly');
+                    } else {
+                        console.log('   ❌ Global markers array is empty - this is the problem!');
+                    }
+                    
+                    // Fit map to show all properties or default to London with null handling
+                    try {
+                        if (propertiesWithCoords.length > 0 && bounds && !bounds.isEmpty()) {
+                            console.log('Fitting map to bounds:', bounds);
+                            
+                            // Check if bounds are too large
+                            const ne = bounds.getNorthEast();
+                            const sw = bounds.getSouthWest();
+                            
+                            if (ne && sw) {
+                                const latRange = ne.lat() - sw.lat();
+                                const lngRange = ne.lng() - sw.lng();
+                                
+                                console.log('Bounds range - Lat:', latRange, 'Lng:', lngRange);
+                                
+                                // If bounds are too large or properties are spread out, focus on London
+                                if (latRange > 10 || lngRange > 10) {
+                                    console.log('Bounds too large, focusing on London');
+                                    map.setCenter({ lat: 51.505, lng: -0.09 }); // London center
+                                    map.setZoom(10); // Good zoom for London area
+                                    showWarning('Properties are spread across a large area. Map is focused on London. Use filters to see specific locations more clearly.');
+                                } else {
+                                    console.log('Fitting to bounds with padding');
+                                    map.fitBounds(bounds, 50); // 50px padding
+                                }
+                            } else {
+                                console.log('Invalid bounds, focusing on London');
+                                map.setCenter({ lat: 51.505, lng: -0.09 }); // London center
+                                map.setZoom(10); // Good zoom for London area
+                            }
+                        } else {
+                            // No properties with coordinates, ensure map is focused on London
+                            console.log('No properties with coordinates, focusing on London');
+                            map.setCenter({ lat: 51.505, lng: -0.09 }); // London center
+                            map.setZoom(10); // Good zoom for London area
+                        }
+                    } catch (error) {
+                        console.error('Error fitting map bounds:', error);
+                        // Fallback to London
+                        map.setCenter({ lat: 51.505, lng: -0.09 }); // London center
+                        map.setZoom(10); // Good zoom for London area
+                    }
+                    
+                    // Change cursor on hover for markers
+                    map.addListener('idle', function() {
+                        map.getDiv().style.cursor = 'default';
+                    });
+                    
+                    // Clear timeout since map loaded successfully
+                    clearTimeout(loadingTimeout);
+                    console.log('Map initialization complete!');
+                    
+                } catch (error) {
+                    console.error('Map error:', error);
+                    clearTimeout(loadingTimeout);
+                    showSimpleFallback('Map failed to load: ' + error.message);
+                }
+            };
+        }
+        
         // Prevent duplicate execution
         if (window.mapScriptLoaded) {
             console.log('⚠️ Map script already loaded, skipping duplicate execution');
