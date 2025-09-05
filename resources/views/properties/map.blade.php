@@ -6,9 +6,13 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <meta name="cache-buster" content="{{ time() }}">
     <title>Property Map - Property Scraper</title>
-    <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
     
     <script>
         console.log('🧪 Page head script - if you see this, the page is loading');
@@ -675,29 +679,38 @@
     </div>
 
     <!-- Google Maps JS -->
-    <script src="https://maps.googleapis.com/maps/api/js?key={{ config('services.google.maps_api_key', 'YOUR_API_KEY') }}&libraries=places"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key={{ config('services.google.maps_api_key', 'YOUR_API_KEY') }}&libraries=places&callback=initMap&v=weekly&loading=async&t={{ time() }}&r={{ rand(1000, 9999) }}"></script>
     <!-- Marker Clustering Library -->
-    <script src="https://unpkg.com/@googlemaps/markerclusterer/dist/index.min.js"></script>
+    <script src="https://unpkg.com/@googlemaps/markerclusterer/dist/index.min.js?v=1.0.0&t={{ time() }}&r={{ rand(1000, 9999) }}"></script>
     
-    <script>
-        console.log('🧪 Basic script test - if you see this, JavaScript is working');
-        console.log('🚀 Map script loaded!');
-        
-        // Simple test - properties will be loaded later
-        console.log('🧪 Basic script loaded successfully');
-        console.log('📊 Properties will be loaded when DOM is ready');
-        
-        let map = null;
-        let markers = [];
-        let markerClusterer = null;
-        let infoWindow = null;
-        let allProperties = [];
-        let clusteringEnabled = true;
+    <script id="map-script-{{ uniqid() }}">
+        (function() {
+            'use strict';
+            
+            console.log('🧪 Basic script test - if you see this, JavaScript is working');
+            console.log('🚀 Map script loaded!');
+            console.log('🕒 Script loaded at:', new Date().toISOString());
+            console.log('🔄 Cache busting timestamp:', Date.now());
+            console.log('🆔 Unique script ID:', '{{ uniqid() }}');
+            console.log('🔧 Script version:', '2.0.0');
+            console.log('🎲 Random number:', {{ rand(10000, 99999) }});
+            
+            // Simple test - properties will be loaded later
+            console.log('🧪 Basic script loaded successfully');
+            console.log('📊 Properties will be loaded when DOM is ready');
+            
+            let map = null;
+            let markers = [];
+            let markerClusterer = null;
+            let infoWindow = null;
+            let allProperties = [];
+            let clusteringEnabled = true;
         
         console.log('📋 Variables initialized:', { map, markers: markers.length, infoWindow });
         
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('🎯 DOM loaded, checking Google Maps...');
+        // Make initMap globally accessible
+        window.initMap = function() {
+            console.log('🎯 Google Maps API loaded, initializing map...');
             
             if (typeof google === 'undefined' || typeof google.maps === 'undefined') {
                 console.error('Google Maps not loaded');
@@ -748,9 +761,48 @@
                     console.log('🧪 Attempting to load properties from data attribute...');
                     const propertiesData = document.getElementById('properties-data');
                     if (propertiesData && propertiesData.dataset.properties) {
-                        properties = JSON.parse(propertiesData.dataset.properties);
+                        const rawProperties = JSON.parse(propertiesData.dataset.properties);
+                        
+                        // Clean and validate properties data
+                        properties = rawProperties.filter(property => {
+                            // Check if property exists and has required fields
+                            if (!property || typeof property !== 'object') {
+                                console.warn('Invalid property object:', property);
+                                return false;
+                            }
+                            
+                            // Ensure all string fields are properly handled
+                            const cleanProperty = {
+                                id: property.id || null,
+                                title: property.title || 'Untitled Property',
+                                location: property.location || 'Location not specified',
+                                latitude: property.latitude || null,
+                                longitude: property.longitude || null,
+                                price: property.price || null,
+                                formatted_price: property.formatted_price || 'Price not specified',
+                                property_type: property.property_type || null,
+                                management_company: property.management_company || null,
+                                available_date: property.available_date || null,
+                                amenities: property.amenities || null,
+                                furnishings: property.furnishings || null,
+                                bills_included: property.bills_included || null,
+                                balcony_roof_terrace: property.balcony_roof_terrace || null,
+                                garden_patio: property.garden_patio || null,
+                                parking: property.parking || null,
+                                description: property.description || null,
+                                high_quality_photos_array: property.high_quality_photos_array || null,
+                                all_photos_array: property.all_photos_array || null,
+                                first_photo_url: property.first_photo_url || null
+                            };
+                            
+                            // Replace the original property with cleaned version
+                            Object.assign(property, cleanProperty);
+                            
+                            return true;
+                        });
+                        
                         allProperties = properties; // Store for search functionality
-                        console.log('🚀 Properties loaded from data attribute:', properties.length);
+                        console.log('🚀 Properties loaded and cleaned from data attribute:', properties.length);
                         console.log('📋 Properties data sample:', properties.slice(0, 3));
                     } else {
                         console.log('📋 No properties data found in data attribute');
@@ -782,9 +834,34 @@
                 // Debug: Log property coordinates to see the geographic spread
                 const propertiesWithCoords = properties.filter(p => {
                     try {
-                        return p && p.latitude && p.longitude && 
-                               !isNaN(parseFloat(p.latitude)) && 
-                               !isNaN(parseFloat(p.longitude));
+                        // Check if property exists and has valid coordinates
+                        if (!p || typeof p !== 'object') {
+                            return false;
+                        }
+                        
+                        const lat = p.latitude;
+                        const lng = p.longitude;
+                        
+                        // Check if coordinates exist and are valid numbers
+                        if (!lat || !lng) {
+                            return false;
+                        }
+                        
+                        const latNum = parseFloat(lat);
+                        const lngNum = parseFloat(lng);
+                        
+                        // Check if parsed numbers are valid and within reasonable bounds
+                        if (isNaN(latNum) || isNaN(lngNum)) {
+                            return false;
+                        }
+                        
+                        // Check if coordinates are within reasonable geographic bounds
+                        if (latNum < -90 || latNum > 90 || lngNum < -180 || lngNum > 180) {
+                            console.warn('Property has invalid coordinates:', p.id, latNum, lngNum);
+                            return false;
+                        }
+                        
+                        return true;
                     } catch (error) {
                         console.warn('Error filtering property:', p, error);
                         return false;
@@ -820,24 +897,30 @@
                 propertiesWithCoords.forEach((property, index) => {
                     try {
                         console.log(`📍 Creating marker ${index + 1}/${propertiesWithCoords.length}:`);
-                        console.log(`   ID: ${property.id}`);
-                        console.log(`   Title: ${property.title}`);
-                        console.log(`   Location: ${property.location}`);
+                        console.log(`   ID: ${property.id || 'N/A'}`);
+                        console.log(`   Title: ${property.title || 'Untitled'}`);
+                        console.log(`   Location: ${property.location || 'Unknown'}`);
                         
-                        const position = {
-                            lat: parseFloat(property.latitude),
-                            lng: parseFloat(property.longitude)
-                        };
+                        // Safely parse coordinates with null checks
+                        const lat = property.latitude ? parseFloat(property.latitude) : null;
+                        const lng = property.longitude ? parseFloat(property.longitude) : null;
+                        
+                        if (!lat || !lng || isNaN(lat) || isNaN(lng)) {
+                            console.warn(`Skipping property ${property.id} - invalid coordinates:`, lat, lng);
+                            return;
+                        }
+                        
+                        const position = { lat, lng };
                         console.log(`   Coordinates: ${position.lat}, ${position.lng}`);
-                        console.log(`   Price: ${property.price}`);
+                        console.log(`   Price: ${property.price || 'N/A'}`);
                         
-                        // Get company color
+                        // Get company color with null handling
                         const companyColor = getCompanyColor(property.management_company);
                         
-                        // Create marker
+                        // Create marker with safe defaults
                         const marker = new google.maps.Marker({
                             position: position,
-                            title: property.title,
+                            title: property.title || 'Property',
                             icon: {
                                 path: google.maps.SymbolPath.CIRCLE,
                                 scale: 8,
@@ -854,51 +937,93 @@
                             const div = document.createElement('div');
                             div.className = 'price-label';
                             
-                            // Format price with proper fallback
+                            // Format price with comprehensive null handling
                             let priceText = 'Price N/A';
-                            if (property.price && property.price !== 'N/A' && property.price !== '') {
-                                // If price is a number, format it as currency
-                                const priceNum = parseFloat(property.price);
-                                if (!isNaN(priceNum)) {
-                                    priceText = `£${priceNum.toLocaleString()}`;
-                                } else if (typeof property.price === 'string') {
-                                    // If it's already a formatted string, use it
-                                    priceText = property.price;
+                            
+                            try {
+                                // Check if property exists and has price data
+                                if (property && property.price && property.price !== 'N/A' && property.price !== '' && property.price !== null && property.price !== undefined) {
+                                    // If price is a number, format it as currency
+                                    const priceNum = parseFloat(property.price);
+                                    if (!isNaN(priceNum) && priceNum > 0) {
+                                        priceText = `£${priceNum.toLocaleString()}`;
+                                    } else if (typeof property.price === 'string' && property.price.trim() !== '') {
+                                        // If it's already a formatted string, use it
+                                        priceText = property.price.trim();
+                                    }
+                                } else if (property && property.formatted_price && property.formatted_price !== 'N/A' && property.formatted_price !== '' && property.formatted_price !== null && property.formatted_price !== undefined) {
+                                    priceText = property.formatted_price;
                                 }
-                            } else if (property.formatted_price && property.formatted_price !== 'N/A' && property.formatted_price !== '') {
-                                priceText = property.formatted_price;
+                            } catch (error) {
+                                console.warn('Error formatting price for property:', property.id, error);
+                                priceText = 'Price N/A';
                             }
                             
                             div.textContent = priceText;
                             div.style.position = 'absolute';
                             div.style.zIndex = '1000';
                             this.div_ = div;
-                            const panes = this.getPanes();
-                            panes.overlayImage.appendChild(div);
+                            
+                            try {
+                                const panes = this.getPanes();
+                                if (panes && panes.overlayImage) {
+                                    panes.overlayImage.appendChild(div);
+                                }
+                            } catch (error) {
+                                console.warn('Error adding price label to map:', error);
+                            }
                         };
                         
                         priceLabel.draw = function() {
-                            const projection = this.getProjection();
-                            const position = projection.fromLatLngToDivPixel(marker.getPosition());
-                            const div = this.div_;
-                            div.style.left = (position.x - div.offsetWidth / 2) + 'px';
-                            div.style.top = (position.y - div.offsetHeight - 20) + 'px';
+                            try {
+                                const projection = this.getProjection();
+                                if (!projection || !marker || !this.div_) {
+                                    return;
+                                }
+                                
+                                const position = projection.fromLatLngToDivPixel(marker.getPosition());
+                                if (!position) {
+                                    return;
+                                }
+                                
+                                const div = this.div_;
+                                if (div && div.offsetWidth && div.offsetHeight) {
+                                    div.style.left = (position.x - div.offsetWidth / 2) + 'px';
+                                    div.style.top = (position.y - div.offsetHeight - 20) + 'px';
+                                }
+                            } catch (error) {
+                                console.warn('Error drawing price label:', error);
+                            }
                         };
                         
                         priceLabel.setMap(map);
                         
-                        // Create info window content
+                        // Create info window content with null handling
                         const infoContent = createInfoWindowContent(property);
                         
-                        // Add click event
+                        // Add click event with null checks
                         marker.addListener('click', function() {
-                            infoWindow.setContent(infoContent);
-                            infoWindow.open(map, marker);
+                            try {
+                                if (infoWindow && infoContent) {
+                                    infoWindow.setContent(infoContent);
+                                    infoWindow.open(map, marker);
+                                }
+                            } catch (error) {
+                                console.warn('Error opening info window:', error);
+                            }
                         });
                         
-                        // Add to bounds
-                        bounds.extend(position);
-                        markers.push(marker);
+                        // Add to bounds with null checks
+                        try {
+                            if (bounds && position && position.lat && position.lng) {
+                                bounds.extend(position);
+                            }
+                            if (markers && Array.isArray(markers)) {
+                                markers.push(marker);
+                            }
+                        } catch (error) {
+                            console.warn('Error adding marker to bounds or markers array:', error);
+                        }
                         
                         markerCount++;
                         console.log(`   ✅ Marker ${markerCount} created and added to map`);
@@ -907,38 +1032,64 @@
                     }
                 });
                 
-                // Create marker clusterer
-                if (typeof MarkerClusterer !== 'undefined') {
-                    markerClusterer = new MarkerClusterer(map, markers, {
-                        imagePath: 'https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m',
-                        gridSize: 50,
-                        maxZoom: 15,
-                        styles: [
-                            {
-                                textColor: 'white',
-                                url: 'https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m1.png',
-                                height: 53,
-                                width: 53
-                            },
-                            {
-                                textColor: 'white',
-                                url: 'https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m2.png',
-                                height: 56,
-                                width: 56
-                            },
-                            {
-                                textColor: 'white',
-                                url: 'https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m3.png',
-                                height: 66,
-                                width: 66
-                            }
-                        ]
-                    });
-                    console.log('✅ Marker clusterer created');
-                } else {
-                    console.log('⚠️ MarkerClusterer not available, showing individual markers');
+                // Create marker clusterer with null handling
+                try {
+                    if (typeof MarkerClusterer !== 'undefined' && map && markers && markers.length > 0) {
+                        markerClusterer = new MarkerClusterer(map, markers, {
+                            imagePath: 'https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m',
+                            gridSize: 50,
+                            maxZoom: 15,
+                            styles: [
+                                {
+                                    textColor: 'white',
+                                    url: 'https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m1.png',
+                                    height: 53,
+                                    width: 53
+                                },
+                                {
+                                    textColor: 'white',
+                                    url: 'https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m2.png',
+                                    height: 56,
+                                    width: 56
+                                },
+                                {
+                                    textColor: 'white',
+                                    url: 'https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m3.png',
+                                    height: 66,
+                                    width: 66
+                                }
+                            ]
+                        });
+                        console.log('✅ Marker clusterer created');
+                    } else {
+                        console.log('⚠️ MarkerClusterer not available or no markers, showing individual markers');
+                        // Fallback: add markers directly to map with null checks
+                        if (markers && Array.isArray(markers) && map) {
+                            markers.forEach(marker => {
+                                try {
+                                    if (marker && typeof marker.setMap === 'function') {
+                                        marker.setMap(map);
+                                    }
+                                } catch (error) {
+                                    console.warn('Error adding marker to map:', error);
+                                }
+                            });
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error creating marker clusterer:', error);
                     // Fallback: add markers directly to map
-                    markers.forEach(marker => marker.setMap(map));
+                    if (markers && Array.isArray(markers) && map) {
+                        markers.forEach(marker => {
+                            try {
+                                if (marker && typeof marker.setMap === 'function') {
+                                    marker.setMap(map);
+                                }
+                            } catch (error) {
+                                console.warn('Error adding marker to map:', error);
+                            }
+                        });
+                    }
                 }
                 
                 console.log('Properties added to map:', propertiesWithCoords.length);
@@ -954,31 +1105,45 @@
                     console.log('   ❌ Global markers array is empty - this is the problem!');
                 }
                 
-                // Fit map to show all properties or default to London
-                if (propertiesWithCoords.length > 0) {
-                    console.log('Fitting map to bounds:', bounds);
-                    
-                    // Check if bounds are too large
-                    const ne = bounds.getNorthEast();
-                    const sw = bounds.getSouthWest();
-                    const latRange = ne.lat() - sw.lat();
-                    const lngRange = ne.lng() - sw.lng();
-                    
-                    console.log('Bounds range - Lat:', latRange, 'Lng:', lngRange);
-                    
-                    // If bounds are too large or properties are spread out, focus on London
-                    if (latRange > 10 || lngRange > 10) {
-                        console.log('Bounds too large, focusing on London');
+                // Fit map to show all properties or default to London with null handling
+                try {
+                    if (propertiesWithCoords.length > 0 && bounds && !bounds.isEmpty()) {
+                        console.log('Fitting map to bounds:', bounds);
+                        
+                        // Check if bounds are too large
+                        const ne = bounds.getNorthEast();
+                        const sw = bounds.getSouthWest();
+                        
+                        if (ne && sw) {
+                            const latRange = ne.lat() - sw.lat();
+                            const lngRange = ne.lng() - sw.lng();
+                            
+                            console.log('Bounds range - Lat:', latRange, 'Lng:', lngRange);
+                            
+                            // If bounds are too large or properties are spread out, focus on London
+                            if (latRange > 10 || lngRange > 10) {
+                                console.log('Bounds too large, focusing on London');
+                                map.setCenter({ lat: 51.505, lng: -0.09 }); // London center
+                                map.setZoom(10); // Good zoom for London area
+                                showWarning('Properties are spread across a large area. Map is focused on London. Use filters to see specific locations more clearly.');
+                            } else {
+                                console.log('Fitting to bounds with padding');
+                                map.fitBounds(bounds, 50); // 50px padding
+                            }
+                        } else {
+                            console.log('Invalid bounds, focusing on London');
+                            map.setCenter({ lat: 51.505, lng: -0.09 }); // London center
+                            map.setZoom(10); // Good zoom for London area
+                        }
+                    } else {
+                        // No properties with coordinates, ensure map is focused on London
+                        console.log('No properties with coordinates, focusing on London');
                         map.setCenter({ lat: 51.505, lng: -0.09 }); // London center
                         map.setZoom(10); // Good zoom for London area
-                        showWarning('Properties are spread across a large area. Map is focused on London. Use filters to see specific locations more clearly.');
-                    } else {
-                        console.log('Fitting to bounds with padding');
-                        map.fitBounds(bounds, 50); // 50px padding
                     }
-                } else {
-                    // No properties with coordinates, ensure map is focused on London
-                    console.log('No properties with coordinates, focusing on London');
+                } catch (error) {
+                    console.error('Error fitting map bounds:', error);
+                    // Fallback to London
                     map.setCenter({ lat: 51.505, lng: -0.09 }); // London center
                     map.setZoom(10); // Good zoom for London area
                 }
@@ -997,7 +1162,7 @@
                 clearTimeout(loadingTimeout);
                 showSimpleFallback('Map failed to load: ' + error.message);
             }
-        });
+        };
         
         function getCompanyColor(company) {
             if (!company || company === 'N/A' || company === '') {
@@ -1417,50 +1582,101 @@
                              return;
                          }
                          
-                         // Search through properties
-                         const results = allProperties.filter(property => {
-                             return (property.title && property.title.toLowerCase().includes(query)) ||
-                                    (property.location && property.location.toLowerCase().includes(query)) ||
-                                    (property.description && property.description.toLowerCase().includes(query));
-                         });
+                                                 // Search through properties with null handling
+                        const results = allProperties.filter(property => {
+                            if (!property || typeof property !== 'object') {
+                                return false;
+                            }
+                            
+                            try {
+                                const title = property.title || '';
+                                const location = property.location || '';
+                                const description = property.description || '';
+                                
+                                return (title.toLowerCase().includes(query)) ||
+                                       (location.toLowerCase().includes(query)) ||
+                                       (description.toLowerCase().includes(query));
+                            } catch (error) {
+                                console.warn('Error filtering property in search:', property, error);
+                                return false;
+                            }
+                        });
                          
-                         if (results.length > 0) {
-                             searchResults.innerHTML = results.slice(0, 5).map(property => `
-                                 <div class="search-result p-2 hover:bg-gray-100 cursor-pointer border-b border-gray-200 last:border-b-0" 
-                                      data-lat="${property.latitude}" data-lng="${property.longitude}" data-title="${property.title}">
-                                     <div class="font-medium text-sm">${property.title}</div>
-                                     <div class="text-xs text-gray-600">${property.location}</div>
-                                     <div class="text-xs text-blue-600">${property.formatted_price || 'Price N/A'}</div>
-                                 </div>
-                             `).join('');
+                                                 if (results.length > 0) {
+                            searchResults.innerHTML = results.slice(0, 5).map(property => {
+                                try {
+                                    const lat = property.latitude || '';
+                                    const lng = property.longitude || '';
+                                    const title = property.title || 'Untitled Property';
+                                    const location = property.location || 'Location not specified';
+                                    const price = property.formatted_price || 'Price N/A';
+                                    
+                                    return `
+                                        <div class="search-result p-2 hover:bg-gray-100 cursor-pointer border-b border-gray-200 last:border-b-0" 
+                                             data-lat="${lat}" data-lng="${lng}" data-title="${title.replace(/"/g, '&quot;')}">
+                                            <div class="font-medium text-sm">${title}</div>
+                                            <div class="text-xs text-gray-600">${location}</div>
+                                            <div class="text-xs text-blue-600">${price}</div>
+                                        </div>
+                                    `;
+                                } catch (error) {
+                                    console.warn('Error creating search result HTML:', property, error);
+                                    return '';
+                                }
+                            }).filter(html => html !== '').join('');
                              searchResults.classList.remove('hidden');
                              
-                             // Add click handlers to search results
-                             searchResults.querySelectorAll('.search-result').forEach(result => {
-                                 result.addEventListener('click', function() {
-                                     const lat = parseFloat(this.dataset.lat);
-                                     const lng = parseFloat(this.dataset.lng);
-                                     const title = this.dataset.title;
-                                     
-                                     if (!isNaN(lat) && !isNaN(lng)) {
-                                         map.setCenter({ lat: lat, lng: lng });
-                                         map.setZoom(15);
-                                         
-                                         // Find and click the corresponding marker
-                                         const marker = markers.find(m => {
-                                             const pos = m.getPosition();
-                                             return Math.abs(pos.lat() - lat) < 0.0001 && Math.abs(pos.lng() - lng) < 0.0001;
-                                         });
-                                         
-                                         if (marker) {
-                                             google.maps.event.trigger(marker, 'click');
-                                         }
-                                         
-                                         searchResults.classList.add('hidden');
-                                         mapSearch.value = title;
-                                     }
-                                 });
-                             });
+                                                         // Add click handlers to search results with null handling
+                            searchResults.querySelectorAll('.search-result').forEach(result => {
+                                result.addEventListener('click', function() {
+                                    try {
+                                        const latStr = this.dataset.lat || '';
+                                        const lngStr = this.dataset.lng || '';
+                                        const title = this.dataset.title || '';
+                                        
+                                        if (!latStr || !lngStr) {
+                                            console.warn('Invalid coordinates in search result:', latStr, lngStr);
+                                            return;
+                                        }
+                                        
+                                        const lat = parseFloat(latStr);
+                                        const lng = parseFloat(lngStr);
+                                        
+                                        if (!isNaN(lat) && !isNaN(lng) && map) {
+                                            map.setCenter({ lat: lat, lng: lng });
+                                            map.setZoom(15);
+                                            
+                                            // Find and click the corresponding marker
+                                            if (markers && Array.isArray(markers)) {
+                                                const marker = markers.find(m => {
+                                                    try {
+                                                        if (!m || typeof m.getPosition !== 'function') {
+                                                            return false;
+                                                        }
+                                                        const pos = m.getPosition();
+                                                        if (!pos) return false;
+                                                        return Math.abs(pos.lat() - lat) < 0.0001 && Math.abs(pos.lng() - lng) < 0.0001;
+                                                    } catch (error) {
+                                                        console.warn('Error checking marker position:', error);
+                                                        return false;
+                                                    }
+                                                });
+                                                
+                                                if (marker) {
+                                                    google.maps.event.trigger(marker, 'click');
+                                                }
+                                            }
+                                            
+                                            searchResults.classList.add('hidden');
+                                            if (mapSearch) {
+                                                mapSearch.value = title;
+                                            }
+                                        }
+                                    } catch (error) {
+                                        console.warn('Error handling search result click:', error);
+                                    }
+                                });
+                            });
                          } else {
                              searchResults.innerHTML = '<div class="p-2 text-sm text-gray-500">No properties found</div>';
                              searchResults.classList.remove('hidden');
@@ -1475,36 +1691,51 @@
                      });
                  }
                  
-                 // Clustering toggle functionality
-                 const toggleClusteringBtn = document.getElementById('toggleClustering');
-                 if (toggleClusteringBtn) {
-                     toggleClusteringBtn.addEventListener('click', function() {
-                         clusteringEnabled = !clusteringEnabled;
-                         
-                         if (clusteringEnabled) {
-                             // Enable clustering
-                             if (markerClusterer) {
-                                 markerClusterer.setMap(map);
-                             } else if (typeof MarkerClusterer !== 'undefined') {
-                                 markerClusterer = new MarkerClusterer(map, markers, {
-                                     imagePath: 'https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m',
-                                     gridSize: 50,
-                                     maxZoom: 15
-                                 });
-                             }
-                             this.innerHTML = '<i class="fas fa-layer-group mr-1 sm:mr-2"></i><span class="hidden sm:inline">Disable Clustering</span><span class="sm:hidden">Uncluster</span>';
-                         } else {
-                             // Disable clustering
-                             if (markerClusterer) {
-                                 markerClusterer.setMap(null);
-                             }
-                             markers.forEach(marker => marker.setMap(map));
-                             this.innerHTML = '<i class="fas fa-layer-group mr-1 sm:mr-2"></i><span class="hidden sm:inline">Enable Clustering</span><span class="sm:hidden">Cluster</span>';
-                         }
-                     });
-                 }
+                                 // Clustering toggle functionality with null handling
+                const toggleClusteringBtn = document.getElementById('toggleClustering');
+                if (toggleClusteringBtn) {
+                    toggleClusteringBtn.addEventListener('click', function() {
+                        try {
+                            clusteringEnabled = !clusteringEnabled;
+                            
+                            if (clusteringEnabled) {
+                                // Enable clustering
+                                if (markerClusterer && map) {
+                                    markerClusterer.setMap(map);
+                                } else if (typeof MarkerClusterer !== 'undefined' && map && markers && markers.length > 0) {
+                                    markerClusterer = new MarkerClusterer(map, markers, {
+                                        imagePath: 'https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m',
+                                        gridSize: 50,
+                                        maxZoom: 15
+                                    });
+                                }
+                                this.innerHTML = '<i class="fas fa-layer-group mr-1 sm:mr-2"></i><span class="hidden sm:inline">Disable Clustering</span><span class="sm:hidden">Uncluster</span>';
+                            } else {
+                                // Disable clustering
+                                if (markerClusterer) {
+                                    markerClusterer.setMap(null);
+                                }
+                                if (markers && Array.isArray(markers) && map) {
+                                    markers.forEach(marker => {
+                                        try {
+                                            if (marker && typeof marker.setMap === 'function') {
+                                                marker.setMap(map);
+                                            }
+                                        } catch (error) {
+                                            console.warn('Error adding marker to map:', error);
+                                        }
+                                    });
+                                }
+                                this.innerHTML = '<i class="fas fa-layer-group mr-1 sm:mr-2"></i><span class="hidden sm:inline">Enable Clustering</span><span class="sm:hidden">Cluster</span>';
+                            }
+                        } catch (error) {
+                            console.error('Error toggling clustering:', error);
+                        }
+                    });
+                }
              }, 500);
          });
+        })(); // End of IIFE
     </script>
 </body>
 </html>
