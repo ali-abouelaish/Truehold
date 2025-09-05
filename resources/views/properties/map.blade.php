@@ -686,48 +686,7 @@
     <script src="https://unpkg.com/@googlemaps/markerclusterer/dist/index.min.js?v=1.0.0&t={{ time() }}&r={{ rand(1000, 9999) }}"></script>
     
     <script id="map-script-{{ uniqid() }}">
-        // Prevent duplicate execution
-        if (window.mapScriptLoaded) {
-            console.log('⚠️ Map script already loaded, skipping duplicate execution');
-            // Exit early without return statement
-        } else {
-            window.mapScriptLoaded = true;
-        
-        console.log('🧪 Basic script test - if you see this, JavaScript is working');
-        console.log('🚀 Map script loaded!');
-        console.log('🕒 Script loaded at:', new Date().toISOString());
-        console.log('🔄 Cache busting timestamp:', Date.now());
-        console.log('🆔 Unique script ID:', '{{ uniqid() }}');
-        console.log('🔧 Script version:', '3.0.0');
-        console.log('🎲 Random number:', {{ rand(10000, 99999) }});
-        
-        // Simple test - properties will be loaded later
-        console.log('🧪 Basic script loaded successfully');
-        console.log('📊 Properties will be loaded when DOM is ready');
-        
-        // Global variables for map functionality (with duplicate check)
-        if (typeof window.mapInitialized === 'undefined') {
-            window.mapInitialized = true;
-            
-            let map = null;
-            let markers = [];
-            let markerClusterer = null;
-            let infoWindow = null;
-            let allProperties = [];
-            let clusteringEnabled = true;
-        } else {
-            console.log('⚠️ Map variables already initialized, using existing ones');
-            var map = window.map || null;
-            var markers = window.markers || [];
-            var markerClusterer = window.markerClusterer || null;
-            var infoWindow = window.infoWindow || null;
-            var allProperties = window.allProperties || [];
-            var clusteringEnabled = window.clusteringEnabled || true;
-        }
-        
-        console.log('📋 Variables initialized:', { map, markers: markers.length, infoWindow });
-        
-        // Make initMap globally accessible immediately
+        // Always define initMap function first, regardless of duplicate execution
         window.initMap = function() {
             console.log('🎯 Google Maps API loaded, initializing map...');
             
@@ -1182,6 +1141,47 @@
                 showSimpleFallback('Map failed to load: ' + error.message);
             }
         };
+        
+        // Prevent duplicate execution
+        if (window.mapScriptLoaded) {
+            console.log('⚠️ Map script already loaded, skipping duplicate execution');
+            // Exit early without return statement
+        } else {
+            window.mapScriptLoaded = true;
+        
+        console.log('🧪 Basic script test - if you see this, JavaScript is working');
+        console.log('🚀 Map script loaded!');
+        console.log('🕒 Script loaded at:', new Date().toISOString());
+        console.log('🔄 Cache busting timestamp:', Date.now());
+        console.log('🆔 Unique script ID:', '{{ uniqid() }}');
+        console.log('🔧 Script version:', '3.0.0');
+        console.log('🎲 Random number:', {{ rand(10000, 99999) }});
+        
+        // Simple test - properties will be loaded later
+        console.log('🧪 Basic script loaded successfully');
+        console.log('📊 Properties will be loaded when DOM is ready');
+        
+        // Global variables for map functionality (with duplicate check)
+        if (typeof window.mapInitialized === 'undefined') {
+            window.mapInitialized = true;
+            
+            let map = null;
+            let markers = [];
+            let markerClusterer = null;
+            let infoWindow = null;
+            let allProperties = [];
+            let clusteringEnabled = true;
+        } else {
+            console.log('⚠️ Map variables already initialized, using existing ones');
+            var map = window.map || null;
+            var markers = window.markers || [];
+            var markerClusterer = window.markerClusterer || null;
+            var infoWindow = window.infoWindow || null;
+            var allProperties = window.allProperties || [];
+            var clusteringEnabled = window.clusteringEnabled || true;
+        }
+        
+        console.log('📋 Variables initialized:', { map, markers: markers.length, infoWindow });
         
         function getCompanyColor(company) {
             if (!company || company === 'N/A' || company === '') {
