@@ -689,9 +689,9 @@
         // Prevent duplicate execution
         if (window.mapScriptLoaded) {
             console.log('⚠️ Map script already loaded, skipping duplicate execution');
-            return;
-        }
-        window.mapScriptLoaded = true;
+            // Exit early without return statement
+        } else {
+            window.mapScriptLoaded = true;
         
         console.log('🧪 Basic script test - if you see this, JavaScript is working');
         console.log('🚀 Map script loaded!');
@@ -1754,6 +1754,7 @@
                 }
              }, 500);
          });
+        } // End of else block for duplicate execution prevention
     </script>
 </body>
 </html>
