@@ -618,6 +618,14 @@
                                         </div>
                                     @endif
                                 @endforeach
+                                <!-- Add "Other" entry for null management companies -->
+                                <div class="flex items-center">
+                                    @php
+                                        $otherColor = \App\Models\Property::getCompanyColor(null);
+                                    @endphp
+                                    <div class="w-2 sm:w-3 h-2 sm:h-3 rounded-full mr-1 sm:mr-2 flex-shrink-0" style="background-color: {{ $otherColor['fill'] }}; border: 1px solid {{ $otherColor['stroke'] }};"></div>
+                                    <span class="truncate text-xs">Other</span>
+                                </div>
                             </div>
                         </div>
                         @else
