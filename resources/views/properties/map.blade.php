@@ -10,6 +10,8 @@
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
     <meta name="cache-buster" content="{{ time() }}">
+    <meta name="version" content="3.0.0">
+    <meta name="build-time" content="{{ now() }}">
     <title>Property Map - Property Scraper</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -684,25 +686,44 @@
     <script src="https://unpkg.com/@googlemaps/markerclusterer/dist/index.min.js?v=1.0.0&t={{ time() }}&r={{ rand(1000, 9999) }}"></script>
     
     <script id="map-script-{{ uniqid() }}">
+        // Prevent duplicate execution
+        if (window.mapScriptLoaded) {
+            console.log('⚠️ Map script already loaded, skipping duplicate execution');
+            return;
+        }
+        window.mapScriptLoaded = true;
+        
         console.log('🧪 Basic script test - if you see this, JavaScript is working');
         console.log('🚀 Map script loaded!');
         console.log('🕒 Script loaded at:', new Date().toISOString());
         console.log('🔄 Cache busting timestamp:', Date.now());
         console.log('🆔 Unique script ID:', '{{ uniqid() }}');
-        console.log('🔧 Script version:', '2.0.0');
+        console.log('🔧 Script version:', '3.0.0');
         console.log('🎲 Random number:', {{ rand(10000, 99999) }});
         
         // Simple test - properties will be loaded later
         console.log('🧪 Basic script loaded successfully');
         console.log('📊 Properties will be loaded when DOM is ready');
         
-        // Global variables for map functionality
-        let map = null;
-        let markers = [];
-        let markerClusterer = null;
-        let infoWindow = null;
-        let allProperties = [];
-        let clusteringEnabled = true;
+        // Global variables for map functionality (with duplicate check)
+        if (typeof window.mapInitialized === 'undefined') {
+            window.mapInitialized = true;
+            
+            let map = null;
+            let markers = [];
+            let markerClusterer = null;
+            let infoWindow = null;
+            let allProperties = [];
+            let clusteringEnabled = true;
+        } else {
+            console.log('⚠️ Map variables already initialized, using existing ones');
+            var map = window.map || null;
+            var markers = window.markers || [];
+            var markerClusterer = window.markerClusterer || null;
+            var infoWindow = window.infoWindow || null;
+            var allProperties = window.allProperties || [];
+            var clusteringEnabled = window.clusteringEnabled || true;
+        }
         
         console.log('📋 Variables initialized:', { map, markers: markers.length, infoWindow });
         
