@@ -749,28 +749,51 @@
                                 return false;
                             }
                             
-                            // Ensure all string fields are properly handled
+                            // Comprehensive null handling for all property fields
                             const cleanProperty = {
-                                id: property.id || null,
-                                title: property.title || 'Untitled Property',
-                                location: property.location || 'Location not specified',
-                                latitude: property.latitude || null,
-                                longitude: property.longitude || null,
-                                price: property.price || null,
-                                formatted_price: property.formatted_price || 'Price not specified',
-                                property_type: property.property_type || null,
-                                management_company: property.management_company || null,
-                                available_date: property.available_date || null,
-                                amenities: property.amenities || null,
-                                furnishings: property.furnishings || null,
-                                bills_included: property.bills_included || null,
-                                balcony_roof_terrace: property.balcony_roof_terrace || null,
-                                garden_patio: property.garden_patio || null,
-                                parking: property.parking || null,
-                                description: property.description || null,
-                                high_quality_photos_array: property.high_quality_photos_array || null,
-                                all_photos_array: property.all_photos_array || null,
-                                first_photo_url: property.first_photo_url || null
+                                id: cleanValue(property.id, null),
+                                title: cleanValue(property.title, 'Untitled Property'),
+                                location: cleanValue(property.location, 'Location not specified'),
+                                latitude: cleanCoordinate(property.latitude),
+                                longitude: cleanCoordinate(property.longitude),
+                                price: cleanValue(property.price, null),
+                                formatted_price: cleanValue(property.formatted_price, 'Price not specified'),
+                                property_type: cleanValue(property.property_type, null),
+                                management_company: cleanValue(property.management_company, null),
+                                available_date: cleanValue(property.available_date, null),
+                                amenities: cleanValue(property.amenities, null),
+                                furnishings: cleanValue(property.furnishings, null),
+                                bills_included: cleanValue(property.bills_included, null),
+                                balcony_roof_terrace: cleanValue(property.balcony_roof_terrace, null),
+                                garden_patio: cleanValue(property.garden_patio, null),
+                                parking: cleanValue(property.parking, null),
+                                description: cleanValue(property.description, null),
+                                high_quality_photos_array: cleanArray(property.high_quality_photos_array),
+                                all_photos_array: cleanArray(property.all_photos_array),
+                                first_photo_url: cleanValue(property.first_photo_url, null),
+                                status: cleanValue(property.status, 'available'),
+                                min_term: cleanValue(property.min_term, null),
+                                max_term: cleanValue(property.max_term, null),
+                                deposit: cleanValue(property.deposit, null),
+                                total_rooms: cleanValue(property.total_rooms, null),
+                                housemates: cleanValue(property.housemates, null),
+                                couples_ok: cleanValue(property.couples_ok, null),
+                                couples_allowed: cleanValue(property.couples_allowed, null),
+                                smoking_ok: cleanValue(property.smoking_ok, null),
+                                pets_ok: cleanValue(property.pets_ok, null),
+                                smoker: cleanValue(property.smoker, null),
+                                pets: cleanValue(property.pets, null),
+                                occupation: cleanValue(property.occupation, null),
+                                gender: cleanValue(property.gender, null),
+                                pref_occupation: cleanValue(property.pref_occupation, null),
+                                references: cleanValue(property.references, null),
+                                min_age: cleanValue(property.min_age, null),
+                                max_age: cleanValue(property.max_age, null),
+                                photo_count: cleanValue(property.photo_count, 0),
+                                contact_info: cleanValue(property.contact_info, null),
+                                disabled_access: cleanValue(property.disabled_access, null),
+                                living_room: cleanValue(property.living_room, null),
+                                agent_id: cleanValue(property.agent_id, null)
                             };
                             
                             // Replace the original property with cleaned version
@@ -862,7 +885,12 @@
                 // Create bounds object and markers array
                 const bounds = new google.maps.LatLngBounds();
                 // Clear global markers array and use it
-                markers.length = 0;
+                if (!Array.isArray(markers)) {
+                    markers = [];
+                } else {
+                    markers.length = 0;
+                }
+                window.markers = markers; // Update global reference
                 
                 // Create info window
                 const infoWindow = new google.maps.InfoWindow();
@@ -875,22 +903,28 @@
                 propertiesWithCoords.forEach((property, index) => {
                     try {
                         console.log(`📍 Creating marker ${index + 1}/${propertiesWithCoords.length}:`);
-                        console.log(`   ID: ${property.id || 'N/A'}`);
-                        console.log(`   Title: ${property.title || 'Untitled'}`);
-                        console.log(`   Location: ${property.location || 'Unknown'}`);
+                        console.log(`   ID: ${cleanValue(property.id, 'N/A')}`);
+                        console.log(`   Title: ${cleanValue(property.title, 'Untitled')}`);
+                        console.log(`   Location: ${cleanValue(property.location, 'Unknown')}`);
                         
-                        // Safely parse coordinates with null checks
-                        const lat = property.latitude ? parseFloat(property.latitude) : null;
-                        const lng = property.longitude ? parseFloat(property.longitude) : null;
+                        // Safely parse coordinates with comprehensive null checks
+                        const lat = cleanCoordinate(property.latitude);
+                        const lng = cleanCoordinate(property.longitude);
                         
-                        if (!lat || !lng || isNaN(lat) || isNaN(lng)) {
-                            console.warn(`Skipping property ${property.id} - invalid coordinates:`, lat, lng);
+                        if (lat === null || lng === null) {
+                            console.warn(`Skipping property ${cleanValue(property.id, 'unknown')} - invalid coordinates:`, lat, lng);
+                            return;
+                        }
+                        
+                        // Additional validation for coordinate bounds
+                        if (lat < -90 || lat > 90 || lng < -180 || lng > 180) {
+                            console.warn(`Skipping property ${cleanValue(property.id, 'unknown')} - coordinates out of bounds:`, lat, lng);
                             return;
                         }
                         
                         const position = { lat, lng };
                         console.log(`   Coordinates: ${position.lat}, ${position.lng}`);
-                        console.log(`   Price: ${property.price || 'N/A'}`);
+                        console.log(`   Price: ${cleanValue(property.price, 'N/A')}`);
                         
                         // Get company color with null handling
                         const companyColor = getCompanyColor(property.management_company);
@@ -898,7 +932,7 @@
                         // Create marker with safe defaults
                         const marker = new google.maps.Marker({
                             position: position,
-                            title: property.title || 'Property',
+                            title: cleanValue(property.title, 'Property'),
                             icon: {
                                 path: google.maps.SymbolPath.CIRCLE,
                                 scale: 8,
@@ -919,18 +953,21 @@
                             let priceText = 'Price N/A';
                             
                             try {
-                                // Check if property exists and has price data
-                                if (property && property.price && property.price !== 'N/A' && property.price !== '' && property.price !== null && property.price !== undefined) {
+                                // Use cleaned values for price formatting
+                                const cleanPrice = cleanValue(property.price, null);
+                                const cleanFormattedPrice = cleanValue(property.formatted_price, null);
+                                
+                                if (cleanPrice !== null) {
                                     // If price is a number, format it as currency
-                                    const priceNum = parseFloat(property.price);
+                                    const priceNum = parseFloat(cleanPrice);
                                     if (!isNaN(priceNum) && priceNum > 0) {
                                         priceText = `£${priceNum.toLocaleString()}`;
-                                    } else if (typeof property.price === 'string' && property.price.trim() !== '') {
+                                    } else if (typeof cleanPrice === 'string' && cleanPrice.trim() !== '') {
                                         // If it's already a formatted string, use it
-                                        priceText = property.price.trim();
+                                        priceText = cleanPrice.trim();
                                     }
-                                } else if (property && property.formatted_price && property.formatted_price !== 'N/A' && property.formatted_price !== '' && property.formatted_price !== null && property.formatted_price !== undefined) {
-                                    priceText = property.formatted_price;
+                                } else if (cleanFormattedPrice !== null) {
+                                    priceText = cleanFormattedPrice;
                                 }
                             } catch (error) {
                                 console.warn('Error formatting price for property:', property.id, error);
@@ -998,6 +1035,11 @@
                             }
                             if (markers && Array.isArray(markers)) {
                                 markers.push(marker);
+                                window.markers = markers; // Update global reference
+                            } else {
+                                console.warn('Markers array is not available, creating new array');
+                                markers = [marker];
+                                window.markers = markers; // Update global reference
                             }
                         } catch (error) {
                             console.warn('Error adding marker to bounds or markers array:', error);
@@ -1007,6 +1049,8 @@
                         console.log(`   ✅ Marker ${markerCount} created and added to map`);
                     } catch (error) {
                         console.error(`❌ Error creating marker for property ${index}:`, error, property);
+                        console.error(`❌ Property ID: ${cleanValue(property?.id, 'unknown')}`);
+                        console.error(`❌ Property Title: ${cleanValue(property?.title, 'unknown')}`);
                     }
                 });
                 
@@ -1074,10 +1118,10 @@
                 console.log('📊 Final Marker Summary:');
                 console.log(`   Total properties with coordinates: ${propertiesWithCoords.length}`);
                 console.log(`   Markers created: ${markerCount}`);
-                console.log(`   Global markers array length: ${markers.length}`);
+                console.log(`   Global markers array length: ${markers ? markers.length : 0}`);
                 console.log(`   Bounds extended: ${bounds.isEmpty() ? 'No' : 'Yes'}`);
                 
-                if (markers.length > 0) {
+                if (markers && markers.length > 0) {
                     console.log('   ✅ Global markers array is populated correctly');
                 } else {
                     console.log('   ❌ Global markers array is empty - this is the problem!');
@@ -1206,28 +1250,51 @@
                                     return false;
                                 }
                                 
-                                // Ensure all string fields are properly handled
+                                // Comprehensive null handling for all property fields
                                 const cleanProperty = {
-                                    id: property.id || null,
-                                    title: property.title || 'Untitled Property',
-                                    location: property.location || 'Location not specified',
-                                    latitude: property.latitude || null,
-                                    longitude: property.longitude || null,
-                                    price: property.price || null,
-                                    formatted_price: property.formatted_price || 'Price not specified',
-                                    property_type: property.property_type || null,
-                                    management_company: property.management_company || null,
-                                    available_date: property.available_date || null,
-                                    amenities: property.amenities || null,
-                                    furnishings: property.furnishings || null,
-                                    bills_included: property.bills_included || null,
-                                    balcony_roof_terrace: property.balcony_roof_terrace || null,
-                                    garden_patio: property.garden_patio || null,
-                                    parking: property.parking || null,
-                                    description: property.description || null,
-                                    high_quality_photos_array: property.high_quality_photos_array || null,
-                                    all_photos_array: property.all_photos_array || null,
-                                    first_photo_url: property.first_photo_url || null
+                                    id: cleanValue(property.id, null),
+                                    title: cleanValue(property.title, 'Untitled Property'),
+                                    location: cleanValue(property.location, 'Location not specified'),
+                                    latitude: cleanCoordinate(property.latitude),
+                                    longitude: cleanCoordinate(property.longitude),
+                                    price: cleanValue(property.price, null),
+                                    formatted_price: cleanValue(property.formatted_price, 'Price not specified'),
+                                    property_type: cleanValue(property.property_type, null),
+                                    management_company: cleanValue(property.management_company, null),
+                                    available_date: cleanValue(property.available_date, null),
+                                    amenities: cleanValue(property.amenities, null),
+                                    furnishings: cleanValue(property.furnishings, null),
+                                    bills_included: cleanValue(property.bills_included, null),
+                                    balcony_roof_terrace: cleanValue(property.balcony_roof_terrace, null),
+                                    garden_patio: cleanValue(property.garden_patio, null),
+                                    parking: cleanValue(property.parking, null),
+                                    description: cleanValue(property.description, null),
+                                    high_quality_photos_array: cleanArray(property.high_quality_photos_array),
+                                    all_photos_array: cleanArray(property.all_photos_array),
+                                    first_photo_url: cleanValue(property.first_photo_url, null),
+                                    status: cleanValue(property.status, 'available'),
+                                    min_term: cleanValue(property.min_term, null),
+                                    max_term: cleanValue(property.max_term, null),
+                                    deposit: cleanValue(property.deposit, null),
+                                    total_rooms: cleanValue(property.total_rooms, null),
+                                    housemates: cleanValue(property.housemates, null),
+                                    couples_ok: cleanValue(property.couples_ok, null),
+                                    couples_allowed: cleanValue(property.couples_allowed, null),
+                                    smoking_ok: cleanValue(property.smoking_ok, null),
+                                    pets_ok: cleanValue(property.pets_ok, null),
+                                    smoker: cleanValue(property.smoker, null),
+                                    pets: cleanValue(property.pets, null),
+                                    occupation: cleanValue(property.occupation, null),
+                                    gender: cleanValue(property.gender, null),
+                                    pref_occupation: cleanValue(property.pref_occupation, null),
+                                    references: cleanValue(property.references, null),
+                                    min_age: cleanValue(property.min_age, null),
+                                    max_age: cleanValue(property.max_age, null),
+                                    photo_count: cleanValue(property.photo_count, 0),
+                                    contact_info: cleanValue(property.contact_info, null),
+                                    disabled_access: cleanValue(property.disabled_access, null),
+                                    living_room: cleanValue(property.living_room, null),
+                                    agent_id: cleanValue(property.agent_id, null)
                                 };
                                 
                                 // Replace the original property with cleaned version
@@ -1319,7 +1386,12 @@
                     // Create bounds object and markers array
                     const bounds = new google.maps.LatLngBounds();
                     // Clear global markers array and use it
-                    markers.length = 0;
+                    if (!Array.isArray(markers)) {
+                        markers = [];
+                    } else {
+                        markers.length = 0;
+                    }
+                    window.markers = markers; // Update global reference
                     
                     // Create info window
                     const infoWindow = new google.maps.InfoWindow();
@@ -1531,10 +1603,10 @@
                     console.log('📊 Final Marker Summary:');
                     console.log(`   Total properties with coordinates: ${propertiesWithCoords.length}`);
                     console.log(`   Markers created: ${markerCount}`);
-                    console.log(`   Global markers array length: ${markers.length}`);
+                    console.log(`   Global markers array length: ${markers ? markers.length : 0}`);
                     console.log(`   Bounds extended: ${bounds.isEmpty() ? 'No' : 'Yes'}`);
                     
-                    if (markers.length > 0) {
+                    if (markers && markers.length > 0) {
                         console.log('   ✅ Global markers array is populated correctly');
                     } else {
                         console.log('   ❌ Global markers array is empty - this is the problem!');
@@ -1629,6 +1701,70 @@
             let infoWindow = null;
             let allProperties = [];
             let clusteringEnabled = true;
+            
+            // Ensure markers is always an array
+            if (!Array.isArray(markers)) {
+                markers = [];
+            }
+            
+            // Store references globally for access from other functions
+            window.map = map;
+            window.markers = markers;
+            window.markerClusterer = markerClusterer;
+            window.infoWindow = infoWindow;
+            window.allProperties = allProperties;
+            window.clusteringEnabled = clusteringEnabled;
+
+            // Helper functions for null handling
+            function cleanValue(value, defaultValue = null) {
+                if (value === null || value === undefined || value === '' || 
+                    value === 'N/A' || value === 'null' || value === 'undefined' || 
+                    value === 'NaN' || (typeof value === 'string' && value.trim() === '')) {
+                    return defaultValue;
+                }
+                
+                // Handle arrays that might be null
+                if (Array.isArray(value) && value.length === 0) {
+                    return defaultValue;
+                }
+                
+                // Handle objects that might be null
+                if (typeof value === 'object' && value !== null && Object.keys(value).length === 0) {
+                    return defaultValue;
+                }
+                
+                return value;
+            }
+
+            function cleanCoordinate(coord) {
+                if (coord === null || coord === undefined || coord === '' || 
+                    coord === 'N/A' || coord === 'null' || coord === 'undefined' || 
+                    coord === 'NaN' || (typeof coord === 'string' && coord.trim() === '')) {
+                    return null;
+                }
+                
+                const num = parseFloat(coord);
+                if (isNaN(num)) {
+                    return null;
+                }
+                
+                return num;
+            }
+
+            function cleanArray(arr) {
+                if (!arr || !Array.isArray(arr) || arr.length === 0) {
+                    return [];
+                }
+                
+                return arr.filter(item => 
+                    item !== null && 
+                    item !== undefined && 
+                    item !== '' && 
+                    item !== 'N/A' && 
+                    item !== 'null' && 
+                    item !== 'undefined'
+                );
+            }
         } else {
             console.log('⚠️ Map variables already initialized, using existing ones');
             var map = window.map || null;
@@ -1637,12 +1773,19 @@
             var infoWindow = window.infoWindow || null;
             var allProperties = window.allProperties || [];
             var clusteringEnabled = window.clusteringEnabled || true;
+            
+            // Ensure markers is always an array
+            if (!Array.isArray(markers)) {
+                markers = [];
+                window.markers = markers;
+            }
         }
         
-        console.log('📋 Variables initialized:', { map, markers: markers.length, infoWindow });
+        console.log('📋 Variables initialized:', { map, markers: markers ? markers.length : 0, infoWindow });
         
         function getCompanyColor(company) {
-            if (!company || company === 'N/A' || company === '') {
+            const cleanCompany = cleanValue(company, null);
+            if (cleanCompany === null) {
                 return { fill: '#6b7280', stroke: '#ffffff' }; // Gray for unknown
             }
             
@@ -1661,19 +1804,19 @@
             };
             
             // Check for exact matches first
-            if (companyColors[company]) {
-                return companyColors[company];
+            if (companyColors[cleanCompany]) {
+                return companyColors[cleanCompany];
             }
             
             // Check for partial matches
             for (const [key, color] of Object.entries(companyColors)) {
-                if (company.toLowerCase().includes(key.toLowerCase()) || key.toLowerCase().includes(company.toLowerCase())) {
+                if (cleanCompany.toLowerCase().includes(key.toLowerCase()) || key.toLowerCase().includes(cleanCompany.toLowerCase())) {
                     return companyColors[key];
                 }
             }
             
             // Generate a consistent color based on company name hash
-            const hash = company.split('').reduce((a, b) => {
+            const hash = cleanCompany.split('').reduce((a, b) => {
                 a = ((a << 5) - a) + b.charCodeAt(0);
                 return a & a;
             }, 0);
@@ -1696,28 +1839,50 @@
 
         function createInfoWindowContent(property) {
             try {
-                // Try to get first photo from high_quality_photos_array, fallback to all_photos_array, then first_photo_url
+                // Clean all property values first
+                const cleanProp = {
+                    id: cleanValue(property.id, null),
+                    title: cleanValue(property.title, 'Property'),
+                    location: cleanValue(property.location, null),
+                    formatted_price: cleanValue(property.formatted_price, 'Price not specified'),
+                    property_type: cleanValue(property.property_type, null),
+                    management_company: cleanValue(property.management_company, null),
+                    available_date: cleanValue(property.available_date, null),
+                    amenities: cleanValue(property.amenities, null),
+                    furnishings: cleanValue(property.furnishings, null),
+                    bills_included: cleanValue(property.bills_included, null),
+                    balcony_roof_terrace: cleanValue(property.balcony_roof_terrace, null),
+                    garden_patio: cleanValue(property.garden_patio, null),
+                    parking: cleanValue(property.parking, null),
+                    description: cleanValue(property.description, null),
+                    high_quality_photos_array: cleanArray(property.high_quality_photos_array),
+                    all_photos_array: cleanArray(property.all_photos_array),
+                    first_photo_url: cleanValue(property.first_photo_url, null)
+                };
+
+                // Try to get first photo from cleaned arrays
                 let firstPhoto = '';
-                if (property.high_quality_photos_array && property.high_quality_photos_array.length > 0) {
-                    firstPhoto = property.high_quality_photos_array[0];
-                } else if (property.all_photos_array && property.all_photos_array.length > 0) {
-                    firstPhoto = property.all_photos_array[0];
-                } else if (property.first_photo_url && property.first_photo_url !== 'N/A') {
-                    firstPhoto = property.first_photo_url;
+                if (cleanProp.high_quality_photos_array && cleanProp.high_quality_photos_array.length > 0) {
+                    firstPhoto = cleanProp.high_quality_photos_array[0];
+                } else if (cleanProp.all_photos_array && cleanProp.all_photos_array.length > 0) {
+                    firstPhoto = cleanProp.all_photos_array[0];
+                } else if (cleanProp.first_photo_url) {
+                    firstPhoto = cleanProp.first_photo_url;
                 }
                 
                 const photo = firstPhoto 
-                    ? `<img src="${firstPhoto}" alt="${property.title || 'Property'}" style="width: 100%; height: 150px; object-fit: cover; border-radius: 4px; margin-bottom: 8px; cursor: pointer;" onclick="openImageModal('${firstPhoto}', '${property.title || 'Property'}')">` 
+                    ? `<img src="${firstPhoto}" alt="${cleanProp.title}" style="width: 100%; height: 150px; object-fit: cover; border-radius: 4px; margin-bottom: 8px; cursor: pointer;" onclick="openImageModal('${firstPhoto}', '${cleanProp.title}')">` 
                     : '';
                 
-                const companyColor = getCompanyColor(property.management_company);
+                const companyColor = getCompanyColor(cleanProp.management_company);
                 
-                // Helper function to show field only if it has a meaningful value
+                // Enhanced helper function to show field only if it has a meaningful value
                 const showField = (value, label, icon = '') => {
-                    if (value && value !== 'N/A' && value !== '' && value !== 'null' && value !== 'undefined') {
+                    const cleanVal = cleanValue(value, null);
+                    if (cleanVal !== null) {
                         return `<div style="color: #666; margin-bottom: 4px; font-size: 12px;">
                             ${icon ? `<i class="fas fa-${icon}" style="color: #6b7280; margin-right: 4px;"></i>` : ''}
-                            <strong>${label}:</strong> ${value}
+                            <strong>${label}:</strong> ${cleanVal}
                         </div>`;
                     }
                     return '';
@@ -1726,34 +1891,34 @@
                 return `
                 <div style="padding: 8px; max-width: 300px;">
                     ${photo}
-                    <h3 style="font-weight: bold; font-size: 16px; margin-bottom: 8px;">${property.title || 'Property'}</h3>
+                    <h3 style="font-weight: bold; font-size: 16px; margin-bottom: 8px;">${cleanProp.title}</h3>
                     
-                    ${showField(property.location, 'Location', 'map-marker-alt')}
+                    ${showField(cleanProp.location, 'Location', 'map-marker-alt')}
                     
                     <div style="font-size: 18px; font-weight: bold; color: #2563eb; margin-bottom: 8px;">
-                        ${property.formatted_price || 'Price not specified'}
+                        ${cleanProp.formatted_price}
                     </div>
                     
-                    ${property.property_type ? `<span style="background: #dbeafe; color: #1e40af; padding: 2px 8px; border-radius: 12px; font-size: 12px; font-weight: 500;">${property.property_type}</span>` : ''}
+                    ${cleanProp.property_type ? `<span style="background: #dbeafe; color: #1e40af; padding: 2px 8px; border-radius: 12px; font-size: 12px; font-weight: 500;">${cleanProp.property_type}</span>` : ''}
                     
-                    ${property.management_company && property.management_company !== 'N/A' ? `
+                    ${cleanProp.management_company ? `
                         <div style="margin-top: 8px; margin-bottom: 8px;">
                             <span style="background: ${companyColor.fill}; color: white; padding: 4px 8px; border-radius: 12px; font-size: 12px; font-weight: 500;">
-                                <i class="fas fa-building" style="margin-right: 4px;"></i>${property.management_company}
+                                <i class="fas fa-building" style="margin-right: 4px;"></i>${cleanProp.management_company}
                             </span>
                         </div>
                     ` : ''}
                     
-                    ${showField(property.available_date, 'Available', 'calendar')}
-                    ${showField(property.amenities, 'Amenities', 'star')}
-                    ${showField(property.furnishings, 'Furnishings', 'couch')}
-                    ${showField(property.bills_included, 'Bills Included', 'bolt')}
-                    ${showField(property.balcony_roof_terrace, 'Outdoor Space', 'tree')}
-                    ${showField(property.garden_patio, 'Garden/Patio', 'leaf')}
-                    ${showField(property.parking, 'Parking', 'car')}
+                    ${showField(cleanProp.available_date, 'Available', 'calendar')}
+                    ${showField(cleanProp.amenities, 'Amenities', 'star')}
+                    ${showField(cleanProp.furnishings, 'Furnishings', 'couch')}
+                    ${showField(cleanProp.bills_included, 'Bills Included', 'bolt')}
+                    ${showField(cleanProp.balcony_roof_terrace, 'Outdoor Space', 'tree')}
+                    ${showField(cleanProp.garden_patio, 'Garden/Patio', 'leaf')}
+                    ${showField(cleanProp.parking, 'Parking', 'car')}
                     
                     <div style="margin-top: 12px;">
-                        <a href="/properties/${property.id}" style="background: #1f2937; color: white; padding: 6px 12px; border-radius: 6px; text-decoration: none; font-size: 14px; display: inline-block;">
+                        <a href="/properties/${cleanProp.id || '#'}" style="background: #1f2937; color: white; padding: 6px 12px; border-radius: 6px; text-decoration: none; font-size: 14px; display: inline-block;">
                             <i class="fas fa-info-circle" style="margin-right: 4px;"></i>View Details
                         </a>
                     </div>
@@ -1761,12 +1926,13 @@
             `;
             } catch (error) {
                 console.error('Error creating info window content:', error, property);
+                const safeId = cleanValue(property?.id, '#');
                 return `
                     <div style="padding: 8px; max-width: 300px;">
                         <h3 style="font-weight: bold; font-size: 16px; margin-bottom: 8px;">Property Information</h3>
                         <p style="color: #666;">Unable to display property details due to an error.</p>
                         <div style="margin-top: 12px;">
-                            <a href="/properties/${property.id || '#'}" style="background: #1f2937; color: white; padding: 6px 12px; border-radius: 6px; text-decoration: none; font-size: 14px; display: inline-block;">
+                            <a href="/properties/${safeId}" style="background: #1f2937; color: white; padding: 6px 12px; border-radius: 6px; text-decoration: none; font-size: 14px; display: inline-block;">
                                 <i class="fas fa-info-circle" style="margin-right: 4px;"></i>View Details
                             </a>
                         </div>
@@ -1978,7 +2144,7 @@
                          console.log('🔘 Fit All button clicked!');
                          console.log(`   Map exists: ${map ? 'Yes' : 'No'}`);
                          console.log(`   Markers array exists: ${markers ? 'Yes' : 'No'}`);
-                         console.log(`   Markers array length: ${markers ? markers.length : 'N/A'}`);
+                         console.log(`   Markers array length: ${markers ? markers.length : 0}`);
                          
                          if (map && markers && markers.length > 0) {
                              console.log('✅ All conditions met, fitting bounds...');
