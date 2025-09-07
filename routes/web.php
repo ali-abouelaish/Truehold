@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\PropertyController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\RentalCodeController;
+use App\Http\Controllers\InvoiceController;
 
 Route::get('/', function () {
     return redirect('/properties');
@@ -90,6 +91,21 @@ Route::middleware('auth')->prefix('admin')->group(function () {
     // Rental Code Management Routes
     Route::resource('rental-codes', RentalCodeController::class);
     Route::get('/rental-codes/generate-code', [RentalCodeController::class, 'generateCode'])->name('rental-codes.generate-code');
+    
+    // Invoice Management Routes
+    Route::resource('invoices', InvoiceController::class)->names([
+        'index' => 'admin.invoices.index',
+        'create' => 'admin.invoices.create',
+        'store' => 'admin.invoices.store',
+        'show' => 'admin.invoices.show',
+        'edit' => 'admin.invoices.edit',
+        'update' => 'admin.invoices.update',
+        'destroy' => 'admin.invoices.destroy'
+    ]);
+    Route::get('/invoices/{invoice}/pdf', [InvoiceController::class, 'pdf'])->name('admin.invoices.pdf');
+    Route::post('/invoices/{invoice}/mark-sent', [InvoiceController::class, 'markAsSent'])->name('admin.invoices.mark-sent');
+    Route::post('/invoices/{invoice}/mark-paid', [InvoiceController::class, 'markAsPaid'])->name('admin.invoices.mark-paid');
+    Route::post('/invoices/{invoice}/duplicate', [InvoiceController::class, 'duplicate'])->name('admin.invoices.duplicate');
 });
 
 // Logout route

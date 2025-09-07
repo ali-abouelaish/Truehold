@@ -18,15 +18,6 @@ class RentalCode extends Model
         'property',
         'licensor',
         'client_id',
-        'client_full_name',
-        'client_date_of_birth',
-        'client_phone_number',
-        'client_email',
-        'client_nationality',
-        'client_current_address',
-        'client_company_university_name',
-        'client_company_university_address',
-        'client_position_role',
         'rent_by_agent',
         'client_by_agent',
         'notes',
@@ -35,7 +26,6 @@ class RentalCode extends Model
 
     protected $casts = [
         'rental_date' => 'date',
-        'client_date_of_birth' => 'date',
         'consultation_fee' => 'decimal:2',
     ];
 
@@ -68,6 +58,14 @@ class RentalCode extends Model
     }
 
     /**
+     * Get the client that owns the rental code
+     */
+    public function client(): BelongsTo
+    {
+        return $this->belongsTo(Client::class);
+    }
+
+    /**
      * Get formatted rental date
      */
     public function getFormattedRentalDateAttribute(): string
@@ -75,19 +73,4 @@ class RentalCode extends Model
         return $this->rental_date->format('d/m/Y');
     }
 
-    /**
-     * Get formatted client date of birth
-     */
-    public function getFormattedClientDateOfBirthAttribute(): string
-    {
-        return $this->client_date_of_birth->format('M d, Y');
-    }
-
-    /**
-     * Get the client associated with this rental code
-     */
-    public function client(): BelongsTo
-    {
-        return $this->belongsTo(Client::class);
-    }
 }

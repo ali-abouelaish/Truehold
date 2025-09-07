@@ -22,6 +22,8 @@
     <style>
         .sidebar {
             transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
         }
         
         .sidebar.collapsed {
@@ -34,6 +36,31 @@
         
         .sidebar.collapsed .sidebar-icon {
             margin-right: 0;
+        }
+        
+        .sidebar-nav {
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding-bottom: 1rem;
+        }
+        
+        .sidebar-nav::-webkit-scrollbar {
+            width: 4px;
+        }
+        
+        .sidebar-nav::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 2px;
+        }
+        
+        .sidebar-nav::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 2px;
+        }
+        
+        .sidebar-nav::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8;
         }
         
         .main-content {
@@ -87,7 +114,7 @@
             </div>
 
             <!-- Sidebar Navigation -->
-            <nav class="mt-4">
+            <nav class="sidebar-nav mt-4">
                 <div class="px-4 mb-4">
                     <span class="sidebar-text text-xs font-semibold text-gray-500 uppercase tracking-wider">Main</span>
                 </div>
@@ -141,6 +168,22 @@
                 </a>
 
                 <div class="px-4 mt-6 mb-4">
+                    <span class="sidebar-text text-xs font-semibold text-gray-500 uppercase tracking-wider">Invoicing</span>
+                </div>
+                
+                <a href="{{ route('admin.invoices.index') }}" 
+                   class="sidebar-item flex items-center px-4 py-3 text-gray-700 hover:text-blue-600 {{ request()->routeIs('admin.invoices*') ? 'active' : '' }}">
+                    <i class="fas fa-file-invoice sidebar-icon mr-3 text-lg"></i>
+                    <span class="sidebar-text">Manage Invoices</span>
+                </a>
+                
+                <a href="{{ route('admin.invoices.create') }}" 
+                   class="sidebar-item flex items-center px-4 py-3 text-gray-700 hover:text-blue-600 {{ request()->routeIs('admin.invoices.create') ? 'active' : '' }}">
+                    <i class="fas fa-plus sidebar-icon mr-3 text-lg"></i>
+                    <span class="sidebar-text">Create Invoice</span>
+                </a>
+
+                <div class="px-4 mt-6 mb-4">
                     <span class="sidebar-text text-xs font-semibold text-gray-500 uppercase tracking-wider">Users</span>
                 </div>
                 
@@ -168,7 +211,7 @@
             </nav>
 
             <!-- Sidebar Footer -->
-            <div class="absolute bottom-0 w-full p-4 border-t border-gray-200">
+            <div class="w-full p-4 border-t border-gray-200 mt-auto">
                 <div class="flex items-center justify-between">
                     <div class="flex items-center">
                         <div class="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
