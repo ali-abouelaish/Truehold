@@ -600,12 +600,12 @@
                             
                             @auth
                             <div>
-                                <label class="filter-label text-sm sm:text-base">Management Company</label>
-                                <select name="management_company" class="filter-input w-full text-sm sm:text-base">
-                                    <option value="">All Companies</option>
-                                    @foreach($managementCompanies as $company)
-                                        <option value="{{ $company }}" {{ request('management_company') == $company ? 'selected' : '' }}>
-                                            {{ $company }}
+                                <label class="filter-label text-sm sm:text-base">Agent Name</label>
+                                <select name="agent_name" class="filter-input w-full text-sm sm:text-base">
+                                    <option value="">All Agents</option>
+                                    @foreach($agentNames as $agent)
+                                        <option value="{{ $agent }}" {{ request('agent_name') == $agent ? 'selected' : '' }}>
+                                            {{ $agent }}
                                         </option>
                                     @endforeach
                                 </select>
@@ -665,7 +665,7 @@
         <!-- Properties Gallery -->
         <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
             <!-- Enhanced Filter Summary -->
-            @if(request('search') || request('location') || request('property_type') || request('min_price') || request('max_price') || request('available_date') || request('management_company') || request('london_area') || request('couples_allowed'))
+            @if(request('search') || request('location') || request('property_type') || request('min_price') || request('max_price') || request('available_date') || request('agent_name') || request('london_area') || request('couples_allowed'))
                 <div class="mb-6 sm:mb-8 p-4 sm:p-6 bg-blue-50 border border-blue-200 rounded-16 sm:rounded-20 animate-fade-in">
                     <h3 class="text-lg sm:text-xl font-bold text-blue-800 mb-3 sm:mb-4 flex items-center space-x-2">
                         <i class="fas fa-filter text-blue-600"></i>
@@ -687,9 +687,9 @@
                                 <i class="fas fa-home"></i>Type: {{ request('property_type') }}
                             </span>
                         @endif
-                        @if(request('management_company'))
+                        @if(request('agent_name'))
                             <span class="filter-badge text-xs sm:text-sm">
-                                <i class="fas fa-building"></i>Company: {{ request('management_company') }}
+                                <i class="fas fa-user-tie"></i>Agent: {{ request('agent_name') }}
                             </span>
                         @endif
                         @if(request('london_area'))
@@ -910,7 +910,7 @@
             }
 
             // Auto-submit form when select filters change
-            const filterSelects = document.querySelectorAll('select[name="location"], select[name="property_type"], select[name="management_company"], select[name="london_area"], select[name="couples_allowed"]');
+            const filterSelects = document.querySelectorAll('select[name="location"], select[name="property_type"], select[name="agent_name"], select[name="london_area"], select[name="couples_allowed"]');
             filterSelects.forEach(select => {
                 select.addEventListener('change', function() {
                     // Auto-submit for immediate feedback

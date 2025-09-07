@@ -337,6 +337,11 @@ class ImportNewScrapeProperties extends Command
                     }
                     break;
                     
+                case 'agent_name':
+                    // Clean agent name but preserve it as a string
+                    $cleaned[$key] = $this->cleanString($value);
+                    break;
+                    
                 default:
                     // Clean special characters and encoding issues
                     $cleaned[$key] = $this->cleanString($value);

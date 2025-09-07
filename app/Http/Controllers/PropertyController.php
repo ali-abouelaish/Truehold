@@ -20,7 +20,9 @@ class PropertyController extends Controller
             $query->where(function($q) use ($searchTerm) {
                 $q->where('title', 'like', "%{$searchTerm}%")
                   ->orWhere('description', 'like', "%{$searchTerm}%")
-                  ->orWhere('location', 'like', "%{$searchTerm}%");
+                  ->orWhere('location', 'like', "%{$searchTerm}%")
+                  ->orWhere('management_company', 'like', "%{$searchTerm}%")
+                  ->orWhere('agent_name', 'like', "%{$searchTerm}%");
             });
         }
 
@@ -46,9 +48,13 @@ class PropertyController extends Controller
             $query->where('available_date', 'like', "%{$request->available_date}%");
         }
 
-        // New filters: Management Company and London Area
+        // New filters: Management Company, Agent Name and London Area
         if ($request->filled('management_company')) {
             $query->byManagementCompany($request->management_company);
+        }
+
+        if ($request->filled('agent_name')) {
+            $query->where('agent_name', 'like', "%{$request->agent_name}%");
         }
 
         if ($request->filled('london_area')) {
@@ -63,7 +69,7 @@ class PropertyController extends Controller
         $locations = Property::distinct()->pluck('location')->filter()->sort()->values();
         $propertyTypes = Property::distinct()->pluck('property_type')->filter()->sort()->values();
         $availableDates = Property::distinct()->pluck('available_date')->filter()->sort()->values();
-        $managementCompanies = Property::distinct()->pluck('management_company')->filter()->sort()->values();
+        $agentNames = Property::distinct()->pluck('agent_name')->filter()->sort()->values();
 
         $properties = $query->latest()->paginate(20);
 
@@ -82,7 +88,7 @@ class PropertyController extends Controller
             'london_area_filter' => $request->input('london_area')
         ]);
 
-        return view('properties.index', compact('properties', 'locations', 'propertyTypes', 'availableDates', 'managementCompanies'));
+        return view('properties.index', compact('properties', 'locations', 'propertyTypes', 'availableDates', 'agentNames'));
     }
 
     /**
@@ -108,7 +114,9 @@ class PropertyController extends Controller
             $query->where(function($q) use ($searchTerm) {
                 $q->where('title', 'like', "%{$searchTerm}%")
                   ->orWhere('description', 'like', "%{$searchTerm}%")
-                  ->orWhere('location', 'like', "%{$searchTerm}%");
+                  ->orWhere('location', 'like', "%{$searchTerm}%")
+                  ->orWhere('management_company', 'like', "%{$searchTerm}%")
+                  ->orWhere('agent_name', 'like', "%{$searchTerm}%");
             });
         }
 
@@ -134,9 +142,13 @@ class PropertyController extends Controller
             $query->where('available_date', 'like', "%{$request->available_date}%");
         }
 
-        // New filters: Management Company and London Area
+        // New filters: Management Company, Agent Name and London Area
         if ($request->filled('management_company')) {
             $query->byManagementCompany($request->management_company);
+        }
+
+        if ($request->filled('agent_name')) {
+            $query->where('agent_name', 'like', "%{$request->agent_name}%");
         }
 
         if ($request->filled('london_area')) {
@@ -151,10 +163,16 @@ class PropertyController extends Controller
         $locations = Property::distinct()->pluck('location')->filter()->sort()->values();
         $propertyTypes = Property::distinct()->pluck('property_type')->sort()->values();
         $availableDates = Property::distinct()->pluck('available_date')->sort()->values();
-        $managementCompanies = Property::distinct()->pluck('management_company')->filter()->sort()->values();
+        $agentNames = Property::distinct()->pluck('agent_name')->filter()->sort()->values();
 
-        // Limit properties to prevent performance issues
-        $properties = $query->limit(100)->get();
+        // Select specific fields for map performance and include agent_name
+        $properties = $query->select([
+            'id', 'title', 'location', 'latitude', 'longitude', 'price', 'description',
+            'property_type', 'available_date', 'management_company', 'agent_name',
+            'bills_included', 'furnishings', 'parking', 'garden', 'broadband',
+            'housemates', 'total_rooms', 'couples_ok', 'smoking_ok', 'pets_ok',
+            'min_age', 'max_age', 'photo_count', 'first_photo_url', 'all_photos', 'photos'
+        ])->limit(175)->get();
 
         // Log validation results for debugging
         \Log::info('Map query results', [
@@ -182,7 +200,7 @@ class PropertyController extends Controller
             })
         ]);
 
-        return view('properties.map', compact('properties', 'locations', 'propertyTypes', 'availableDates', 'managementCompanies'));
+        return view('properties.map', compact('properties', 'locations', 'propertyTypes', 'availableDates', 'agentNames'));
     }
 
     /**
