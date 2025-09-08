@@ -358,10 +358,6 @@
         }
         
         .legend {
-            position: absolute;
-            bottom: 20px;
-            left: 20px;
-            z-index: 1000;
             background: white;
             padding: 20px;
             border-radius: 12px;
@@ -840,6 +836,12 @@
                 
                 // Create info window
                 infoWindow = new google.maps.InfoWindow();
+
+                // Attach legend to bottom-left of the map
+                const legendEl = document.getElementById('legend');
+                if (legendEl) {
+                    map.controls[google.maps.ControlPosition.LEFT_BOTTOM].push(legendEl);
+                }
 
                 // Load properties
                 loadProperties();
