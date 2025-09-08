@@ -7,6 +7,7 @@ use App\Http\Controllers\PropertyController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\RentalCodeController;
 use App\Http\Controllers\InvoiceController;
+use App\Http\Controllers\GroupViewingController;
 
 Route::get('/', function () {
     return redirect('/properties');
@@ -71,6 +72,15 @@ Route::middleware('auth')->prefix('admin')->group(function () {
     Route::put('/properties/{property}', [AdminController::class, 'update'])->name('admin.properties.update');
     Route::delete('/properties/{property}', [AdminController::class, 'destroy'])->name('admin.properties.destroy');
     Route::post('/upload-image', [AdminController::class, 'uploadImage'])->name('admin.upload-image');
+
+    // Property interested clients
+    Route::post('/properties/{property}/interests', [AdminController::class, 'addInterestedClient'])->name('admin.properties.interests.add');
+    Route::delete('/properties/{property}/interests/{client}', [AdminController::class, 'removeInterestedClient'])->name('admin.properties.interests.remove');
+
+    // Group Viewings
+    Route::get('/group-viewings', [GroupViewingController::class, 'index'])->name('admin.group-viewings.index');
+    Route::get('/group-viewings/create', [GroupViewingController::class, 'create'])->name('admin.group-viewings.create');
+    Route::post('/group-viewings', [GroupViewingController::class, 'store'])->name('admin.group-viewings.store');
     
     // User Management Routes
     Route::get('/users', [AdminController::class, 'users'])->name('admin.users');

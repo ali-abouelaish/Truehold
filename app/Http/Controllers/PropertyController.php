@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Property;
+use App\Models\Client;
 
 class PropertyController extends Controller
 {
@@ -96,8 +97,12 @@ class PropertyController extends Controller
      */
     public function show(string $id)
     {
-        $property = Property::findOrFail($id);
-        return view('properties.show', compact('property'));
+        $property = Property::with(['interests.client'])->findOrFail($id);
+        $clients = collect();
+        if (auth()->check()) {
+            $clients = Client::orderBy('full_name', 'asc')->get();
+        }
+        return view('properties.show', compact('property', 'clients'));
     }
 
     /**

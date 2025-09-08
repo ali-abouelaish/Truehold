@@ -24,6 +24,8 @@
             transition: all 0.3s ease;
             display: flex;
             flex-direction: column;
+            height: 100vh; /* ensure full viewport height so inner nav can scroll */
+            overflow: hidden; /* prevent the whole sidebar from scrolling */
         }
         
         .sidebar.collapsed {
@@ -93,6 +95,23 @@
         .stats-card:hover {
             transform: translateY(-2px);
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Mobile responsiveness */
+        @media (max-width: 767.98px) {
+            .sidebar {
+                width: 16rem; /* keep full width on mobile when opened */
+                transform: translateX(-100%);
+                will-change: transform;
+            }
+
+            .sidebar.open {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-left: 0 !important;
+            }
         }
     </style>
 </head>
@@ -184,6 +203,16 @@
                 </a>
 
                 <div class="px-4 mt-6 mb-4">
+                    <span class="sidebar-text text-xs font-semibold text-gray-500 uppercase tracking-wider">Viewings</span>
+                </div>
+                
+                <a href="{{ route('admin.group-viewings.index') }}" 
+                   class="sidebar-item flex items-center px-4 py-3 text-gray-700 hover:text-blue-600 {{ request()->routeIs('admin.group-viewings*') ? 'active' : '' }}">
+                    <i class="fas fa-users sidebar-icon mr-3 text-lg"></i>
+                    <span class="sidebar-text">Group Viewings</span>
+                </a>
+
+                <div class="px-4 mt-6 mb-4">
                     <span class="sidebar-text text-xs font-semibold text-gray-500 uppercase tracking-wider">Users</span>
                 </div>
                 
@@ -231,6 +260,8 @@
                 </div>
             </div>
         </div>
+        <!-- Mobile Sidebar Overlay -->
+        <div id="sidebarOverlay" class="hidden fixed inset-0 bg-black bg-opacity-40 z-30 md:hidden"></div>
 
         <!-- Main Content -->
         <div class="main-content flex-1 ml-64">
@@ -238,6 +269,9 @@
             <header class="bg-white shadow-sm border-b border-gray-200">
                 <div class="flex items-center justify-between px-6 py-4">
                     <div class="flex items-center">
+                        <button id="mobileSidebarToggle" class="mr-3 text-gray-600 md:hidden">
+                            <i class="fas fa-bars"></i>
+                        </button>
                         <h1 class="text-2xl font-bold text-gray-900">@yield('page-title', 'Dashboard')</h1>
                     </div>
                     
@@ -282,35 +316,83 @@
 
     <script>
         // Sidebar toggle functionality
-        document.getElementById('sidebarToggle').addEventListener('click', function() {
+        (function() {
             const sidebar = document.getElementById('sidebar');
             const mainContent = document.querySelector('.main-content');
-            
-            sidebar.classList.toggle('collapsed');
-            
-            if (sidebar.classList.contains('collapsed')) {
-                mainContent.style.marginLeft = '4rem';
-            } else {
-                mainContent.style.marginLeft = '16rem';
-            }
-        });
+            const sidebarToggle = document.getElementById('sidebarToggle');
+            const mobileSidebarToggle = document.getElementById('mobileSidebarToggle');
+            const sidebarOverlay = document.getElementById('sidebarOverlay');
 
-        // Auto-hide sidebar on mobile
-        function checkScreenSize() {
-            const sidebar = document.getElementById('sidebar');
-            const mainContent = document.querySelector('.main-content');
-            
-            if (window.innerWidth < 768) {
-                sidebar.classList.add('collapsed');
-                mainContent.style.marginLeft = '4rem';
-            } else {
-                sidebar.classList.remove('collapsed');
-                mainContent.style.marginLeft = '16rem';
+            function isMobile() {
+                return window.innerWidth < 768;
             }
-        }
 
-        window.addEventListener('resize', checkScreenSize);
-        checkScreenSize();
+            function openMobileSidebar() {
+                sidebar.classList.add('open');
+                if (sidebarOverlay) sidebarOverlay.classList.remove('hidden');
+                document.body.classList.add('overflow-hidden');
+            }
+
+            function closeMobileSidebar() {
+                sidebar.classList.remove('open');
+                if (sidebarOverlay) sidebarOverlay.classList.add('hidden');
+                document.body.classList.remove('overflow-hidden');
+            }
+
+            // Desktop collapse toggle
+            if (sidebarToggle) {
+                sidebarToggle.addEventListener('click', function() {
+                    if (isMobile()) {
+                        // On mobile, use slide-in/out
+                        if (sidebar.classList.contains('open')) {
+                            closeMobileSidebar();
+                        } else {
+                            openMobileSidebar();
+                        }
+                        return;
+                    }
+                    sidebar.classList.toggle('collapsed');
+                    if (sidebar.classList.contains('collapsed')) {
+                        mainContent.style.marginLeft = '4rem';
+                    } else {
+                        mainContent.style.marginLeft = '16rem';
+                    }
+                });
+            }
+
+            // Mobile hamburger in top bar
+            if (mobileSidebarToggle) {
+                mobileSidebarToggle.addEventListener('click', function() {
+                    if (sidebar.classList.contains('open')) {
+                        closeMobileSidebar();
+                    } else {
+                        openMobileSidebar();
+                    }
+                });
+            }
+
+            // Close when clicking overlay (mobile)
+            if (sidebarOverlay) {
+                sidebarOverlay.addEventListener('click', closeMobileSidebar);
+            }
+
+            // Handle responsive state
+            function applyResponsiveLayout() {
+                if (isMobile()) {
+                    // Reset desktop-specific states
+                    sidebar.classList.remove('collapsed');
+                    mainContent.style.marginLeft = '0';
+                    closeMobileSidebar();
+                } else {
+                    // Ensure overlay is hidden on desktop
+                    closeMobileSidebar();
+                    mainContent.style.marginLeft = sidebar.classList.contains('collapsed') ? '4rem' : '16rem';
+                }
+            }
+
+            window.addEventListener('resize', applyResponsiveLayout);
+            applyResponsiveLayout();
+        })();
     </script>
     
     <!-- Bootstrap JS -->

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Property extends Model
 {
@@ -438,6 +439,14 @@ class Property extends Model
     public function agent(): BelongsTo
     {
         return $this->belongsTo(Agent::class);
+    }
+
+    /**
+     * Interested clients (pivot entries) for this property.
+     */
+    public function interests(): HasMany
+    {
+        return $this->hasMany(PropertyInterest::class);
     }
 
     /**

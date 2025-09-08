@@ -309,6 +309,74 @@
     </form>
 </div>
 
+<!-- Interested Clients Management -->
+<div class="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200">
+        <div class="px-6 py-4 border-b border-gray-200">
+            <h3 class="text-lg font-medium text-gray-900">Add Interested Client</h3>
+            <p class="text-sm text-gray-500">Select a registered client to mark as interested for group viewings.</p>
+        </div>
+        <form method="POST" action="{{ route('admin.properties.interests.add', $property) }}" class="p-6 space-y-4">
+            @csrf
+            <div>
+                <label for="client_id" class="block text-sm font-medium text-gray-700 mb-2">Client</label>
+                <select id="client_id" name="client_id" class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                    <option value="">Select a client</option>
+                    @foreach($clients as $client)
+                        <option value="{{ $client->id }}">{{ $client->full_name }} @if($client->email) ({{ $client->email }}) @endif</option>
+                    @endforeach
+                </select>
+            </div>
+            <div>
+                <label for="notes" class="block text-sm font-medium text-gray-700 mb-2">Notes (optional)</label>
+                <textarea id="notes" name="notes" rows="3" class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500" placeholder="Availability, preferences, etc."></textarea>
+            </div>
+            <div class="flex justify-end">
+                <button type="submit" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium">
+                    <i class="fas fa-user-plus mr-2"></i>Add Interested Client
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200">
+        <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
+            <div>
+                <h3 class="text-lg font-medium text-gray-900">Interested Clients</h3>
+                <p class="text-sm text-gray-500">Clients marked as interested in this property.</p>
+            </div>
+            <span class="text-sm text-gray-600">{{ $property->interests->count() }} total</span>
+        </div>
+        <div class="p-6">
+            @if($property->interests->isEmpty())
+                <p class="text-sm text-gray-500">No clients have been marked as interested yet.</p>
+            @else
+                <ul class="divide-y divide-gray-200">
+                    @foreach($property->interests as $interest)
+                        <li class="py-3 flex items-start justify-between">
+                            <div>
+                                <p class="font-medium text-gray-900">{{ $interest->client->full_name }}</p>
+                                <p class="text-sm text-gray-600">{{ $interest->client->email }} @if($interest->client->phone_number) • {{ $interest->client->phone_number }} @endif</p>
+                                @if($interest->notes)
+                                    <p class="text-sm text-gray-500 mt-1">Notes: {{ $interest->notes }}</p>
+                                @endif
+                                <p class="text-xs text-gray-400 mt-1">Added {{ $interest->created_at->diffForHumans() }} @if($interest->addedBy) by {{ $interest->addedBy->name }} @endif</p>
+                            </div>
+                            <form method="POST" action="{{ route('admin.properties.interests.remove', [$property, $interest->client]) }}" onsubmit="return confirm('Remove this client from interested list?')">
+                                @csrf
+                                @method('DELETE')
+                                <button class="text-red-600 hover:text-red-700">
+                                    <i class="fas fa-user-minus"></i>
+                                </button>
+                            </form>
+                        </li>
+                    @endforeach
+                </ul>
+            @endif
+        </div>
+    </div>
+</div>
+
 <!-- Delete Confirmation Modal -->
 <div id="deleteModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
     <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">

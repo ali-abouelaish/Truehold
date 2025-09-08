@@ -43,6 +43,14 @@ class Client extends Model
     }
 
     /**
+     * Get properties this client is interested in.
+     */
+    public function interestedProperties(): HasMany
+    {
+        return $this->hasMany(PropertyInterest::class);
+    }
+
+    /**
      * Get the client's age.
      */
     public function getAgeAttribute(): ?int

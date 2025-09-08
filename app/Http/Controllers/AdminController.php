@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Property;
 use App\Models\User;
+use App\Models\Client;
+use App\Models\PropertyInterest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
@@ -156,7 +158,9 @@ class AdminController extends Controller
 
     public function edit(Property $property)
     {
-        return view('admin.properties.edit', compact('property'));
+        $property->load(['interests.client']);
+        $clients = Client::orderBy('full_name')->get();
+        return view('admin.properties.edit', compact('property', 'clients'));
     }
 
     public function update(Request $request, Property $property)
@@ -232,6 +236,50 @@ class AdminController extends Controller
 
         return redirect()->route('admin.properties')
             ->with('success', 'Property updated successfully!');
+    }
+
+    /**
+     * Attach a registered client as interested in a property.
+     */
+    public function addInterestedClient(Request $request, Property $property)
+    {
+        $data = $request->validate([
+            'client_id' => 'required|exists:clients,id',
+            'notes' => 'nullable|string|max:1000',
+        ]);
+
+        $interest = PropertyInterest::firstOrCreate(
+            [
+                'property_id' => $property->id,
+                'client_id' => $data['client_id'],
+            ],
+            [
+                'added_by_user_id' => auth()->id(),
+                'notes' => $data['notes'] ?? null,
+            ]
+        );
+
+        if (!$interest->wasRecentlyCreated) {
+            // Update notes and added_by if re-attaching
+            $interest->update([
+                'notes' => $data['notes'] ?? $interest->notes,
+                'added_by_user_id' => $interest->added_by_user_id ?: auth()->id(),
+            ]);
+        }
+
+        return back()->with('success', 'Client added as interested in this property.');
+    }
+
+    /**
+     * Detach an interested client from a property.
+     */
+    public function removeInterestedClient(Property $property, Client $client)
+    {
+        PropertyInterest::where('property_id', $property->id)
+            ->where('client_id', $client->id)
+            ->delete();
+
+        return back()->with('success', 'Client removed from interested list.');
     }
 
     public function destroy(Property $property)
