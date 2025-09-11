@@ -357,127 +357,6 @@
             transform: translateY(-2px);
         }
         
-        .legend {
-            background: white;
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
-            max-width: 350px;
-            max-height: 500px;
-            overflow-y: auto;
-        }
-        
-        .legend h3 {
-            margin: 0 0 15px 0;
-            font-size: 18px;
-            font-weight: 600;
-            color: #1f2937;
-            text-align: center;
-        }
-        
-        .legend-header {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 15px;
-            padding-bottom: 10px;
-            border-bottom: 2px solid #e5e7eb;
-        }
-        
-        .legend-total, .legend-companies {
-            font-size: 14px;
-            color: #6b7280;
-        }
-        
-        .legend-list {
-            max-height: 300px;
-            overflow-y: auto;
-        }
-        
-        .legend-item {
-            display: flex;
-            align-items: center;
-            margin: 8px 0;
-            padding: 8px;
-            border-radius: 8px;
-            transition: all 0.2s;
-            cursor: pointer;
-            border: 1px solid transparent;
-        }
-        
-        .legend-item:hover {
-            background-color: #f3f4f6;
-            border-color: #d1d5db;
-            transform: translateX(2px);
-        }
-        
-        .legend-item.active {
-            background-color: #dbeafe;
-            border-color: #3b82f6;
-        }
-        
-        .legend-color {
-            width: 18px;
-            height: 18px;
-            border-radius: 50%;
-            margin-right: 12px;
-            border: 2px solid #ffffff;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-            flex-shrink: 0;
-        }
-        
-        .legend-text {
-            font-size: 14px;
-            color: #374151;
-            flex: 1;
-            font-weight: 500;
-        }
-        
-        .legend-stats {
-            display: flex;
-            flex-direction: column;
-            align-items: flex-end;
-            gap: 2px;
-        }
-        
-        .legend-count {
-            font-size: 12px;
-            color: #1f2937;
-            background: #f3f4f6;
-            padding: 2px 8px;
-            border-radius: 12px;
-            font-weight: 600;
-        }
-        
-        .legend-percentage {
-            font-size: 11px;
-            color: #6b7280;
-        }
-        
-        .legend-actions {
-            display: flex;
-            gap: 8px;
-            margin-top: 15px;
-            padding-top: 10px;
-            border-top: 1px solid #e5e7eb;
-        }
-        
-        .legend-button {
-            flex: 1;
-            padding: 6px 12px;
-            border: 1px solid #d1d5db;
-            border-radius: 6px;
-            background: white;
-            color: #374151;
-            font-size: 12px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        
-        .legend-button:hover {
-            background: #f9fafb;
-            border-color: #9ca3af;
-        }
         
         .filters-panel {
             position: absolute;
@@ -766,13 +645,6 @@
         </div>
 
 
-    <!-- Legend -->
-    <div class="legend" id="legend">
-        <h3><i class="fas fa-palette mr-2"></i>Property Managers</h3>
-        <div id="legendContent">
-            <!-- Legend items will be populated by JavaScript -->
-                    </div>
-                </div>
 
     <!-- Loading Screen -->
     <div class="loading" id="loadingScreen">
@@ -837,11 +709,6 @@
                 // Create info window
                 infoWindow = new google.maps.InfoWindow();
 
-                // Attach legend to bottom-left of the map
-                const legendEl = document.getElementById('legend');
-                if (legendEl) {
-                    map.controls[google.maps.ControlPosition.LEFT_BOTTOM].push(legendEl);
-                }
 
                 // Load properties
                 loadProperties();
@@ -902,8 +769,6 @@
                 // Create markers
                 createMarkers(validProperties);
 
-                // Update legend
-                updateLegend(validProperties);
 
                 // Fit map to bounds
                 fitMapToProperties(validProperties);
@@ -1317,8 +1182,6 @@
             // Recreate markers with filtered data
             createMarkers(validProperties);
             
-            // Update legend
-            updateLegend(validProperties);
 
             // Fit map to filtered properties
             if (validProperties.length > 0) {
@@ -1359,65 +1222,6 @@
             }
         }
 
-        // Update legend with agent statistics
-        function updateLegend(properties) {
-            // Count properties by agent
-            agentStats = {};
-            properties.forEach(property => {
-                const agent = property.agent_name;
-                // Group null/empty values into "Others" category
-                if (!agent || agent === 'N/A' || agent === '' || agent === null) {
-                    agentStats['Others'] = (agentStats['Others'] || 0) + 1;
-                } else {
-                    agentStats[agent] = (agentStats[agent] || 0) + 1;
-                }
-            });
-
-            // Sort agents by count (descending)
-            const sortedAgents = Object.entries(agentStats)
-                .sort(([,a], [,b]) => b - a);
-
-            // Create legend HTML
-            const legendContent = document.getElementById('legendContent');
-            legendContent.innerHTML = `
-                <div class="legend-header">
-                    <div class="legend-total">
-                        <strong>${properties.length}</strong> properties
-                    </div>
-                    <div class="legend-agents">
-                        <strong>${sortedAgents.length}</strong> agents
-                        </div>
-                    </div>
-                <div class="legend-list">
-                    ${sortedAgents.map(([agent, count]) => {
-                        const color = getAgentColor(agent);
-                        const percentage = ((count / properties.length) * 100).toFixed(1);
-                return `
-                            <div class="legend-item" onclick="filterByAgent('${agent}')">
-                                <div class="legend-color" style="background-color: ${color.fill};"></div>
-                                <div class="legend-text">${agent}</div>
-                                <div class="legend-stats">
-                                    <div class="legend-count">${count}</div>
-                                    <div class="legend-percentage">${percentage}%</div>
-                        </div>
-                    </div>
-                `;
-                    }).join('')}
-                </div>
-                <div class="legend-actions">
-                    <button onclick="showAllAgents()" class="legend-button">Show All</button>
-                    <button onclick="hideAllAgents()" class="legend-button">Hide All</button>
-                </div>
-            `;
-
-            // Show/hide legend based on whether there are agents
-            const legend = document.getElementById('legend');
-            if (sortedAgents.length > 0) {
-                legend.style.display = 'block';
-            } else {
-                legend.style.display = 'none';
-            }
-        }
 
         // Initialize filters from URL parameters
         function initializeFiltersFromURL() {
@@ -1519,49 +1323,6 @@
             }
         }
 
-        // Filter by specific agent
-        function filterByAgent(agent) {
-            const agentFilter = document.getElementById('agentFilter');
-            if (agentFilter) {
-                // Handle "Others" category - show only properties without agent name
-                if (agent === 'Others') {
-                    agentFilter.value = '';
-                    showOthersOnly = true;
-                } else {
-                    agentFilter.value = agent;
-                    showOthersOnly = false;
-                }
-                applyFilters();
-            }
-            
-            // Update legend active state
-            document.querySelectorAll('.legend-item').forEach(item => {
-                item.classList.remove('active');
-            });
-            event.target.closest('.legend-item').classList.add('active');
-        }
-
-        // Show all agents
-        function showAllAgents() {
-            const agentFilter = document.getElementById('agentFilter');
-            if (agentFilter) {
-                agentFilter.value = '';
-                showOthersOnly = false;
-                applyFilters();
-            }
-            
-            // Remove active states
-            document.querySelectorAll('.legend-item').forEach(item => {
-                item.classList.remove('active');
-            });
-        }
-
-        // Hide all agents (show none)
-        function hideAllAgents() {
-            // This would require a more complex implementation
-            // For now, just clear the agent filter
-            showAllAgents();
-        }
     </script>
 </body>
 </html>

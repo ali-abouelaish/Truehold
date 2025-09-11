@@ -594,71 +594,6 @@
                             </div>
                         @endif
 
-                        @auth
-                        <!-- Add Interested Client (Admins/Agents) -->
-                        <div class="property-card p-6">
-                            <h3 class="text-xl font-bold text-gray-900 mb-4 flex items-center space-x-2">
-                                <i class="fas fa-users text-blue-600"></i>
-                                <span>Mark Client as Interested</span>
-                            </h3>
-                            <form method="POST" action="{{ route('admin.properties.interests.add', $property) }}" class="grid grid-cols-1 gap-4">
-                                @csrf
-                                <div>
-                                    <label for="client_id" class="block text-sm font-medium text-gray-700 mb-2">Select Client (A→Z)</label>
-                                    <select id="client_id" name="client_id" class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500">
-                                        <option value="">Choose a client</option>
-                                        @isset($clients)
-                                            @foreach($clients as $client)
-                                                <option value="{{ $client->id }}">{{ $client->full_name }} @if($client->email) ({{ $client->email }}) @endif</option>
-                                            @endforeach
-                                        @endisset
-                                    </select>
-                                </div>
-                                <div>
-                                    <label for="notes" class="block text-sm font-medium text-gray-700 mb-2">Notes (optional)</label>
-                                    <textarea id="notes" name="notes" rows="2" class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500" placeholder="Availability, preferences, etc."></textarea>
-                                </div>
-                                <div class="flex justify-end">
-                                    <button type="submit" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium">
-                                        <i class="fas fa-user-plus mr-2"></i>Add Interested Client
-                                    </button>
-                                </div>
-                            </form>
-                        </div>
-
-                        <!-- Interested Clients List -->
-                        <div class="property-card p-6">
-                            <h3 class="text-xl font-bold text-gray-900 mb-4 flex items-center space-x-2">
-                                <i class="fas fa-user-friends text-indigo-600"></i>
-                                <span>Interested Clients</span>
-                            </h3>
-                            @if($property->interests && $property->interests->count())
-                                <ul class="divide-y divide-gray-200">
-                                    @foreach($property->interests as $interest)
-                                        <li class="py-3 flex items-start justify-between">
-                                            <div>
-                                                <p class="font-semibold text-gray-900">{{ $interest->client->full_name }}</p>
-                                                <p class="text-sm text-gray-600">{{ $interest->client->email }} @if($interest->client->phone_number) • {{ $interest->client->phone_number }} @endif</p>
-                                                @if($interest->notes)
-                                                    <p class="text-sm text-gray-500 mt-1">Notes: {{ $interest->notes }}</p>
-                                                @endif
-                                                <p class="text-xs text-gray-400 mt-1">Added {{ $interest->created_at->diffForHumans() }}</p>
-                                            </div>
-                                            <form method="POST" action="{{ route('admin.properties.interests.remove', [$property, $interest->client]) }}" onsubmit="return confirm('Remove this client from interested list?')">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button class="text-red-600 hover:text-red-700">
-                                                    <i class="fas fa-user-minus"></i>
-                                                </button>
-                                            </form>
-                                        </li>
-                                    @endforeach
-                                </ul>
-                            @else
-                                <p class="text-sm text-gray-500">No clients marked as interested yet.</p>
-                            @endif
-                        </div>
-                        @endauth
                     </div>
                 </div>
             </div>
@@ -870,6 +805,76 @@
                             </a>
                         </div>
                     @endif
+
+                    <!-- Mark Client as Interested -->
+                    @auth
+                    <div class="property-card p-8">
+                        <h2 class="text-2xl font-bold text-gray-900 mb-6 flex items-center space-x-3">
+                            <div class="bg-blue-100 p-3 rounded-full">
+                                <i class="fas fa-users text-blue-600 text-xl"></i>
+                            </div>
+                            <span>Mark Client as Interested</span>
+                        </h2>
+                        <form method="POST" action="{{ route('admin.properties.interests.add', $property) }}" class="grid grid-cols-1 gap-4">
+                            @csrf
+                            <div>
+                                <label for="client_id" class="block text-sm font-medium text-gray-700 mb-2">Select Client (A→Z)</label>
+                                <select id="client_id" name="client_id" class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                                    <option value="">Choose a client</option>
+                                    @foreach($clients ?? [] as $client)
+                                        <option value="{{ $client->id }}">{{ $client->name }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div>
+                                <label for="notes" class="block text-sm font-medium text-gray-700 mb-2">Notes (optional)</label>
+                                <textarea id="notes" name="notes" rows="2" class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500" placeholder="Availability, preferences, etc."></textarea>
+                            </div>
+                            <div class="flex justify-end">
+                                <button type="submit" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium">
+                                    <i class="fas fa-user-plus mr-2"></i>Add Interested Client
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                    @endauth
+
+                    <!-- Interested Clients -->
+                    <div class="property-card p-8">
+                        <h2 class="text-2xl font-bold text-gray-900 mb-6 flex items-center space-x-3">
+                            <div class="bg-indigo-100 p-3 rounded-full">
+                                <i class="fas fa-user-friends text-indigo-600 text-xl"></i>
+                            </div>
+                            <span>Interested Clients</span>
+                        </h2>
+                        <ul class="divide-y divide-gray-200">
+                            @forelse($property->interestedClients ?? [] as $client)
+                                <li class="py-3 flex items-start justify-between">
+                                    <div>
+                                        <p class="font-semibold text-gray-900">{{ $client->name }}</p>
+                                        <p class="text-sm text-gray-600">{{ $client->email }} @if($client->phone) • {{ $client->phone }} @endif</p>
+                                        @if($client->pivot && $client->pivot->created_at)
+                                            <p class="text-xs text-gray-400 mt-1">Added {{ $client->pivot->created_at->diffForHumans() }}</p>
+                                        @endif
+                                    </div>
+                                    @auth
+                                    <form method="POST" action="{{ route('admin.properties.interests.remove', [$property, $client]) }}" onsubmit="return confirm('Remove this client from interested list?')">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button class="text-red-600 hover:text-red-700">
+                                            <i class="fas fa-user-minus"></i>
+                                        </button>
+                                    </form>
+                                    @endauth
+                                </li>
+                            @empty
+                                <li class="py-4 text-center text-gray-500">
+                                    <i class="fas fa-users text-2xl mb-2"></i>
+                                    <p>No interested clients yet</p>
+                                </li>
+                            @endforelse
+                        </ul>
+                    </div>
 
                     <!-- Enhanced Quick Actions -->
                     <div class="property-card p-8">
