@@ -158,7 +158,7 @@ class AdminController extends Controller
 
     public function edit(Property $property)
     {
-        $property->load(['interests.client']);
+        $property->load(['interests.client', 'interestedClients']);
         $clients = Client::orderBy('full_name')->get();
         return view('admin.properties.edit', compact('property', 'clients'));
     }

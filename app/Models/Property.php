@@ -450,6 +450,16 @@ class Property extends Model
     }
 
     /**
+     * Get the clients interested in this property.
+     */
+    public function interestedClients()
+    {
+        return $this->belongsToMany(Client::class, 'property_interests')
+                    ->withPivot(['notes', 'added_by_user_id', 'created_at', 'updated_at'])
+                    ->withTimestamps();
+    }
+
+    /**
      * Check if the property has an assigned agent.
      */
     public function hasAgent(): bool

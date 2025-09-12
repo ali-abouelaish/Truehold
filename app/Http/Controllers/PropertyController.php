@@ -97,7 +97,7 @@ class PropertyController extends Controller
      */
     public function show(string $id)
     {
-        $property = Property::with(['interests.client'])->findOrFail($id);
+        $property = Property::with(['interests.client', 'interestedClients'])->findOrFail($id);
         $clients = collect();
         if (auth()->check()) {
             $clients = Client::orderBy('full_name', 'asc')->get();
