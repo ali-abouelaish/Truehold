@@ -822,7 +822,7 @@
                                 <select id="client_id" name="client_id" class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500">
                                     <option value="">Choose a client</option>
                                     @foreach($clients ?? [] as $client)
-                                        <option value="{{ $client->id }}">{{ $client->name }}</option>
+                                        <option value="{{ $client->id }}">{{ $client->full_name }}</option>
                                     @endforeach
                                 </select>
                             </div>
@@ -851,8 +851,8 @@
                             @forelse($property->interestedClients ?? [] as $client)
                                 <li class="py-3 flex items-start justify-between">
                                     <div>
-                                        <p class="font-semibold text-gray-900">{{ $client->name }}</p>
-                                        <p class="text-sm text-gray-600">{{ $client->email }} @if($client->phone) • {{ $client->phone }} @endif</p>
+                                        <p class="font-semibold text-gray-900">{{ $client->full_name }}</p>
+                                        <p class="text-sm text-gray-600">{{ $client->email }} @if($client->phone_number) • {{ $client->phone_number }} @endif</p>
                                         @if($client->pivot && $client->pivot->created_at)
                                             <p class="text-xs text-gray-400 mt-1">Added {{ $client->pivot->created_at->diffForHumans() }}</p>
                                         @endif
