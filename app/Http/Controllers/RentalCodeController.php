@@ -27,11 +27,11 @@ class RentalCodeController extends Controller
     {
         // Get users who are agents (either by role or by having an agent profile)
         // Simplified approach: get all users with agent role OR agent profile
-        $usersWithAgentRole = User::where('role', 'agent')->get();
-        $usersWithAgentProfile = User::whereHas('agent')->get();
+        $agentUsers = User::where('role', 'agent')->with('agent')->get();
+
+      
         
-        // Combine and remove duplicates
-        $agentUsers = $usersWithAgentRole->merge($usersWithAgentProfile)->unique('id')->load('agent');
+       
         
         
         return view('admin.rental-codes.create', compact('agentUsers'));

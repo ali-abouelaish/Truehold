@@ -352,24 +352,26 @@
                                      <div class="input-group">
                                          <span class="input-group-text"><i class="fas fa-user-tie"></i></span>
                                          <select class="form-select @error('rent_by_agent') is-invalid @enderror" 
-                                                 id="rent_by_agent" name="rent_by_agent" required>
-                                             <option value="">Select agent</option>
-                                             {{-- Debug info --}}
-                                             @if(config('app.debug'))
-                                                 <option value="" disabled>DEBUG: {{ $agentUsers->count() }} agents found</option>
-                                             @endif
-                                             @forelse($agentUsers as $user)
-                                                 <option value="{{ $user->name }}" 
-                                                         {{ old('rent_by_agent') == $user->name ? 'selected' : '' }}>
-                                                     {{ $user->name }}
-                                                     @if($user->agent && $user->agent->company_name)
-                                                         ({{ $user->agent->company_name }})
-                                                     @endif
-                                                 </option>
-                                             @empty
-                                                 <option value="" disabled>No agents found</option>
-                                             @endforelse
-                                         </select>
+        id="rent_by_agent" name="rent_by_agent" required>
+    <option value="">Select agent</option>
+
+    @if(config('app.debug'))
+        <option value="" disabled>DEBUG: {{ $agentUsers->count() }} agents found</option>
+    @endif
+
+    @forelse($agentUsers as $user)
+        <option value="{{ $user->id }}" 
+                {{ old('rent_by_agent') == $user->id ? 'selected' : '' }}>
+            {{ $user->name }}
+            @if($user->agent && $user->agent->company_name)
+                ({{ $user->agent->company_name }})
+            @endif
+        </option>
+    @empty
+        <option value="" disabled>No agents found</option>
+    @endforelse
+</select>
+
                                      </div>
                                      @error('rent_by_agent')
                                          <div class="invalid-feedback">{{ $message }}</div>
