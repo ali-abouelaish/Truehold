@@ -2,6 +2,13 @@
 
 @section('title', 'Create Rental Code')
 
+{{-- Debug info --}}
+@if(config('app.debug'))
+    <div class="alert alert-info">
+        <strong>DEBUG:</strong> Agent users count: {{ isset($agentUsers) ? $agentUsers->count() : 'NOT SET' }}
+    </div>
+@endif
+
 @section('content')
 <div class="container-fluid">
     <!-- Header Section -->
@@ -347,7 +354,11 @@
                                          <select class="form-select @error('rent_by_agent') is-invalid @enderror" 
                                                  id="rent_by_agent" name="rent_by_agent" required>
                                              <option value="">Select agent</option>
-                                             @foreach($agentUsers as $user)
+                                             {{-- Debug info --}}
+                                             @if(config('app.debug'))
+                                                 <option value="" disabled>DEBUG: {{ $agentUsers->count() }} agents found</option>
+                                             @endif
+                                             @forelse($agentUsers as $user)
                                                  <option value="{{ $user->name }}" 
                                                          {{ old('rent_by_agent') == $user->name ? 'selected' : '' }}>
                                                      {{ $user->name }}
@@ -355,7 +366,9 @@
                                                          ({{ $user->agent->company_name }})
                                                      @endif
                                                  </option>
-                                             @endforeach
+                                             @empty
+                                                 <option value="" disabled>No agents found</option>
+                                             @endforelse
                                          </select>
                                      </div>
                                      @error('rent_by_agent')

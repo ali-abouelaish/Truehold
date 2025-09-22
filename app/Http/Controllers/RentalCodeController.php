@@ -26,10 +26,13 @@ class RentalCodeController extends Controller
     public function create()
     {
         // Get users who are agents (either by role or by having an agent profile)
-        $agentUsers = User::where(function($query) {
-            $query->where('role', 'agent')
-                  ->orWhereHas('agent');
-        })->with('agent')->get();
+        // Simplified approach: get all users with agent role OR agent profile
+        $usersWithAgentRole = User::where('role', 'agent')->get();
+        $usersWithAgentProfile = User::whereHas('agent')->get();
+        
+        // Combine and remove duplicates
+        $agentUsers = $usersWithAgentRole->merge($usersWithAgentProfile)->unique('id')->load('agent');
+        
         
         return view('admin.rental-codes.create', compact('agentUsers'));
     }
@@ -101,10 +104,11 @@ class RentalCodeController extends Controller
     public function edit(RentalCode $rentalCode)
     {
         // Get users who are agents (either by role or by having an agent profile)
-        $agentUsers = User::where(function($query) {
-            $query->where('role', 'agent')
-                  ->orWhereHas('agent');
-        })->with('agent')->get();
+        $usersWithAgentRole = User::where('role', 'agent')->get();
+        $usersWithAgentProfile = User::whereHas('agent')->get();
+        
+        // Combine and remove duplicates
+        $agentUsers = $usersWithAgentRole->merge($usersWithAgentProfile)->unique('id')->load('agent');
         
         return view('admin.rental-codes.edit', compact('rentalCode', 'agentUsers'));
     }
