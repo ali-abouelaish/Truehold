@@ -101,6 +101,7 @@ Route::middleware('auth')->prefix('admin')->group(function () {
     // Rental Code Management Routes
     Route::resource('rental-codes', RentalCodeController::class);
     Route::get('/rental-codes/generate-code', [RentalCodeController::class, 'generateCode'])->name('rental-codes.generate-code');
+    Route::get('/rental-codes/agent-earnings', [RentalCodeController::class, 'agentEarnings'])->name('rental-codes.agent-earnings');
     
     // Invoice Management Routes
     Route::resource('invoices', InvoiceController::class)->names([

@@ -22,10 +22,75 @@ class AdminController extends Controller
         return view('admin.dashboard', compact('totalProperties', 'propertiesWithCoords', 'recentProperties'));
     }
 
-    public function properties()
+    public function properties(Request $request)
     {
-        $properties = Property::latest()->paginate(20);
-        return view('admin.properties.index', compact('properties'));
+        $query = Property::query();
+
+        // Apply search functionality
+        if ($request->filled('search')) {
+            $searchTerm = $request->search;
+            $query->where(function($q) use ($searchTerm) {
+                $q->where('title', 'like', "%{$searchTerm}%")
+                  ->orWhere('description', 'like', "%{$searchTerm}%")
+                  ->orWhere('location', 'like', "%{$searchTerm}%")
+                  ->orWhere('management_company', 'like', "%{$searchTerm}%")
+                  ->orWhere('agent_name', 'like', "%{$searchTerm}%");
+            });
+        }
+
+        // Apply filters
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        if ($request->filled('location')) {
+            $query->byLocation($request->location);
+        }
+
+        if ($request->filled('property_type')) {
+            $query->where('property_type', 'like', "%{$request->property_type}%");
+        }
+
+        // Price filtering - handle min and max separately
+        if ($request->filled('min_price')) {
+            $query->byMinPrice($request->min_price);
+        }
+        
+        if ($request->filled('max_price')) {
+            $query->byMaxPrice($request->max_price);
+        }
+
+        if ($request->filled('available_date')) {
+            $query->where('available_date', 'like', "%{$request->available_date}%");
+        }
+
+        // Management Company and Agent Name filters
+        if ($request->filled('management_company')) {
+            $query->byManagementCompany($request->management_company);
+        }
+
+        if ($request->filled('agent_name')) {
+            $query->where('agent_name', 'like', "%{$request->agent_name}%");
+        }
+
+        if ($request->filled('london_area')) {
+            $query->byLondonArea($request->london_area);
+        }
+
+        if ($request->filled('couples_allowed')) {
+            $query->byCouplesAllowed($request->couples_allowed);
+        }
+
+        // Get unique values for filter dropdowns
+        $locations = Property::distinct()->pluck('location')->filter()->sort()->values();
+        $propertyTypes = Property::distinct()->pluck('property_type')->filter()->sort()->values();
+        $availableDates = Property::distinct()->pluck('available_date')->filter()->sort()->values();
+        $agentNames = Property::distinct()->pluck('agent_name')->filter()->sort()->values();
+        $managementCompanies = Property::distinct()->pluck('management_company')->filter()->sort()->values();
+
+        $properties = $query->latest()->paginate(20)->withQueryString();
+
+        return view('admin.properties.index', compact('properties', 'locations', 'propertyTypes', 'availableDates', 'agentNames', 'managementCompanies'));
     }
 
     public function create()

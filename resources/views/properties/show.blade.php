@@ -784,6 +784,35 @@
                         </div>
                     @endif
 
+                    <!-- Property Manager -->
+                    @if($property->agent_name && $property->agent_name !== 'N/A' && auth()->check())
+                        <div class="property-card p-8">
+                            <h2 class="text-2xl font-bold text-gray-900 mb-6 flex items-center space-x-3">
+                                <div class="bg-blue-100 p-3 rounded-full">
+                                    <i class="fas fa-user-tie text-blue-600 text-xl"></i>
+                                </div>
+                                <span>Property Manager</span>
+                            </h2>
+                            <div class="bg-blue-50 p-4 rounded-12 border border-blue-200">
+                                <p class="text-gray-700 font-medium">{{ $property->agent_name }}</p>
+                            </div>
+                        </div>
+                    @elseif($property->agent_name && $property->agent_name !== 'N/A')
+                        <div class="property-card p-8">
+                            <h2 class="text-2xl font-bold text-gray-900 mb-6 flex items-center space-x-3">
+                                <div class="bg-blue-100 p-3 rounded-full">
+                                    <i class="fas fa-user-tie text-blue-600 text-xl"></i>
+                                </div>
+                                <span>Property Manager</span>
+                            </h2>
+                            <div class="bg-gray-100 border border-gray-300 text-gray-600 px-6 py-4 rounded-lg text-center">
+                                <i class="fas fa-lock text-2xl mb-3"></i>
+                                <p class="mb-2">Property manager information is available to registered users.</p>
+                                <a href="{{ route('login') }}" class="font-medium text-blue-600 hover:text-blue-800">Login to view manager details</a>
+                            </div>
+                        </div>
+                    @endif
+
                     <!-- Enhanced Location Information -->
                     @if($property->latitude && $property->longitude && $property->latitude !== 'N/A' && $property->longitude !== 'N/A')
                         <div class="property-card p-8">

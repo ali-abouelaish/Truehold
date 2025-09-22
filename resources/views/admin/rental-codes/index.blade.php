@@ -14,7 +14,10 @@
                     </h2>
                     <p class="text-muted mb-0">Manage and track all rental code applications</p>
                 </div>
-                <div>
+                <div class="d-flex gap-2">
+                    <a href="{{ route('rental-codes.agent-earnings') }}" class="btn btn-success">
+                        <i class="fas fa-chart-line me-1"></i> Agent Earnings Report
+                    </a>
                     <a href="{{ route('rental-codes.create') }}" class="btn btn-primary">
                         <i class="fas fa-plus me-1"></i> Add New Rental Code
                     </a>

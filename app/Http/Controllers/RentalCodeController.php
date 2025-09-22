@@ -248,4 +248,78 @@ class RentalCodeController extends Controller
             return response()->json(['error' => 'Failed to generate rental code'], 500);
         }
     }
+
+    /**
+     * Show agent earnings report
+     */
+    public function agentEarnings(Request $request)
+    {
+        $endDate = $request->input('end_date', now()->format('Y-m-d'));
+        
+        // Get all rental codes up to the specified date
+        $rentalCodes = RentalCode::where('rental_date', '<=', $endDate)
+            ->where('status', '!=', 'cancelled')
+            ->get();
+
+        // Calculate earnings by agent
+        $agentEarnings = [];
+        
+        foreach ($rentalCodes as $rentalCode) {
+            // Handle rent_by_agent earnings
+            if (!empty($rentalCode->rent_by_agent)) {
+                $agentName = $rentalCode->rent_by_agent;
+                if (!isset($agentEarnings[$agentName])) {
+                    $agentEarnings[$agentName] = [
+                        'name' => $agentName,
+                        'rent_earnings' => 0,
+                        'client_earnings' => 0,
+                        'total_earnings' => 0,
+                        'rent_count' => 0,
+                        'client_count' => 0,
+                        'total_count' => 0
+                    ];
+                }
+                $agentEarnings[$agentName]['rent_earnings'] += $rentalCode->consultation_fee;
+                $agentEarnings[$agentName]['rent_count']++;
+                $agentEarnings[$agentName]['total_earnings'] += $rentalCode->consultation_fee;
+                $agentEarnings[$agentName]['total_count']++;
+            }
+            
+            // Handle client_by_agent earnings
+            if (!empty($rentalCode->client_by_agent)) {
+                $agentName = $rentalCode->client_by_agent;
+                if (!isset($agentEarnings[$agentName])) {
+                    $agentEarnings[$agentName] = [
+                        'name' => $agentName,
+                        'rent_earnings' => 0,
+                        'client_earnings' => 0,
+                        'total_earnings' => 0,
+                        'rent_count' => 0,
+                        'client_count' => 0,
+                        'total_count' => 0
+                    ];
+                }
+                $agentEarnings[$agentName]['client_earnings'] += $rentalCode->consultation_fee;
+                $agentEarnings[$agentName]['client_count']++;
+                $agentEarnings[$agentName]['total_earnings'] += $rentalCode->consultation_fee;
+                $agentEarnings[$agentName]['total_count']++;
+            }
+        }
+
+        // Sort by total earnings (descending)
+        uasort($agentEarnings, function($a, $b) {
+            return $b['total_earnings'] <=> $a['total_earnings'];
+        });
+
+        // Calculate totals
+        $totalEarnings = array_sum(array_column($agentEarnings, 'total_earnings'));
+        $totalRentalCodes = $rentalCodes->count();
+
+        return view('admin.rental-codes.agent-earnings', compact(
+            'agentEarnings', 
+            'totalEarnings', 
+            'totalRentalCodes', 
+            'endDate'
+        ));
+    }
 }
