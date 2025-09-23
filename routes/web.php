@@ -18,7 +18,8 @@ Route::get('/', function () {
 Route::get('/properties', [PropertyController::class, 'index'])->name('properties.index');
 Route::get('/properties/map', [PropertyController::class, 'map'])->name('properties.map');
 Route::get('/properties/{property}', [PropertyController::class, 'show'])->name('properties.show');
-
+Route::get('/rental-codes/agent-earnings', [RentalCodeController::class, 'agentEarnings'])->name('rental-codes.agent-earnings');
+    
 // Temporary public route for testing rental code generation
 Route::get('/test-rental-code', function () {
     try {
@@ -101,7 +102,6 @@ Route::middleware('auth')->prefix('admin')->group(function () {
     // Rental Code Management Routes
     Route::resource('rental-codes', RentalCodeController::class);
     Route::get('/rental-codes/generate-code', [RentalCodeController::class, 'generateCode'])->name('rental-codes.generate-code');
-    Route::get('/rental-codes/agent-earnings', [RentalCodeController::class, 'agentEarnings'])->name('rental-codes.agent-earnings');
     
     // Invoice Management Routes
     Route::resource('invoices', InvoiceController::class)->names([
