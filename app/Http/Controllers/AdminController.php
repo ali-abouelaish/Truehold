@@ -395,8 +395,8 @@ class AdminController extends Controller
 
     public function createClient()
     {
-        $agents = \App\Models\Agent::all();
-        return view('admin.clients.create', compact('agents'));
+        $agentUsers = \App\Models\User::where('role', 'agent')->with('agent')->get();
+        return view('admin.clients.create', compact('agentUsers'));
     }
 
     public function storeClient(Request $request)
@@ -411,14 +411,22 @@ class AdminController extends Controller
             'company_university_name' => 'nullable|string|max:255',
             'company_university_address' => 'nullable|string',
             'position_role' => 'nullable|string|max:255',
-            'agent_id' => 'nullable|exists:agents,id',
+            'agent_user_id' => 'nullable|exists:users,id',
         ]);
 
         if ($validator->fails()) {
             return back()->withErrors($validator)->withInput();
         }
 
-        \App\Models\Client::create($request->all());
+        $data = $request->all();
+        // Map selected agent user -> agents.id if available
+        if (!empty($data['agent_user_id'])) {
+            $agentId = \App\Models\Agent::where('user_id', $data['agent_user_id'])->value('id');
+            $data['agent_id'] = $agentId; // may be null if no profile exists
+        }
+        unset($data['agent_user_id']);
+
+        \App\Models\Client::create($data);
 
         return redirect()->route('admin.clients')
             ->with('success', 'Client created successfully!');
@@ -426,8 +434,8 @@ class AdminController extends Controller
 
     public function editClient(\App\Models\Client $client)
     {
-        $agents = \App\Models\Agent::all();
-        return view('admin.clients.edit', compact('client', 'agents'));
+        $agentUsers = \App\Models\User::where('role', 'agent')->with('agent')->get();
+        return view('admin.clients.edit', compact('client', 'agentUsers'));
     }
 
     public function updateClient(Request $request, \App\Models\Client $client)
@@ -442,14 +450,26 @@ class AdminController extends Controller
             'company_university_name' => 'nullable|string|max:255',
             'company_university_address' => 'nullable|string',
             'position_role' => 'nullable|string|max:255',
-            'agent_id' => 'nullable|exists:agents,id',
+            'agent_user_id' => 'nullable|exists:users,id',
         ]);
 
         if ($validator->fails()) {
             return back()->withErrors($validator)->withInput();
         }
 
-        $client->update($request->all());
+        $data = $request->all();
+        if (!empty($data['agent_user_id'])) {
+            $agentId = \App\Models\Agent::where('user_id', $data['agent_user_id'])->value('id');
+            $data['agent_id'] = $agentId;
+        } else {
+            // allow clearing assigned agent
+            if (array_key_exists('agent_user_id', $data)) {
+                $data['agent_id'] = null;
+            }
+        }
+        unset($data['agent_user_id']);
+
+        $client->update($data);
 
         return redirect()->route('admin.clients')
             ->with('success', 'Client updated successfully!');

@@ -17,21 +17,49 @@
     </div>
 </div>
 
-<!-- Date Filter -->
+<!-- Filters -->
 <div class="bg-white rounded-lg shadow-sm border border-gray-200 mb-6">
     <div class="px-6 py-4 border-b border-gray-200">
-        <h3 class="text-lg font-medium text-gray-900">Filter by Date</h3>
+        <h3 class="text-lg font-medium text-gray-900">Filters</h3>
     </div>
     <div class="p-6">
-        <form method="GET" action="{{ route('rental-codes.agent-earnings') }}" class="flex items-end space-x-4">
-            <div class="flex-1">
-                <label class="block text-sm font-medium text-gray-700 mb-2">Earnings up to date:</label>
+        <form method="GET" action="{{ route('rental-codes.agent-earnings') }}" class="grid grid-cols-1 md:grid-cols-5 gap-4">
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Start date</label>
+                <input type="date" name="start_date" value="{{ $startDate }}" 
+                       class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">End date</label>
                 <input type="date" name="end_date" value="{{ $endDate }}" 
                        class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500">
             </div>
-            <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium">
-                <i class="fas fa-filter mr-2"></i>Update Report
-            </button>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Status</label>
+                <select name="status" class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                    <option value="">Any</option>
+                    <option value="pending" {{ $status==='pending' ? 'selected' : '' }}>Pending</option>
+                    <option value="approved" {{ $status==='approved' ? 'selected' : '' }}>Approved</option>
+                    <option value="completed" {{ $status==='completed' ? 'selected' : '' }}>Completed</option>
+                    <option value="cancelled" {{ $status==='cancelled' ? 'selected' : '' }}>Cancelled</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Payment method</label>
+                <select name="payment_method" class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                    <option value="">Any</option>
+                    <option value="Cash" {{ $paymentMethod==='Cash' ? 'selected' : '' }}>Cash</option>
+                    <option value="Transfer" {{ $paymentMethod==='Transfer' ? 'selected' : '' }}>Transfer</option>
+                </select>
+            </div>
+            <div class="flex items-end space-x-2">
+                <button type="submit" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium">
+                    <i class="fas fa-filter mr-2"></i>Apply
+                </button>
+                <a href="{{ route('rental-codes.agent-earnings') }}" class="flex-1 bg-gray-500 hover:bg-gray-600 text-white px-6 py-2 rounded-lg font-medium text-center">
+                    <i class="fas fa-times mr-2"></i>Clear
+                </a>
+            </div>
         </form>
     </div>
 </div>
@@ -85,7 +113,12 @@
 <div class="bg-white rounded-lg shadow-sm border border-gray-200">
     <div class="px-6 py-4 border-b border-gray-200">
         <h3 class="text-lg font-medium text-gray-900">Agent Earnings Breakdown</h3>
-        <p class="text-sm text-gray-500 mt-1">Earnings up to {{ \Carbon\Carbon::parse($endDate)->format('d/m/Y') }}</p>
+        <p class="text-sm text-gray-500 mt-1">
+            Range: {{ $startDate ? \Carbon\Carbon::parse($startDate)->format('d/m/Y') : 'Beginning' }}
+            — {{ \Carbon\Carbon::parse($endDate)->format('d/m/Y') }}
+            @if($status) • Status: {{ ucfirst($status) }} @endif
+            @if($paymentMethod) • Payment: {{ $paymentMethod }} @endif
+        </p>
     </div>
     
     <div class="overflow-x-auto">
@@ -119,7 +152,7 @@
                 </tr>
             </thead>
             <tbody class="bg-white divide-y divide-gray-200">
-                @forelse($agentEarnings as $agent)
+                @forelse($rows as $agent)
                 <tr class="hover:bg-gray-50">
                     <td class="px-6 py-4 whitespace-nowrap">
                         <div class="flex items-center">
@@ -200,7 +233,7 @@
 </div>
 
 <!-- Export Options -->
-@if(count($agentEarnings) > 0)
+@if(count($rows) > 0)
 <div class="mt-6 bg-white rounded-lg shadow-sm border border-gray-200 p-6">
     <h3 class="text-lg font-medium text-gray-900 mb-4">Export Options</h3>
     <div class="flex space-x-3">

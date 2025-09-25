@@ -101,17 +101,17 @@
                                 </div>
                                 
                                 <div class="form-group mb-3">
-                                    <label for="agent_id">Assigned Agent</label>
-                                    <select class="form-control @error('agent_id') is-invalid @enderror" 
-                                            id="agent_id" name="agent_id">
+                                    <label for="agent_user_id">Assigned Agent</label>
+                                    <select class="form-control @error('agent_user_id') is-invalid @enderror" 
+                                            id="agent_user_id" name="agent_user_id">
                                         <option value="">Select an agent</option>
-                                        @foreach($agents as $agent)
-                                            <option value="{{ $agent->id }}" {{ old('agent_id', $client->agent_id) == $agent->id ? 'selected' : '' }}>
-                                                {{ $agent->name }}
+                                        @foreach($agentUsers as $user)
+                                            <option value="{{ $user->id }}" {{ old('agent_user_id', optional($client->agent)->user_id) == $user->id ? 'selected' : '' }}>
+                                                {{ $user->name }}@if($user->agent && $user->agent->company_name) ({{ $user->agent->company_name }})@endif
                                             </option>
                                         @endforeach
                                     </select>
-                                    @error('agent_id')
+                                    @error('agent_user_id')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
                                 </div>
