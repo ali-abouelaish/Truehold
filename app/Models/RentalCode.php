@@ -30,6 +30,48 @@ class RentalCode extends Model
     ];
 
     /**
+     * Get display name for rent_by_agent (handles ID or name string)
+     */
+    public function getRentByAgentNameAttribute(): string
+    {
+        try {
+            $value = $this->rent_by_agent;
+            if (empty($value)) {
+                return 'N/A';
+            }
+            // If numeric, treat as user_id and resolve to user's name
+            if (is_numeric($value)) {
+                $user = \App\Models\User::find((int) $value);
+                return $user?->name ?? (string) $value;
+            }
+            // Otherwise already a name
+            return (string) $value;
+        } catch (\Throwable $e) {
+            return (string) ($this->rent_by_agent ?? 'N/A');
+        }
+    }
+
+    /**
+     * Get display name for client_by_agent (handles ID or name string)
+     */
+    public function getClientByAgentNameAttribute(): string
+    {
+        try {
+            $value = $this->client_by_agent;
+            if (empty($value)) {
+                return 'N/A';
+            }
+            if (is_numeric($value)) {
+                $user = \App\Models\User::find((int) $value);
+                return $user?->name ?? (string) $value;
+            }
+            return (string) $value;
+        } catch (\Throwable $e) {
+            return (string) ($this->client_by_agent ?? 'N/A');
+        }
+    }
+
+    /**
      * Generate a unique rental code
      */
     public static function generateRentalCode(): string

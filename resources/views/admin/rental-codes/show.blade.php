@@ -282,7 +282,7 @@
                         <div class="info-label">Rent By Agent</div>
                         <div class="info-value">
                             <i class="fas fa-user-tie text-muted me-2"></i>
-                            <strong>{{ $rentalCode->rent_by_agent }}</strong>
+                            <strong>{{ $rentalCode->rent_by_agent_name }}</strong>
                         </div>
                     </div>
                     
@@ -290,7 +290,7 @@
                         <div class="info-label">Client By Agent</div>
                         <div class="info-value">
                             <i class="fas fa-user-tie text-muted me-2"></i>
-                            <strong>{{ $rentalCode->client_by_agent }}</strong>
+                            <strong>{{ $rentalCode->client_by_agent_name }}</strong>
                         </div>
                     </div>
                     

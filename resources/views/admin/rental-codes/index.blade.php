@@ -204,7 +204,7 @@
                                                     <div class="avatar-sm bg-light rounded-circle d-flex align-items-center justify-content-center me-2">
                                                         <i class="fas fa-user-tie text-muted"></i>
                                                     </div>
-                                                    <span>{{ $rentalCode->rent_by_agent }}</span>
+                                                    <span>{{ $rentalCode->rent_by_agent_name }}</span>
                                                 </div>
                                             </td>
                                             <td>
