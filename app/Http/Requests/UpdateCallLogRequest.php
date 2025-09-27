@@ -58,7 +58,6 @@ class UpdateCallLogRequest extends FormRequest
             
             // Objection Handling
             'objections' => ['nullable', 'array'],
-            'objection_response' => ['nullable', 'string'],
             
             // Outcome & Next Steps
             'viewing_booked' => ['boolean'],

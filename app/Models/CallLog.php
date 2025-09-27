@@ -52,7 +52,6 @@ class CallLog extends Model
         
         // Objection Handling
         'objections',
-        'objection_response',
         
         // Outcome & Next Steps
         'viewing_booked',

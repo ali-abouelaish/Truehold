@@ -82,7 +82,10 @@ class CallLogController extends Controller
      */
     public function store(StoreCallLogRequest $request)
     {
-        $callLog = CallLog::create($request->validated());
+        $data = $request->validated();
+        $data['agent_id'] = auth()->id();
+        
+        $callLog = CallLog::create($data);
 
         return redirect()->route('admin.call-logs.index')
             ->with('success', 'Call log created successfully.');

@@ -150,10 +150,6 @@
                     <label class="block text-sm font-medium text-gray-500">Landlord Preference</label>
                     <p class="mt-1 text-sm text-gray-900">{{ ucfirst(str_replace('_', ' ', $callLog->landlord_preference)) }}</p>
                 </div>
-                <div class="md:col-span-2">
-                    <label class="block text-sm font-medium text-gray-500">Objection Response</label>
-                    <p class="mt-1 text-sm text-gray-900">{{ $callLog->objection_response ?? 'None specified' }}</p>
-                </div>
             </div>
         </div>
 

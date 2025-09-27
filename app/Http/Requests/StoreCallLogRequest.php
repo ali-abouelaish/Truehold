@@ -57,7 +57,6 @@ class StoreCallLogRequest extends FormRequest
             
             // Objection Handling
             'objections' => ['nullable', 'array'],
-            'objection_response' => ['nullable', 'string'],
             
             // Outcome & Next Steps
             'viewing_booked' => ['boolean'],
@@ -110,14 +109,4 @@ class StoreCallLogRequest extends FormRequest
         ];
     }
 
-    /**
-     * Prepare the data for validation.
-     */
-    protected function prepareForValidation(): void
-    {
-        $this->merge([
-            'agent_id' => auth()->id(),
-            'call_datetime' => $this->call_datetime ?? now(),
-        ]);
-    }
 }
