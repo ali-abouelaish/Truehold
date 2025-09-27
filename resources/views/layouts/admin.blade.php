@@ -213,6 +213,22 @@
                 </a>
 
                 <div class="px-4 mt-6 mb-4">
+                    <span class="sidebar-text text-xs font-semibold text-gray-500 uppercase tracking-wider">Call Logs</span>
+                </div>
+                
+                <a href="{{ route('admin.call-logs.index') }}" 
+                   class="sidebar-item flex items-center px-4 py-3 text-gray-700 hover:text-blue-600 {{ request()->routeIs('admin.call-logs*') ? 'active' : '' }}">
+                    <i class="fas fa-phone sidebar-icon mr-3 text-lg"></i>
+                    <span class="sidebar-text">All Call Logs</span>
+                </a>
+                
+                <a href="{{ route('admin.call-logs.create') }}" 
+                   class="sidebar-item flex items-center px-4 py-3 text-gray-700 hover:text-blue-600 {{ request()->routeIs('admin.call-logs.create') ? 'active' : '' }}">
+                    <i class="fas fa-plus sidebar-icon mr-3 text-lg"></i>
+                    <span class="sidebar-text">Log New Call</span>
+                </a>
+
+                <div class="px-4 mt-6 mb-4">
                     <span class="sidebar-text text-xs font-semibold text-gray-500 uppercase tracking-wider">Users</span>
                 </div>
                 
