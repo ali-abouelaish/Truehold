@@ -62,7 +62,7 @@
         </div>
 
         <!-- Landlord Details -->
-        <div class="mb-8">
+        <div class="mb-8 conditional-field">
             <h2 class="text-xl font-semibold mb-4 text-gray-800">Landlord Information</h2>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
@@ -109,7 +109,7 @@
         </div>
 
         <!-- Property Details -->
-        <div class="mb-8">
+        <div class="mb-8 conditional-field">
             <h2 class="text-xl font-semibold mb-4 text-gray-800">Property Information</h2>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div class="md:col-span-2">
@@ -165,7 +165,7 @@
         </div>
 
         <!-- Discovery & Compliance -->
-        <div class="mb-8">
+        <div class="mb-8 conditional-field">
             <h2 class="text-xl font-semibold mb-4 text-gray-800">Discovery & Compliance</h2>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div class="md:col-span-2">
@@ -224,7 +224,7 @@
         </div>
 
         <!-- Offer Presentation -->
-        <div class="mb-8">
+        <div class="mb-8 conditional-field">
             <h2 class="text-xl font-semibold mb-4 text-gray-800">Offer Presentation</h2>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
@@ -340,4 +340,38 @@
         </div>
     </form>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const callStatusSelect = document.getElementById('call_status');
+    const conditionalFields = document.querySelectorAll('.conditional-field');
+    
+    function toggleFields() {
+        const isNoAnswer = callStatusSelect.value === 'no_answer';
+        
+        conditionalFields.forEach(field => {
+            if (isNoAnswer) {
+                field.style.display = 'none';
+                // Make fields not required
+                const inputs = field.querySelectorAll('input[required], select[required], textarea[required]');
+                inputs.forEach(input => {
+                    input.removeAttribute('required');
+                });
+            } else {
+                field.style.display = 'block';
+                // Restore required attributes for essential fields
+                const inputs = field.querySelectorAll('input, select, textarea');
+                inputs.forEach(input => {
+                    if (field.classList.contains('required-field')) {
+                        input.setAttribute('required', 'required');
+                    }
+                });
+            }
+        });
+    }
+    
+    callStatusSelect.addEventListener('change', toggleFields);
+    toggleFields(); // Run on page load
+});
+</script>
 @endsection

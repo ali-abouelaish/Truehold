@@ -22,6 +22,8 @@ class UpdateCallLogRequest extends FormRequest
      */
     public function rules(): array
     {
+        $isNoAnswer = request('call_status') === 'no_answer';
+        
         return [
             // Call Metadata
             'call_type' => ['sometimes', 'in:outbound,inbound,follow_up,voicemail,sms_whatsapp'],
@@ -29,19 +31,19 @@ class UpdateCallLogRequest extends FormRequest
             'call_datetime' => ['nullable', 'date'],
             
             // Landlord Details
-            'landlord_name' => ['sometimes', 'string', 'max:255'],
+            'landlord_name' => [$isNoAnswer ? 'nullable' : 'sometimes', 'string', 'max:255'],
             'landlord_phone' => ['nullable', 'string', 'max:20'],
             'landlord_email' => ['nullable', 'email', 'max:255'],
             'landlord_company' => ['nullable', 'string', 'max:255'],
-            'contact_source' => ['sometimes', 'in:gumtree,spareroom,zoopla,rightmove,referral,other'],
+            'contact_source' => [$isNoAnswer ? 'nullable' : 'sometimes', 'in:gumtree,spareroom,zoopla,rightmove,referral,other'],
             
             // Property Details
-            'property_address' => ['sometimes', 'string', 'max:500'],
-            'property_type' => ['sometimes', 'in:studio,one_bed,two_bed,hmo,other'],
-            'advertised_rent' => ['sometimes', 'numeric', 'min:0', 'max:99999.99'],
+            'property_address' => [$isNoAnswer ? 'nullable' : 'sometimes', 'string', 'max:500'],
+            'property_type' => [$isNoAnswer ? 'nullable' : 'sometimes', 'in:studio,one_bed,two_bed,hmo,other'],
+            'advertised_rent' => [$isNoAnswer ? 'nullable' : 'sometimes', 'numeric', 'min:0', 'max:99999.99'],
             'availability_date' => ['nullable', 'date'],
             'vacant_keys' => ['boolean'],
-            'furnished' => ['sometimes', 'in:furnished,unfurnished,part_furnished,other'],
+            'furnished' => [$isNoAnswer ? 'nullable' : 'sometimes', 'in:furnished,unfurnished,part_furnished,other'],
             
             // Discovery & Compliance
             'works_pending' => ['nullable', 'string'],
@@ -49,12 +51,12 @@ class UpdateCallLogRequest extends FormRequest
             'compliance_eicr' => ['boolean'],
             'compliance_gas' => ['boolean'],
             'compliance_licence' => ['boolean'],
-            'landlord_priority' => ['sometimes', 'in:speed,best_price,hands_off,other'],
+            'landlord_priority' => [$isNoAnswer ? 'nullable' : 'sometimes', 'in:speed,best_price,hands_off,other'],
             'discovery_notes' => ['nullable', 'string'],
             
             // Offer Presentation
             'packages_discussed' => ['nullable', 'array'],
-            'landlord_preference' => ['sometimes', 'in:full_management,top_up,let_only,undecided'],
+            'landlord_preference' => [$isNoAnswer ? 'nullable' : 'sometimes', 'in:full_management,top_up,let_only,undecided'],
             
             // Objection Handling
             'objections' => ['nullable', 'array'],
@@ -64,7 +66,7 @@ class UpdateCallLogRequest extends FormRequest
             'viewing_datetime' => ['nullable', 'date'],
             'follow_up_needed' => ['boolean'],
             'follow_up_datetime' => ['nullable', 'date'],
-            'next_step_status' => ['sometimes', 'in:send_terms,send_compliance_docs,awaiting_response,collect_keys,tenant_reference_started,other'],
+            'next_step_status' => [$isNoAnswer ? 'nullable' : 'sometimes', 'in:send_terms,send_compliance_docs,awaiting_response,collect_keys,tenant_reference_started,other'],
             'call_outcome' => ['sometimes', 'in:instruction_won,pending,lost,not_interested'],
             'agent_notes' => ['nullable', 'string'],
             
