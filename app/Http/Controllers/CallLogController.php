@@ -5,8 +5,8 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreCallLogRequest;
 use App\Http\Requests\UpdateCallLogRequest;
 use App\Models\CallLog;
+use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Response;
 
 class CallLogController extends Controller
@@ -14,158 +14,156 @@ class CallLogController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(Request $request): JsonResponse
+    public function index(Request $request)
     {
         $query = CallLog::with('agent');
 
         // Filter by agent
-        if ($request->has('agent_id')) {
+        if ($request->has('agent_id') && $request->agent_id) {
             $query->where('agent_id', $request->agent_id);
         }
 
         // Filter by call status
-        if ($request->has('call_status')) {
+        if ($request->has('call_status') && $request->call_status) {
             $query->where('call_status', $request->call_status);
         }
 
         // Filter by call type
-        if ($request->has('call_type')) {
+        if ($request->has('call_type') && $request->call_type) {
             $query->where('call_type', $request->call_type);
         }
 
         // Filter by landlord name
-        if ($request->has('landlord_name')) {
+        if ($request->has('landlord_name') && $request->landlord_name) {
             $query->where('landlord_name', 'like', '%' . $request->landlord_name . '%');
         }
 
         // Filter by property address
-        if ($request->has('property_address')) {
+        if ($request->has('property_address') && $request->property_address) {
             $query->where('property_address', 'like', '%' . $request->property_address . '%');
         }
 
         // Filter by date range
-        if ($request->has('date_from')) {
+        if ($request->has('date_from') && $request->date_from) {
             $query->where('call_datetime', '>=', $request->date_from);
         }
 
-        if ($request->has('date_to')) {
+        if ($request->has('date_to') && $request->date_to) {
             $query->where('call_datetime', '<=', $request->date_to);
         }
 
         // Filter by call outcome
-        if ($request->has('call_outcome')) {
+        if ($request->has('call_outcome') && $request->call_outcome) {
             $query->where('call_outcome', $request->call_outcome);
         }
 
         // Order by call datetime (most recent first)
         $query->orderBy('call_datetime', 'desc');
 
-        // Paginate results
-        $perPage = $request->get('per_page', 15);
-        $callLogs = $query->paginate($perPage);
+        // Get all results (no pagination for simple web interface)
+        $callLogs = $query->get();
+        
+        // Get agents for filter dropdown
+        $agents = User::where('role', 'agent')->get();
 
-        return response()->json([
-            'success' => true,
-            'data' => $callLogs,
-            'message' => 'Call logs retrieved successfully'
-        ]);
+        return view('admin.call-logs.index', compact('callLogs', 'agents'));
+    }
+
+    /**
+     * Show the form for creating a new resource.
+     */
+    public function create()
+    {
+        return view('admin.call-logs.create');
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(StoreCallLogRequest $request): JsonResponse
+    public function store(StoreCallLogRequest $request)
     {
         $callLog = CallLog::create($request->validated());
 
-        return response()->json([
-            'success' => true,
-            'data' => $callLog->load('agent'),
-            'message' => 'Call log created successfully'
-        ], Response::HTTP_CREATED);
+        return redirect()->route('admin.call-logs.index')
+            ->with('success', 'Call log created successfully.');
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(CallLog $callLog): JsonResponse
+    public function show(CallLog $callLog)
     {
         // Ensure the user can only access their own call logs or is an admin
         if (auth()->user()->id !== $callLog->agent_id && !auth()->user()->isAdmin()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Unauthorized access to call log'
-            ], Response::HTTP_FORBIDDEN);
+            abort(403, 'Unauthorized access to call log');
         }
 
-        return response()->json([
-            'success' => true,
-            'data' => $callLog->load('agent'),
-            'message' => 'Call log retrieved successfully'
-        ]);
+        return view('admin.call-logs.show', compact('callLog'));
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function edit(CallLog $callLog)
+    {
+        // Ensure the user can only edit their own call logs or is an admin
+        if (auth()->user()->id !== $callLog->agent_id && !auth()->user()->isAdmin()) {
+            abort(403, 'Unauthorized access to call log');
+        }
+
+        return view('admin.call-logs.edit', compact('callLog'));
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateCallLogRequest $request, CallLog $callLog): JsonResponse
+    public function update(UpdateCallLogRequest $request, CallLog $callLog)
     {
         // Ensure the user can only update their own call logs or is an admin
         if (auth()->user()->id !== $callLog->agent_id && !auth()->user()->isAdmin()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Unauthorized access to call log'
-            ], Response::HTTP_FORBIDDEN);
+            abort(403, 'Unauthorized access to call log');
         }
 
         $callLog->update($request->validated());
 
-        return response()->json([
-            'success' => true,
-            'data' => $callLog->load('agent'),
-            'message' => 'Call log updated successfully'
-        ]);
+        return redirect()->route('admin.call-logs.index')
+            ->with('success', 'Call log updated successfully.');
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(CallLog $callLog): JsonResponse
+    public function destroy(CallLog $callLog)
     {
         // Ensure the user can only delete their own call logs or is an admin
         if (auth()->user()->id !== $callLog->agent_id && !auth()->user()->isAdmin()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Unauthorized access to call log'
-            ], Response::HTTP_FORBIDDEN);
+            abort(403, 'Unauthorized access to call log');
         }
 
         $callLog->delete();
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Call log deleted successfully'
-        ]);
+        return redirect()->route('admin.call-logs.index')
+            ->with('success', 'Call log deleted successfully.');
     }
 
     /**
      * Get call logs statistics for dashboard
      */
-    public function stats(Request $request): JsonResponse
+    public function stats(Request $request)
     {
         $query = CallLog::query();
 
         // Filter by agent if specified
-        if ($request->has('agent_id')) {
+        if ($request->has('agent_id') && $request->agent_id) {
             $query->where('agent_id', $request->agent_id);
         }
 
         // Filter by date range if specified
-        if ($request->has('date_from')) {
+        if ($request->has('date_from') && $request->date_from) {
             $query->where('call_datetime', '>=', $request->date_from);
         }
 
-        if ($request->has('date_to')) {
+        if ($request->has('date_to') && $request->date_to) {
             $query->where('call_datetime', '<=', $request->date_to);
         }
 
@@ -186,23 +184,19 @@ class CallLogController extends Controller
             'viewing_booked_count' => $query->where('viewing_booked', true)->count(),
         ];
 
-        return response()->json([
-            'success' => true,
-            'data' => $stats,
-            'message' => 'Call log statistics retrieved successfully'
-        ]);
+        return view('admin.call-logs.stats', compact('stats'));
     }
 
     /**
      * Get call logs that need follow-up
      */
-    public function followUps(Request $request): JsonResponse
+    public function followUps(Request $request)
     {
         $query = CallLog::with('agent')
             ->where('follow_up_needed', true);
 
         // Filter by agent if specified
-        if ($request->has('agent_id')) {
+        if ($request->has('agent_id') && $request->agent_id) {
             $query->where('agent_id', $request->agent_id);
         }
 
@@ -214,20 +208,16 @@ class CallLogController extends Controller
             });
         }
 
-        $followUps = $query->orderBy('follow_up_datetime', 'asc')
-            ->paginate($request->get('per_page', 15));
+        $followUps = $query->orderBy('follow_up_datetime', 'asc')->get();
+        $agents = User::where('role', 'agent')->get();
 
-        return response()->json([
-            'success' => true,
-            'data' => $followUps,
-            'message' => 'Follow-up call logs retrieved successfully'
-        ]);
+        return view('admin.call-logs.follow-ups', compact('followUps', 'agents'));
     }
 
     /**
      * Get recent call logs for the authenticated agent
      */
-    public function recent(Request $request): JsonResponse
+    public function recent(Request $request)
     {
         $limit = $request->get('limit', 10);
         
@@ -237,10 +227,6 @@ class CallLogController extends Controller
             ->limit($limit)
             ->get();
 
-        return response()->json([
-            'success' => true,
-            'data' => $recentCalls,
-            'message' => 'Recent call logs retrieved successfully'
-        ]);
+        return view('admin.call-logs.recent', compact('recentCalls'));
     }
 }
