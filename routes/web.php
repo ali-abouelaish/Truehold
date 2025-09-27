@@ -9,6 +9,7 @@ use App\Http\Controllers\RentalCodeController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\GroupViewingController;
 use App\Http\Controllers\CallLogController;
+use App\Http\Controllers\ProfileController;
 
 Route::get('/', function () {
     return redirect('/properties');
@@ -132,6 +133,13 @@ Route::middleware('auth')->prefix('admin')->group(function () {
     Route::get('/call-logs/stats', [CallLogController::class, 'stats'])->name('admin.call-logs.stats');
     Route::get('/call-logs/follow-ups', [CallLogController::class, 'followUps'])->name('admin.call-logs.follow-ups');
     Route::get('/call-logs/recent', [CallLogController::class, 'recent'])->name('admin.call-logs.recent');
+});
+
+// Profile routes - require authentication
+Route::middleware('auth')->group(function () {
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
 // Logout route
