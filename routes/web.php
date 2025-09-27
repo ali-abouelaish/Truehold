@@ -8,6 +8,7 @@ use App\Http\Controllers\AdminController;
 use App\Http\Controllers\RentalCodeController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\GroupViewingController;
+use App\Http\Controllers\CallLogController;
 
 Route::get('/', function () {
     return redirect('/properties');
@@ -117,6 +118,20 @@ Route::middleware('auth')->prefix('admin')->group(function () {
     Route::post('/invoices/{invoice}/mark-sent', [InvoiceController::class, 'markAsSent'])->name('admin.invoices.mark-sent');
     Route::post('/invoices/{invoice}/mark-paid', [InvoiceController::class, 'markAsPaid'])->name('admin.invoices.mark-paid');
     Route::post('/invoices/{invoice}/duplicate', [InvoiceController::class, 'duplicate'])->name('admin.invoices.duplicate');
+    
+    // Call Log Management Routes
+    Route::resource('call-logs', CallLogController::class)->names([
+        'index' => 'admin.call-logs.index',
+        'create' => 'admin.call-logs.create',
+        'store' => 'admin.call-logs.store',
+        'show' => 'admin.call-logs.show',
+        'edit' => 'admin.call-logs.edit',
+        'update' => 'admin.call-logs.update',
+        'destroy' => 'admin.call-logs.destroy'
+    ]);
+    Route::get('/call-logs/stats', [CallLogController::class, 'stats'])->name('admin.call-logs.stats');
+    Route::get('/call-logs/follow-ups', [CallLogController::class, 'followUps'])->name('admin.call-logs.follow-ups');
+    Route::get('/call-logs/recent', [CallLogController::class, 'recent'])->name('admin.call-logs.recent');
 });
 
 // Logout route

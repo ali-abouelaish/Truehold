@@ -19,5 +19,18 @@ class DatabaseSeeder extends Seeder
             'name' => 'Test User',
             'email' => 'test@example.com',
         ]);
+
+        // Run existing seeders
+        $this->call([
+            AgentSeeder::class,
+            AgentUserSeeder::class,
+            ClientSeeder::class,
+            PropertySeeder::class,
+            InvoiceSeeder::class,
+        ]);
+
+        // Add CallLogSeeder if you want sample data
+        // Uncomment the line below to seed sample call logs
+        // $this->call(CallLogSeeder::class);
     }
 }
