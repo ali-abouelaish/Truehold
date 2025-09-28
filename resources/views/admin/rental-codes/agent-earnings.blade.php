@@ -136,7 +136,7 @@
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-purple-100 text-sm font-medium">Total Transactions</p>
-                        <p class="text-3xl font-bold">{{ $summary['total_rent_transactions'] + $summary['total_client_transactions'] }}</p>
+                        <p class="text-3xl font-bold">{{ $summary['total_transactions'] }}</p>
                     </div>
                     <div class="bg-purple-400 bg-opacity-30 p-3 rounded-lg">
                         <i class="fas fa-file-invoice text-2xl"></i>
@@ -224,10 +224,10 @@
                                 Agent
                             </th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Rent Earnings
+                                Agency Earnings
                             </th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Client Earnings
+                                Agent Earnings
                             </th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Total Earnings
@@ -258,26 +258,29 @@
                                     </div>
                                     <div>
                                         <div class="text-sm font-semibold text-gray-900">{{ $agent['name'] }}</div>
-                                        <div class="text-xs text-gray-500">{{ $agent['total_count'] }} total transactions</div>
+                                        <div class="text-xs text-gray-500">{{ $agent['transaction_count'] }} total transactions</div>
                                     </div>
                                 </div>
                             </td>
                             
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="text-sm font-semibold text-gray-900">
-                                    £{{ number_format($agent['rent_earnings'], 2) }}
+                                    £{{ number_format($agent['agency_earnings'], 2) }}
                                 </div>
                                 <div class="text-xs text-gray-500">
-                                    {{ $agent['rent_count'] }} rent transactions
+                                    45% of commission
                                 </div>
                             </td>
                             
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="text-sm font-semibold text-gray-900">
-                                    £{{ number_format($agent['client_earnings'], 2) }}
+                                    £{{ number_format($agent['agent_earnings'], 2) }}
                                 </div>
                                 <div class="text-xs text-gray-500">
-                                    {{ $agent['client_count'] }} client transactions
+                                    55% of commission
+                                    @if($agent['marketing_deductions'] > 0)
+                                        <br><span class="text-red-500">-£{{ number_format($agent['marketing_deductions'], 2) }} marketing</span>
+                                    @endif
                                 </div>
                             </td>
                             
@@ -286,19 +289,14 @@
                                     £{{ number_format($agent['total_earnings'], 2) }}
                                 </div>
                                 <div class="text-xs text-gray-500">
-                                    {{ $agent['total_count'] }} total
+                                    {{ $agent['transaction_count'] }} total
                                 </div>
                             </td>
                             
                             <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="flex space-x-1">
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                                        {{ $agent['rent_count'] }}R
-                                    </span>
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                        {{ $agent['client_count'] }}C
-                                    </span>
-                                </div>
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                    {{ $agent['transaction_count'] }} transactions
+                                </span>
                             </td>
                             
                             <td class="px-6 py-4 whitespace-nowrap">
@@ -349,7 +347,7 @@
                                 </div>
                                 <div>
                                     <h4 class="font-semibold text-gray-900">{{ $agent['name'] }}</h4>
-                                    <p class="text-xs text-gray-500">{{ $agent['total_count'] }} transactions</p>
+                                    <p class="text-xs text-gray-500">{{ $agent['transaction_count'] }} transactions</p>
                                 </div>
                             </div>
                             <button onclick="showAgentDetails('{{ $agent['name'] }}')" 
@@ -366,12 +364,15 @@
                             
                             <div class="grid grid-cols-2 gap-3">
                                 <div class="text-center p-3 bg-blue-50 rounded-lg">
-                                    <div class="text-sm font-semibold text-blue-900">£{{ number_format($agent['rent_earnings'], 2) }}</div>
-                                    <div class="text-xs text-blue-600">{{ $agent['rent_count'] }} Rent</div>
+                                    <div class="text-sm font-semibold text-blue-900">£{{ number_format($agent['agency_earnings'], 2) }}</div>
+                                    <div class="text-xs text-blue-600">Agency (45%)</div>
                                 </div>
                                 <div class="text-center p-3 bg-green-50 rounded-lg">
-                                    <div class="text-sm font-semibold text-green-900">£{{ number_format($agent['client_earnings'], 2) }}</div>
-                                    <div class="text-xs text-green-600">{{ $agent['client_count'] }} Client</div>
+                                    <div class="text-sm font-semibold text-green-900">£{{ number_format($agent['agent_earnings'], 2) }}</div>
+                                    <div class="text-xs text-green-600">Agent (55%)</div>
+                                    @if($agent['marketing_deductions'] > 0)
+                                        <div class="text-xs text-red-600">-£{{ number_format($agent['marketing_deductions'], 2) }} marketing</div>
+                                    @endif
                                 </div>
                             </div>
                             
@@ -544,49 +545,51 @@ function showAgentDetails(agentName) {
     
     document.getElementById('modalTitle').textContent = agentName + ' - Detailed Analysis';
     
-    const transactions = agentData.transactions.slice(0, 10); // Show last 10 transactions
-    let transactionsHtml = '';
-    
-    transactions.forEach(transaction => {
-        transactionsHtml += `
-            <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg mb-2">
-                <div class="flex items-center">
-                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${transaction.type === 'rent' ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800'}">
-                        ${transaction.type.toUpperCase()}
-                    </span>
-                    <span class="ml-3 text-sm font-medium text-gray-900">${transaction.code}</span>
-                </div>
-                <div class="text-right">
-                    <div class="text-sm font-semibold text-gray-900">£${parseFloat(transaction.fee).toFixed(2)}</div>
-                    <div class="text-xs text-gray-500">${new Date(transaction.date).toLocaleDateString()}</div>
-                </div>
-            </div>
-        `;
-    });
-    
-    document.getElementById('modalContent').innerHTML = `
-        <div class="space-y-6">
-            <div class="grid grid-cols-3 gap-4">
-                <div class="text-center p-4 bg-blue-50 rounded-lg">
-                    <div class="text-2xl font-bold text-blue-900">£${parseFloat(agentData.total_earnings).toFixed(2)}</div>
-                    <div class="text-sm text-blue-600">Total Earnings</div>
-                </div>
-                <div class="text-center p-4 bg-green-50 rounded-lg">
-                    <div class="text-2xl font-bold text-green-900">${agentData.total_count}</div>
-                    <div class="text-sm text-green-600">Total Transactions</div>
-                </div>
-                <div class="text-center p-4 bg-purple-50 rounded-lg">
-                    <div class="text-2xl font-bold text-purple-900">£${parseFloat(agentData.avg_transaction_value).toFixed(2)}</div>
-                    <div class="text-sm text-purple-600">Avg per Transaction</div>
-                </div>
-            </div>
-            
-            <div>
-                <h4 class="font-semibold text-gray-900 mb-3">Recent Transactions</h4>
-                ${transactionsHtml}
-            </div>
-        </div>
-    `;
+     const transactions = agentData.transactions.slice(0, 10); // Show last 10 transactions
+     let transactionsHtml = '';
+     
+     transactions.forEach(transaction => {
+         transactionsHtml += `
+             <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg mb-2">
+                 <div class="flex items-center">
+                     <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${transaction.payment_method === 'Transfer' ? 'bg-purple-100 text-purple-800' : 'bg-green-100 text-green-800'}">
+                         ${transaction.payment_method}
+                     </span>
+                     <span class="ml-3 text-sm font-medium text-gray-900">${transaction.code}</span>
+                     ${transaction.is_marketing_agent ? '<span class="ml-2 text-xs text-red-600">Marketing Agent</span>' : ''}
+                 </div>
+                 <div class="text-right">
+                     <div class="text-sm font-semibold text-gray-900">£${parseFloat(transaction.total_fee).toFixed(2)}</div>
+                     <div class="text-xs text-gray-500">Agency: £${parseFloat(transaction.agency_cut).toFixed(2)} | Agent: £${parseFloat(transaction.agent_cut).toFixed(2)}</div>
+                     ${transaction.vat_amount > 0 ? '<div class="text-xs text-orange-600">VAT: £' + parseFloat(transaction.vat_amount).toFixed(2) + '</div>' : ''}
+                 </div>
+             </div>
+         `;
+     });
+     
+     document.getElementById('modalContent').innerHTML = `
+         <div class="space-y-6">
+             <div class="grid grid-cols-3 gap-4">
+                 <div class="text-center p-4 bg-blue-50 rounded-lg">
+                     <div class="text-2xl font-bold text-blue-900">£${parseFloat(agentData.total_earnings).toFixed(2)}</div>
+                     <div class="text-sm text-blue-600">Total Commission</div>
+                 </div>
+                 <div class="text-center p-4 bg-green-50 rounded-lg">
+                     <div class="text-2xl font-bold text-green-900">£${parseFloat(agentData.agent_earnings).toFixed(2)}</div>
+                     <div class="text-sm text-green-600">Agent Earnings</div>
+                 </div>
+                 <div class="text-center p-4 bg-purple-50 rounded-lg">
+                     <div class="text-2xl font-bold text-purple-900">${agentData.transaction_count}</div>
+                     <div class="text-sm text-purple-600">Transactions</div>
+                 </div>
+             </div>
+             
+             <div>
+                 <h4 class="font-semibold text-gray-900 mb-3">Recent Transactions</h4>
+                 ${transactionsHtml}
+             </div>
+         </div>
+     `;
     
     document.getElementById('agentModal').classList.remove('hidden');
 }
