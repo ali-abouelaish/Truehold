@@ -224,10 +224,10 @@
                                 Agent
                             </th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Agency Earnings
+                                Agent Earnings
                             </th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Agent Earnings
+                                Agency Earnings
                             </th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Total Earnings
@@ -265,19 +265,19 @@
                             
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="text-sm font-semibold text-gray-900">
-                                    £{{ number_format($agent['agency_earnings'], 2) }}
+                                    £{{ number_format($agent['agent_earnings'], 2) }}
                                 </div>
                                 <div class="text-xs text-gray-500">
-                                    45% of commission
+                                    55% of commission
                                 </div>
                             </td>
                             
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="text-sm font-semibold text-gray-900">
-                                    £{{ number_format($agent['agent_earnings'], 2) }}
+                                    £{{ number_format($agent['agency_earnings'], 2) }}
                                 </div>
                                 <div class="text-xs text-gray-500">
-                                    55% of commission
+                                    45% of commission
                                 </div>
                             </td>
                             
@@ -363,13 +363,13 @@
                             </div>
                             
                             <div class="grid grid-cols-2 gap-3">
-                                <div class="text-center p-3 bg-blue-50 rounded-lg">
-                                    <div class="text-sm font-semibold text-blue-900">£{{ number_format($agent['agency_earnings'], 2) }}</div>
-                                    <div class="text-xs text-blue-600">Agency (45%)</div>
-                                </div>
                                 <div class="text-center p-3 bg-green-50 rounded-lg">
                                     <div class="text-sm font-semibold text-green-900">£{{ number_format($agent['agent_earnings'], 2) }}</div>
                                     <div class="text-xs text-green-600">Agent (55%)</div>
+                                </div>
+                                <div class="text-center p-3 bg-blue-50 rounded-lg">
+                                    <div class="text-sm font-semibold text-blue-900">£{{ number_format($agent['agency_earnings'], 2) }}</div>
+                                    <div class="text-xs text-blue-600">Agency (45%)</div>
                                 </div>
                             </div>
                             
