@@ -123,11 +123,11 @@
             <div class="bg-gradient-to-r from-green-500 to-green-600 rounded-xl p-6 text-white">
                 <div class="flex items-center justify-between">
                     <div>
-                        <p class="text-green-100 text-sm font-medium">Total Earnings</p>
-                        <p class="text-3xl font-bold">£{{ number_format($summary['total_earnings'], 2) }}</p>
+                        <p class="text-green-100 text-sm font-medium">Total Agency Earnings</p>
+                        <p class="text-3xl font-bold">£{{ number_format($summary['total_agency_earnings'], 2) }}</p>
                     </div>
                     <div class="bg-green-400 bg-opacity-30 p-3 rounded-lg">
-                        <i class="fas fa-pound-sign text-2xl"></i>
+                        <i class="fas fa-building text-2xl"></i>
                     </div>
                 </div>
             </div>
@@ -135,11 +135,11 @@
             <div class="bg-gradient-to-r from-purple-500 to-purple-600 rounded-xl p-6 text-white">
                 <div class="flex items-center justify-between">
                     <div>
-                        <p class="text-purple-100 text-sm font-medium">Total Transactions</p>
-                        <p class="text-3xl font-bold">{{ $summary['total_rent_transactions'] + $summary['total_client_transactions'] }}</p>
+                        <p class="text-purple-100 text-sm font-medium">Total Agent Earnings</p>
+                        <p class="text-3xl font-bold">£{{ number_format($summary['total_agent_earnings'], 2) }}</p>
                     </div>
                     <div class="bg-purple-400 bg-opacity-30 p-3 rounded-lg">
-                        <i class="fas fa-file-invoice text-2xl"></i>
+                        <i class="fas fa-users text-2xl"></i>
                     </div>
                 </div>
             </div>
@@ -147,11 +147,11 @@
             <div class="bg-gradient-to-r from-orange-500 to-orange-600 rounded-xl p-6 text-white">
                 <div class="flex items-center justify-between">
                     <div>
-                        <p class="text-orange-100 text-sm font-medium">Avg per Agent</p>
-                        <p class="text-3xl font-bold">£{{ number_format($summary['avg_earnings_per_agent'], 2) }}</p>
+                        <p class="text-orange-100 text-sm font-medium">Total Transactions</p>
+                        <p class="text-3xl font-bold">{{ $summary['total_transactions'] }}</p>
                     </div>
                     <div class="bg-orange-400 bg-opacity-30 p-3 rounded-lg">
-                        <i class="fas fa-chart-bar text-2xl"></i>
+                        <i class="fas fa-file-invoice text-2xl"></i>
                     </div>
                 </div>
             </div>
@@ -224,13 +224,13 @@
                                 Agent
                             </th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Rent Earnings
+                                Agency Cut (45%)
                             </th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Client Earnings
+                                Agent Cut (55%)
                             </th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Total Earnings
+                                Total Commission
                             </th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Transactions
@@ -265,19 +265,22 @@
                             
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="text-sm font-semibold text-gray-900">
-                                    £{{ number_format($agent['rent_earnings'], 2) }}
+                                    £{{ number_format($agent['agency_earnings'], 2) }}
                                 </div>
                                 <div class="text-xs text-gray-500">
-                                    {{ $agent['rent_count'] }} rent transactions
+                                    45% of commission
                                 </div>
                             </td>
                             
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="text-sm font-semibold text-gray-900">
-                                    £{{ number_format($agent['client_earnings'], 2) }}
+                                    £{{ number_format($agent['agent_earnings'], 2) }}
                                 </div>
                                 <div class="text-xs text-gray-500">
-                                    {{ $agent['client_count'] }} client transactions
+                                    55% of commission
+                                    @if($agent['marketing_deductions'] > 0)
+                                        <br><span class="text-red-500">-£{{ number_format($agent['marketing_deductions'], 2) }} marketing</span>
+                                    @endif
                                 </div>
                             </td>
                             
@@ -286,19 +289,17 @@
                                     £{{ number_format($agent['total_earnings'], 2) }}
                                 </div>
                                 <div class="text-xs text-gray-500">
-                                    {{ $agent['total_count'] }} total
+                                    {{ $agent['transaction_count'] }} transactions
+                                    @if($agent['vat_deductions'] > 0)
+                                        <br><span class="text-orange-500">-£{{ number_format($agent['vat_deductions'], 2) }} VAT</span>
+                                    @endif
                                 </div>
                             </td>
                             
                             <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="flex space-x-1">
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                                        {{ $agent['rent_count'] }}R
-                                    </span>
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                        {{ $agent['client_count'] }}C
-                                    </span>
-                                </div>
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                    {{ $agent['transaction_count'] }}
+                                </span>
                             </td>
                             
                             <td class="px-6 py-4 whitespace-nowrap">
@@ -366,12 +367,15 @@
                             
                             <div class="grid grid-cols-2 gap-3">
                                 <div class="text-center p-3 bg-blue-50 rounded-lg">
-                                    <div class="text-sm font-semibold text-blue-900">£{{ number_format($agent['rent_earnings'], 2) }}</div>
-                                    <div class="text-xs text-blue-600">{{ $agent['rent_count'] }} Rent</div>
+                                    <div class="text-sm font-semibold text-blue-900">£{{ number_format($agent['agency_earnings'], 2) }}</div>
+                                    <div class="text-xs text-blue-600">Agency (45%)</div>
                                 </div>
                                 <div class="text-center p-3 bg-green-50 rounded-lg">
-                                    <div class="text-sm font-semibold text-green-900">£{{ number_format($agent['client_earnings'], 2) }}</div>
-                                    <div class="text-xs text-green-600">{{ $agent['client_count'] }} Client</div>
+                                    <div class="text-sm font-semibold text-green-900">£{{ number_format($agent['agent_earnings'], 2) }}</div>
+                                    <div class="text-xs text-green-600">Agent (55%)</div>
+                                    @if($agent['marketing_deductions'] > 0)
+                                        <div class="text-xs text-red-500">-£{{ number_format($agent['marketing_deductions'], 2) }} marketing</div>
+                                    @endif
                                 </div>
                             </div>
                             
@@ -548,18 +552,36 @@ function showAgentDetails(agentName) {
     let transactionsHtml = '';
     
     transactions.forEach(transaction => {
+        const vatText = transaction.vat_amount > 0 ? `<div class="text-xs text-orange-500">VAT: -£${transaction.vat_amount.toFixed(2)}</div>` : '';
+        const marketingText = transaction.marketing_deduction > 0 ? `<div class="text-xs text-red-500">Marketing: -£${transaction.marketing_deduction.toFixed(2)}</div>` : '';
+        
         transactionsHtml += `
-            <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg mb-2">
-                <div class="flex items-center">
-                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${transaction.type === 'rent' ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800'}">
-                        ${transaction.type.toUpperCase()}
-                    </span>
-                    <span class="ml-3 text-sm font-medium text-gray-900">${transaction.code}</span>
+            <div class="p-3 bg-gray-50 rounded-lg mb-2">
+                <div class="flex items-center justify-between mb-2">
+                    <div class="flex items-center">
+                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${transaction.payment_method === 'Transfer' ? 'bg-purple-100 text-purple-800' : 'bg-green-100 text-green-800'}">
+                            ${transaction.payment_method}
+                        </span>
+                        <span class="ml-3 text-sm font-medium text-gray-900">${transaction.code}</span>
+                        ${transaction.is_marketing_agent ? '<span class="ml-2 text-xs text-red-600">Marketing Agent</span>' : ''}
+                    </div>
+                    <div class="text-right">
+                        <div class="text-sm font-semibold text-gray-900">£${parseFloat(transaction.total_fee).toFixed(2)}</div>
+                        <div class="text-xs text-gray-500">${new Date(transaction.date).toLocaleDateString()}</div>
+                    </div>
                 </div>
-                <div class="text-right">
-                    <div class="text-sm font-semibold text-gray-900">£${parseFloat(transaction.fee).toFixed(2)}</div>
-                    <div class="text-xs text-gray-500">${new Date(transaction.date).toLocaleDateString()}</div>
+                <div class="grid grid-cols-2 gap-2 text-xs">
+                    <div class="bg-blue-50 p-2 rounded">
+                        <div class="font-semibold text-blue-900">Agency: £${transaction.agency_cut.toFixed(2)}</div>
+                        <div class="text-blue-600">45%</div>
+                    </div>
+                    <div class="bg-green-50 p-2 rounded">
+                        <div class="font-semibold text-green-900">Agent: £${transaction.agent_cut.toFixed(2)}</div>
+                        <div class="text-green-600">55%</div>
+                        ${marketingText}
+                    </div>
                 </div>
+                ${vatText}
             </div>
         `;
     });
@@ -568,16 +590,16 @@ function showAgentDetails(agentName) {
         <div class="space-y-6">
             <div class="grid grid-cols-3 gap-4">
                 <div class="text-center p-4 bg-blue-50 rounded-lg">
-                    <div class="text-2xl font-bold text-blue-900">£${parseFloat(agentData.total_earnings).toFixed(2)}</div>
-                    <div class="text-sm text-blue-600">Total Earnings</div>
+                    <div class="text-2xl font-bold text-blue-900">£${parseFloat(agentData.agency_earnings).toFixed(2)}</div>
+                    <div class="text-sm text-blue-600">Agency Earnings (45%)</div>
                 </div>
                 <div class="text-center p-4 bg-green-50 rounded-lg">
-                    <div class="text-2xl font-bold text-green-900">${agentData.total_count}</div>
-                    <div class="text-sm text-green-600">Total Transactions</div>
+                    <div class="text-2xl font-bold text-green-900">£${parseFloat(agentData.agent_earnings).toFixed(2)}</div>
+                    <div class="text-sm text-green-600">Agent Earnings (55%)</div>
                 </div>
                 <div class="text-center p-4 bg-purple-50 rounded-lg">
-                    <div class="text-2xl font-bold text-purple-900">£${parseFloat(agentData.avg_transaction_value).toFixed(2)}</div>
-                    <div class="text-sm text-purple-600">Avg per Transaction</div>
+                    <div class="text-2xl font-bold text-purple-900">${agentData.transaction_count}</div>
+                    <div class="text-sm text-purple-600">Total Transactions</div>
                 </div>
             </div>
             
