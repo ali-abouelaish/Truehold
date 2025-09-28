@@ -292,19 +292,41 @@ class RentalCodeController extends Controller
 
         $rentalCodes = $query->get();
 
-        // Get all agent users from the users table
+        // Get all agent users from the users table with null checks
         $agentUsers = User::where('role', 'agent')->pluck('name', 'id')->toArray();
         $agentUserIds = User::where('role', 'agent')->pluck('id')->toArray();
         $agentUserNames = array_values($agentUsers);
+        
+        // Debug logging
+        \Log::info('Agent users found', [
+            'agent_users_count' => count($agentUsers),
+            'agent_users' => $agentUsers,
+            'agent_user_ids' => $agentUserIds
+        ]);
+        
+        // If no registered agents found, show all agents from rental codes
+        if (empty($agentUsers)) {
+            \Log::warning('No registered agents found, will show all agents from rental codes');
+        }
 
         // Aggregate by agent name - only count actual agent users
         $byAgent = [];
         $agentStats = [];
         
         foreach ($rentalCodes as $code) {
-            $totalFee = (float) $code->consultation_fee;
-            $rentalDate = $code->rental_date;
-            $paymentMethod = $code->payment_method;
+            // Add null checks for all data
+            $totalFee = (float) ($code->consultation_fee ?? 0);
+            $rentalDate = $code->rental_date ?? now();
+            $paymentMethod = $code->payment_method ?? 'Cash';
+            
+            // Skip if no consultation fee
+            if ($totalFee <= 0) {
+                \Log::warning('Skipping rental code with no consultation fee', [
+                    'code' => $code->rental_code ?? 'N/A',
+                    'consultation_fee' => $code->consultation_fee
+                ]);
+                continue;
+            }
 
             // Calculate base commission after VAT (for Transfer payments)
             $baseCommission = $totalFee;
@@ -321,15 +343,77 @@ class RentalCodeController extends Controller
             $agentId = $code->client_by_agent ?: $code->rent_by_agent;
             $agentName = null;
             
-            // Check if agent is a valid agent user
-            if (is_numeric($agentId) && in_array((int)$agentId, $agentUserIds)) {
-                $agentName = $agentUsers[(int)$agentId];
-            } elseif (is_string($agentId)) {
-                foreach ($agentUsers as $id => $name) {
-                    if (strcasecmp(trim($agentId), $name) === 0) {
-                        $agentName = $name;
-                        break;
+            // Debug logging
+            \Log::info('Processing rental code', [
+                'code' => $code->rental_code ?? 'N/A',
+                'client_by_agent' => $code->client_by_agent,
+                'rent_by_agent' => $code->rent_by_agent,
+                'client_by_agent_name' => $code->client_by_agent_name,
+                'rent_by_agent_name' => $code->rent_by_agent_name,
+                'agent_id' => $agentId,
+                'agent_users_count' => count($agentUsers)
+            ]);
+            
+            // First try to find agent by ID
+            if (!empty($agentId) && is_numeric($agentId) && in_array((int)$agentId, $agentUserIds)) {
+                $agentName = $agentUsers[(int)$agentId] ?? null;
+                \Log::info('Found agent by ID', ['agent_id' => $agentId, 'agent_name' => $agentName]);
+            } else {
+                // Try to find agent by name from the rental code
+                $clientAgentName = $code->client_by_agent_name;
+                $rentAgentName = $code->rent_by_agent_name;
+                
+                // Prioritize client agent name
+                if (!empty($clientAgentName) && in_array($clientAgentName, $agentUserNames)) {
+                    $agentName = $clientAgentName;
+                    \Log::info('Found agent by client name', ['agent_name' => $agentName]);
+                } elseif (!empty($rentAgentName) && in_array($rentAgentName, $agentUserNames)) {
+                    $agentName = $rentAgentName;
+                    \Log::info('Found agent by rent name', ['agent_name' => $agentName]);
+                } else {
+                    // Try to match by name in agent users
+                    if (!empty($clientAgentName)) {
+                        foreach ($agentUsers as $id => $name) {
+                            if (!empty($name) && strcasecmp(trim($clientAgentName), trim($name)) === 0) {
+                                $agentName = $name;
+                                \Log::info('Found agent by client name match', ['client_name' => $clientAgentName, 'agent_name' => $agentName]);
+                                break;
+                            }
+                        }
                     }
+                    
+                    if (empty($agentName) && !empty($rentAgentName)) {
+                        foreach ($agentUsers as $id => $name) {
+                            if (!empty($name) && strcasecmp(trim($rentAgentName), trim($name)) === 0) {
+                                $agentName = $name;
+                                \Log::info('Found agent by rent name match', ['rent_name' => $rentAgentName, 'agent_name' => $agentName]);
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+            
+            // If no agent found, create a fallback
+            if (empty($agentName)) {
+                \Log::warning('No valid agent found for rental code', [
+                    'code' => $code->rental_code ?? 'N/A',
+                    'agent_id' => $agentId,
+                    'client_by_agent' => $code->client_by_agent,
+                    'rent_by_agent' => $code->rent_by_agent,
+                    'client_by_agent_name' => $code->client_by_agent_name,
+                    'rent_by_agent_name' => $code->rent_by_agent_name
+                ]);
+                
+                // Create a fallback agent name for unregistered agents
+                if (!empty($code->client_by_agent_name)) {
+                    $agentName = $code->client_by_agent_name;
+                } elseif (!empty($code->rent_by_agent_name)) {
+                    $agentName = $code->rent_by_agent_name;
+                } elseif (!empty($agentId)) {
+                    $agentName = is_string($agentId) ? trim($agentId) : "Agent-{$agentId}";
+                } else {
+                    $agentName = "Unknown Agent";
                 }
             }
             
@@ -368,8 +452,8 @@ class RentalCodeController extends Controller
                     'agent_cut' => $agentCut,
                     'vat_amount' => $paymentMethod === 'Transfer' ? ($totalFee - $baseCommission) : 0,
                     'date' => $rentalDate,
-                    'code' => $code->rental_code,
-                    'status' => $code->status,
+                    'code' => $code->rental_code ?? 'N/A',
+                    'status' => $code->status ?? 'Unknown',
                     'payment_method' => $paymentMethod,
                 ];
                 
@@ -437,9 +521,15 @@ class RentalCodeController extends Controller
         // Calculate monthly totals - only for registered agent users with proper commission structure
         $monthlyTotals = [];
         foreach ($rentalCodes as $code) {
-            $totalFee = (float) $code->consultation_fee;
-            $monthKey = $code->rental_date->format('Y-m');
-            $paymentMethod = $code->payment_method;
+            $totalFee = (float) ($code->consultation_fee ?? 0);
+            $rentalDate = $code->rental_date ?? now();
+            $monthKey = $rentalDate->format('Y-m');
+            $paymentMethod = $code->payment_method ?? 'Cash';
+            
+            // Skip if no consultation fee
+            if ($totalFee <= 0) {
+                continue;
+            }
             
             // Calculate base commission after VAT (for Transfer payments)
             $baseCommission = $totalFee;
@@ -451,19 +541,55 @@ class RentalCodeController extends Controller
             $agentId = $code->client_by_agent ?: $code->rent_by_agent;
             $agentName = null;
             
-            // Check if agent is a valid agent user
-            if (is_numeric($agentId) && in_array((int)$agentId, $agentUserIds)) {
-                $agentName = $agentUsers[(int)$agentId];
-            } elseif (is_string($agentId)) {
-                foreach ($agentUsers as $id => $name) {
-                    if (strcasecmp(trim($agentId), $name) === 0) {
-                        $agentName = $name;
-                        break;
+            // First try to find agent by ID
+            if (!empty($agentId) && is_numeric($agentId) && in_array((int)$agentId, $agentUserIds)) {
+                $agentName = $agentUsers[(int)$agentId] ?? null;
+            } else {
+                // Try to find agent by name from the rental code
+                $clientAgentName = $code->client_by_agent_name;
+                $rentAgentName = $code->rent_by_agent_name;
+                
+                // Prioritize client agent name
+                if (!empty($clientAgentName) && in_array($clientAgentName, $agentUserNames)) {
+                    $agentName = $clientAgentName;
+                } elseif (!empty($rentAgentName) && in_array($rentAgentName, $agentUserNames)) {
+                    $agentName = $rentAgentName;
+                } else {
+                    // Try to match by name in agent users
+                    if (!empty($clientAgentName)) {
+                        foreach ($agentUsers as $id => $name) {
+                            if (!empty($name) && strcasecmp(trim($clientAgentName), trim($name)) === 0) {
+                                $agentName = $name;
+                                break;
+                            }
+                        }
+                    }
+                    
+                    if (empty($agentName) && !empty($rentAgentName)) {
+                        foreach ($agentUsers as $id => $name) {
+                            if (!empty($name) && strcasecmp(trim($rentAgentName), trim($name)) === 0) {
+                                $agentName = $name;
+                                break;
+                            }
+                        }
                     }
                 }
             }
             
-            // Only add to monthly totals if agent is valid
+            // Create fallback agent name if needed
+            if (empty($agentName)) {
+                if (!empty($code->client_by_agent_name)) {
+                    $agentName = $code->client_by_agent_name;
+                } elseif (!empty($code->rent_by_agent_name)) {
+                    $agentName = $code->rent_by_agent_name;
+                } elseif (!empty($agentId)) {
+                    $agentName = is_string($agentId) ? trim($agentId) : "Agent-{$agentId}";
+                } else {
+                    $agentName = "Unknown Agent";
+                }
+            }
+            
+            // Add to monthly totals
             if ($agentName) {
                 if (!isset($monthlyTotals[$monthKey])) {
                     $monthlyTotals[$monthKey] = 0;
@@ -473,6 +599,14 @@ class RentalCodeController extends Controller
         }
         ksort($monthlyTotals);
         $chartData['monthly_totals'] = $monthlyTotals;
+
+        // Final debug logging
+        \Log::info('Agent earnings summary', [
+            'total_rental_codes' => $rentalCodes->count(),
+            'agents_found' => count($filteredAgents),
+            'agent_names' => array_keys($filteredAgents),
+            'monthly_totals' => $monthlyTotals
+        ]);
 
         return view('admin.rental-codes.agent-earnings', [
             'agentEarnings' => $filteredAgents,
