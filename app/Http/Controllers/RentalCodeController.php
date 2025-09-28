@@ -254,7 +254,7 @@ class RentalCodeController extends Controller
     }
 
     /**
-     * Show agent earnings report (rebuilt)
+     * Show agent earnings report (completely rebuilt)
      */
     public function agentEarnings(Request $request)
     {
@@ -263,14 +263,18 @@ class RentalCodeController extends Controller
             'end_date' => ['nullable', 'date', 'after_or_equal:start_date'],
             'status' => ['nullable', 'in:pending,approved,completed,cancelled'],
             'payment_method' => ['nullable', 'in:Cash,Transfer'],
+            'agent_search' => ['nullable', 'string', 'max:255'],
         ]);
 
         $startDate = $validated['start_date'] ?? null;
         $endDate = $validated['end_date'] ?? now()->format('Y-m-d');
         $status = $validated['status'] ?? null;
         $paymentMethod = $validated['payment_method'] ?? null;
+        $agentSearch = $validated['agent_search'] ?? null;
 
-        $query = RentalCode::query();
+        // Build query with filters
+        $query = RentalCode::with('client');
+        
         if ($startDate) {
             $query->where('rental_date', '>=', $startDate);
         }
@@ -290,9 +294,13 @@ class RentalCodeController extends Controller
 
         // Aggregate by agent name using accessors to resolve IDs -> names
         $byAgent = [];
+        $agentStats = [];
+        
         foreach ($rentalCodes as $code) {
             $fee = (float) $code->consultation_fee;
+            $rentalDate = $code->rental_date;
 
+            // Process rent agent
             $rentAgent = trim($code->rent_by_agent_name);
             if (!empty($rentAgent) && $rentAgent !== 'N/A') {
                 if (!isset($byAgent[$rentAgent])) {
@@ -304,14 +312,39 @@ class RentalCodeController extends Controller
                         'rent_count' => 0,
                         'client_count' => 0,
                         'total_count' => 0,
+                        'transactions' => [],
+                        'monthly_earnings' => [],
+                        'avg_transaction_value' => 0.0,
+                        'last_transaction_date' => null,
                     ];
                 }
+                
                 $byAgent[$rentAgent]['rent_earnings'] += $fee;
                 $byAgent[$rentAgent]['rent_count'] += 1;
                 $byAgent[$rentAgent]['total_earnings'] += $fee;
                 $byAgent[$rentAgent]['total_count'] += 1;
+                $byAgent[$rentAgent]['transactions'][] = [
+                    'type' => 'rent',
+                    'fee' => $fee,
+                    'date' => $rentalDate,
+                    'code' => $code->rental_code,
+                    'status' => $code->status,
+                ];
+                
+                // Track monthly earnings
+                $monthKey = $rentalDate->format('Y-m');
+                if (!isset($byAgent[$rentAgent]['monthly_earnings'][$monthKey])) {
+                    $byAgent[$rentAgent]['monthly_earnings'][$monthKey] = 0;
+                }
+                $byAgent[$rentAgent]['monthly_earnings'][$monthKey] += $fee;
+                
+                // Update last transaction date
+                if (!$byAgent[$rentAgent]['last_transaction_date'] || $rentalDate > $byAgent[$rentAgent]['last_transaction_date']) {
+                    $byAgent[$rentAgent]['last_transaction_date'] = $rentalDate;
+                }
             }
 
+            // Process client agent
             $clientAgent = trim($code->client_by_agent_name);
             if (!empty($clientAgent) && $clientAgent !== 'N/A') {
                 if (!isset($byAgent[$clientAgent])) {
@@ -323,35 +356,107 @@ class RentalCodeController extends Controller
                         'rent_count' => 0,
                         'client_count' => 0,
                         'total_count' => 0,
+                        'transactions' => [],
+                        'monthly_earnings' => [],
+                        'avg_transaction_value' => 0.0,
+                        'last_transaction_date' => null,
                     ];
                 }
+                
                 $byAgent[$clientAgent]['client_earnings'] += $fee;
                 $byAgent[$clientAgent]['client_count'] += 1;
                 $byAgent[$clientAgent]['total_earnings'] += $fee;
                 $byAgent[$clientAgent]['total_count'] += 1;
+                $byAgent[$clientAgent]['transactions'][] = [
+                    'type' => 'client',
+                    'fee' => $fee,
+                    'date' => $rentalDate,
+                    'code' => $code->rental_code,
+                    'status' => $code->status,
+                ];
+                
+                // Track monthly earnings
+                $monthKey = $rentalDate->format('Y-m');
+                if (!isset($byAgent[$clientAgent]['monthly_earnings'][$monthKey])) {
+                    $byAgent[$clientAgent]['monthly_earnings'][$monthKey] = 0;
+                }
+                $byAgent[$clientAgent]['monthly_earnings'][$monthKey] += $fee;
+                
+                // Update last transaction date
+                if (!$byAgent[$clientAgent]['last_transaction_date'] || $rentalDate > $byAgent[$clientAgent]['last_transaction_date']) {
+                    $byAgent[$clientAgent]['last_transaction_date'] = $rentalDate;
+                }
             }
         }
 
+        // Calculate averages and apply agent search filter
+        $filteredAgents = [];
+        foreach ($byAgent as $agentName => $agentData) {
+            // Apply agent search filter
+            if ($agentSearch && stripos($agentName, $agentSearch) === false) {
+                continue;
+            }
+            
+            // Calculate average transaction value
+            $agentData['avg_transaction_value'] = $agentData['total_count'] > 0 
+                ? $agentData['total_earnings'] / $agentData['total_count'] 
+                : 0.0;
+            
+            // Sort transactions by date
+            usort($agentData['transactions'], function($a, $b) {
+                return $b['date'] <=> $a['date'];
+            });
+            
+            $filteredAgents[$agentName] = $agentData;
+        }
+
         // Sort by total earnings desc
-        usort($byAgent, function ($a, $b) {
+        uasort($filteredAgents, function ($a, $b) {
             return $b['total_earnings'] <=> $a['total_earnings'];
         });
 
+        // Calculate summary statistics
         $summary = [
-            'total_agents' => count($byAgent),
+            'total_agents' => count($filteredAgents),
             'total_rental_codes' => $rentalCodes->count(),
-            'total_earnings' => array_sum(array_map(fn($x) => $x['total_earnings'], $byAgent)),
-            'total_rent_transactions' => array_sum(array_map(fn($x) => $x['rent_count'], $byAgent)),
-            'total_client_transactions' => array_sum(array_map(fn($x) => $x['client_count'], $byAgent)),
+            'total_earnings' => array_sum(array_map(fn($x) => $x['total_earnings'], $filteredAgents)),
+            'total_rent_transactions' => array_sum(array_map(fn($x) => $x['rent_count'], $filteredAgents)),
+            'total_client_transactions' => array_sum(array_map(fn($x) => $x['client_count'], $filteredAgents)),
+            'avg_earnings_per_agent' => count($filteredAgents) > 0 
+                ? array_sum(array_map(fn($x) => $x['total_earnings'], $filteredAgents)) / count($filteredAgents) 
+                : 0,
+            'top_earner' => count($filteredAgents) > 0 ? array_values($filteredAgents)[0] : null,
         ];
 
+        // Prepare chart data
+        $chartData = [
+            'monthly_totals' => [],
+            'agent_comparison' => array_slice($filteredAgents, 0, 10, true), // Top 10 agents
+        ];
+
+        // Calculate monthly totals
+        $monthlyTotals = [];
+        foreach ($rentalCodes as $code) {
+            $monthKey = $code->rental_date->format('Y-m');
+            if (!isset($monthlyTotals[$monthKey])) {
+                $monthlyTotals[$monthKey] = 0;
+            }
+            $monthlyTotals[$monthKey] += (float) $code->consultation_fee;
+        }
+        ksort($monthlyTotals);
+        $chartData['monthly_totals'] = $monthlyTotals;
+
         return view('admin.rental-codes.agent-earnings', [
-            'rows' => $byAgent,
+            'agentEarnings' => $filteredAgents,
             'summary' => $summary,
+            'chartData' => $chartData,
             'startDate' => $startDate,
             'endDate' => $endDate,
             'status' => $status,
             'paymentMethod' => $paymentMethod,
+            'agentSearch' => $agentSearch,
+            'totalRentalCodes' => $rentalCodes->count(),
+            'totalEarnings' => $summary['total_earnings'],
         ]);
     }
 }

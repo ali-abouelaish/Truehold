@@ -527,30 +527,6 @@
                     </div>
                 </div>
                 
-                <!-- Search Bar -->
-                <div class="mb-6">
-                    <div class="relative">
-                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <i class="fas fa-search text-gray-400"></i>
-                        </div>
-                        <input type="text" 
-                                   id="searchInput"
-                               value="{{ request('search') }}" 
-                               placeholder="Search properties by title, description, or location..." 
-                               class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm sm:text-base">
-                        <div class="absolute inset-y-0 right-0 pr-3 flex items-center">
-                            @if(request('search'))
-                                    <button type="button" onclick="clearSearch()" class="text-gray-400 hover:text-gray-600">
-                                    <i class="fas fa-times"></i>
-                                    </button>
-                            @endif
-                        </div>
-                    </div>
-                    <div class="mt-2 text-xs text-gray-500">
-                        <i class="fas fa-info-circle mr-1"></i>
-                        Search through property titles, descriptions, and locations
-                    </div>
-                </div>
                 
                     <!-- Combined filters form -->
                     <form id="filterForm" class="space-y-4 sm:space-y-6">
@@ -594,17 +570,6 @@
                         </div>
                         @endauth
                         
-                        <div>
-                                <label class="filter-label text-sm sm:text-base">London Area</label>
-                                <select id="londonAreaFilter" class="filter-input w-full text-sm sm:text-base">
-                                <option value="">All Areas</option>
-                                <option value="central" {{ request('london_area') == 'central' ? 'selected' : '' }}>Central London</option>
-                                <option value="east" {{ request('london_area') == 'east' ? 'selected' : '' }}>East London</option>
-                                <option value="north" {{ request('london_area') == 'north' ? 'selected' : '' }}>North London</option>
-                                <option value="south" {{ request('london_area') == 'south' ? 'selected' : '' }}>South London</option>
-                                <option value="west" {{ request('london_area') == 'west' ? 'selected' : '' }}>West London</option>
-                            </select>
-                            </div>
                         </div>
                         
                         <!-- Second row of filters -->
@@ -1077,23 +1042,14 @@
 
         // Filter properties based on current filter values
         function filterProperties() {
-            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
             const location = document.getElementById('locationFilter').value;
             const propertyType = document.getElementById('propertyTypeFilter').value;
             const agent = document.getElementById('agentFilter').value;
             const minPrice = parseFloat(document.getElementById('minPriceFilter').value) || 0;
             const maxPrice = parseFloat(document.getElementById('maxPriceFilter').value) || Infinity;
-            const londonArea = document.getElementById('londonAreaFilter').value;
             const couplesAllowed = document.getElementById('couplesAllowedFilter').value;
 
             filteredProperties = properties.filter(property => {
-                // Search filter
-                if (searchTerm && !property.title?.toLowerCase().includes(searchTerm) && 
-                    !property.description?.toLowerCase().includes(searchTerm) && 
-                    !property.location?.toLowerCase().includes(searchTerm)) {
-                    return false;
-                }
-
                 // Location filter
                 if (location && property.location !== location) {
                     return false;
@@ -1124,27 +1080,6 @@
                 const price = parseFloat(property.price) || 0;
                 if (price < minPrice || price > maxPrice) {
                     return false;
-                }
-
-                // London area filter (basic implementation)
-                if (londonArea && property.location) {
-                    const locationLower = property.location.toLowerCase();
-                    const areaKeywords = {
-                        'central': ['central', 'westminster', 'city of london', 'camden', 'islington'],
-                        'east': ['east', 'tower hamlets', 'hackney', 'newham', 'waltham forest'],
-                        'north': ['north', 'haringey', 'enfield', 'barnet', 'harrow'],
-                        'south': ['south', 'lambeth', 'southwark', 'lewisham', 'greenwich'],
-                        'west': ['west', 'hammersmith', 'fulham', 'kensington', 'chelsea']
-                    };
-                    
-                    if (areaKeywords[londonArea]) {
-                        const hasAreaKeyword = areaKeywords[londonArea].some(keyword => 
-                            locationLower.includes(keyword)
-                        );
-                        if (!hasAreaKeyword) {
-                            return false;
-                        }
-                    }
                 }
 
                 // Couples allowed filter
@@ -1191,13 +1126,11 @@
 
         // Clear all filters
         function clearFilters() {
-            document.getElementById('searchInput').value = '';
             document.getElementById('locationFilter').value = '';
             document.getElementById('propertyTypeFilter').value = '';
             document.getElementById('agentFilter').value = '';
             document.getElementById('minPriceFilter').value = '';
             document.getElementById('maxPriceFilter').value = '';
-            document.getElementById('londonAreaFilter').value = '';
             document.getElementById('couplesAllowedFilter').value = '';
             
             // Reset flags
@@ -1227,9 +1160,6 @@
         function initializeFiltersFromURL() {
             const urlParams = new URLSearchParams(window.location.search);
             
-            if (urlParams.get('search')) {
-                document.getElementById('searchInput').value = urlParams.get('search');
-            }
             if (urlParams.get('location')) {
                 document.getElementById('locationFilter').value = urlParams.get('location');
             }
@@ -1245,9 +1175,6 @@
             if (urlParams.get('max_price')) {
                 document.getElementById('maxPriceFilter').value = urlParams.get('max_price');
             }
-            if (urlParams.get('london_area')) {
-                document.getElementById('londonAreaFilter').value = urlParams.get('london_area');
-            }
             if (urlParams.get('couples_allowed')) {
                 document.getElementById('couplesAllowedFilter').value = urlParams.get('couples_allowed');
             }
@@ -1255,21 +1182,11 @@
 
         // Add event listeners for real-time filtering
         function addFilterEventListeners() {
-            // Search input with debounce
-            let searchTimeout;
-            document.getElementById('searchInput').addEventListener('input', function() {
-                clearTimeout(searchTimeout);
-                searchTimeout = setTimeout(() => {
-                    applyFilters();
-                }, 500);
-            });
-
             // Select filters with immediate effect
             const selectFilters = [
                 'locationFilter',
                 'propertyTypeFilter', 
                 'agentFilter',
-                'londonAreaFilter',
                 'couplesAllowedFilter'
             ];
 
@@ -1281,6 +1198,7 @@
             });
 
             // Price filters with debounce
+            let searchTimeout;
             const priceFilters = ['minPriceFilter', 'maxPriceFilter'];
             priceFilters.forEach(filterId => {
                 const element = document.getElementById(filterId);
@@ -1314,14 +1232,6 @@
             }
         }
         
-        // Clear search function
-        function clearSearch() {
-            const searchInput = document.getElementById('searchInput');
-            if (searchInput) {
-                searchInput.value = '';
-                applyFilters();
-            }
-        }
 
     </script>
 </body>

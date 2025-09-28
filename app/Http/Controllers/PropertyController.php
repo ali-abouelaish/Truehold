@@ -15,40 +15,6 @@ class PropertyController extends Controller
     {
         $query = Property::query();
 
-        // Apply search functionality
-        if ($request->filled('search')) {
-            $searchTerm = $request->search;
-            $query->where(function($q) use ($searchTerm) {
-                $q->where('title', 'like', "%{$searchTerm}%")
-                  ->orWhere('description', 'like', "%{$searchTerm}%")
-                  ->orWhere('location', 'like', "%{$searchTerm}%")
-                  ->orWhere('management_company', 'like', "%{$searchTerm}%")
-                  ->orWhere('agent_name', 'like', "%{$searchTerm}%")
-                  // Room/description related fields
-                  ->orWhere('amenities', 'like', "%{$searchTerm}%")
-                  ->orWhere('bills_included', 'like', "%{$searchTerm}%")
-                  ->orWhere('deposit', 'like', "%{$searchTerm}%")
-                  ->orWhere('minimum_term', 'like', "%{$searchTerm}%")
-                  ->orWhere('furnishings', 'like', "%{$searchTerm}%")
-                  ->orWhere('garden_patio', 'like', "%{$searchTerm}%")
-                  ->orWhere('broadband', 'like', "%{$searchTerm}%")
-                  ->orWhere('housemates', 'like', "%{$searchTerm}%")
-                  ->orWhere('total_rooms', 'like', "%{$searchTerm}%")
-                  ->orWhere('smoker', 'like', "%{$searchTerm}%")
-                  ->orWhere('pets', 'like', "%{$searchTerm}%")
-                  ->orWhere('occupation', 'like', "%{$searchTerm}%")
-                  ->orWhere('gender', 'like', "%{$searchTerm}%")
-                  ->orWhere('couples_ok', 'like', "%{$searchTerm}%")
-                  ->orWhere('smoking_ok', 'like', "%{$searchTerm}%")
-                  ->orWhere('pets_ok', 'like', "%{$searchTerm}%")
-                  ->orWhere('pref_occupation', 'like', "%{$searchTerm}%")
-                  ->orWhere('references', 'like', "%{$searchTerm}%")
-                  ->orWhere('living_room', 'like', "%{$searchTerm}%")
-                  ->orWhere('balcony_roof_terrace', 'like', "%{$searchTerm}%")
-                  ->orWhere('disabled_access', 'like', "%{$searchTerm}%");
-            });
-        }
-
         // Apply filters
         if ($request->filled('location')) {
             $query->byLocation($request->location);
@@ -71,17 +37,13 @@ class PropertyController extends Controller
             $query->where('available_date', 'like', "%{$request->available_date}%");
         }
 
-        // New filters: Management Company, Agent Name and London Area
+        // New filters: Management Company, Agent Name
         if ($request->filled('management_company')) {
             $query->byManagementCompany($request->management_company);
         }
 
         if ($request->filled('agent_name')) {
             $query->where('agent_name', 'like', "%{$request->agent_name}%");
-        }
-
-        if ($request->filled('london_area')) {
-            $query->byLondonArea($request->london_area);
         }
 
         if ($request->filled('couples_allowed')) {
@@ -107,8 +69,7 @@ class PropertyController extends Controller
             'price_filter_applied' => $request->filled('min_price') || $request->filled('max_price'),
             'min_price' => $request->input('min_price'),
             'max_price' => $request->input('max_price'),
-            'management_company_filter' => $request->input('management_company'),
-            'london_area_filter' => $request->input('london_area')
+            'management_company_filter' => $request->input('management_company')
         ]);
 
         return view('properties.index', compact('properties', 'locations', 'propertyTypes', 'availableDates', 'agentNames'));
@@ -135,40 +96,6 @@ class PropertyController extends Controller
         // Enhanced coordinate validation query using the scope
         $query = Property::query()->withValidCoordinates();
 
-        // Apply search functionality
-        if ($request->filled('search')) {
-            $searchTerm = $request->search;
-            $query->where(function($q) use ($searchTerm) {
-                $q->where('title', 'like', "%{$searchTerm}%")
-                  ->orWhere('description', 'like', "%{$searchTerm}%")
-                  ->orWhere('location', 'like', "%{$searchTerm}%")
-                  ->orWhere('management_company', 'like', "%{$searchTerm}%")
-                  ->orWhere('agent_name', 'like', "%{$searchTerm}%")
-                  // Room/description related fields
-                  ->orWhere('amenities', 'like', "%{$searchTerm}%")
-                  ->orWhere('bills_included', 'like', "%{$searchTerm}%")
-                  ->orWhere('deposit', 'like', "%{$searchTerm}%")
-                  ->orWhere('minimum_term', 'like', "%{$searchTerm}%")
-                  ->orWhere('furnishings', 'like', "%{$searchTerm}%")
-                  ->orWhere('garden_patio', 'like', "%{$searchTerm}%")
-                  ->orWhere('broadband', 'like', "%{$searchTerm}%")
-                  ->orWhere('housemates', 'like', "%{$searchTerm}%")
-                  ->orWhere('total_rooms', 'like', "%{$searchTerm}%")
-                  ->orWhere('smoker', 'like', "%{$searchTerm}%")
-                  ->orWhere('pets', 'like', "%{$searchTerm}%")
-                  ->orWhere('occupation', 'like', "%{$searchTerm}%")
-                  ->orWhere('gender', 'like', "%{$searchTerm}%")
-                  ->orWhere('couples_ok', 'like', "%{$searchTerm}%")
-                  ->orWhere('smoking_ok', 'like', "%{$searchTerm}%")
-                  ->orWhere('pets_ok', 'like', "%{$searchTerm}%")
-                  ->orWhere('pref_occupation', 'like', "%{$searchTerm}%")
-                  ->orWhere('references', 'like', "%{$searchTerm}%")
-                  ->orWhere('living_room', 'like', "%{$searchTerm}%")
-                  ->orWhere('balcony_roof_terrace', 'like', "%{$searchTerm}%")
-                  ->orWhere('disabled_access', 'like', "%{$searchTerm}%");
-            });
-        }
-
         // Apply filters
         if ($request->filled('location')) {
             $query->byLocation($request->location);
@@ -191,17 +118,13 @@ class PropertyController extends Controller
             $query->where('available_date', 'like', "%{$request->available_date}%");
         }
 
-        // New filters: Management Company, Agent Name and London Area
+        // New filters: Management Company, Agent Name
         if ($request->filled('management_company')) {
             $query->byManagementCompany($request->management_company);
         }
 
         if ($request->filled('agent_name')) {
             $query->where('agent_name', 'like', "%{$request->agent_name}%");
-        }
-
-        if ($request->filled('london_area')) {
-            $query->byLondonArea($request->london_area);
         }
 
         if ($request->filled('couples_allowed')) {

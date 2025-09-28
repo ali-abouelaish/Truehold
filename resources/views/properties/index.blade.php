@@ -544,31 +544,6 @@
                         </div>
                     </div>
                     
-                    <!-- Search Bar -->
-                    <div class="mb-6">
-                        <div class="relative">
-                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                <i class="fas fa-search text-gray-400"></i>
-                            </div>
-                            <input type="text" 
-                                   name="search" 
-                                   value="{{ request('search') }}" 
-                                   placeholder="Search properties by title, description, or location..." 
-                                   class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm sm:text-base"
-                                   onchange="updateFilters()">
-                            <div class="absolute inset-y-0 right-0 pr-3 flex items-center">
-                                @if(request('search'))
-                                    <button type="button" onclick="clearSearch()" class="text-gray-400 hover:text-gray-600">
-                                        <i class="fas fa-times"></i>
-                                    </button>
-                                @endif
-                            </div>
-                        </div>
-                        <div class="mt-2 text-xs text-gray-500">
-                            <i class="fas fa-info-circle mr-1"></i>
-                            Search through property titles, descriptions, and locations
-                        </div>
-                    </div>
                     
                     <!-- Combined filters form -->
                     <form method="GET" action="{{ route('properties.index') }}" id="filterForm" class="space-y-4 sm:space-y-6">
@@ -612,17 +587,6 @@
                             </div>
                             @endauth
                             
-                            <div>
-                                <label class="filter-label text-sm sm:text-base">London Area</label>
-                                <select name="london_area" class="filter-input w-full text-sm sm:text-base">
-                                    <option value="">All Areas</option>
-                                    <option value="central" {{ request('london_area') == 'central' ? 'selected' : '' }}>Central London</option>
-                                    <option value="east" {{ request('london_area') == 'east' ? 'selected' : '' }}>East London</option>
-                                    <option value="north" {{ request('london_area') == 'north' ? 'selected' : '' }}>North London</option>
-                                    <option value="south" {{ request('london_area') == 'south' ? 'selected' : '' }}>South London</option>
-                                    <option value="west" {{ request('london_area') == 'west' ? 'selected' : '' }}>West London</option>
-                                </select>
-                            </div>
                         </div>
                         
                         <!-- Second row of filters -->
@@ -665,18 +629,13 @@
         <!-- Properties Gallery -->
         <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
             <!-- Enhanced Filter Summary -->
-            @if(request('search') || request('location') || request('property_type') || request('min_price') || request('max_price') || request('available_date') || request('agent_name') || request('london_area') || request('couples_allowed'))
+            @if(request('location') || request('property_type') || request('min_price') || request('max_price') || request('available_date') || request('agent_name') || request('couples_allowed'))
                 <div class="mb-6 sm:mb-8 p-4 sm:p-6 bg-blue-50 border border-blue-200 rounded-16 sm:rounded-20 animate-fade-in">
                     <h3 class="text-lg sm:text-xl font-bold text-blue-800 mb-3 sm:mb-4 flex items-center space-x-2">
                         <i class="fas fa-filter text-blue-600"></i>
                         <span>Active Filters:</span>
                     </h3>
                     <div class="flex flex-wrap gap-2 sm:gap-3">
-                        @if(request('search'))
-                            <span class="filter-badge text-xs sm:text-sm">
-                                <i class="fas fa-search"></i>Search: "{{ request('search') }}"
-                            </span>
-                        @endif
                         @if(request('location'))
                             <span class="filter-badge text-xs sm:text-sm">
                                 <i class="fas fa-map-marker-alt"></i>Location: {{ request('location') }}
@@ -690,11 +649,6 @@
                         @if(request('agent_name'))
                             <span class="filter-badge text-xs sm:text-sm">
                                 <i class="fas fa-user-tie"></i>Agent: {{ request('agent_name') }}
-                            </span>
-                        @endif
-                        @if(request('london_area'))
-                            <span class="filter-badge text-xs sm:text-sm">
-                                <i class="fas fa-compass"></i>Area: {{ ucfirst(request('london_area')) }} London
                             </span>
                         @endif
                         @if(request('min_price'))
@@ -726,7 +680,7 @@
                 <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between space-y-2 sm:space-y-0">
                     <div class="text-gray-700 text-sm sm:text-base">
                         <span class="font-bold text-lg sm:text-xl">{{ $properties->total() }}</span> properties found
-                        @if(request('search') || request('location') || request('property_type') || request('min_price') || request('max_price') || request('available_date'))
+                        @if(request('location') || request('property_type') || request('min_price') || request('max_price') || request('available_date'))
                             <span class="text-gray-500 ml-2">(filtered)</span>
                         @endif
                     </div>
@@ -910,7 +864,7 @@
             }
 
             // Auto-submit form when select filters change
-            const filterSelects = document.querySelectorAll('select[name="location"], select[name="property_type"], select[name="agent_name"], select[name="london_area"], select[name="couples_allowed"]');
+            const filterSelects = document.querySelectorAll('select[name="location"], select[name="property_type"], select[name="agent_name"], select[name="couples_allowed"]');
             filterSelects.forEach(select => {
                 select.addEventListener('change', function() {
                     // Auto-submit for immediate feedback
@@ -998,28 +952,9 @@
                 }
             }
             
-            // Also get search input value
-            const searchInput = document.querySelector('input[name="search"]');
-            if (searchInput && searchInput.value.trim() !== '') {
-                filters.search = searchInput.value.trim();
-            }
-            
             sessionStorage.setItem('propertyFilters', JSON.stringify(filters));
         }
 
-        // Clear search function
-        function clearSearch() {
-            const searchInput = document.querySelector('input[name="search"]');
-            if (searchInput) {
-                searchInput.value = '';
-                updateFilters();
-            }
-            // Redirect to base URL without search parameter
-            const urlParams = new URLSearchParams(window.location.search);
-            urlParams.delete('search');
-            const url = '{{ route("properties.index") }}' + (urlParams.toString() ? '?' + urlParams.toString() : '');
-            window.location.href = url;
-        }
 
         // Reset individual filter to default
         function resetIndividualFilter() {
