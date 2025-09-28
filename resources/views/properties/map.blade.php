@@ -13,6 +13,26 @@
             font-family: 'Inter', sans-serif;
             margin: 0;
             padding: 0;
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        .map-container {
+            height: calc(100vh - 180px);
+            width: 100%;
+        }
+        
+        .filters-section {
+            padding: 1rem 0;
+        }
+        
+        .header-section {
+            padding: 0.75rem 0;
+        }
+        
+        #map {
+            height: 100%;
+            width: 100%;
         }
         
         .gradient-header {
@@ -459,8 +479,8 @@
     <div class="min-h-screen">
 
         <!-- Property Map Header -->
-        <div class="bg-white border-b border-gray-200 shadow-sm">
-            <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
+        <div class="bg-white border-b border-gray-200 shadow-sm header-section">
+            <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-2 sm:py-3">
                 <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between space-y-3 sm:space-y-0">
                     <div class="flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-4">
                         <h1 class="text-xl sm:text-2xl font-bold text-gray-900">Property Map</h1>
@@ -504,7 +524,7 @@
 
         <!-- Enhanced Filters -->
         <div class="filters-section">
-            <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+            <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-4">
                 <!-- Mobile filter toggle -->
                 <button type="button" class="filter-toggle sm:hidden w-full mb-4" onclick="toggleFilters()">
                     <i class="fas fa-filter mr-2"></i>
@@ -632,7 +652,9 @@
     </div>
 
     <!-- Map Container -->
-    <div id="map"></div>
+    <div class="map-container">
+        <div id="map"></div>
+    </div>
 
     <!-- Properties Data -->
     <div id="properties-data" style="display: none;">{!! json_encode($properties) !!}</div>

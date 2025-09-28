@@ -43,7 +43,9 @@ class PropertyController extends Controller
         }
 
         if ($request->filled('agent_name')) {
-            $query->where('agent_name', 'like', "%{$request->agent_name}%");
+            $query->whereHas('agent', function($q) use ($request) {
+                $q->where('name', 'like', "%{$request->agent_name}%");
+            });
         }
 
         if ($request->filled('couples_allowed')) {
@@ -54,7 +56,7 @@ class PropertyController extends Controller
         $locations = Property::distinct()->pluck('location')->filter()->sort()->values();
         $propertyTypes = Property::distinct()->pluck('property_type')->filter()->sort()->values();
         $availableDates = Property::distinct()->pluck('available_date')->filter()->sort()->values();
-        $agentNames = Property::distinct()->pluck('agent_name')->filter()->sort()->values();
+        $agentNames = Property::with('agent')->get()->pluck('agent.name')->filter()->unique()->sort()->values();
 
         $properties = $query->latest()->paginate(20);
 
@@ -124,7 +126,9 @@ class PropertyController extends Controller
         }
 
         if ($request->filled('agent_name')) {
-            $query->where('agent_name', 'like', "%{$request->agent_name}%");
+            $query->whereHas('agent', function($q) use ($request) {
+                $q->where('name', 'like', "%{$request->agent_name}%");
+            });
         }
 
         if ($request->filled('couples_allowed')) {
@@ -135,12 +139,12 @@ class PropertyController extends Controller
         $locations = Property::distinct()->pluck('location')->filter()->sort()->values();
         $propertyTypes = Property::distinct()->pluck('property_type')->sort()->values();
         $availableDates = Property::distinct()->pluck('available_date')->sort()->values();
-        $agentNames = Property::distinct()->pluck('agent_name')->filter()->sort()->values();
+        $agentNames = Property::with('agent')->get()->pluck('agent.name')->filter()->unique()->sort()->values();
 
         // Select specific fields for map performance and include agent_name
         $properties = $query->select([
             'id', 'title', 'location', 'latitude', 'longitude', 'price', 'description',
-            'property_type', 'available_date', 'management_company', 'agent_name',
+            'property_type', 'available_date', 'management_company', 'agent_id',
             'bills_included', 'furnishings', 'parking', 'garden', 'broadband',
             'housemates', 'total_rooms', 'couples_ok', 'smoking_ok', 'pets_ok',
             'min_age', 'max_age', 'photo_count', 'first_photo_url', 'all_photos', 'photos'
@@ -211,7 +215,9 @@ class PropertyController extends Controller
         }
 
         if ($request->filled('agent_name')) {
-            $query->where('agent_name', 'like', "%{$request->agent_name}%");
+            $query->whereHas('agent', function($q) use ($request) {
+                $q->where('name', 'like', "%{$request->agent_name}%");
+            });
         }
 
         if ($request->filled('couples_allowed')) {
@@ -222,12 +228,12 @@ class PropertyController extends Controller
         $locations = Property::distinct()->pluck('location')->filter()->sort()->values();
         $propertyTypes = Property::distinct()->pluck('property_type')->sort()->values();
         $availableDates = Property::distinct()->pluck('available_date')->sort()->values();
-        $agentNames = Property::distinct()->pluck('agent_name')->filter()->sort()->values();
+        $agentNames = Property::with('agent')->get()->pluck('agent.name')->filter()->unique()->sort()->values();
 
         // Select specific fields for map performance and include agent_name
         $properties = $query->select([
             'id', 'title', 'location', 'latitude', 'longitude', 'price', 'description',
-            'property_type', 'available_date', 'management_company', 'agent_name',
+            'property_type', 'available_date', 'management_company', 'agent_id',
             'bills_included', 'furnishings', 'parking', 'garden', 'broadband',
             'housemates', 'total_rooms', 'couples_ok', 'smoking_ok', 'pets_ok',
             'min_age', 'max_age', 'photo_count', 'first_photo_url', 'all_photos', 'photos'
