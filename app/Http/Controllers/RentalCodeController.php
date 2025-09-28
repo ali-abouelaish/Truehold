@@ -480,8 +480,8 @@ class RentalCodeController extends Controller
             }
             
             // Calculate average transaction value
-            $agentData['avg_transaction_value'] = $agentData['total_count'] > 0 
-                ? $agentData['total_earnings'] / $agentData['total_count'] 
+            $agentData['avg_transaction_value'] = $agentData['transaction_count'] > 0 
+                ? $agentData['total_earnings'] / $agentData['transaction_count'] 
                 : 0.0;
             
             // Sort transactions by date
