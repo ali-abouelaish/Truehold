@@ -236,7 +236,7 @@
                                 Transactions
                             </th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Avg Value
+                                VAT Deductions
                             </th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Last Activity
@@ -278,9 +278,6 @@
                                 </div>
                                 <div class="text-xs text-gray-500">
                                     55% of commission
-                                    @if($agent['marketing_deductions'] > 0)
-                                        <br><span class="text-red-500">-£{{ number_format($agent['marketing_deductions'], 2) }} marketing</span>
-                                    @endif
                                 </div>
                             </td>
                             
@@ -301,7 +298,10 @@
                             
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="text-sm text-gray-900">
-                                    £{{ number_format($agent['avg_transaction_value'], 2) }}
+                                    £{{ number_format($agent['vat_deductions'], 2) }}
+                                </div>
+                                <div class="text-xs text-gray-500">
+                                    Transfer payments only
                                 </div>
                             </td>
                             
@@ -345,10 +345,10 @@
                                         {{ strtoupper(substr($agent['name'], 0, 2)) }}
                                     </span>
                                 </div>
-                                <div>
-                                    <h4 class="font-semibold text-gray-900">{{ $agent['name'] }}</h4>
-                                    <p class="text-xs text-gray-500">{{ $agent['transaction_count'] }} transactions</p>
-                                </div>
+                                    <div>
+                                        <h4 class="font-semibold text-gray-900">{{ $agent['name'] }}</h4>
+                                        <p class="text-xs text-gray-500">{{ $agent['transaction_count'] }} transactions</p>
+                                    </div>
                             </div>
                             <button onclick="showAgentDetails('{{ $agent['name'] }}')" 
                                     class="text-gray-400 hover:text-gray-600">
@@ -370,9 +370,6 @@
                                 <div class="text-center p-3 bg-green-50 rounded-lg">
                                     <div class="text-sm font-semibold text-green-900">£{{ number_format($agent['agent_earnings'], 2) }}</div>
                                     <div class="text-xs text-green-600">Agent (55%)</div>
-                                    @if($agent['marketing_deductions'] > 0)
-                                        <div class="text-xs text-red-600">-£{{ number_format($agent['marketing_deductions'], 2) }} marketing</div>
-                                    @endif
                                 </div>
                             </div>
                             
@@ -556,7 +553,6 @@ function showAgentDetails(agentName) {
                          ${transaction.payment_method}
                      </span>
                      <span class="ml-3 text-sm font-medium text-gray-900">${transaction.code}</span>
-                     ${transaction.is_marketing_agent ? '<span class="ml-2 text-xs text-red-600">Marketing Agent</span>' : ''}
                  </div>
                  <div class="text-right">
                      <div class="text-sm font-semibold text-gray-900">£${parseFloat(transaction.total_fee).toFixed(2)}</div>

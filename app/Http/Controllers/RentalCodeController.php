@@ -297,9 +297,9 @@ class RentalCodeController extends Controller
         $agentUserIds = User::where('role', 'agent')->pluck('id')->toArray();
         $agentUserNames = array_values($agentUsers);
 
-        // Aggregate by agent name - only count actual agent users with proper commission structure
+        // Aggregate by agent name - only count actual agent users
         $byAgent = [];
-        $agencyTotal = 0.0;
+        $agentStats = [];
         
         foreach ($rentalCodes as $code) {
             $totalFee = (float) $code->consultation_fee;
@@ -312,6 +312,10 @@ class RentalCodeController extends Controller
                 // Subtract 20% VAT for transfer payments
                 $baseCommission = $totalFee * 0.8;
             }
+
+            // Calculate commission split: Agency 45%, Agent 55%
+            $agencyCut = $baseCommission * 0.45;
+            $agentCut = $baseCommission * 0.55;
 
             // Determine the agent (prioritize client_by_agent, fallback to rent_by_agent)
             $agentId = $code->client_by_agent ?: $code->rent_by_agent;
@@ -342,63 +346,7 @@ class RentalCodeController extends Controller
                         'avg_transaction_value' => 0.0,
                         'last_transaction_date' => null,
                         'vat_deductions' => 0.0,
-                        'marketing_deductions' => 0.0,
                     ];
-                }
-                
-                // Calculate commission split: Agency 45%, Agent 55%
-                $agencyCut = $baseCommission * 0.45;
-                $agentCut = $baseCommission * 0.55;
-                
-                // Check if this is a marketing agent scenario (different rent and client agents)
-                $rentAgentId = $code->rent_by_agent;
-                $clientAgentId = $code->client_by_agent;
-                $isMarketingAgent = false;
-                
-                if ($rentAgentId && $clientAgentId && $rentAgentId !== $clientAgentId) {
-                    // Check if both are valid agents and different
-                    $rentAgentName = null;
-                    $clientAgentName = null;
-                    
-                    if (is_numeric($rentAgentId) && in_array((int)$rentAgentId, $agentUserIds)) {
-                        $rentAgentName = $agentUsers[(int)$rentAgentId];
-                    } elseif (is_string($rentAgentId)) {
-                        foreach ($agentUsers as $id => $name) {
-                            if (strcasecmp(trim($rentAgentId), $name) === 0) {
-                                $rentAgentName = $name;
-                                break;
-                            }
-                        }
-                    }
-                    
-                    if (is_numeric($clientAgentId) && in_array((int)$clientAgentId, $agentUserIds)) {
-                        $clientAgentName = $agentUsers[(int)$clientAgentId];
-                    } elseif (is_string($clientAgentId)) {
-                        foreach ($agentUsers as $id => $name) {
-                            if (strcasecmp(trim($clientAgentId), $name) === 0) {
-                                $clientAgentName = $name;
-                                break;
-                            }
-                        }
-                    }
-                    
-                    // If both agents are valid and different, this is a marketing agent scenario
-                    if ($rentAgentName && $clientAgentName && $rentAgentName !== $clientAgentName) {
-                        $isMarketingAgent = true;
-                    }
-                }
-                
-                // Apply marketing agent deduction (£30 from agent's cut)
-                if ($isMarketingAgent) {
-                    $marketingDeduction = min(30.0, $agentCut); // Don't deduct more than agent's cut
-                    $agentCut -= $marketingDeduction;
-                    $byAgent[$agentName]['marketing_deductions'] += $marketingDeduction;
-                }
-                
-                // Track VAT deductions
-                if ($paymentMethod === 'Transfer') {
-                    $vatAmount = $totalFee - $baseCommission;
-                    $byAgent[$agentName]['vat_deductions'] += $vatAmount;
                 }
                 
                 // Add to agent totals
@@ -407,40 +355,35 @@ class RentalCodeController extends Controller
                 $byAgent[$agentName]['total_earnings'] += $baseCommission;
                 $byAgent[$agentName]['transaction_count'] += 1;
                 
+                // Track VAT deductions
+                if ($paymentMethod === 'Transfer') {
+                    $vatAmount = $totalFee - $baseCommission;
+                    $byAgent[$agentName]['vat_deductions'] += $vatAmount;
+                }
+                
                 $byAgent[$agentName]['transactions'][] = [
                     'total_fee' => $totalFee,
                     'base_commission' => $baseCommission,
                     'agency_cut' => $agencyCut,
                     'agent_cut' => $agentCut,
                     'vat_amount' => $paymentMethod === 'Transfer' ? ($totalFee - $baseCommission) : 0,
-                    'marketing_deduction' => $isMarketingAgent ? min(30.0, $baseCommission * 0.55) : 0,
                     'date' => $rentalDate,
                     'code' => $code->rental_code,
                     'status' => $code->status,
                     'payment_method' => $paymentMethod,
-                    'is_marketing_agent' => $isMarketingAgent,
                 ];
                 
                 // Track monthly earnings
                 $monthKey = $rentalDate->format('Y-m');
                 if (!isset($byAgent[$agentName]['monthly_earnings'][$monthKey])) {
-                    $byAgent[$agentName]['monthly_earnings'][$monthKey] = [
-                        'agency' => 0,
-                        'agent' => 0,
-                        'total' => 0
-                    ];
+                    $byAgent[$agentName]['monthly_earnings'][$monthKey] = 0;
                 }
-                $byAgent[$agentName]['monthly_earnings'][$monthKey]['agency'] += $agencyCut;
-                $byAgent[$agentName]['monthly_earnings'][$monthKey]['agent'] += $agentCut;
-                $byAgent[$agentName]['monthly_earnings'][$monthKey]['total'] += $baseCommission;
+                $byAgent[$agentName]['monthly_earnings'][$monthKey] += $baseCommission;
                 
                 // Update last transaction date
                 if (!$byAgent[$agentName]['last_transaction_date'] || $rentalDate > $byAgent[$agentName]['last_transaction_date']) {
                     $byAgent[$agentName]['last_transaction_date'] = $rentalDate;
                 }
-                
-                // Add to agency total
-                $agencyTotal += $agencyCut;
             }
         }
 
@@ -479,7 +422,6 @@ class RentalCodeController extends Controller
             'total_agent_earnings' => array_sum(array_map(fn($x) => $x['agent_earnings'], $filteredAgents)),
             'total_transactions' => array_sum(array_map(fn($x) => $x['transaction_count'], $filteredAgents)),
             'total_vat_deductions' => array_sum(array_map(fn($x) => $x['vat_deductions'], $filteredAgents)),
-            'total_marketing_deductions' => array_sum(array_map(fn($x) => $x['marketing_deductions'], $filteredAgents)),
             'avg_earnings_per_agent' => count($filteredAgents) > 0 
                 ? array_sum(array_map(fn($x) => $x['total_earnings'], $filteredAgents)) / count($filteredAgents) 
                 : 0,
@@ -492,7 +434,7 @@ class RentalCodeController extends Controller
             'agent_comparison' => array_slice($filteredAgents, 0, 10, true), // Top 10 agents
         ];
 
-        // Calculate monthly totals - only for actual agent users with proper commission structure
+        // Calculate monthly totals - only for registered agent users with proper commission structure
         $monthlyTotals = [];
         foreach ($rentalCodes as $code) {
             $totalFee = (float) $code->consultation_fee;
@@ -502,7 +444,6 @@ class RentalCodeController extends Controller
             // Calculate base commission after VAT (for Transfer payments)
             $baseCommission = $totalFee;
             if ($paymentMethod === 'Transfer') {
-                // Subtract 20% VAT for transfer payments
                 $baseCommission = $totalFee * 0.8;
             }
             
