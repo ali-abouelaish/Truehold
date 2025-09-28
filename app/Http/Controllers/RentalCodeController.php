@@ -296,7 +296,7 @@ class RentalCodeController extends Controller
         $agentUsers = User::where('role', 'agent')->pluck('name', 'id')->toArray();
         $agentUserIds = User::where('role', 'agent')->pluck('id')->toArray();
 
-        // Aggregate by agent name - only count actual agent users
+        // Aggregate by agent name - only count actual agent users with proper commission structure
         $byAgent = [];
         $agencyTotal = 0.0;
         
@@ -491,7 +491,7 @@ class RentalCodeController extends Controller
             'agent_comparison' => array_slice($filteredAgents, 0, 10, true), // Top 10 agents
         ];
 
-        // Calculate monthly totals - only for actual agent users
+        // Calculate monthly totals - only for actual agent users with proper commission structure
         $monthlyTotals = [];
         foreach ($rentalCodes as $code) {
             $totalFee = (float) $code->consultation_fee;

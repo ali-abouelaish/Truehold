@@ -116,19 +116,22 @@
             </thead>
             <tbody class="bg-white divide-y divide-gray-200">
                 @forelse($clients as $client)
-                <tr class="hover:bg-gray-50">
+                <tr class="hover:bg-gray-50 cursor-pointer" onclick="toggleClientDetails({{ $client->id }})">
                     <td class="px-6 py-4">
                         <div class="flex items-center">
                             <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center mr-4">
                                 <i class="fas fa-user text-blue-600"></i>
                             </div>
-                            <div>
+                            <div class="flex-1">
                                 <div class="text-sm font-medium text-gray-900">
                                     {{ $client->full_name }}
                                 </div>
                                 <div class="text-sm text-gray-500">
                                     Age: {{ $client->age ?? 'N/A' }} ({{ $client->age_group }})
                                 </div>
+                            </div>
+                            <div class="ml-2">
+                                <i class="fas fa-chevron-down text-gray-400 transition-transform duration-200" id="chevron-{{ $client->id }}"></i>
                             </div>
                         </div>
                     </td>
@@ -186,17 +189,106 @@
                     <td class="px-6 py-4 text-sm font-medium">
                         <div class="flex items-center space-x-2">
                             <a href="{{ route('admin.clients.edit', $client) }}" 
-                               class="text-indigo-600 hover:text-indigo-900" title="Edit">
+                               class="text-indigo-600 hover:text-indigo-900" title="Edit" onclick="event.stopPropagation()">
                                 <i class="fas fa-edit"></i>
                             </a>
                             <form method="POST" action="{{ route('admin.clients.destroy', $client) }}" 
-                                  class="inline" onsubmit="return confirm('Are you sure you want to delete this client?')">
+                                  class="inline" onsubmit="return confirm('Are you sure you want to delete this client?')" onclick="event.stopPropagation()">
                                 @csrf
                                 @method('DELETE')
                                 <button type="submit" class="text-red-600 hover:text-red-900" title="Delete">
                                     <i class="fas fa-trash"></i>
                                 </button>
                             </form>
+                        </div>
+                    </td>
+                </tr>
+                
+                <!-- Expandable Details Row -->
+                <tr class="hidden bg-gray-50" id="details-{{ $client->id }}">
+                    <td colspan="6" class="px-6 py-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            <!-- Budget & Moving Info -->
+                            <div class="space-y-4">
+                                <div class="bg-white rounded-lg p-4 shadow-sm">
+                                    <h4 class="text-sm font-semibold text-gray-900 mb-3 flex items-center">
+                                        <i class="fas fa-pound-sign mr-2 text-green-600"></i>
+                                        Budget & Moving
+                                    </h4>
+                                    <div class="space-y-2">
+                                        <div class="flex justify-between">
+                                            <span class="text-sm text-gray-600">Budget:</span>
+                                            <span class="text-sm font-medium text-gray-900">{{ $client->formatted_budget }}</span>
+                                        </div>
+                                        <div class="flex justify-between">
+                                            <span class="text-sm text-gray-600">Moving Date:</span>
+                                            <span class="text-sm font-medium text-gray-900">{{ $client->formatted_moving_date }}</span>
+                                        </div>
+                                        @if($client->days_until_moving !== null)
+                                            <div class="flex justify-between">
+                                                <span class="text-sm text-gray-600">Days Until Moving:</span>
+                                                <span class="text-sm font-medium {{ $client->days_until_moving < 0 ? 'text-red-600' : ($client->days_until_moving < 30 ? 'text-orange-600' : 'text-green-600') }}">
+                                                    {{ $client->days_until_moving }} days
+                                                </span>
+                                            </div>
+                                        @endif
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Area of Interest -->
+                            <div class="space-y-4">
+                                <div class="bg-white rounded-lg p-4 shadow-sm">
+                                    <h4 class="text-sm font-semibold text-gray-900 mb-3 flex items-center">
+                                        <i class="fas fa-map-marker-alt mr-2 text-blue-600"></i>
+                                        Area of Interest
+                                    </h4>
+                                    <div class="text-sm text-gray-900">
+                                        {{ $client->area_of_interest ?? 'Not specified' }}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Notes -->
+                            <div class="space-y-4 md:col-span-2 lg:col-span-1">
+                                <div class="bg-white rounded-lg p-4 shadow-sm">
+                                    <h4 class="text-sm font-semibold text-gray-900 mb-3 flex items-center">
+                                        <i class="fas fa-sticky-note mr-2 text-yellow-600"></i>
+                                        Notes
+                                    </h4>
+                                    <div class="text-sm text-gray-900">
+                                        {{ $client->notes ?? 'No notes available' }}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Additional Details -->
+                            <div class="space-y-4 md:col-span-2 lg:col-span-3">
+                                <div class="bg-white rounded-lg p-4 shadow-sm">
+                                    <h4 class="text-sm font-semibold text-gray-900 mb-3 flex items-center">
+                                        <i class="fas fa-info-circle mr-2 text-purple-600"></i>
+                                        Additional Details
+                                    </h4>
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div>
+                                            <div class="text-sm text-gray-600 mb-1">Current Address:</div>
+                                            <div class="text-sm text-gray-900">{{ $client->current_address ?? 'Not provided' }}</div>
+                                        </div>
+                                        <div>
+                                            <div class="text-sm text-gray-600 mb-1">Company/University:</div>
+                                            <div class="text-sm text-gray-900">{{ $client->company_university_name ?? 'Not provided' }}</div>
+                                        </div>
+                                        <div>
+                                            <div class="text-sm text-gray-600 mb-1">Position/Role:</div>
+                                            <div class="text-sm text-gray-900">{{ $client->position_role ?? 'Not provided' }}</div>
+                                        </div>
+                                        <div>
+                                            <div class="text-sm text-gray-600 mb-1">Date of Birth:</div>
+                                            <div class="text-sm text-gray-900">{{ $client->formatted_date_of_birth }}</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </td>
                 </tr>
@@ -226,4 +318,30 @@
     </div>
     @endif
 </div>
+
+<script>
+function toggleClientDetails(clientId) {
+    const detailsRow = document.getElementById(`details-${clientId}`);
+    const chevron = document.getElementById(`chevron-${clientId}`);
+    
+    if (detailsRow.classList.contains('hidden')) {
+        // Show details
+        detailsRow.classList.remove('hidden');
+        chevron.style.transform = 'rotate(180deg)';
+    } else {
+        // Hide details
+        detailsRow.classList.add('hidden');
+        chevron.style.transform = 'rotate(0deg)';
+    }
+}
+
+// Add smooth transitions for better UX
+document.addEventListener('DOMContentLoaded', function() {
+    // Add transition classes to all detail rows
+    const detailRows = document.querySelectorAll('[id^="details-"]');
+    detailRows.forEach(row => {
+        row.style.transition = 'all 0.3s ease-in-out';
+    });
+});
+</script>
 @endsection

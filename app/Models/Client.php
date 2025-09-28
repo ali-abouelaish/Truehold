@@ -19,11 +19,16 @@ class Client extends Model
         'company_university_name',
         'company_university_address',
         'position_role',
+        'budget',
+        'area_of_interest',
+        'moving_date',
+        'notes',
         'agent_id',
     ];
 
     protected $casts = [
         'date_of_birth' => 'date',
+        'moving_date' => 'date',
     ];
 
     /**
@@ -138,6 +143,42 @@ class Client extends Model
         }
         
         return $this->date_of_birth->format('jS F Y');
+    }
+
+    /**
+     * Get formatted budget.
+     */
+    public function getFormattedBudgetAttribute(): string
+    {
+        if (!$this->budget) {
+            return 'Not specified';
+        }
+        
+        return '£' . number_format($this->budget, 2);
+    }
+
+    /**
+     * Get formatted moving date.
+     */
+    public function getFormattedMovingDateAttribute(): string
+    {
+        if (!$this->moving_date) {
+            return 'Not specified';
+        }
+        
+        return $this->moving_date->format('jS F Y');
+    }
+
+    /**
+     * Get days until moving date.
+     */
+    public function getDaysUntilMovingAttribute(): ?int
+    {
+        if (!$this->moving_date) {
+            return null;
+        }
+        
+        return now()->diffInDays($this->moving_date, false);
     }
 
     /**
