@@ -247,7 +247,7 @@
                 padding: 1.5rem 1rem;
             }
             
-            .filters-section .max-w-7xl {
+            .filters-section .max-w-4xl {
                 padding-left: 1rem;
                 padding-right: 1rem;
             }
@@ -460,7 +460,7 @@
 
         <!-- Property Map Header -->
         <div class="bg-white border-b border-gray-200 shadow-sm">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
+            <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
                 <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between space-y-3 sm:space-y-0">
                     <div class="flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-4">
                         <h1 class="text-xl sm:text-2xl font-bold text-gray-900">Property Map</h1>
@@ -479,6 +479,9 @@
                             <i class="fas fa-sign-in-alt mr-2"></i>Login
                         </a>
                         @endauth
+                        <a href="{{ route('properties.map-fullscreen') }}" class="bg-green-600 hover:bg-green-700 text-white px-3 sm:px-4 py-2 rounded-lg font-medium transition-colors text-sm sm:text-base">
+                            <i class="fas fa-expand mr-2"></i>Full Screen
+                        </a>
                         <a href="{{ route('properties.index') }}" class="bg-blue-600 hover:bg-blue-700 text-white px-3 sm:px-4 py-2 rounded-lg font-medium transition-colors text-sm sm:text-base">
                             <i class="fas fa-list mr-2"></i>List View
                         </a>
@@ -489,7 +492,7 @@
 
         <!-- Success Messages -->
         @if(session('success'))
-            <div class="max-w-7xl mx-auto px-6 lg:px-8 py-4">
+            <div class="max-w-4xl mx-auto px-6 lg:px-8 py-4">
                 <div class="success-message animate-fade-in">
                     <div class="flex items-center space-x-3">
                         <i class="fas fa-check-circle text-2xl"></i>
@@ -501,7 +504,7 @@
 
         <!-- Enhanced Filters -->
         <div class="filters-section">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+            <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
                 <!-- Mobile filter toggle -->
                 <button type="button" class="filter-toggle sm:hidden w-full mb-4" onclick="toggleFilters()">
                     <i class="fas fa-filter mr-2"></i>

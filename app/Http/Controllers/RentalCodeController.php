@@ -274,7 +274,7 @@ class RentalCodeController extends Controller
 
         // Build query with filters
         $query = RentalCode::with('client');
-        
+
         if ($startDate) {
             $query->where('rental_date', '>=', $startDate);
         }
@@ -327,6 +327,7 @@ class RentalCodeController extends Controller
                     }
                 }
             }
+            
             
             if ($agentName) {
                 if (!isset($byAgent[$agentName])) {
@@ -468,6 +469,7 @@ class RentalCodeController extends Controller
         uasort($filteredAgents, function ($a, $b) {
             return $b['total_earnings'] <=> $a['total_earnings'];
         });
+
 
         // Calculate summary statistics
         $summary = [

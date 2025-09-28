@@ -19,6 +19,7 @@ Route::get('/', function () {
 // Public routes - no authentication required
 Route::get('/properties', [PropertyController::class, 'index'])->name('properties.index');
 Route::get('/properties/map', [PropertyController::class, 'map'])->name('properties.map');
+Route::get('/properties/map-fullscreen', [PropertyController::class, 'mapFullscreen'])->name('properties.map-fullscreen');
 Route::get('/properties/{property}', [PropertyController::class, 'show'])->name('properties.show');
 Route::get('/rental-codes/agent-earnings', [RentalCodeController::class, 'agentEarnings'])->name('rental-codes.agent-earnings');
     

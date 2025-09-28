@@ -411,6 +411,10 @@ class AdminController extends Controller
             'company_university_name' => 'nullable|string|max:255',
             'company_university_address' => 'nullable|string',
             'position_role' => 'nullable|string|max:255',
+            'budget' => 'nullable|numeric|min:0',
+            'area_of_interest' => 'nullable|string|max:255',
+            'moving_date' => 'nullable|date|after_or_equal:today',
+            'notes' => 'nullable|string',
             'agent_user_id' => 'nullable|exists:users,id',
         ]);
 
@@ -450,6 +454,10 @@ class AdminController extends Controller
             'company_university_name' => 'nullable|string|max:255',
             'company_university_address' => 'nullable|string',
             'position_role' => 'nullable|string|max:255',
+            'budget' => 'nullable|numeric|min:0',
+            'area_of_interest' => 'nullable|string|max:255',
+            'moving_date' => 'nullable|date|after_or_equal:today',
+            'notes' => 'nullable|string',
             'agent_user_id' => 'nullable|exists:users,id',
         ]);
 
