@@ -292,7 +292,11 @@ class RentalCodeController extends Controller
 
         $rentalCodes = $query->get();
 
-        // Aggregate by agent name using accessors to resolve IDs -> names
+        // Get all agent users from the users table
+        $agentUsers = User::where('role', 'agent')->pluck('name', 'id')->toArray();
+        $agentUserIds = User::where('role', 'agent')->pluck('id')->toArray();
+
+        // Aggregate by agent name - only count actual agent users
         $byAgent = [];
         $agentStats = [];
         
@@ -300,12 +304,27 @@ class RentalCodeController extends Controller
             $fee = (float) $code->consultation_fee;
             $rentalDate = $code->rental_date;
 
-            // Process rent agent
-            $rentAgent = trim($code->rent_by_agent_name);
-            if (!empty($rentAgent) && $rentAgent !== 'N/A') {
-                if (!isset($byAgent[$rentAgent])) {
-                    $byAgent[$rentAgent] = [
-                        'name' => $rentAgent,
+            // Process rent agent - only if they're in the users table as an agent
+            $rentAgentId = $code->rent_by_agent;
+            $rentAgentName = null;
+            
+            // Check if rent_by_agent is a numeric ID and if that user is an agent
+            if (is_numeric($rentAgentId) && in_array((int)$rentAgentId, $agentUserIds)) {
+                $rentAgentName = $agentUsers[(int)$rentAgentId];
+            } elseif (is_string($rentAgentId)) {
+                // Check if the string matches any agent name
+                foreach ($agentUsers as $id => $name) {
+                    if (strcasecmp(trim($rentAgentId), $name) === 0) {
+                        $rentAgentName = $name;
+                        break;
+                    }
+                }
+            }
+            
+            if ($rentAgentName) {
+                if (!isset($byAgent[$rentAgentName])) {
+                    $byAgent[$rentAgentName] = [
+                        'name' => $rentAgentName,
                         'rent_earnings' => 0.0,
                         'client_earnings' => 0.0,
                         'total_earnings' => 0.0,
@@ -319,11 +338,11 @@ class RentalCodeController extends Controller
                     ];
                 }
                 
-                $byAgent[$rentAgent]['rent_earnings'] += $fee;
-                $byAgent[$rentAgent]['rent_count'] += 1;
-                $byAgent[$rentAgent]['total_earnings'] += $fee;
-                $byAgent[$rentAgent]['total_count'] += 1;
-                $byAgent[$rentAgent]['transactions'][] = [
+                $byAgent[$rentAgentName]['rent_earnings'] += $fee;
+                $byAgent[$rentAgentName]['rent_count'] += 1;
+                $byAgent[$rentAgentName]['total_earnings'] += $fee;
+                $byAgent[$rentAgentName]['total_count'] += 1;
+                $byAgent[$rentAgentName]['transactions'][] = [
                     'type' => 'rent',
                     'fee' => $fee,
                     'date' => $rentalDate,
@@ -333,23 +352,38 @@ class RentalCodeController extends Controller
                 
                 // Track monthly earnings
                 $monthKey = $rentalDate->format('Y-m');
-                if (!isset($byAgent[$rentAgent]['monthly_earnings'][$monthKey])) {
-                    $byAgent[$rentAgent]['monthly_earnings'][$monthKey] = 0;
+                if (!isset($byAgent[$rentAgentName]['monthly_earnings'][$monthKey])) {
+                    $byAgent[$rentAgentName]['monthly_earnings'][$monthKey] = 0;
                 }
-                $byAgent[$rentAgent]['monthly_earnings'][$monthKey] += $fee;
+                $byAgent[$rentAgentName]['monthly_earnings'][$monthKey] += $fee;
                 
                 // Update last transaction date
-                if (!$byAgent[$rentAgent]['last_transaction_date'] || $rentalDate > $byAgent[$rentAgent]['last_transaction_date']) {
-                    $byAgent[$rentAgent]['last_transaction_date'] = $rentalDate;
+                if (!$byAgent[$rentAgentName]['last_transaction_date'] || $rentalDate > $byAgent[$rentAgentName]['last_transaction_date']) {
+                    $byAgent[$rentAgentName]['last_transaction_date'] = $rentalDate;
                 }
             }
 
-            // Process client agent
-            $clientAgent = trim($code->client_by_agent_name);
-            if (!empty($clientAgent) && $clientAgent !== 'N/A') {
-                if (!isset($byAgent[$clientAgent])) {
-                    $byAgent[$clientAgent] = [
-                        'name' => $clientAgent,
+            // Process client agent - only if they're in the users table as an agent
+            $clientAgentId = $code->client_by_agent;
+            $clientAgentName = null;
+            
+            // Check if client_by_agent is a numeric ID and if that user is an agent
+            if (is_numeric($clientAgentId) && in_array((int)$clientAgentId, $agentUserIds)) {
+                $clientAgentName = $agentUsers[(int)$clientAgentId];
+            } elseif (is_string($clientAgentId)) {
+                // Check if the string matches any agent name
+                foreach ($agentUsers as $id => $name) {
+                    if (strcasecmp(trim($clientAgentId), $name) === 0) {
+                        $clientAgentName = $name;
+                        break;
+                    }
+                }
+            }
+            
+            if ($clientAgentName) {
+                if (!isset($byAgent[$clientAgentName])) {
+                    $byAgent[$clientAgentName] = [
+                        'name' => $clientAgentName,
                         'rent_earnings' => 0.0,
                         'client_earnings' => 0.0,
                         'total_earnings' => 0.0,
@@ -363,11 +397,11 @@ class RentalCodeController extends Controller
                     ];
                 }
                 
-                $byAgent[$clientAgent]['client_earnings'] += $fee;
-                $byAgent[$clientAgent]['client_count'] += 1;
-                $byAgent[$clientAgent]['total_earnings'] += $fee;
-                $byAgent[$clientAgent]['total_count'] += 1;
-                $byAgent[$clientAgent]['transactions'][] = [
+                $byAgent[$clientAgentName]['client_earnings'] += $fee;
+                $byAgent[$clientAgentName]['client_count'] += 1;
+                $byAgent[$clientAgentName]['total_earnings'] += $fee;
+                $byAgent[$clientAgentName]['total_count'] += 1;
+                $byAgent[$clientAgentName]['transactions'][] = [
                     'type' => 'client',
                     'fee' => $fee,
                     'date' => $rentalDate,
@@ -377,14 +411,14 @@ class RentalCodeController extends Controller
                 
                 // Track monthly earnings
                 $monthKey = $rentalDate->format('Y-m');
-                if (!isset($byAgent[$clientAgent]['monthly_earnings'][$monthKey])) {
-                    $byAgent[$clientAgent]['monthly_earnings'][$monthKey] = 0;
+                if (!isset($byAgent[$clientAgentName]['monthly_earnings'][$monthKey])) {
+                    $byAgent[$clientAgentName]['monthly_earnings'][$monthKey] = 0;
                 }
-                $byAgent[$clientAgent]['monthly_earnings'][$monthKey] += $fee;
+                $byAgent[$clientAgentName]['monthly_earnings'][$monthKey] += $fee;
                 
                 // Update last transaction date
-                if (!$byAgent[$clientAgent]['last_transaction_date'] || $rentalDate > $byAgent[$clientAgent]['last_transaction_date']) {
-                    $byAgent[$clientAgent]['last_transaction_date'] = $rentalDate;
+                if (!$byAgent[$clientAgentName]['last_transaction_date'] || $rentalDate > $byAgent[$clientAgentName]['last_transaction_date']) {
+                    $byAgent[$clientAgentName]['last_transaction_date'] = $rentalDate;
                 }
             }
         }
@@ -434,14 +468,50 @@ class RentalCodeController extends Controller
             'agent_comparison' => array_slice($filteredAgents, 0, 10, true), // Top 10 agents
         ];
 
-        // Calculate monthly totals
+        // Calculate monthly totals - only for actual agent users
         $monthlyTotals = [];
         foreach ($rentalCodes as $code) {
+            $fee = (float) $code->consultation_fee;
             $monthKey = $code->rental_date->format('Y-m');
-            if (!isset($monthlyTotals[$monthKey])) {
-                $monthlyTotals[$monthKey] = 0;
+            
+            // Only count if either rent_by_agent or client_by_agent is an actual agent user
+            $rentAgentId = $code->rent_by_agent;
+            $clientAgentId = $code->client_by_agent;
+            
+            $isRentAgentValid = false;
+            $isClientAgentValid = false;
+            
+            // Check rent agent
+            if (is_numeric($rentAgentId) && in_array((int)$rentAgentId, $agentUserIds)) {
+                $isRentAgentValid = true;
+            } elseif (is_string($rentAgentId)) {
+                foreach ($agentUsers as $id => $name) {
+                    if (strcasecmp(trim($rentAgentId), $name) === 0) {
+                        $isRentAgentValid = true;
+                        break;
+                    }
+                }
             }
-            $monthlyTotals[$monthKey] += (float) $code->consultation_fee;
+            
+            // Check client agent
+            if (is_numeric($clientAgentId) && in_array((int)$clientAgentId, $agentUserIds)) {
+                $isClientAgentValid = true;
+            } elseif (is_string($clientAgentId)) {
+                foreach ($agentUsers as $id => $name) {
+                    if (strcasecmp(trim($clientAgentId), $name) === 0) {
+                        $isClientAgentValid = true;
+                        break;
+                    }
+                }
+            }
+            
+            // Only add to monthly totals if at least one agent is valid
+            if ($isRentAgentValid || $isClientAgentValid) {
+                if (!isset($monthlyTotals[$monthKey])) {
+                    $monthlyTotals[$monthKey] = 0;
+                }
+                $monthlyTotals[$monthKey] += $fee;
+            }
         }
         ksort($monthlyTotals);
         $chartData['monthly_totals'] = $monthlyTotals;
