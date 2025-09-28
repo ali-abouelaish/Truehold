@@ -274,7 +274,7 @@ class RentalCodeController extends Controller
 
         // Build query with filters
         $query = RentalCode::with('client');
-
+        
         if ($startDate) {
             $query->where('rental_date', '>=', $startDate);
         }
@@ -295,152 +295,102 @@ class RentalCodeController extends Controller
         // Get all agent users from the users table
         $agentUsers = User::where('role', 'agent')->pluck('name', 'id')->toArray();
         $agentUserIds = User::where('role', 'agent')->pluck('id')->toArray();
+        $agentUserNames = array_values($agentUsers);
 
-        // Aggregate by agent name - only count actual agent users with proper commission structure
+        // Aggregate by agent name - only count actual agent users
         $byAgent = [];
-        $agencyTotal = 0.0;
+        $agentStats = [];
         
         foreach ($rentalCodes as $code) {
-            $totalFee = (float) $code->consultation_fee;
+            $fee = (float) $code->consultation_fee;
             $rentalDate = $code->rental_date;
-            $paymentMethod = $code->payment_method;
 
-            // Calculate base commission after VAT (for Transfer payments)
-            $baseCommission = $totalFee;
-            if ($paymentMethod === 'Transfer') {
-                // Subtract 20% VAT for transfer payments
-                $baseCommission = $totalFee * 0.8;
-            }
-
-            // Determine the agent (prioritize client_by_agent, fallback to rent_by_agent)
-            $agentId = $code->client_by_agent ?: $code->rent_by_agent;
-            $agentName = null;
-            
-            // Check if agent is a valid agent user
-            if (is_numeric($agentId) && in_array((int)$agentId, $agentUserIds)) {
-                $agentName = $agentUsers[(int)$agentId];
-            } elseif (is_string($agentId)) {
-                foreach ($agentUsers as $id => $name) {
-                    if (strcasecmp(trim($agentId), $name) === 0) {
-                        $agentName = $name;
-                        break;
-                    }
-                }
-            }
-            
-            
-            if ($agentName) {
-                if (!isset($byAgent[$agentName])) {
-                    $byAgent[$agentName] = [
-                        'name' => $agentName,
-                        'agency_earnings' => 0.0,
-                        'agent_earnings' => 0.0,
+            // Process rent agent - only if they are a registered agent user
+            $rentAgent = trim($code->rent_by_agent_name);
+            if (!empty($rentAgent) && $rentAgent !== 'N/A' && in_array($rentAgent, $agentUserNames)) {
+                if (!isset($byAgent[$rentAgent])) {
+                    $byAgent[$rentAgent] = [
+                        'name' => $rentAgent,
+                        'rent_earnings' => 0.0,
+                        'client_earnings' => 0.0,
                         'total_earnings' => 0.0,
-                        'transaction_count' => 0,
+                        'rent_count' => 0,
+                        'client_count' => 0,
+                        'total_count' => 0,
                         'transactions' => [],
                         'monthly_earnings' => [],
                         'avg_transaction_value' => 0.0,
                         'last_transaction_date' => null,
-                        'vat_deductions' => 0.0,
-                        'marketing_deductions' => 0.0,
                     ];
                 }
                 
-                // Calculate commission split: Agency 45%, Agent 55%
-                $agencyCut = $baseCommission * 0.45;
-                $agentCut = $baseCommission * 0.55;
-                
-                // Check if this is a marketing agent scenario (different rent and client agents)
-                $rentAgentId = $code->rent_by_agent;
-                $clientAgentId = $code->client_by_agent;
-                $isMarketingAgent = false;
-                
-                if ($rentAgentId && $clientAgentId && $rentAgentId !== $clientAgentId) {
-                    // Check if both are valid agents and different
-                    $rentAgentName = null;
-                    $clientAgentName = null;
-                    
-                    if (is_numeric($rentAgentId) && in_array((int)$rentAgentId, $agentUserIds)) {
-                        $rentAgentName = $agentUsers[(int)$rentAgentId];
-                    } elseif (is_string($rentAgentId)) {
-                        foreach ($agentUsers as $id => $name) {
-                            if (strcasecmp(trim($rentAgentId), $name) === 0) {
-                                $rentAgentName = $name;
-                                break;
-                            }
-                        }
-                    }
-                    
-                    if (is_numeric($clientAgentId) && in_array((int)$clientAgentId, $agentUserIds)) {
-                        $clientAgentName = $agentUsers[(int)$clientAgentId];
-                    } elseif (is_string($clientAgentId)) {
-                        foreach ($agentUsers as $id => $name) {
-                            if (strcasecmp(trim($clientAgentId), $name) === 0) {
-                                $clientAgentName = $name;
-                                break;
-                            }
-                        }
-                    }
-                    
-                    // If both agents are valid and different, this is a marketing agent scenario
-                    if ($rentAgentName && $clientAgentName && $rentAgentName !== $clientAgentName) {
-                        $isMarketingAgent = true;
-                    }
-                }
-                
-                // Apply marketing agent deduction (£30 from agent's cut)
-                if ($isMarketingAgent) {
-                    $marketingDeduction = min(30.0, $agentCut); // Don't deduct more than agent's cut
-                    $agentCut -= $marketingDeduction;
-                    $byAgent[$agentName]['marketing_deductions'] += $marketingDeduction;
-                }
-                
-                // Track VAT deductions
-                if ($paymentMethod === 'Transfer') {
-                    $vatAmount = $totalFee - $baseCommission;
-                    $byAgent[$agentName]['vat_deductions'] += $vatAmount;
-                }
-                
-                // Add to agent totals
-                $byAgent[$agentName]['agency_earnings'] += $agencyCut;
-                $byAgent[$agentName]['agent_earnings'] += $agentCut;
-                $byAgent[$agentName]['total_earnings'] += $baseCommission;
-                $byAgent[$agentName]['transaction_count'] += 1;
-                
-                $byAgent[$agentName]['transactions'][] = [
-                    'total_fee' => $totalFee,
-                    'base_commission' => $baseCommission,
-                    'agency_cut' => $agencyCut,
-                    'agent_cut' => $agentCut,
-                    'vat_amount' => $paymentMethod === 'Transfer' ? ($totalFee - $baseCommission) : 0,
-                    'marketing_deduction' => $isMarketingAgent ? min(30.0, $baseCommission * 0.55) : 0,
+                $byAgent[$rentAgent]['rent_earnings'] += $fee;
+                $byAgent[$rentAgent]['rent_count'] += 1;
+                $byAgent[$rentAgent]['total_earnings'] += $fee;
+                $byAgent[$rentAgent]['total_count'] += 1;
+                $byAgent[$rentAgent]['transactions'][] = [
+                    'type' => 'rent',
+                    'fee' => $fee,
                     'date' => $rentalDate,
                     'code' => $code->rental_code,
                     'status' => $code->status,
-                    'payment_method' => $paymentMethod,
-                    'is_marketing_agent' => $isMarketingAgent,
                 ];
                 
                 // Track monthly earnings
                 $monthKey = $rentalDate->format('Y-m');
-                if (!isset($byAgent[$agentName]['monthly_earnings'][$monthKey])) {
-                    $byAgent[$agentName]['monthly_earnings'][$monthKey] = [
-                        'agency' => 0,
-                        'agent' => 0,
-                        'total' => 0
-                    ];
+                if (!isset($byAgent[$rentAgent]['monthly_earnings'][$monthKey])) {
+                    $byAgent[$rentAgent]['monthly_earnings'][$monthKey] = 0;
                 }
-                $byAgent[$agentName]['monthly_earnings'][$monthKey]['agency'] += $agencyCut;
-                $byAgent[$agentName]['monthly_earnings'][$monthKey]['agent'] += $agentCut;
-                $byAgent[$agentName]['monthly_earnings'][$monthKey]['total'] += $baseCommission;
+                $byAgent[$rentAgent]['monthly_earnings'][$monthKey] += $fee;
                 
                 // Update last transaction date
-                if (!$byAgent[$agentName]['last_transaction_date'] || $rentalDate > $byAgent[$agentName]['last_transaction_date']) {
-                    $byAgent[$agentName]['last_transaction_date'] = $rentalDate;
+                if (!$byAgent[$rentAgent]['last_transaction_date'] || $rentalDate > $byAgent[$rentAgent]['last_transaction_date']) {
+                    $byAgent[$rentAgent]['last_transaction_date'] = $rentalDate;
+                }
+            }
+
+            // Process client agent - only if they are a registered agent user
+            $clientAgent = trim($code->client_by_agent_name);
+            if (!empty($clientAgent) && $clientAgent !== 'N/A' && in_array($clientAgent, $agentUserNames)) {
+                if (!isset($byAgent[$clientAgent])) {
+                    $byAgent[$clientAgent] = [
+                        'name' => $clientAgent,
+                        'rent_earnings' => 0.0,
+                        'client_earnings' => 0.0,
+                        'total_earnings' => 0.0,
+                        'rent_count' => 0,
+                        'client_count' => 0,
+                        'total_count' => 0,
+                        'transactions' => [],
+                        'monthly_earnings' => [],
+                        'avg_transaction_value' => 0.0,
+                        'last_transaction_date' => null,
+                    ];
                 }
                 
-                // Add to agency total
-                $agencyTotal += $agencyCut;
+                $byAgent[$clientAgent]['client_earnings'] += $fee;
+                $byAgent[$clientAgent]['client_count'] += 1;
+                $byAgent[$clientAgent]['total_earnings'] += $fee;
+                $byAgent[$clientAgent]['total_count'] += 1;
+                $byAgent[$clientAgent]['transactions'][] = [
+                    'type' => 'client',
+                    'fee' => $fee,
+                    'date' => $rentalDate,
+                    'code' => $code->rental_code,
+                    'status' => $code->status,
+                ];
+                
+                // Track monthly earnings
+                $monthKey = $rentalDate->format('Y-m');
+                if (!isset($byAgent[$clientAgent]['monthly_earnings'][$monthKey])) {
+                    $byAgent[$clientAgent]['monthly_earnings'][$monthKey] = 0;
+                }
+                $byAgent[$clientAgent]['monthly_earnings'][$monthKey] += $fee;
+                
+                // Update last transaction date
+                if (!$byAgent[$clientAgent]['last_transaction_date'] || $rentalDate > $byAgent[$clientAgent]['last_transaction_date']) {
+                    $byAgent[$clientAgent]['last_transaction_date'] = $rentalDate;
+                }
             }
         }
 
@@ -470,17 +420,13 @@ class RentalCodeController extends Controller
             return $b['total_earnings'] <=> $a['total_earnings'];
         });
 
-
         // Calculate summary statistics
         $summary = [
             'total_agents' => count($filteredAgents),
             'total_rental_codes' => $rentalCodes->count(),
             'total_earnings' => array_sum(array_map(fn($x) => $x['total_earnings'], $filteredAgents)),
-            'total_agency_earnings' => array_sum(array_map(fn($x) => $x['agency_earnings'], $filteredAgents)),
-            'total_agent_earnings' => array_sum(array_map(fn($x) => $x['agent_earnings'], $filteredAgents)),
-            'total_transactions' => array_sum(array_map(fn($x) => $x['transaction_count'], $filteredAgents)),
-            'total_vat_deductions' => array_sum(array_map(fn($x) => $x['vat_deductions'], $filteredAgents)),
-            'total_marketing_deductions' => array_sum(array_map(fn($x) => $x['marketing_deductions'], $filteredAgents)),
+            'total_rent_transactions' => array_sum(array_map(fn($x) => $x['rent_count'], $filteredAgents)),
+            'total_client_transactions' => array_sum(array_map(fn($x) => $x['client_count'], $filteredAgents)),
             'avg_earnings_per_agent' => count($filteredAgents) > 0 
                 ? array_sum(array_map(fn($x) => $x['total_earnings'], $filteredAgents)) / count($filteredAgents) 
                 : 0,
@@ -493,41 +439,25 @@ class RentalCodeController extends Controller
             'agent_comparison' => array_slice($filteredAgents, 0, 10, true), // Top 10 agents
         ];
 
-        // Calculate monthly totals - only for actual agent users with proper commission structure
+        // Calculate monthly totals - only for registered agent users
         $monthlyTotals = [];
         foreach ($rentalCodes as $code) {
-            $totalFee = (float) $code->consultation_fee;
             $monthKey = $code->rental_date->format('Y-m');
-            $paymentMethod = $code->payment_method;
+            $rentAgent = trim($code->rent_by_agent_name);
+            $clientAgent = trim($code->client_by_agent_name);
             
-            // Calculate base commission after VAT (for Transfer payments)
-            $baseCommission = $totalFee;
-            if ($paymentMethod === 'Transfer') {
-                $baseCommission = $totalFee * 0.8;
+            // Only include if at least one agent is a registered agent user
+            $hasRegisteredAgent = false;
+            if ((!empty($rentAgent) && $rentAgent !== 'N/A' && in_array($rentAgent, $agentUserNames)) ||
+                (!empty($clientAgent) && $clientAgent !== 'N/A' && in_array($clientAgent, $agentUserNames))) {
+                $hasRegisteredAgent = true;
             }
             
-            // Determine the agent (prioritize client_by_agent, fallback to rent_by_agent)
-            $agentId = $code->client_by_agent ?: $code->rent_by_agent;
-            $agentName = null;
-            
-            // Check if agent is a valid agent user
-            if (is_numeric($agentId) && in_array((int)$agentId, $agentUserIds)) {
-                $agentName = $agentUsers[(int)$agentId];
-            } elseif (is_string($agentId)) {
-                foreach ($agentUsers as $id => $name) {
-                    if (strcasecmp(trim($agentId), $name) === 0) {
-                        $agentName = $name;
-                        break;
-                    }
-                }
-            }
-            
-            // Only add to monthly totals if agent is valid
-            if ($agentName) {
+            if ($hasRegisteredAgent) {
                 if (!isset($monthlyTotals[$monthKey])) {
                     $monthlyTotals[$monthKey] = 0;
                 }
-                $monthlyTotals[$monthKey] += $baseCommission;
+                $monthlyTotals[$monthKey] += (float) $code->consultation_fee;
             }
         }
         ksort($monthlyTotals);

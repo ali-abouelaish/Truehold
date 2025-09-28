@@ -14,7 +14,7 @@ class Property extends Model
         'furnishings', 'parking', 'garden', 'broadband', 'housemates', 'total_rooms',
         'smoker', 'pets', 'occupation', 'gender', 'couples_ok', 'couples_allowed', 'smoking_ok', 'pets_ok',
         'pref_occupation', 'references', 'min_age', 'max_age', 'photo_count', 'first_photo_url',
-        'all_photos', 'photos', 'contact_info', 'management_company', 'amenities',
+        'all_photos', 'photos', 'contact_info', 'management_company', 'agent_name', 'amenities',
         'balcony_roof_terrace', 'disabled_access', 'living_room', 'agent_id'
     ];
 

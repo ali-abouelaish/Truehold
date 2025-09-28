@@ -3,107 +3,87 @@
 @section('page-title', 'Dashboard')
 
 @section('content')
-<!-- Property Type Overview Cards -->
+<!-- Stats Overview -->
 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-    <!-- Map View Card -->
-    <a href="{{ route('properties.map-fullscreen') }}" class="group">
-        <div class="stats-card bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl shadow-lg p-6 border border-blue-200 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
-            <div class="flex items-center">
-                <div class="flex-shrink-0">
-                    <div class="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg">
-                        <i class="fas fa-map-marked-alt text-2xl text-white"></i>
-                    </div>
-                </div>
-                <div class="ml-4">
-                    <p class="text-sm font-medium text-blue-700">Map View</p>
-                    <p class="text-3xl font-bold text-blue-900">{{ $totalProperties }}</p>
-                    <p class="text-xs text-blue-600 mt-1">Total Properties</p>
+    <div class="stats-card bg-white rounded-lg shadow-sm p-6 border border-gray-200">
+        <div class="flex items-center">
+            <div class="flex-shrink-0">
+                <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-building text-2xl text-blue-600"></i>
                 </div>
             </div>
-            <div class="mt-4 flex items-center justify-between">
-                <span class="text-sm text-blue-600 font-medium">
-                    <i class="fas fa-eye mr-1"></i>
-                    Interactive Map
-                </span>
-                <i class="fas fa-arrow-right text-blue-500 group-hover:translate-x-1 transition-transform"></i>
+            <div class="ml-4">
+                <p class="text-sm font-medium text-gray-500">Total Properties</p>
+                <p class="text-2xl font-bold text-gray-900">{{ $totalProperties }}</p>
             </div>
         </div>
-    </a>
+        <div class="mt-4">
+            <span class="text-sm text-green-600">
+                <i class="fas fa-arrow-up mr-1"></i>
+                +12% from last month
+            </span>
+        </div>
+    </div>
 
-    <!-- Rooms Card -->
-    <a href="{{ route('admin.properties', ['property_type' => 'room']) }}" class="group">
-        <div class="stats-card bg-gradient-to-br from-green-50 to-green-100 rounded-xl shadow-lg p-6 border border-green-200 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
-            <div class="flex items-center">
-                <div class="flex-shrink-0">
-                    <div class="w-16 h-16 bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center shadow-lg">
-                        <i class="fas fa-bed text-2xl text-white"></i>
-                    </div>
-                </div>
-                <div class="ml-4">
-                    <p class="text-sm font-medium text-green-700">Rooms</p>
-                    <p class="text-3xl font-bold text-green-900">{{ App\Models\Property::where('property_type', 'like', '%room%')->count() }}</p>
-                    <p class="text-xs text-green-600 mt-1">Available Rooms</p>
+    <div class="stats-card bg-white rounded-lg shadow-sm p-6 border border-gray-200">
+        <div class="flex items-center">
+            <div class="flex-shrink-0">
+                <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-map-marker-alt text-2xl text-green-600"></i>
                 </div>
             </div>
-            <div class="mt-4 flex items-center justify-between">
-                <span class="text-sm text-green-600 font-medium">
-                    <i class="fas fa-home mr-1"></i>
-                    Shared Living
-                </span>
-                <i class="fas fa-arrow-right text-green-500 group-hover:translate-x-1 transition-transform"></i>
+            <div class="ml-4">
+                <p class="text-sm font-medium text-gray-500">With Coordinates</p>
+                <p class="text-2xl font-bold text-gray-900">{{ $propertiesWithCoords }}</p>
             </div>
         </div>
-    </a>
+        <div class="mt-4">
+            <span class="text-sm text-green-600">
+                <i class="fas fa-arrow-up mr-1"></i>
+                {{ $totalProperties > 0 ? round(($propertiesWithCoords / $totalProperties) * 100, 1) : 0 }}% coverage
+            </span>
+        </div>
+    </div>
 
-    <!-- Flats Card -->
-    <a href="{{ route('admin.properties', ['property_type' => 'flat']) }}" class="group">
-        <div class="stats-card bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl shadow-lg p-6 border border-purple-200 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
-            <div class="flex items-center">
-                <div class="flex-shrink-0">
-                    <div class="w-16 h-16 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
-                        <i class="fas fa-building text-2xl text-white"></i>
-                    </div>
-                </div>
-                <div class="ml-4">
-                    <p class="text-sm font-medium text-purple-700">Flats</p>
-                    <p class="text-3xl font-bold text-purple-900">{{ App\Models\Property::where('property_type', 'like', '%flat%')->count() }}</p>
-                    <p class="text-xs text-purple-600 mt-1">Self-Contained</p>
+    <div class="stats-card bg-white rounded-lg shadow-sm p-6 border border-gray-200">
+        <div class="flex items-center">
+            <div class="flex-shrink-0">
+                <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-users text-2xl text-purple-600"></i>
                 </div>
             </div>
-            <div class="mt-4 flex items-center justify-between">
-                <span class="text-sm text-purple-600 font-medium">
-                    <i class="fas fa-key mr-1"></i>
-                    Private Space
-                </span>
-                <i class="fas fa-arrow-right text-purple-500 group-hover:translate-x-1 transition-transform"></i>
+            <div class="ml-4">
+                <p class="text-sm font-medium text-gray-500">Active Agents</p>
+                <p class="text-2xl font-bold text-gray-900">{{ App\Models\User::count() }}</p>
             </div>
         </div>
-    </a>
+        <div class="mt-4">
+            <span class="text-sm text-blue-600">
+                <i class="fas fa-info-circle mr-1"></i>
+                Managing properties
+            </span>
+        </div>
+    </div>
 
-    <!-- Studios Card -->
-    <a href="{{ route('admin.properties', ['property_type' => 'studio']) }}" class="group">
-        <div class="stats-card bg-gradient-to-br from-orange-50 to-orange-100 rounded-xl shadow-lg p-6 border border-orange-200 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
-            <div class="flex items-center">
-                <div class="flex-shrink-0">
-                    <div class="w-16 h-16 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl flex items-center justify-center shadow-lg">
-                        <i class="fas fa-couch text-2xl text-white"></i>
-                    </div>
-                </div>
-                <div class="ml-4">
-                    <p class="text-sm font-medium text-orange-700">Studios</p>
-                    <p class="text-3xl font-bold text-orange-900">{{ App\Models\Property::where('property_type', 'like', '%studio%')->count() }}</p>
-                    <p class="text-xs text-orange-600 mt-1">Open Plan</p>
+    <div class="stats-card bg-white rounded-lg shadow-sm p-6 border border-gray-200">
+        <div class="flex items-center">
+            <div class="flex-shrink-0">
+                <div class="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-chart-line text-2xl text-yellow-600"></i>
                 </div>
             </div>
-            <div class="mt-4 flex items-center justify-between">
-                <span class="text-sm text-orange-600 font-medium">
-                    <i class="fas fa-compress-arrows-alt mr-1"></i>
-                    Compact Living
-                </span>
-                <i class="fas fa-arrow-right text-orange-500 group-hover:translate-x-1 transition-transform"></i>
+            <div class="ml-4">
+                <p class="text-sm font-medium text-gray-500">Available</p>
+                <p class="text-2xl font-bold text-gray-900">{{ App\Models\Property::where('status', 'available')->count() }}</p>
             </div>
         </div>
-    </a>
+        <div class="mt-4">
+            <span class="text-sm text-green-600">
+                <i class="fas fa-check-circle mr-1"></i>
+                Ready for viewing
+            </span>
+        </div>
+    </div>
 </div>
 
 <!-- Quick Actions -->

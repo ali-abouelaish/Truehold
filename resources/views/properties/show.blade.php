@@ -876,54 +876,33 @@
                             </div>
                             <span>Interested Clients</span>
                         </h2>
-                        
-                        @auth
-                            <!-- Full client list for authenticated users -->
-                            <ul class="divide-y divide-gray-200">
-                                @forelse($property->interestedClients ?? [] as $client)
-                                    <li class="py-3 flex items-start justify-between">
-                                        <div>
-                                            <p class="font-semibold text-gray-900">{{ $client->full_name }}</p>
-                                            <p class="text-sm text-gray-600">{{ $client->email }} @if($client->phone_number) • {{ $client->phone_number }} @endif</p>
-                                            @if($client->pivot && $client->pivot->created_at)
-                                                <p class="text-xs text-gray-400 mt-1">Added {{ $client->pivot->created_at->diffForHumans() }}</p>
-                                            @endif
-                                        </div>
-                                        <form method="POST" action="{{ route('admin.properties.interests.remove', [$property, $client]) }}" onsubmit="return confirm('Remove this client from interested list?')">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button class="text-red-600 hover:text-red-700">
-                                                <i class="fas fa-user-minus"></i>
-                                            </button>
-                                        </form>
-                                    </li>
-                                @empty
-                                    <li class="py-4 text-center text-gray-500">
-                                        <i class="fas fa-users text-2xl mb-2"></i>
-                                        <p>No interested clients yet</p>
-                                    </li>
-                                @endforelse
-                            </ul>
-                        @else
-                            <!-- Client count only for non-authenticated users -->
-                            <div class="text-center py-8">
-                                <div class="bg-indigo-50 rounded-lg p-6">
-                                    <i class="fas fa-users text-3xl text-indigo-600 mb-4"></i>
-                                    <p class="text-lg font-semibold text-gray-900 mb-2">
-                                        {{ count($property->interestedClients ?? []) }} 
-                                        {{ count($property->interestedClients ?? []) === 1 ? 'Client' : 'Clients' }} 
-                                        Interested
-                                    </p>
-                                    <p class="text-sm text-gray-600">
-                                        @if(count($property->interestedClients ?? []) > 0)
-                                            This property has generated interest from potential tenants
-                                        @else
-                                            Be the first to show interest in this property
+                        <ul class="divide-y divide-gray-200">
+                            @forelse($property->interestedClients ?? [] as $client)
+                                <li class="py-3 flex items-start justify-between">
+                                    <div>
+                                        <p class="font-semibold text-gray-900">{{ $client->full_name }}</p>
+                                        <p class="text-sm text-gray-600">{{ $client->email }} @if($client->phone_number) • {{ $client->phone_number }} @endif</p>
+                                        @if($client->pivot && $client->pivot->created_at)
+                                            <p class="text-xs text-gray-400 mt-1">Added {{ $client->pivot->created_at->diffForHumans() }}</p>
                                         @endif
-                                    </p>
-                                </div>
-                            </div>
-                        @endauth
+                                    </div>
+                                    @auth
+                                    <form method="POST" action="{{ route('admin.properties.interests.remove', [$property, $client]) }}" onsubmit="return confirm('Remove this client from interested list?')">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button class="text-red-600 hover:text-red-700">
+                                            <i class="fas fa-user-minus"></i>
+                                        </button>
+                                    </form>
+                                    @endauth
+                                </li>
+                            @empty
+                                <li class="py-4 text-center text-gray-500">
+                                    <i class="fas fa-users text-2xl mb-2"></i>
+                                    <p>No interested clients yet</p>
+                                </li>
+                            @endforelse
+                        </ul>
                     </div>
 
                     <!-- Enhanced Quick Actions -->

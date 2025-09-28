@@ -42,11 +42,10 @@ class PropertyController extends Controller
             $query->byManagementCompany($request->management_company);
         }
 
-        if ($request->filled('agent_name')) {
-            $query->whereHas('agent', function($q) use ($request) {
-                $q->where('name', 'like', "%{$request->agent_name}%");
-            });
-        }
+        // Agent name filtering removed - column doesn't exist
+        // if ($request->filled('agent_name')) {
+        //     $query->where('agent_name', 'like', "%{$request->agent_name}%");
+        // }
 
         if ($request->filled('couples_allowed')) {
             $query->byCouplesAllowed($request->couples_allowed);
@@ -56,7 +55,8 @@ class PropertyController extends Controller
         $locations = Property::distinct()->pluck('location')->filter()->sort()->values();
         $propertyTypes = Property::distinct()->pluck('property_type')->filter()->sort()->values();
         $availableDates = Property::distinct()->pluck('available_date')->filter()->sort()->values();
-        $agentNames = Property::with('agent')->get()->pluck('agent.name')->filter()->unique()->sort()->values();
+        // $agentNames = Property::distinct()->pluck('agent_name')->filter()->sort()->values();
+        $agentNames = collect(); // Empty collection since agent_name column doesn't exist
 
         $properties = $query->latest()->paginate(20);
 
@@ -125,11 +125,10 @@ class PropertyController extends Controller
             $query->byManagementCompany($request->management_company);
         }
 
-        if ($request->filled('agent_name')) {
-            $query->whereHas('agent', function($q) use ($request) {
-                $q->where('name', 'like', "%{$request->agent_name}%");
-            });
-        }
+        // Agent name filtering removed - column doesn't exist
+        // if ($request->filled('agent_name')) {
+        //     $query->where('agent_name', 'like', "%{$request->agent_name}%");
+        // }
 
         if ($request->filled('couples_allowed')) {
             $query->byCouplesAllowed($request->couples_allowed);
@@ -139,12 +138,13 @@ class PropertyController extends Controller
         $locations = Property::distinct()->pluck('location')->filter()->sort()->values();
         $propertyTypes = Property::distinct()->pluck('property_type')->sort()->values();
         $availableDates = Property::distinct()->pluck('available_date')->sort()->values();
-        $agentNames = Property::with('agent')->get()->pluck('agent.name')->filter()->unique()->sort()->values();
+        // $agentNames = Property::distinct()->pluck('agent_name')->filter()->sort()->values();
+        $agentNames = collect(); // Empty collection since agent_name column doesn't exist
 
         // Select specific fields for map performance and include agent_name
         $properties = $query->select([
             'id', 'title', 'location', 'latitude', 'longitude', 'price', 'description',
-            'property_type', 'available_date', 'management_company', 'agent_id',
+            'property_type', 'available_date', 'management_company',
             'bills_included', 'furnishings', 'parking', 'garden', 'broadband',
             'housemates', 'total_rooms', 'couples_ok', 'smoking_ok', 'pets_ok',
             'min_age', 'max_age', 'photo_count', 'first_photo_url', 'all_photos', 'photos'
@@ -177,69 +177,6 @@ class PropertyController extends Controller
         ]);
 
         return view('properties.map', compact('properties', 'locations', 'propertyTypes', 'availableDates', 'agentNames'));
-    }
-
-    /**
-     * Display properties on a full screen map with minimal UI.
-     */
-    public function mapFullscreen(Request $request)
-    {
-        // Enhanced coordinate validation query using the scope
-        $query = Property::query()->withValidCoordinates();
-
-        // Apply filters
-        if ($request->filled('location')) {
-            $query->byLocation($request->location);
-        }
-
-        // Price filtering - handle min and max separately
-        if ($request->filled('min_price')) {
-            $query->byMinPrice($request->min_price);
-        }
-        
-        if ($request->filled('max_price')) {
-            $query->byMaxPrice($request->max_price);
-        }
-
-        if ($request->filled('property_type')) {
-            $query->where('property_type', 'like', "%{$request->property_type}%");
-        }
-
-        if ($request->filled('available_date')) {
-            $query->where('available_date', 'like', "%{$request->available_date}%");
-        }
-
-        // New filters: Management Company, Agent Name
-        if ($request->filled('management_company')) {
-            $query->byManagementCompany($request->management_company);
-        }
-
-        if ($request->filled('agent_name')) {
-            $query->whereHas('agent', function($q) use ($request) {
-                $q->where('name', 'like', "%{$request->agent_name}%");
-            });
-        }
-
-        if ($request->filled('couples_allowed')) {
-            $query->byCouplesAllowed($request->couples_allowed);
-        }
-
-        // Get unique values for filter dropdowns
-        $locations = Property::distinct()->pluck('location')->filter()->sort()->values();
-        $propertyTypes = Property::distinct()->pluck('property_type')->sort()->values();
-        $availableDates = Property::distinct()->pluck('available_date')->sort()->values();
-        $agentNames = Property::with('agent')->get()->pluck('agent.name')->filter()->unique()->sort()->values();
-
-        // Select specific fields for map performance and include agent_name
-        $properties = $query->select([
-            'id', 'title', 'location', 'latitude', 'longitude', 'price', 'description',
-            'property_type', 'available_date', 'management_company', 'agent_id',
-            'bills_included', 'furnishings', 'parking', 'garden', 'broadband',
-            'housemates', 'total_rooms', 'couples_ok', 'smoking_ok', 'pets_ok',
-            'min_age', 'max_age', 'photo_count', 'first_photo_url', 'all_photos', 'photos'
-        ])->limit(175)->get();
-
-        return view('properties.map-fullscreen', compact('properties', 'locations', 'propertyTypes', 'availableDates', 'agentNames'));
     }
 
     /**
