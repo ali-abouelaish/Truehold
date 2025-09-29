@@ -396,7 +396,8 @@ class AdminController extends Controller
     public function createClient()
     {
         $agentUsers = \App\Models\User::where('role', 'agent')->with('agent')->get();
-        return view('admin.clients.create', compact('agentUsers'));
+        $marketingUsers = \App\Models\User::where('role', 'marketing_agent')->get();
+        return view('admin.clients.create', compact('agentUsers', 'marketingUsers'));
     }
 
     public function storeClient(Request $request)
@@ -417,6 +418,7 @@ class AdminController extends Controller
             'notes' => 'nullable|string',
             'registration_status' => 'nullable|in:registered,unregistered',
             'agent_user_id' => 'nullable|exists:users,id',
+            'marketing_agent_id' => 'nullable|exists:users,id',
         ]);
 
         if ($validator->fails()) {
@@ -440,7 +442,8 @@ class AdminController extends Controller
     public function editClient(\App\Models\Client $client)
     {
         $agentUsers = \App\Models\User::where('role', 'agent')->with('agent')->get();
-        return view('admin.clients.edit', compact('client', 'agentUsers'));
+        $marketingUsers = \App\Models\User::where('role', 'marketing_agent')->get();
+        return view('admin.clients.edit', compact('client', 'agentUsers', 'marketingUsers'));
     }
 
     public function updateClient(Request $request, \App\Models\Client $client)
@@ -461,6 +464,7 @@ class AdminController extends Controller
             'notes' => 'nullable|string',
             'registration_status' => 'nullable|in:registered,unregistered',
             'agent_user_id' => 'nullable|exists:users,id',
+            'marketing_agent_id' => 'nullable|exists:users,id',
         ]);
 
         if ($validator->fails()) {

@@ -115,6 +115,23 @@
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
                                 </div>
+                                
+                                <div class="form-group mb-3">
+                                    <label for="marketing_agent_id">Marketing Agent</label>
+                                    <select class="form-control @error('marketing_agent_id') is-invalid @enderror" 
+                                            id="marketing_agent_id" name="marketing_agent_id">
+                                        <option value="">Select a marketing agent</option>
+                                        @foreach($marketingUsers as $user)
+                                            <option value="{{ $user->id }}" {{ old('marketing_agent_id', $client->marketing_agent_id) == $user->id ? 'selected' : '' }}>
+                                                {{ $user->name }} ({{ $user->email }})
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                    <small class="form-text text-muted">Optional: Assign a marketing agent to this client</small>
+                                    @error('marketing_agent_id')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
                             </div>
                         </div>
 

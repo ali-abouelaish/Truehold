@@ -25,6 +25,7 @@ class Client extends Model
         'notes',
         'registration_status',
         'agent_id',
+        'marketing_agent_id',
     ];
 
     protected $casts = [
@@ -39,6 +40,14 @@ class Client extends Model
     public function agent(): BelongsTo
     {
         return $this->belongsTo(Agent::class);
+    }
+
+    /**
+     * Get the marketing agent assigned to this client.
+     */
+    public function marketingAgent(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'marketing_agent_id');
     }
 
     /**

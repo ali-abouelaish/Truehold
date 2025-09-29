@@ -141,6 +141,11 @@
                                         <i class="fas fa-user-times mr-1"></i>No agent assigned
                                     </div>
                                 @endif
+                                @if($client->marketingAgent)
+                                    <div class="text-xs text-purple-600 mt-1">
+                                        <i class="fas fa-bullhorn mr-1"></i>Marketing: {{ $client->marketingAgent->name }}
+                                    </div>
+                                @endif
                             </div>
                         </div>
                     </td>
@@ -288,7 +293,7 @@
                             <!-- Assigned Agent Information -->
                             <div class="bg-white rounded-lg p-4 shadow-sm">
                                 <h6 class="font-semibold text-gray-900 mb-3 flex items-center">
-                                    <i class="fas fa-user-tie mr-2 text-purple-600"></i>Assigned Agent
+                                    <i class="fas fa-user-tie mr-2 text-blue-600"></i>Assigned Agent
                                 </h6>
                                 <div class="space-y-2 text-sm">
                                     @if($client->agent)
@@ -312,6 +317,28 @@
                                     @else
                                         <div class="text-gray-500 italic">
                                             <i class="fas fa-user-times mr-2"></i>No agent assigned to this client
+                                        </div>
+                                    @endif
+                                </div>
+                            </div>
+
+                            <!-- Marketing Agent Information -->
+                            <div class="bg-white rounded-lg p-4 shadow-sm">
+                                <h6 class="font-semibold text-gray-900 mb-3 flex items-center">
+                                    <i class="fas fa-bullhorn mr-2 text-purple-600"></i>Marketing Agent
+                                </h6>
+                                <div class="space-y-2 text-sm">
+                                    @if($client->marketingAgent)
+                                        <div><strong>Marketing Agent:</strong> {{ $client->marketingAgent->name }}</div>
+                                        <div><strong>Email:</strong> {{ $client->marketingAgent->email }}</div>
+                                        <div class="mt-2">
+                                            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                                                <i class="fas fa-bullhorn mr-1"></i>Marketing Agent
+                                            </span>
+                                        </div>
+                                    @else
+                                        <div class="text-gray-500 italic">
+                                            <i class="fas fa-bullhorn mr-2"></i>No marketing agent assigned
                                         </div>
                                     @endif
                                 </div>
