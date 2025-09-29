@@ -3,6 +3,8 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
+use App\Models\RentalCode;
+use App\Observers\RentalCodeObserver;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -23,5 +25,8 @@ class AppServiceProvider extends ServiceProvider
         \Blade::directive('safe', function ($expression) {
             return "<?php echo is_string($expression) ? $expression : 'N/A'; ?>";
         });
+        
+        // Register model observers
+        RentalCode::observe(RentalCodeObserver::class);
     }
 }
