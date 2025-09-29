@@ -18,15 +18,21 @@ class RentalCode extends Model
         'property',
         'licensor',
         'client_id',
+        'client_count',
         'rent_by_agent',
         'client_by_agent',
+        'marketing_agent',
         'notes',
         'status',
+        'paid',
+        'paid_at',
     ];
 
     protected $casts = [
         'rental_date' => 'date',
         'consultation_fee' => 'decimal:2',
+        'paid' => 'boolean',
+        'paid_at' => 'datetime',
     ];
 
     /**
@@ -68,6 +74,26 @@ class RentalCode extends Model
             return (string) $value;
         } catch (\Throwable $e) {
             return (string) ($this->client_by_agent ?? 'N/A');
+        }
+    }
+
+    /**
+     * Get display name for marketing_agent (handles ID or name string)
+     */
+    public function getMarketingAgentNameAttribute(): string
+    {
+        try {
+            $value = $this->marketing_agent;
+            if (empty($value)) {
+                return 'N/A';
+            }
+            if (is_numeric($value)) {
+                $user = \App\Models\User::find((int) $value);
+                return $user?->name ?? (string) $value;
+            }
+            return (string) $value;
+        } catch (\Throwable $e) {
+            return (string) ($this->marketing_agent ?? 'N/A');
         }
     }
 

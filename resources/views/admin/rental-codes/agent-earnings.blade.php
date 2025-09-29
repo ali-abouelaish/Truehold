@@ -65,11 +65,16 @@
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">
-                                <i class="fas fa-user mr-1"></i>Agent Search
+                                <i class="fas fa-user mr-1"></i>Agent Filter
                             </label>
-                            <input type="text" name="agent_search" value="{{ $agentSearch }}" 
-                                   placeholder="Search by agent name..."
-                                   class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200">
+                            <select name="agent_search" class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200">
+                                <option value="">All Agents</option>
+                                @foreach($agentEarnings as $agent)
+                                    <option value="{{ $agent['name'] }}" {{ $agentSearch == $agent['name'] ? 'selected' : '' }}>
+                                        {{ $agent['name'] }} ({{ $agent['transaction_count'] }} transactions)
+                                    </option>
+                                @endforeach
+                            </select>
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">
@@ -236,7 +241,16 @@
                                 Transactions
                             </th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                VAT Deductions
+                                Marketing Deductions
+                            </th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Marketing Earnings
+                            </th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Paid Amount
+                            </th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Outstanding
                             </th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Last Activity
@@ -298,10 +312,37 @@
                             
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="text-sm text-gray-900">
-                                    £{{ number_format($agent['vat_deductions'], 2) }}
+                                    £{{ number_format($agent['marketing_deductions'], 2) }}
                                 </div>
                                 <div class="text-xs text-gray-500">
-                                    Transfer payments only
+                                    £30 per different marketing agent
+                                </div>
+                            </td>
+                            
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm text-gray-900">
+                                    £{{ number_format($agent['marketing_agent_earnings'], 2) }}
+                                </div>
+                                <div class="text-xs text-gray-500">
+                                    Marketing agent earnings
+                                </div>
+                            </td>
+                            
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm text-gray-900">
+                                    £{{ number_format($agent['paid_amount'], 2) }}
+                                </div>
+                                <div class="text-xs text-gray-500">
+                                    Already paid
+                                </div>
+                            </td>
+                            
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm font-semibold {{ $agent['outstanding_amount'] > 0 ? 'text-red-600' : 'text-green-600' }}">
+                                    £{{ number_format($agent['outstanding_amount'], 2) }}
+                                </div>
+                                <div class="text-xs text-gray-500">
+                                    {{ $agent['outstanding_amount'] > 0 ? 'Outstanding' : 'Up to date' }}
                                 </div>
                             </td>
                             
@@ -376,6 +417,24 @@
                             <div class="flex justify-between items-center text-xs text-gray-500">
                                 <span>Avg: £{{ number_format($agent['avg_transaction_value'], 2) }}</span>
                                 <span>{{ $agent['last_transaction_date'] ? $agent['last_transaction_date']->format('d M') : 'N/A' }}</span>
+                            </div>
+                            
+                            @if($agent['marketing_deductions'] > 0 || $agent['marketing_agent_earnings'] > 0)
+                            <div class="mt-2 pt-2 border-t border-gray-200">
+                                <div class="flex justify-between items-center text-xs">
+                                    <span class="text-orange-600">Marketing Deductions: £{{ number_format($agent['marketing_deductions'], 2) }}</span>
+                                    <span class="text-green-600">Marketing Earnings: £{{ number_format($agent['marketing_agent_earnings'], 2) }}</span>
+                                </div>
+                            </div>
+                            @endif
+                            
+                            <div class="mt-2 pt-2 border-t border-gray-200">
+                                <div class="flex justify-between items-center text-xs">
+                                    <span class="text-blue-600">Paid: £{{ number_format($agent['paid_amount'], 2) }}</span>
+                                    <span class="{{ $agent['outstanding_amount'] > 0 ? 'text-red-600' : 'text-green-600' }}">
+                                        Outstanding: £{{ number_format($agent['outstanding_amount'], 2) }}
+                                    </span>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -558,6 +617,10 @@ function showAgentDetails(agentName) {
                      <div class="text-sm font-semibold text-gray-900">£${parseFloat(transaction.total_fee).toFixed(2)}</div>
                      <div class="text-xs text-gray-500">Agency: £${parseFloat(transaction.agency_cut).toFixed(2)} | Agent: £${parseFloat(transaction.agent_cut).toFixed(2)}</div>
                      ${transaction.vat_amount > 0 ? '<div class="text-xs text-orange-600">VAT: £' + parseFloat(transaction.vat_amount).toFixed(2) + '</div>' : ''}
+                     ${transaction.marketing_deduction > 0 ? '<div class="text-xs text-red-600">Marketing Deduction: £' + parseFloat(transaction.marketing_deduction).toFixed(2) + '</div>' : ''}
+                     ${transaction.is_marketing_earnings ? '<div class="text-xs text-green-600">Marketing Earnings</div>' : ''}
+                     ${transaction.client_count > 1 ? '<div class="text-xs text-blue-600">Multiple Clients: ' + transaction.client_count + '</div>' : ''}
+                     ${transaction.paid ? '<div class="text-xs text-green-600">✓ Paid</div>' : '<div class="text-xs text-orange-600">Pending Payment</div>'}
                  </div>
              </div>
          `;

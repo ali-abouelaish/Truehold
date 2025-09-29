@@ -26,15 +26,12 @@ class RentalCodeController extends Controller
     public function create()
     {
         // Get users who are agents (either by role or by having an agent profile)
-        // Simplified approach: get all users with agent role OR agent profile
         $agentUsers = User::where('role', 'agent')->with('agent')->get();
-
-      
         
-       
+        // Get users who are marketing (marketing role)
+        $marketingUsers = User::where('role', 'marketing')->get();
         
-        
-        return view('admin.rental-codes.create', compact('agentUsers'));
+        return view('admin.rental-codes.create', compact('agentUsers', 'marketingUsers'));
     }
 
     /**
@@ -60,6 +57,8 @@ class RentalCodeController extends Controller
             'client_position_role' => 'nullable|string|max:255',
             'rent_by_agent' => 'required|string|max:255',
             'client_by_agent' => 'required|string|max:255',
+            'marketing_agent' => 'nullable|string|max:255',
+            'client_count' => 'required|integer|min:1|max:10',
             'notes' => 'nullable|string',
             'status' => 'required|string|in:pending,approved,completed,cancelled',
         ]);
@@ -110,7 +109,10 @@ class RentalCodeController extends Controller
         // Combine and remove duplicates
         $agentUsers = $usersWithAgentRole->merge($usersWithAgentProfile)->unique('id')->load('agent');
         
-        return view('admin.rental-codes.edit', compact('rentalCode', 'agentUsers'));
+        // Get users who are marketing (marketing role)
+        $marketingUsers = User::where('role', 'marketing')->get();
+        
+        return view('admin.rental-codes.edit', compact('rentalCode', 'agentUsers', 'marketingUsers'));
     }
 
     /**
@@ -140,6 +142,8 @@ class RentalCodeController extends Controller
             'client_position_role' => 'nullable|string|max:255',
             'rent_by_agent' => 'required|string|max:255',
             'client_by_agent' => 'required|string|max:255',
+            'marketing_agent' => 'nullable|string|max:255',
+            'client_count' => 'required|integer|min:1|max:10',
             'notes' => 'nullable|string',
             'status' => 'required|string|in:pending,approved,completed,cancelled',
         ]);
@@ -313,6 +317,16 @@ class RentalCodeController extends Controller
         $byAgent = [];
         $agentStats = [];
         
+        // Get current month and calculate earnings period (up to 10th of current month)
+        $currentDate = now();
+        $currentMonth = $currentDate->format('Y-m');
+        $earningsCutoffDate = $currentDate->copy()->day(10);
+        
+        // If we're past the 10th, use next month's 10th as cutoff
+        if ($currentDate->day > 10) {
+            $earningsCutoffDate = $currentDate->copy()->addMonth()->day(10);
+        }
+        
         foreach ($rentalCodes as $code) {
             // Add null checks for all data
             $totalFee = (float) ($code->consultation_fee ?? 0);
@@ -338,6 +352,36 @@ class RentalCodeController extends Controller
             // Calculate commission split: Agency 45%, Agent 55%
             $agencyCut = $baseCommission * 0.45;
             $agentCut = $baseCommission * 0.55;
+            
+            // Check if marketing agent is different from rental agent
+            $marketingAgent = $code->marketing_agent;
+            $marketingDeduction = 0;
+            $marketingAgentName = null;
+            $clientCount = $code->client_count ?? 1;
+            
+            // If marketing agent exists and is different from the rental agent
+            if (!empty($marketingAgent) && $marketingAgent != $agentId) {
+                // £30 for single client, £40 for multiple clients
+                $marketingDeduction = $clientCount > 1 ? 40.0 : 30.0;
+                $agentCut -= $marketingDeduction; // Deduct from agent
+                
+                // Get marketing agent name
+                if (is_numeric($marketingAgent) && in_array((int)$marketingAgent, $agentUserIds)) {
+                    $marketingAgentName = $agentUsers[(int)$marketingAgent] ?? null;
+                } elseif (is_string($marketingAgent) && !empty(trim($marketingAgent))) {
+                    foreach ($agentUsers as $id => $name) {
+                        if (!empty($name) && strcasecmp(trim($marketingAgent), trim($name)) === 0) {
+                            $marketingAgentName = $name;
+                            break;
+                        }
+                    }
+                }
+                
+                // If no marketing agent found in registered users, use the value as is
+                if (empty($marketingAgentName)) {
+                    $marketingAgentName = is_string($marketingAgent) ? trim($marketingAgent) : "Marketing-{$marketingAgent}";
+                }
+            }
 
             // Determine the agent (prioritize client_by_agent, fallback to rent_by_agent)
             $agentId = $code->client_by_agent ?: $code->rent_by_agent;
@@ -430,6 +474,11 @@ class RentalCodeController extends Controller
                         'avg_transaction_value' => 0.0,
                         'last_transaction_date' => null,
                         'vat_deductions' => 0.0,
+                        'marketing_deductions' => 0.0,
+                        'marketing_agent_earnings' => 0.0,
+                        'paid_amount' => 0.0,
+                        'entitled_amount' => 0.0,
+                        'outstanding_amount' => 0.0,
                     ];
                 }
                 
@@ -445,12 +494,35 @@ class RentalCodeController extends Controller
                     $byAgent[$agentName]['vat_deductions'] += $vatAmount;
                 }
                 
+                // Track marketing deductions
+                if ($marketingDeduction > 0) {
+                    $byAgent[$agentName]['marketing_deductions'] += $marketingDeduction;
+                }
+                
+                // Track paid amounts and entitled amounts
+                $isPaid = $code->paid ?? false;
+                $agentEarnings = $agentCut; // Agent's portion of earnings
+                
+                if ($isPaid) {
+                    $byAgent[$agentName]['paid_amount'] += $agentEarnings;
+                } else {
+                    $byAgent[$agentName]['entitled_amount'] += $agentEarnings;
+                }
+                
+                // Calculate outstanding amount
+                $byAgent[$agentName]['outstanding_amount'] = $byAgent[$agentName]['entitled_amount'] - $byAgent[$agentName]['paid_amount'];
+                
                 $byAgent[$agentName]['transactions'][] = [
                     'total_fee' => $totalFee,
                     'base_commission' => $baseCommission,
                     'agency_cut' => $agencyCut,
                     'agent_cut' => $agentCut,
                     'vat_amount' => $paymentMethod === 'Transfer' ? ($totalFee - $baseCommission) : 0,
+                    'marketing_deduction' => $marketingDeduction,
+                    'marketing_agent' => $marketingAgentName,
+                    'client_count' => $clientCount,
+                    'paid' => $isPaid,
+                    'paid_at' => $code->paid_at,
                     'date' => $rentalDate,
                     'code' => $code->rental_code ?? 'N/A',
                     'status' => $code->status ?? 'Unknown',
@@ -467,6 +539,75 @@ class RentalCodeController extends Controller
                 // Update last transaction date
                 if (!$byAgent[$agentName]['last_transaction_date'] || $rentalDate > $byAgent[$agentName]['last_transaction_date']) {
                     $byAgent[$agentName]['last_transaction_date'] = $rentalDate;
+                }
+            }
+            
+            // Handle marketing agent earnings if different from rental agent
+            if ($marketingDeduction > 0 && $marketingAgentName) {
+                if (!isset($byAgent[$marketingAgentName])) {
+                    $byAgent[$marketingAgentName] = [
+                        'name' => $marketingAgentName,
+                        'agency_earnings' => 0.0,
+                        'agent_earnings' => 0.0,
+                        'total_earnings' => 0.0,
+                        'transaction_count' => 0,
+                        'transactions' => [],
+                        'monthly_earnings' => [],
+                        'avg_transaction_value' => 0.0,
+                        'last_transaction_date' => null,
+                        'vat_deductions' => 0.0,
+                        'marketing_deductions' => 0.0,
+                        'marketing_agent_earnings' => 0.0,
+                        'paid_amount' => 0.0,
+                        'entitled_amount' => 0.0,
+                        'outstanding_amount' => 0.0,
+                    ];
+                }
+                
+                // Add marketing agent earnings
+                $byAgent[$marketingAgentName]['marketing_agent_earnings'] += $marketingDeduction;
+                $byAgent[$marketingAgentName]['total_earnings'] += $marketingDeduction;
+                $byAgent[$marketingAgentName]['transaction_count'] += 1;
+                
+                // Track paid amounts for marketing agent
+                $marketingIsPaid = $code->paid ?? false;
+                if ($marketingIsPaid) {
+                    $byAgent[$marketingAgentName]['paid_amount'] += $marketingDeduction;
+                } else {
+                    $byAgent[$marketingAgentName]['entitled_amount'] += $marketingDeduction;
+                }
+                
+                // Calculate outstanding amount for marketing agent
+                $byAgent[$marketingAgentName]['outstanding_amount'] = $byAgent[$marketingAgentName]['entitled_amount'] - $byAgent[$marketingAgentName]['paid_amount'];
+                
+                $byAgent[$marketingAgentName]['transactions'][] = [
+                    'total_fee' => $totalFee,
+                    'base_commission' => $marketingDeduction,
+                    'agency_cut' => 0,
+                    'agent_cut' => $marketingDeduction,
+                    'vat_amount' => 0,
+                    'marketing_deduction' => 0,
+                    'marketing_agent' => $marketingAgentName,
+                    'client_count' => $clientCount,
+                    'paid' => $marketingIsPaid,
+                    'paid_at' => $code->paid_at,
+                    'date' => $rentalDate,
+                    'code' => $code->rental_code ?? 'N/A',
+                    'status' => $code->status ?? 'Unknown',
+                    'payment_method' => $paymentMethod,
+                    'is_marketing_earnings' => true,
+                ];
+                
+                // Track monthly earnings for marketing agent
+                $monthKey = $rentalDate->format('Y-m');
+                if (!isset($byAgent[$marketingAgentName]['monthly_earnings'][$monthKey])) {
+                    $byAgent[$marketingAgentName]['monthly_earnings'][$monthKey] = 0;
+                }
+                $byAgent[$marketingAgentName]['monthly_earnings'][$monthKey] += $marketingDeduction;
+                
+                // Update last transaction date for marketing agent
+                if (!$byAgent[$marketingAgentName]['last_transaction_date'] || $rentalDate > $byAgent[$marketingAgentName]['last_transaction_date']) {
+                    $byAgent[$marketingAgentName]['last_transaction_date'] = $rentalDate;
                 }
             }
         }
@@ -504,6 +645,11 @@ class RentalCodeController extends Controller
             'total_earnings' => array_sum(array_map(fn($x) => $x['total_earnings'], $filteredAgents)),
             'total_agency_earnings' => array_sum(array_map(fn($x) => $x['agency_earnings'], $filteredAgents)),
             'total_agent_earnings' => array_sum(array_map(fn($x) => $x['agent_earnings'], $filteredAgents)),
+            'total_marketing_earnings' => array_sum(array_map(fn($x) => $x['marketing_agent_earnings'], $filteredAgents)),
+            'total_marketing_deductions' => array_sum(array_map(fn($x) => $x['marketing_deductions'], $filteredAgents)),
+            'total_paid_amount' => array_sum(array_map(fn($x) => $x['paid_amount'], $filteredAgents)),
+            'total_entitled_amount' => array_sum(array_map(fn($x) => $x['entitled_amount'], $filteredAgents)),
+            'total_outstanding_amount' => array_sum(array_map(fn($x) => $x['outstanding_amount'], $filteredAgents)),
             'total_transactions' => array_sum(array_map(fn($x) => $x['transaction_count'], $filteredAgents)),
             'total_vat_deductions' => array_sum(array_map(fn($x) => $x['vat_deductions'], $filteredAgents)),
             'avg_earnings_per_agent' => count($filteredAgents) > 0 
@@ -619,6 +765,39 @@ class RentalCodeController extends Controller
             'agentSearch' => $agentSearch,
             'totalRentalCodes' => $rentalCodes->count(),
             'totalEarnings' => $summary['total_earnings'],
+        ]);
+    }
+
+    /**
+     * Mark a rental code as paid
+     */
+    public function markAsPaid(RentalCode $rentalCode)
+    {
+        $rentalCode->update([
+            'paid' => true,
+            'paid_at' => now(),
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Rental code marked as paid successfully',
+            'paid_at' => $rentalCode->paid_at->format('d M Y H:i'),
+        ]);
+    }
+
+    /**
+     * Mark a rental code as unpaid
+     */
+    public function markAsUnpaid(RentalCode $rentalCode)
+    {
+        $rentalCode->update([
+            'paid' => false,
+            'paid_at' => null,
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Rental code marked as unpaid successfully',
         ]);
     }
 }

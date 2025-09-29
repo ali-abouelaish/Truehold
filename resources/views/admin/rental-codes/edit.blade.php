@@ -391,14 +391,74 @@
                                             </label>
                                             <div class="input-group">
                                                 <span class="input-group-text"><i class="fas fa-user-tie"></i></span>
-                                                <input type="text" class="form-control @error('client_by_agent') is-invalid @enderror" 
-                                                       id="client_by_agent" name="client_by_agent" 
-                                                       value="{{ old('client_by_agent', $rentalCode->client_by_agent) }}" 
-                                                       placeholder="Enter agent name" required>
+                                                <select class="form-select @error('client_by_agent') is-invalid @enderror" 
+                                                        id="client_by_agent" name="client_by_agent" required>
+                                                    <option value="">Select agent</option>
+                                                    @foreach($agentUsers as $user)
+                                                        <option value="{{ $user->id }}" 
+                                                                {{ old('client_by_agent', $rentalCode->client_by_agent) == $user->id ? 'selected' : '' }}>
+                                                            {{ $user->name }}
+                                                            @if($user->agent && $user->agent->company_name)
+                                                                ({{ $user->agent->company_name }})
+                                                            @endif
+                                                        </option>
+                                                    @endforeach
+                                                </select>
                                             </div>
                                             @error('client_by_agent')
                                                 <div class="invalid-feedback">{{ $message }}</div>
                                             @enderror
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group mb-3">
+                                            <label for="marketing_agent" class="form-label">
+                                                Marketing Agent
+                                            </label>
+                                            <div class="input-group">
+                                                <span class="input-group-text"><i class="fas fa-bullhorn"></i></span>
+                                                <select class="form-select @error('marketing_agent') is-invalid @enderror" 
+                                                        id="marketing_agent" name="marketing_agent">
+                                                    <option value="">Select marketing agent</option>
+                                                    @foreach($marketingUsers as $user)
+                                                        <option value="{{ $user->id }}" 
+                                                                {{ old('marketing_agent', $rentalCode->marketing_agent) == $user->id ? 'selected' : '' }}>
+                                                            {{ $user->name }}
+                                                        </option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                            @error('marketing_agent')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="col-md-6">
+                                        <div class="form-group mb-3">
+                                            <label for="client_count" class="form-label">
+                                                Number of Clients <span class="text-danger">*</span>
+                                            </label>
+                                            <div class="input-group">
+                                                <span class="input-group-text"><i class="fas fa-users"></i></span>
+                                                <select class="form-select @error('client_count') is-invalid @enderror" 
+                                                        id="client_count" name="client_count" required>
+                                                    @for($i = 1; $i <= 10; $i++)
+                                                        <option value="{{ $i }}" {{ old('client_count', $rentalCode->client_count ?? 1) == $i ? 'selected' : '' }}>
+                                                            {{ $i }} {{ $i == 1 ? 'Client' : 'Clients' }}
+                                                        </option>
+                                                    @endfor
+                                                </select>
+                                            </div>
+                                            @error('client_count')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                            <small class="form-text text-muted">
+                                                Multiple clients increase marketing commission to £40
+                                            </small>
                                         </div>
                                     </div>
                                 </div>

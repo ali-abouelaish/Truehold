@@ -104,6 +104,8 @@ Route::middleware('auth')->prefix('admin')->group(function () {
     // Rental Code Management Routes
     Route::resource('rental-codes', RentalCodeController::class);
     Route::get('/rental-codes/generate-code', [RentalCodeController::class, 'generateCode'])->name('rental-codes.generate-code');
+    Route::post('/rental-codes/{rentalCode}/mark-paid', [RentalCodeController::class, 'markAsPaid'])->name('rental-codes.mark-paid');
+    Route::post('/rental-codes/{rentalCode}/mark-unpaid', [RentalCodeController::class, 'markAsUnpaid'])->name('rental-codes.mark-unpaid');
     
     // Invoice Management Routes
     Route::resource('invoices', InvoiceController::class)->names([
