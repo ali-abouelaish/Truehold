@@ -761,9 +761,27 @@ function updateNavigationButtons() {
     const nextBtn = document.getElementById('nextBtn');
     const submitBtn = document.getElementById('submitBtn');
     
-    prevBtn.style.display = currentStep > 1 ? 'block' : 'none';
-    nextBtn.style.display = currentStep < totalSteps ? 'block' : 'none';
-    submitBtn.style.display = currentStep === totalSteps ? 'block' : 'none';
+    console.log('Updating navigation buttons...');
+    console.log('Current step:', currentStep);
+    console.log('Total steps:', totalSteps);
+    console.log('Prev button:', prevBtn);
+    console.log('Next button:', nextBtn);
+    console.log('Submit button:', submitBtn);
+    
+    if (prevBtn) {
+        prevBtn.style.display = currentStep > 1 ? 'block' : 'none';
+        console.log('Prev button display:', prevBtn.style.display);
+    }
+    
+    if (nextBtn) {
+        nextBtn.style.display = currentStep < totalSteps ? 'block' : 'none';
+        console.log('Next button display:', nextBtn.style.display);
+    }
+    
+    if (submitBtn) {
+        submitBtn.style.display = currentStep === totalSteps ? 'block' : 'none';
+        console.log('Submit button display:', submitBtn.style.display);
+    }
 }
 
 function updateReviewSection() {
@@ -824,7 +842,21 @@ document.querySelectorAll('input[required], select[required], textarea[required]
 
 // Auto-generate rental code
 document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM loaded, initializing navigation...');
+    console.log('Current step:', currentStep);
+    console.log('Total steps:', totalSteps);
+    
+    // Initialize navigation buttons
     updateNavigationButtons();
+    
+    // Debug navigation buttons
+    const nextBtn = document.getElementById('nextBtn');
+    const prevBtn = document.getElementById('prevBtn');
+    const submitBtn = document.getElementById('submitBtn');
+    
+    console.log('Next button found:', nextBtn);
+    console.log('Prev button found:', prevBtn);
+    console.log('Submit button found:', submitBtn);
     
     // Generate rental code button
     const generateBtn = document.getElementById('generate-code');
@@ -895,6 +927,12 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Initialize on page load
     toggleClientSections();
+    
+    // Ensure navigation buttons are properly initialized
+    setTimeout(function() {
+        console.log('Delayed navigation initialization...');
+        updateNavigationButtons();
+    }, 100);
 });
 </script>
 @endsection
