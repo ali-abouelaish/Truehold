@@ -774,14 +774,12 @@ const totalSteps = 4;
 
 // Immediate initialization to ensure buttons are visible
 function initializeNavigation() {
-    console.log('Initializing navigation immediately...');
     const nextBtn = document.getElementById('nextBtn');
     const prevBtn = document.getElementById('prevBtn');
     const submitBtn = document.getElementById('submitBtn');
     
     if (nextBtn) {
         nextBtn.style.display = 'block';
-        console.log('Next button made visible');
     }
     
     if (prevBtn) {
@@ -808,61 +806,17 @@ setTimeout(function() {
         nextBtn.style.opacity = '1';
         nextBtn.style.position = 'relative';
         nextBtn.style.zIndex = '9999';
-        console.log('Forced Next button visibility with timeout');
     } else {
         console.error('Next button still not found after timeout');
     }
 }, 50);
 
-// Debug function to show all buttons
-function debugButtons() {
-    console.log('=== BUTTON DEBUG ===');
-    const allButtons = document.querySelectorAll('button');
-    console.log('Total buttons found:', allButtons.length);
-    
-    allButtons.forEach((btn, index) => {
-        console.log(`Button ${index}:`, {
-            id: btn.id,
-            text: btn.textContent.trim(),
-            display: btn.style.display,
-            visibility: btn.style.visibility,
-            className: btn.className
-        });
-    });
-    
-    const nextBtn = document.getElementById('nextBtn');
-    console.log('Next button specifically:', nextBtn);
-    if (nextBtn) {
-        console.log('Next button styles:', {
-            display: nextBtn.style.display,
-            visibility: nextBtn.style.visibility,
-            opacity: nextBtn.style.opacity,
-            position: nextBtn.style.position,
-            zIndex: nextBtn.style.zIndex
-        });
-    }
-}
 
-// Run debug after a short delay
-setTimeout(debugButtons, 100);
-
-// Debug step content
-setTimeout(function() {
-    console.log('=== STEP CONTENT DEBUG ===');
-    for (let i = 1; i <= 4; i++) {
-        const stepElement = document.getElementById(`step-${i}`);
-        console.log(`Step ${i}:`, stepElement);
-        if (stepElement) {
-            console.log(`Step ${i} content:`, stepElement.innerHTML.substring(0, 100) + '...');
-        }
-    }
-}, 200);
 
 function changeStep(direction) {
     const currentStepElement = document.getElementById(`step-${currentStep}`);
     const nextStep = currentStep + direction;
     
-    console.log('Changing step:', { currentStep, nextStep, direction });
     
     if (nextStep < 1 || nextStep > totalSteps) return;
     
@@ -880,12 +834,10 @@ function changeStep(direction) {
     
     // Show next step
     const nextStepElement = document.getElementById(`step-${currentStep}`);
-    console.log('Next step element:', nextStepElement);
     
     if (nextStepElement) {
         nextStepElement.style.display = 'block';
         nextStepElement.classList.add('step-active');
-        console.log('Step', currentStep, 'displayed');
         
         // Special debugging for step 3
         if (currentStep === 3) {
@@ -899,18 +851,12 @@ function changeStep(direction) {
             
             // Check for form fields
             const formFields = nextStepElement.querySelectorAll('input, select, textarea');
-            console.log('Step 3 form fields found:', formFields.length);
-            formFields.forEach((field, index) => {
-                console.log(`Field ${index}:`, field.name, field.type, field.placeholder);
-            });
             
             // Force visibility of all elements in step 3
             const allElements = nextStepElement.querySelectorAll('*');
-            console.log('Total elements in Step 3:', allElements.length);
             
             allElements.forEach((element, index) => {
                 if (element.style.display === 'none' || element.style.visibility === 'hidden') {
-                    console.log(`Hidden element ${index}:`, element);
                     element.style.display = 'block';
                     element.style.visibility = 'visible';
                     element.style.opacity = '1';
@@ -923,7 +869,6 @@ function changeStep(direction) {
                 card.style.display = 'block';
                 card.style.visibility = 'visible';
                 card.style.opacity = '1';
-                console.log('Card visibility forced');
             }
             
             // Force card body visibility
@@ -932,7 +877,6 @@ function changeStep(direction) {
                 cardBody.style.display = 'block';
                 cardBody.style.visibility = 'visible';
                 cardBody.style.opacity = '1';
-                console.log('Card body visibility forced');
             }
             
             // Check if step-active class is applied
@@ -958,30 +902,21 @@ function updateNavigationButtons() {
     const nextBtn = document.getElementById('nextBtn');
     const submitBtn = document.getElementById('submitBtn');
     
-    console.log('Updating navigation buttons...');
-    console.log('Current step:', currentStep);
-    console.log('Total steps:', totalSteps);
-    console.log('Prev button:', prevBtn);
-    console.log('Next button:', nextBtn);
-    console.log('Submit button:', submitBtn);
     
     if (prevBtn) {
         prevBtn.style.display = currentStep > 1 ? 'block' : 'none';
-        console.log('Prev button display:', prevBtn.style.display);
     } else {
         console.error('Previous button not found!');
     }
     
     if (nextBtn) {
         nextBtn.style.display = currentStep < totalSteps ? 'block' : 'none';
-        console.log('Next button display:', nextBtn.style.display);
     } else {
         console.error('Next button not found!');
     }
     
     if (submitBtn) {
         submitBtn.style.display = currentStep === totalSteps ? 'block' : 'none';
-        console.log('Submit button display:', submitBtn.style.display);
     } else {
         console.error('Submit button not found!');
     }
@@ -990,7 +925,6 @@ function updateNavigationButtons() {
     if (nextBtn && currentStep < totalSteps) {
         nextBtn.style.display = 'block';
         nextBtn.style.visibility = 'visible';
-        console.log('Forced next button visibility');
     }
 }
 
@@ -1052,9 +986,6 @@ document.querySelectorAll('input[required], select[required], textarea[required]
 
 // Auto-generate rental code
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('DOM loaded, initializing navigation...');
-    console.log('Current step:', currentStep);
-    console.log('Total steps:', totalSteps);
     
     // Initialize navigation buttons
     updateNavigationButtons();
@@ -1064,9 +995,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const prevBtn = document.getElementById('prevBtn');
     const submitBtn = document.getElementById('submitBtn');
     
-    console.log('Next button found:', nextBtn);
-    console.log('Prev button found:', prevBtn);
-    console.log('Submit button found:', submitBtn);
     
     // Generate rental code button
     const generateBtn = document.getElementById('generate-code');
@@ -1074,9 +1002,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     if (generateBtn && rentalCodeInput) {
         generateBtn.addEventListener('click', function() {
-            console.log('Generate button clicked');
             const url = '/test-rental-code';
-            console.log('Fetching URL:', url);
             
             fetch(url, {
                 method: 'GET',
@@ -1088,15 +1014,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 credentials: 'same-origin'
             })
                 .then(response => {
-                    console.log('Response status:', response.status);
-                    console.log('Response headers:', response.headers);
                     if (!response.ok) {
                         throw new Error(`HTTP error! status: ${response.status}`);
                     }
                     return response.json();
                 })
                 .then(data => {
-                    console.log('Received data:', data);
                     if (data.error) {
                         throw new Error(data.error);
                     }
@@ -1140,7 +1063,6 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Ensure navigation buttons are properly initialized
     setTimeout(function() {
-        console.log('Delayed navigation initialization...');
         updateNavigationButtons();
     }, 100);
 });
