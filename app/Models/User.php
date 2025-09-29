@@ -106,6 +106,14 @@ class User extends Authenticatable
     }
 
     /**
+     * Check if the user is a marketing agent.
+     */
+    public function isMarketingAgent(): bool
+    {
+        return $this->role === 'marketing_agent';
+    }
+
+    /**
      * Get the call logs for this agent.
      */
     public function callLogs(): HasMany

@@ -110,6 +110,11 @@ Route::middleware('auth')->prefix('admin')->group(function () {
     Route::get('/rental-codes/agent/{agentName}', [RentalCodeController::class, 'agentDetails'])->name('rental-codes.agent-details');
     Route::get('/rental-codes/{rentalCode}/details', [RentalCodeController::class, 'getRentalDetails'])->name('rental-codes.details');
     
+    // Marketing Agent Management Routes
+    Route::get('/marketing-agents', [RentalCodeController::class, 'marketingAgents'])->name('marketing-agents.index');
+    Route::post('/marketing-agents', [RentalCodeController::class, 'storeMarketingAgent'])->name('marketing-agents.store');
+    Route::delete('/marketing-agents/{user}', [RentalCodeController::class, 'removeMarketingAgent'])->name('marketing-agents.remove');
+    
     // Invoice Management Routes
     Route::resource('invoices', InvoiceController::class)->names([
         'index' => 'admin.invoices.index',

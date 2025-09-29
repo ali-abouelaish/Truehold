@@ -86,8 +86,8 @@
                                 <option value="rent_only" {{ $marketingAgentFilter == 'rent_only' ? 'selected' : '' }}>Rent Agents Only</option>
                                 <option value="both" {{ $marketingAgentFilter == 'both' ? 'selected' : '' }}>Both Rent & Marketing</option>
                             </select>
-                        </div>
-                        <div>
+            </div>
+            <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">
                                 <i class="fas fa-check-circle mr-1"></i>Status
                             </label>
@@ -144,33 +144,33 @@
                     </div>
                     <div class="bg-green-400 bg-opacity-30 p-2 rounded">
                         <i class="fas fa-pound-sign text-lg"></i>
-                    </div>
-                </div>
             </div>
+        </div>
+    </div>
     
             <div class="bg-gradient-to-r from-purple-500 to-purple-600 rounded-lg p-4 text-white">
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-purple-100 text-xs font-medium">Total Transactions</p>
                         <p class="text-xl font-bold">{{ $summary['total_transactions'] }}</p>
-                    </div>
+                </div>
                     <div class="bg-purple-400 bg-opacity-30 p-2 rounded">
                         <i class="fas fa-file-invoice text-lg"></i>
-                    </div>
-                </div>
             </div>
+        </div>
+    </div>
     
             <div class="bg-gradient-to-r from-orange-500 to-orange-600 rounded-lg p-4 text-white">
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-orange-100 text-xs font-medium">Avg per Agent</p>
                         <p class="text-xl font-bold">£{{ number_format($summary['avg_earnings_per_agent'], 2) }}</p>
-                    </div>
+                </div>
                     <div class="bg-orange-400 bg-opacity-30 p-2 rounded">
                         <i class="fas fa-chart-bar text-lg"></i>
-                    </div>
-                </div>
             </div>
+        </div>
+    </div>
 </div>
 
         <!-- Charts Section -->

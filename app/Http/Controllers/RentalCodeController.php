@@ -28,8 +28,8 @@ class RentalCodeController extends Controller
         // Get users who are agents (either by role or by having an agent profile)
         $agentUsers = User::where('role', 'agent')->with('agent')->get();
         
-        // Get users who are marketing (marketing role)
-        $marketingUsers = User::where('role', 'marketing')->get();
+        // Get users who are marketing agents
+        $marketingUsers = User::where('role', 'marketing_agent')->get();
         
         return view('admin.rental-codes.create', compact('agentUsers', 'marketingUsers'));
     }
@@ -108,8 +108,8 @@ class RentalCodeController extends Controller
         // Combine and remove duplicates
         $agentUsers = $usersWithAgentRole->merge($usersWithAgentProfile)->unique('id')->load('agent');
         
-        // Get users who are marketing (marketing role)
-        $marketingUsers = User::where('role', 'marketing')->get();
+        // Get users who are marketing agents
+        $marketingUsers = User::where('role', 'marketing_agent')->get();
         
         return view('admin.rental-codes.edit', compact('rentalCode', 'agentUsers', 'marketingUsers'));
     }
@@ -1092,5 +1092,43 @@ class RentalCodeController extends Controller
                 'error' => 'Failed to get rental details: ' . $e->getMessage()
             ], 500);
         }
+    }
+
+    /**
+     * Show marketing agents management page
+     */
+    public function marketingAgents()
+    {
+        $marketingAgents = User::where('role', 'marketing_agent')->get();
+        $allUsers = User::whereIn('role', ['agent', 'user'])->get();
+        
+        return view('admin.marketing-agents.index', compact('marketingAgents', 'allUsers'));
+    }
+
+    /**
+     * Store a new marketing agent
+     */
+    public function storeMarketingAgent(Request $request)
+    {
+        $validated = $request->validate([
+            'user_id' => 'required|exists:users,id',
+        ]);
+
+        $user = User::findOrFail($validated['user_id']);
+        $user->update(['role' => 'marketing_agent']);
+
+        return redirect()->route('marketing-agents.index')
+            ->with('success', 'User has been assigned as a marketing agent.');
+    }
+
+    /**
+     * Remove marketing agent role
+     */
+    public function removeMarketingAgent(User $user)
+    {
+        $user->update(['role' => 'user']);
+        
+        return redirect()->route('marketing-agents.index')
+            ->with('success', 'Marketing agent role has been removed.');
     }
 }
