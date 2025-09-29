@@ -547,21 +547,7 @@ function showRentalDetails(rentalId) {
         return;
     }
     
-    const modal = new bootstrap.Modal(modalElement);
-    
-    // Force center the modal
-    modalElement.addEventListener('shown.bs.modal', function() {
-        const modalDialog = modalElement.querySelector('.modal-dialog');
-        if (modalDialog) {
-            modalDialog.style.margin = '0 auto';
-            modalDialog.style.display = 'block';
-            modalDialog.style.position = 'relative';
-            modalDialog.style.left = '50%';
-            modalDialog.style.transform = 'translateX(-50%)';
-        }
-    });
-    
-    modal.show();
+ 
     
     // Fetch actual rental details
     console.log('Fetching rental details for ID:', rentalId);
@@ -886,18 +872,11 @@ document.addEventListener('DOMContentLoaded', function() {
 <style>
 /* Force modal to be perfectly centered */
 #rentalDetailsModal .modal-dialog {
-    position: fixed !important;
-    top: 50% !important;
-    left: 50% !important;
-    transform: translate(-50%, -50%) !important;
-    margin: 0 !important;
-    max-width: 800px !important;
-    width: 90% !important;
-    max-height: 90vh !important;
+    max-width: 800px;
+    width: 90%;
 }
 
 #rentalDetailsModal .modal-content {
-    width: 100%;
     max-height: 90vh;
     overflow-y: auto;
 }
