@@ -368,8 +368,8 @@
                                                         id="rent_by_agent" name="rent_by_agent" required>
                                                     <option value="">Select agent</option>
                                                     @foreach($agentUsers as $user)
-                                                        <option value="{{ $user->name }}" 
-                                                                {{ old('rent_by_agent', $rentalCode->rent_by_agent) == $user->name ? 'selected' : '' }}>
+                                                        <option value="{{ $user->id }}" 
+                                                                {{ old('rent_by_agent', $rentalCode->rent_by_agent) == $user->id ? 'selected' : '' }}>
                                                             {{ $user->name }}
                                                             @if($user->agent && $user->agent->company_name)
                                                                 ({{ $user->agent->company_name }})

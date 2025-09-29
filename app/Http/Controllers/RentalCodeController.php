@@ -834,6 +834,49 @@ class RentalCodeController extends Controller
     }
 
     /**
+     * Update rental code status
+     */
+    public function updateStatus(Request $request, RentalCode $rentalCode)
+    {
+        try {
+            $validated = $request->validate([
+                'status' => 'required|string|in:pending,approved,completed,cancelled',
+            ]);
+
+            \Log::info('Updating rental code status', [
+                'rental_code_id' => $rentalCode->id,
+                'old_status' => $rentalCode->status,
+                'new_status' => $validated['status']
+            ]);
+
+            $rentalCode->update([
+                'status' => $validated['status'],
+            ]);
+
+            \Log::info('Rental code status updated successfully', [
+                'rental_code_id' => $rentalCode->id,
+                'new_status' => $rentalCode->status
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Rental code status updated successfully',
+                'new_status' => $rentalCode->status,
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Error updating rental code status', [
+                'rental_code_id' => $rentalCode->id,
+                'error' => $e->getMessage()
+            ]);
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Error updating rental code status: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
      * Show detailed agent earnings page
      */
     public function agentDetails(Request $request, $agentName)

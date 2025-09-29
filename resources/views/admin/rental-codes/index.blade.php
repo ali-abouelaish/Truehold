@@ -162,6 +162,7 @@
                                         <th>Consultation Fee</th>
                                         <th>Status</th>
                                         <th>Agent</th>
+                                        <th>Quick Actions</th>
                                         <th>Actions</th>
                                     </tr>
                                 </thead>
@@ -205,6 +206,15 @@
                                                         <i class="fas fa-user-tie text-muted"></i>
                                                     </div>
                                                     <span>{{ $rentalCode->rent_by_agent_name }}</span>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="btn-group" role="group">
+                                                    <button type="button" class="btn btn-sm btn-outline-primary" 
+                                                            onclick="toggleStatus({{ $rentalCode->id }}, '{{ $rentalCode->status }}')" 
+                                                            title="Change Status">
+                                                        <i class="fas fa-toggle-on"></i>
+                                                    </button>
                                                 </div>
                                             </td>
                                             <td>
@@ -465,6 +475,51 @@ function exportToCSV() {
 // Print table
 function printTable() {
     window.print();
+}
+
+// Status toggle function
+function toggleStatus(rentalCodeId, currentStatus) {
+    const statusOptions = ['pending', 'approved', 'completed', 'cancelled'];
+    const currentIndex = statusOptions.indexOf(currentStatus);
+    const nextIndex = (currentIndex + 1) % statusOptions.length;
+    const newStatus = statusOptions[nextIndex];
+    
+    if (confirm(`Change status from "${currentStatus}" to "${newStatus}"?`)) {
+        // Show loading state
+        const button = event.target.closest('button');
+        const originalHTML = button.innerHTML;
+        button.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+        button.disabled = true;
+        
+        fetch(`/admin/rental-codes/${rentalCodeId}/update-status`, {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+            },
+            body: JSON.stringify({
+                status: newStatus
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Reload the page to show updated status
+                location.reload();
+            } else {
+                alert('Error updating status: ' + (data.message || 'Unknown error'));
+                button.innerHTML = originalHTML;
+                button.disabled = false;
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error updating status. Please try again.');
+            button.innerHTML = originalHTML;
+            button.disabled = false;
+        });
+    }
 }
 </script>
 @endsection
