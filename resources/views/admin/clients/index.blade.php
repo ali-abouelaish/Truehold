@@ -101,10 +101,10 @@
                         Contact Info
                     </th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Nationality
+                        Budget & Area
                     </th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Type
+                        Moving Date
                     </th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Agent
@@ -141,29 +141,41 @@
                             @if($client->phone_number)
                                 <div><i class="fas fa-phone mr-1"></i>{{ $client->formatted_phone }}</div>
                             @endif
+                            @if($client->nationality)
+                                <div class="text-xs text-gray-500 mt-1">
+                                    <i class="fas fa-flag mr-1"></i>{{ $client->nationality }}
+                                </div>
+                            @endif
                         </div>
                     </td>
                     
                     <td class="px-6 py-4">
-                        <div class="text-sm text-gray-900">{{ $client->nationality ?? 'N/A' }}</div>
-                        @if($client->current_address)
-                            <div class="text-xs text-gray-500">
-                                <i class="fas fa-map-marker-alt mr-1"></i>
-                                {{ Str::limit($client->current_address, 30) }}
-                            </div>
-                        @endif
+                        <div class="text-sm text-gray-900">
+                            @if($client->budget)
+                                <div class="font-medium text-green-600">
+                                    <i class="fas fa-pound-sign mr-1"></i>{{ $client->formatted_budget }}
+                                </div>
+                            @else
+                                <div class="text-gray-400">No budget set</div>
+                            @endif
+                            @if($client->area_of_interest)
+                                <div class="text-xs text-gray-500 mt-1">
+                                    <i class="fas fa-map-marker-alt mr-1"></i>{{ Str::limit($client->area_of_interest, 25) }}
+                                </div>
+                            @endif
+                        </div>
                     </td>
                     
                     <td class="px-6 py-4">
-                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium 
-                            {{ $client->client_type === 'Student' ? 'bg-green-100 text-green-800' : 
-                               ($client->client_type === 'Professional' ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800') }}">
-                            {{ $client->client_type }}
-                        </span>
-                        @if($client->company_university_name)
-                            <div class="text-xs text-gray-500 mt-1">
-                                {{ Str::limit($client->company_university_name, 25) }}
+                        @if($client->moving_date)
+                            <div class="text-sm">
+                                <div class="font-medium">{{ $client->formatted_moving_date }}</div>
+                                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium {{ $client->urgency_color }}">
+                                    {{ $client->urgency_level }}
+                                </span>
                             </div>
+                        @else
+                            <div class="text-gray-400">Not specified</div>
                         @endif
                     </td>
                     
@@ -185,6 +197,10 @@
                     
                     <td class="px-6 py-4 text-sm font-medium">
                         <div class="flex items-center space-x-2">
+                            <button onclick="toggleClientDetails({{ $client->id }})" 
+                                    class="text-blue-600 hover:text-blue-900" title="View Details">
+                                <i class="fas fa-eye"></i>
+                            </button>
                             <a href="{{ route('admin.clients.edit', $client) }}" 
                                class="text-indigo-600 hover:text-indigo-900" title="Edit">
                                 <i class="fas fa-edit"></i>
@@ -197,6 +213,81 @@
                                     <i class="fas fa-trash"></i>
                                 </button>
                             </form>
+                        </div>
+                    </td>
+                </tr>
+                
+                <!-- Expandable Details Row -->
+                <tr id="client-details-{{ $client->id }}" class="hidden bg-gray-50">
+                    <td colspan="6" class="px-6 py-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            <!-- Personal Information -->
+                            <div class="bg-white rounded-lg p-4 shadow-sm">
+                                <h6 class="font-semibold text-gray-900 mb-3 flex items-center">
+                                    <i class="fas fa-user mr-2 text-blue-600"></i>Personal Information
+                                </h6>
+                                <div class="space-y-2 text-sm">
+                                    <div><strong>Full Name:</strong> {{ $client->full_name }}</div>
+                                    <div><strong>Age:</strong> {{ $client->age ?? 'N/A' }} ({{ $client->age_group }})</div>
+                                    <div><strong>Nationality:</strong> {{ $client->nationality ?? 'Not specified' }}</div>
+                                    <div><strong>Type:</strong> 
+                                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium 
+                                            {{ $client->client_type === 'Student' ? 'bg-green-100 text-green-800' : 
+                                               ($client->client_type === 'Professional' ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800') }}">
+                                            {{ $client->client_type }}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Contact Information -->
+                            <div class="bg-white rounded-lg p-4 shadow-sm">
+                                <h6 class="font-semibold text-gray-900 mb-3 flex items-center">
+                                    <i class="fas fa-address-book mr-2 text-green-600"></i>Contact Information
+                                </h6>
+                                <div class="space-y-2 text-sm">
+                                    <div><strong>Email:</strong> {{ $client->email ?? 'Not provided' }}</div>
+                                    <div><strong>Phone:</strong> {{ $client->formatted_phone }}</div>
+                                    <div><strong>Current Address:</strong> {{ $client->current_address ?? 'Not provided' }}</div>
+                                    @if($client->company_university_name)
+                                        <div><strong>Company/University:</strong> {{ $client->company_university_name }}</div>
+                                    @endif
+                                    @if($client->position_role)
+                                        <div><strong>Position/Role:</strong> {{ $client->position_role }}</div>
+                                    @endif
+                                </div>
+                            </div>
+
+                            <!-- Requirements & Preferences -->
+                            <div class="bg-white rounded-lg p-4 shadow-sm">
+                                <h6 class="font-semibold text-gray-900 mb-3 flex items-center">
+                                    <i class="fas fa-search mr-2 text-purple-600"></i>Requirements & Preferences
+                                </h6>
+                                <div class="space-y-2 text-sm">
+                                    <div><strong>Budget:</strong> {{ $client->formatted_budget }}</div>
+                                    <div><strong>Area of Interest:</strong> {{ $client->area_of_interest ?? 'Not specified' }}</div>
+                                    <div><strong>Moving Date:</strong> {{ $client->formatted_moving_date }}</div>
+                                    @if($client->moving_date)
+                                        <div><strong>Urgency:</strong> 
+                                            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium {{ $client->urgency_color }}">
+                                                {{ $client->urgency_level }}
+                                            </span>
+                                        </div>
+                                    @endif
+                                </div>
+                            </div>
+
+                            <!-- Notes -->
+                            @if($client->notes)
+                            <div class="bg-white rounded-lg p-4 shadow-sm md:col-span-2 lg:col-span-3">
+                                <h6 class="font-semibold text-gray-900 mb-3 flex items-center">
+                                    <i class="fas fa-sticky-note mr-2 text-yellow-600"></i>Notes
+                                </h6>
+                                <div class="text-sm text-gray-700 bg-yellow-50 p-3 rounded border-l-4 border-yellow-400">
+                                    {{ $client->notes }}
+                                </div>
+                            </div>
+                            @endif
                         </div>
                     </td>
                 </tr>
@@ -226,4 +317,24 @@
     </div>
     @endif
 </div>
+
+<script>
+function toggleClientDetails(clientId) {
+    const detailsRow = document.getElementById(`client-details-${clientId}`);
+    const button = event.target.closest('button');
+    const icon = button.querySelector('i');
+    
+    if (detailsRow.classList.contains('hidden')) {
+        detailsRow.classList.remove('hidden');
+        icon.classList.remove('fa-eye');
+        icon.classList.add('fa-eye-slash');
+        button.title = 'Hide Details';
+    } else {
+        detailsRow.classList.add('hidden');
+        icon.classList.remove('fa-eye-slash');
+        icon.classList.add('fa-eye');
+        button.title = 'View Details';
+    }
+}
+</script>
 @endsection

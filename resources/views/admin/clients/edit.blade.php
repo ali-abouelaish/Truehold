@@ -117,6 +117,62 @@
                                 </div>
                             </div>
                         </div>
+
+                        <!-- Additional Client Details Section -->
+                        <div class="row mt-4">
+                            <div class="col-12">
+                                <h5 class="text-primary mb-3">
+                                    <i class="fas fa-info-circle mr-2"></i>Client Requirements & Preferences
+                                </h5>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label for="budget">Budget (£)</label>
+                                    <input type="number" step="0.01" min="0" class="form-control @error('budget') is-invalid @enderror" 
+                                           id="budget" name="budget" value="{{ old('budget', $client->budget) }}" placeholder="e.g., 1500.00">
+                                    <small class="form-text text-muted">Monthly rent budget</small>
+                                    @error('budget')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                                
+                                <div class="form-group mb-3">
+                                    <label for="area_of_interest">Area of Interest</label>
+                                    <input type="text" class="form-control @error('area_of_interest') is-invalid @enderror" 
+                                           id="area_of_interest" name="area_of_interest" value="{{ old('area_of_interest', $client->area_of_interest) }}" 
+                                           placeholder="e.g., Central London, Camden, Shoreditch">
+                                    <small class="form-text text-muted">Preferred areas to live</small>
+                                    @error('area_of_interest')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label for="moving_date">Moving Date</label>
+                                    <input type="date" class="form-control @error('moving_date') is-invalid @enderror" 
+                                           id="moving_date" name="moving_date" value="{{ old('moving_date', $client->moving_date) }}">
+                                    <small class="form-text text-muted">When they need to move by</small>
+                                    @error('moving_date')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                                
+                                <div class="form-group mb-3">
+                                    <label for="notes">Notes</label>
+                                    <textarea class="form-control @error('notes') is-invalid @enderror" 
+                                              id="notes" name="notes" rows="4" placeholder="Any additional notes about the client...">{{ old('notes', $client->notes) }}</textarea>
+                                    <small class="form-text text-muted">Special requirements, preferences, or important notes</small>
+                                    @error('notes')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                            </div>
+                        </div>
                         
                         <div class="form-group">
                             <button type="submit" class="btn btn-primary">Update Client</button>

@@ -234,6 +234,12 @@
                     <span class="sidebar-text">Manage Rental Codes</span>
                 </a>
 
+                <a href="{{ route('marketing-agents.index') }}" 
+                   class="sidebar-item flex items-center px-4 py-3 text-gray-700 hover:text-blue-600 {{ request()->routeIs('marketing-agents*') ? 'active' : '' }}">
+                    <i class="fas fa-bullhorn sidebar-icon mr-3 text-lg"></i>
+                    <span class="sidebar-text">Marketing Agents</span>
+                </a>
+
                 <div class="px-4 mt-6 mb-4">
                     <span class="sidebar-text text-xs font-semibold text-gray-500 uppercase tracking-wider">Invoicing</span>
                 </div>
@@ -284,12 +290,6 @@
                    class="sidebar-item flex items-center px-4 py-3 text-gray-700 hover:text-blue-600 {{ request()->routeIs('admin.users*') ? 'active' : '' }}">
                     <i class="fas fa-users sidebar-icon mr-3 text-lg"></i>
                     <span class="sidebar-text">Manage Agents</span>
-                </a>
-
-                <a href="{{ route('marketing-agents.index') }}" 
-                   class="sidebar-item flex items-center px-4 py-3 text-gray-700 hover:text-blue-600 {{ request()->routeIs('marketing-agents*') ? 'active' : '' }}">
-                    <i class="fas fa-bullhorn sidebar-icon mr-3 text-lg"></i>
-                    <span class="sidebar-text">Marketing Agents</span>
                 </a>
 
                 <div class="px-4 mt-6 mb-4">

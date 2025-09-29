@@ -19,11 +19,17 @@ class Client extends Model
         'company_university_name',
         'company_university_address',
         'position_role',
+        'budget',
+        'area_of_interest',
+        'moving_date',
+        'notes',
         'agent_id',
     ];
 
     protected $casts = [
         'date_of_birth' => 'date',
+        'moving_date' => 'date',
+        'budget' => 'decimal:2',
     ];
 
     /**
@@ -138,6 +144,77 @@ class Client extends Model
         }
         
         return $this->date_of_birth->format('jS F Y');
+    }
+
+    /**
+     * Get formatted budget.
+     */
+    public function getFormattedBudgetAttribute(): string
+    {
+        if (!$this->budget) {
+            return 'Not specified';
+        }
+        
+        return '£' . number_format($this->budget, 2);
+    }
+
+    /**
+     * Get formatted moving date.
+     */
+    public function getFormattedMovingDateAttribute(): string
+    {
+        if (!$this->moving_date) {
+            return 'Not specified';
+        }
+        
+        return $this->moving_date->format('jS F Y');
+    }
+
+    /**
+     * Get urgency level based on moving date.
+     */
+    public function getUrgencyLevelAttribute(): string
+    {
+        if (!$this->moving_date) {
+            return 'Unknown';
+        }
+        
+        $daysUntilMoving = now()->diffInDays($this->moving_date, false);
+        
+        if ($daysUntilMoving < 0) {
+            return 'Overdue';
+        } elseif ($daysUntilMoving <= 7) {
+            return 'Urgent';
+        } elseif ($daysUntilMoving <= 30) {
+            return 'High';
+        } elseif ($daysUntilMoving <= 90) {
+            return 'Medium';
+        } else {
+            return 'Low';
+        }
+    }
+
+    /**
+     * Get urgency color for display.
+     */
+    public function getUrgencyColorAttribute(): string
+    {
+        $urgency = $this->urgency_level;
+        
+        switch ($urgency) {
+            case 'Overdue':
+                return 'text-red-600 bg-red-100';
+            case 'Urgent':
+                return 'text-red-600 bg-red-50';
+            case 'High':
+                return 'text-orange-600 bg-orange-50';
+            case 'Medium':
+                return 'text-yellow-600 bg-yellow-50';
+            case 'Low':
+                return 'text-green-600 bg-green-50';
+            default:
+                return 'text-gray-600 bg-gray-50';
+        }
     }
 
     /**
