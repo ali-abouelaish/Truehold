@@ -839,16 +839,8 @@ function changeStep(direction) {
         nextStepElement.style.display = 'block';
         nextStepElement.classList.add('step-active');
         
-        // Special debugging for step 3
+        // Special handling for step 3
         if (currentStep === 3) {
-            console.log('=== STEP 3 DEBUG ===');
-            console.log('Step 3 element:', nextStepElement);
-            console.log('Step 3 classes:', nextStepElement.className);
-            console.log('Step 3 style display:', nextStepElement.style.display);
-            console.log('Step 3 innerHTML length:', nextStepElement.innerHTML.length);
-            console.log('Step 3 children:', nextStepElement.children.length);
-            console.log('Step 3 first child:', nextStepElement.children[0]);
-            
             // Check for form fields
             const formFields = nextStepElement.querySelectorAll('input, select, textarea');
             
@@ -878,9 +870,6 @@ function changeStep(direction) {
                 cardBody.style.visibility = 'visible';
                 cardBody.style.opacity = '1';
             }
-            
-            // Check if step-active class is applied
-            console.log('Step 3 has step-active class:', nextStepElement.classList.contains('step-active'));
         }
     } else {
         console.error('Step element not found:', `step-${currentStep}`);

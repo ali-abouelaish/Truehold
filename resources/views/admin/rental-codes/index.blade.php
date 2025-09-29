@@ -462,14 +462,12 @@ function bulkAction(action) {
     
     if (confirm(`Are you sure you want to ${action} ${ids.length} rental code(s)?`)) {
         // Implement bulk action logic here
-        console.log(`Bulk ${action} for IDs:`, ids);
     }
 }
 
 // Export to CSV
 function exportToCSV() {
     // Implement CSV export logic
-    console.log('Export to CSV');
 }
 
 // Print table

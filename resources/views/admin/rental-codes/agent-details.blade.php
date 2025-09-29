@@ -330,29 +330,22 @@
 <script>
 // Test JavaScript function
 function testJavaScript() {
-    console.log('JavaScript is working!');
     alert('JavaScript is working! Check the console for more details.');
     
     // Test if Bootstrap is loaded
     if (typeof bootstrap !== 'undefined') {
-        console.log('Bootstrap is loaded');
     } else {
-        console.log('Bootstrap is NOT loaded');
     }
     
     // Test if Chart.js is loaded
     if (typeof Chart !== 'undefined') {
-        console.log('Chart.js is loaded');
     } else {
-        console.log('Chart.js is NOT loaded');
     }
     
     // Test CSRF token
     const csrfToken = document.querySelector('meta[name="csrf-token"]');
     if (csrfToken) {
-        console.log('CSRF token found:', csrfToken.getAttribute('content'));
     } else {
-        console.log('CSRF token NOT found');
     }
 }
 
@@ -419,9 +412,7 @@ new Chart(ctx, {
 
 // Mark as paid function
 function markAsPaid(rentalId) {
-    console.log('markAsPaid function called with rentalId:', rentalId);
     
-    console.log('Marking rental as paid:', rentalId);
     
     // Show loading state
     const button = event.target.closest('button');
@@ -444,14 +435,12 @@ function markAsPaid(rentalId) {
             },
         })
         .then(response => {
-            console.log('Response status:', response.status);
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
             return response.json();
         })
         .then(data => {
-            console.log('Response data:', data);
             if (data.success) {
                 // Show success message
                 alert('Rental marked as paid successfully!');
@@ -474,9 +463,7 @@ function markAsPaid(rentalId) {
 
 // Mark as unpaid function
 function markAsUnpaid(rentalId) {
-    console.log('markAsUnpaid function called with rentalId:', rentalId);
     
-    console.log('Marking rental as unpaid:', rentalId);
     
     // Show loading state
     const button = event.target.closest('button');
@@ -499,14 +486,12 @@ function markAsUnpaid(rentalId) {
         },
     })
     .then(response => {
-        console.log('Response status:', response.status);
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
         return response.json();
     })
     .then(data => {
-        console.log('Response data:', data);
         if (data.success) {
             // Show success message
             alert('Rental marked as unpaid successfully!');
@@ -529,7 +514,6 @@ function markAsUnpaid(rentalId) {
 
 // Show rental details function
 function showRentalDetails(rentalId) {
-    console.log('showRentalDetails function called with rentalId:', rentalId);
     
     // Show loading spinner
     document.getElementById('rentalDetailsContent').innerHTML = `
@@ -549,12 +533,9 @@ function showRentalDetails(rentalId) {
     
     // Show the modal first
     const modal = new bootstrap.Modal(modalElement);
-    console.log('Modal object created:', modal);
     modal.show();
-    console.log('Modal show() called');
     
     // Fetch actual rental details
-    console.log('Fetching rental details for ID:', rentalId);
         fetch(`/admin/rental-codes/${rentalId}/details`, {
         method: 'GET',
         headers: {
@@ -564,14 +545,12 @@ function showRentalDetails(rentalId) {
         },
     })
     .then(response => {
-        console.log('Response status:', response.status);
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
         return response.json();
     })
     .then(data => {
-        console.log('Rental details data:', data);
         // Display the rental details
         document.getElementById('rentalDetailsContent').innerHTML = `
             <div class="row">
@@ -726,7 +705,6 @@ function markSelectedAsPaid() {
         return;
     }
     
-    console.log('Marking multiple rentals as paid:', rentalIds);
     
     // Show loading state
     const button = document.getElementById('bulkMarkPaidBtn');
@@ -797,7 +775,6 @@ function markSelectedAsUnpaid() {
         return;
     }
     
-    console.log('Marking multiple rentals as unpaid:', rentalIds);
     
     // Show loading state
     const button = document.getElementById('bulkMarkUnpaidBtn');

@@ -708,7 +708,6 @@ document.querySelectorAll('input, select, textarea').forEach(field => {
         clearTimeout(autoSaveTimeout);
         autoSaveTimeout = setTimeout(() => {
             // Implement auto-save logic here if needed
-            console.log('Auto-save triggered');
         }, 2000);
     });
 });

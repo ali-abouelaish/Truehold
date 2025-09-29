@@ -505,7 +505,6 @@ document.addEventListener('DOMContentLoaded', function() {
                         }, 1000);
                     }).catch(() => {
                         // Fallback for older browsers
-                        console.log('Copy failed, text:', text);
                     });
                 }
             }
