@@ -773,16 +773,32 @@ class RentalCodeController extends Controller
      */
     public function markAsPaid(RentalCode $rentalCode)
     {
-        $rentalCode->update([
-            'paid' => true,
-            'paid_at' => now(),
-        ]);
+        try {
+            \Log::info('Marking rental code as paid', ['rental_code_id' => $rentalCode->id]);
+            
+            $rentalCode->update([
+                'paid' => true,
+                'paid_at' => now(),
+            ]);
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Rental code marked as paid successfully',
-            'paid_at' => $rentalCode->paid_at->format('d M Y H:i'),
-        ]);
+            \Log::info('Rental code marked as paid successfully', ['rental_code_id' => $rentalCode->id]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Rental code marked as paid successfully',
+                'paid_at' => $rentalCode->paid_at->format('d M Y H:i'),
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Error marking rental code as paid', [
+                'rental_code_id' => $rentalCode->id,
+                'error' => $e->getMessage()
+            ]);
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Error marking rental code as paid: ' . $e->getMessage(),
+            ], 500);
+        }
     }
 
     /**
@@ -790,15 +806,31 @@ class RentalCodeController extends Controller
      */
     public function markAsUnpaid(RentalCode $rentalCode)
     {
-        $rentalCode->update([
-            'paid' => false,
-            'paid_at' => null,
-        ]);
+        try {
+            \Log::info('Marking rental code as unpaid', ['rental_code_id' => $rentalCode->id]);
+            
+            $rentalCode->update([
+                'paid' => false,
+                'paid_at' => null,
+            ]);
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Rental code marked as unpaid successfully',
-        ]);
+            \Log::info('Rental code marked as unpaid successfully', ['rental_code_id' => $rentalCode->id]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Rental code marked as unpaid successfully',
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Error marking rental code as unpaid', [
+                'rental_code_id' => $rentalCode->id,
+                'error' => $e->getMessage()
+            ]);
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Error marking rental code as unpaid: ' . $e->getMessage(),
+            ], 500);
+        }
     }
 
     /**
@@ -953,5 +985,53 @@ class RentalCodeController extends Controller
             'status' => $status,
             'paymentMethod' => $paymentMethod,
         ]);
+    }
+
+    /**
+     * Get rental code details as JSON
+     */
+    public function getRentalDetails(RentalCode $rentalCode)
+    {
+        \Log::info('Getting rental details', ['rental_code_id' => $rentalCode->id]);
+        
+        try {
+            $data = [
+            'id' => $rentalCode->id,
+            'rental_code' => $rentalCode->rental_code,
+            'rental_date' => $rentalCode->rental_date,
+            'consultation_fee' => $rentalCode->consultation_fee,
+            'payment_method' => $rentalCode->payment_method,
+            'property' => $rentalCode->property,
+            'licensor' => $rentalCode->licensor,
+            'status' => $rentalCode->status,
+            'paid' => $rentalCode->paid,
+            'paid_at' => $rentalCode->paid_at,
+            'notes' => $rentalCode->notes,
+            'client_by_agent_name' => $rentalCode->client_by_agent_name,
+            'rent_by_agent_name' => $rentalCode->rent_by_agent_name,
+            'marketing_agent_name' => $rentalCode->marketing_agent_name,
+            'client_count' => $rentalCode->client_count,
+            'client' => $rentalCode->client ? [
+                'id' => $rentalCode->client->id,
+                'full_name' => $rentalCode->client->full_name,
+                'email' => $rentalCode->client->email,
+                'phone' => $rentalCode->client->phone,
+            ] : null,
+        ];
+        
+        \Log::info('Rental details data prepared', ['data' => $data]);
+        
+        return response()->json($data);
+        
+        } catch (\Exception $e) {
+            \Log::error('Error getting rental details', [
+                'rental_code_id' => $rentalCode->id,
+                'error' => $e->getMessage()
+            ]);
+            
+            return response()->json([
+                'error' => 'Failed to get rental details: ' . $e->getMessage()
+            ], 500);
+        }
     }
 }

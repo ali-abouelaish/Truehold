@@ -16,6 +16,9 @@
                     <p class="text-muted">Detailed earnings and performance analysis</p>
                 </div>
                 <div>
+                    <button class="btn btn-outline-info me-2" onclick="testJavaScript()">
+                        <i class="fas fa-bug me-1"></i> Test JS
+                    </button>
                     <a href="{{ route('rental-codes.agent-earnings') }}" class="btn btn-outline-secondary">
                         <i class="fas fa-arrow-left me-1"></i> Back to Earnings
                     </a>
@@ -253,11 +256,11 @@
                                     <td>
                                         <div class="btn-group" role="group">
                                             @if($rental->paid)
-                                                <button class="btn btn-sm btn-outline-warning" onclick="markAsUnpaid({{ $rental->id }})">
+                                                <button class="btn btn-sm btn-outline-warning" onclick="markAsUnpaid({{ $rental->id }})" title="Mark as Unpaid">
                                                     <i class="fas fa-undo"></i> Mark Unpaid
                                                 </button>
                                             @else
-                                                <button class="btn btn-sm btn-outline-success" onclick="markAsPaid({{ $rental->id }})">
+                                                <button class="btn btn-sm btn-outline-success" onclick="markAsPaid({{ $rental->id }})" title="Mark as Paid">
                                                     <i class="fas fa-check"></i> Mark Paid
                                                 </button>
                                             @endif
@@ -285,15 +288,22 @@
 </div>
 
 <!-- Rental Details Modal -->
-<div class="modal fade" id="rentalDetailsModal" tabindex="-1">
+<div class="modal fade" id="rentalDetailsModal" tabindex="-1" aria-labelledby="rentalDetailsModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Rental Code Details</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                <h5 class="modal-title" id="rentalDetailsModalLabel">
+                    <i class="fas fa-info-circle text-primary me-2"></i>Rental Code Details
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body" id="rentalDetailsContent">
                 <!-- Content will be loaded here -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-1"></i>Close
+                </button>
             </div>
         </div>
     </div>
@@ -304,6 +314,34 @@
 @push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
+// Test JavaScript function
+function testJavaScript() {
+    console.log('JavaScript is working!');
+    alert('JavaScript is working! Check the console for more details.');
+    
+    // Test if Bootstrap is loaded
+    if (typeof bootstrap !== 'undefined') {
+        console.log('Bootstrap is loaded');
+    } else {
+        console.log('Bootstrap is NOT loaded');
+    }
+    
+    // Test if Chart.js is loaded
+    if (typeof Chart !== 'undefined') {
+        console.log('Chart.js is loaded');
+    } else {
+        console.log('Chart.js is NOT loaded');
+    }
+    
+    // Test CSRF token
+    const csrfToken = document.querySelector('meta[name="csrf-token"]');
+    if (csrfToken) {
+        console.log('CSRF token found:', csrfToken.getAttribute('content'));
+    } else {
+        console.log('CSRF token NOT found');
+    }
+}
+
 // Monthly Performance Chart
 const monthlyData = @json($monthlyBreakdown);
 const monthlyLabels = Object.keys(monthlyData).map(month => {
@@ -365,58 +403,123 @@ new Chart(ctx, {
 
 // Mark as paid function
 function markAsPaid(rentalId) {
+    console.log('markAsPaid function called with rentalId:', rentalId);
+    
     if (confirm('Are you sure you want to mark this rental as paid?')) {
+        console.log('Marking rental as paid:', rentalId);
+        
+        // Show loading state
+        const button = event.target.closest('button');
+        const originalText = button.innerHTML;
+        button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+        button.disabled = true;
+        
+        const csrfToken = document.querySelector('meta[name="csrf-token"]');
+        if (!csrfToken) {
+            alert('CSRF token not found. Please refresh the page and try again.');
+            return;
+        }
+        
         fetch(`/rental-codes/${rentalId}/mark-paid`, {
             method: 'POST',
             headers: {
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                'X-CSRF-TOKEN': csrfToken.getAttribute('content'),
                 'Content-Type': 'application/json',
+                'Accept': 'application/json',
             },
         })
-        .then(response => response.json())
+        .then(response => {
+            console.log('Response status:', response.status);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
         .then(data => {
+            console.log('Response data:', data);
             if (data.success) {
+                // Show success message
+                alert('Rental marked as paid successfully!');
                 location.reload();
             } else {
-                alert('Error: ' + data.message);
+                alert('Error: ' + (data.message || 'Unknown error occurred'));
+                // Restore button
+                button.innerHTML = originalText;
+                button.disabled = false;
             }
         })
         .catch(error => {
             console.error('Error:', error);
-            alert('An error occurred while updating the rental code.');
+            alert('An error occurred while updating the rental code: ' + error.message);
+            // Restore button
+            button.innerHTML = originalText;
+            button.disabled = false;
         });
     }
 }
 
 // Mark as unpaid function
 function markAsUnpaid(rentalId) {
+    console.log('markAsUnpaid function called with rentalId:', rentalId);
+    
     if (confirm('Are you sure you want to mark this rental as unpaid?')) {
+        console.log('Marking rental as unpaid:', rentalId);
+        
+        // Show loading state
+        const button = event.target.closest('button');
+        const originalText = button.innerHTML;
+        button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+        button.disabled = true;
+        
+        const csrfToken = document.querySelector('meta[name="csrf-token"]');
+        if (!csrfToken) {
+            alert('CSRF token not found. Please refresh the page and try again.');
+            return;
+        }
+        
         fetch(`/rental-codes/${rentalId}/mark-unpaid`, {
             method: 'POST',
             headers: {
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                'X-CSRF-TOKEN': csrfToken.getAttribute('content'),
                 'Content-Type': 'application/json',
+                'Accept': 'application/json',
             },
         })
-        .then(response => response.json())
+        .then(response => {
+            console.log('Response status:', response.status);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
         .then(data => {
+            console.log('Response data:', data);
             if (data.success) {
+                // Show success message
+                alert('Rental marked as unpaid successfully!');
                 location.reload();
             } else {
-                alert('Error: ' + data.message);
+                alert('Error: ' + (data.message || 'Unknown error occurred'));
+                // Restore button
+                button.innerHTML = originalText;
+                button.disabled = false;
             }
         })
         .catch(error => {
             console.error('Error:', error);
-            alert('An error occurred while updating the rental code.');
+            alert('An error occurred while updating the rental code: ' + error.message);
+            // Restore button
+            button.innerHTML = originalText;
+            button.disabled = false;
         });
     }
 }
 
 // Show rental details function
 function showRentalDetails(rentalId) {
-    // This would load detailed rental information
-    // For now, we'll show a placeholder
+    console.log('showRentalDetails function called with rentalId:', rentalId);
+    
+    // Show loading spinner
     document.getElementById('rentalDetailsContent').innerHTML = `
         <div class="text-center py-4">
             <i class="fas fa-spinner fa-spin fa-2x text-muted mb-3"></i>
@@ -424,35 +527,156 @@ function showRentalDetails(rentalId) {
         </div>
     `;
     
-    const modal = new bootstrap.Modal(document.getElementById('rentalDetailsModal'));
+    // Initialize and show modal
+    const modalElement = document.getElementById('rentalDetailsModal');
+    if (!modalElement) {
+        console.error('Modal element not found');
+        alert('Modal not found. Please refresh the page and try again.');
+        return;
+    }
+    
+    const modal = new bootstrap.Modal(modalElement);
     modal.show();
     
-    // Here you would typically make an AJAX call to get detailed rental information
-    // For now, we'll show a placeholder
-    setTimeout(() => {
+    // Fetch actual rental details
+    console.log('Fetching rental details for ID:', rentalId);
+    fetch(`/rental-codes/${rentalId}/details`, {
+        method: 'GET',
+        headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+        },
+    })
+    .then(response => {
+        console.log('Response status:', response.status);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        console.log('Rental details data:', data);
+        // Display the rental details
         document.getElementById('rentalDetailsContent').innerHTML = `
             <div class="row">
                 <div class="col-md-6">
-                    <h6>Rental Information</h6>
-                    <p><strong>Code:</strong> RC${rentalId.toString().padStart(4, '0')}</p>
-                    <p><strong>Date:</strong> ${new Date().toLocaleDateString()}</p>
-                    <p><strong>Status:</strong> <span class="badge bg-primary">Active</span></p>
+                    <h6><i class="fas fa-info-circle text-primary me-2"></i>Rental Information</h6>
+                    <div class="mb-3">
+                        <strong>Rental Code:</strong> ${data.rental_code || 'N/A'}
+                    </div>
+                    <div class="mb-3">
+                        <strong>Date:</strong> ${data.rental_date ? new Date(data.rental_date).toLocaleDateString() : 'N/A'}
+                    </div>
+                    <div class="mb-3">
+                        <strong>Status:</strong> 
+                        <span class="badge bg-${data.status === 'completed' ? 'success' : (data.status === 'approved' ? 'primary' : 'warning')}">
+                            ${data.status ? data.status.charAt(0).toUpperCase() + data.status.slice(1) : 'N/A'}
+                        </span>
+                    </div>
+                    <div class="mb-3">
+                        <strong>Property:</strong> ${data.property || 'N/A'}
+                    </div>
+                    <div class="mb-3">
+                        <strong>Licensor:</strong> ${data.licensor || 'N/A'}
+                    </div>
                 </div>
                 <div class="col-md-6">
-                    <h6>Financial Details</h6>
-                    <p><strong>Fee:</strong> £1,200.00</p>
-                    <p><strong>Agent Earnings:</strong> £660.00</p>
-                    <p><strong>Payment Status:</strong> <span class="badge bg-warning">Pending</span></p>
+                    <h6><i class="fas fa-pound-sign text-success me-2"></i>Financial Details</h6>
+                    <div class="mb-3">
+                        <strong>Consultation Fee:</strong> £${parseFloat(data.consultation_fee || 0).toFixed(2)}
+                    </div>
+                    <div class="mb-3">
+                        <strong>Payment Method:</strong> 
+                        <span class="badge bg-${data.payment_method === 'Transfer' ? 'info' : 'secondary'}">
+                            ${data.payment_method || 'N/A'}
+                        </span>
+                    </div>
+                    <div class="mb-3">
+                        <strong>Payment Status:</strong> 
+                        <span class="badge bg-${data.paid ? 'success' : 'warning'}">
+                            <i class="fas fa-${data.paid ? 'check' : 'clock'} me-1"></i>
+                            ${data.paid ? 'Paid' : 'Pending'}
+                        </span>
+                    </div>
+                    ${data.paid_at ? `
+                    <div class="mb-3">
+                        <strong>Paid Date:</strong> ${new Date(data.paid_at).toLocaleDateString()}
+                    </div>
+                    ` : ''}
                 </div>
             </div>
             <div class="row mt-3">
-                <div class="col-12">
-                    <h6>Additional Information</h6>
-                    <p class="text-muted">Detailed rental information would be displayed here, including client details, property information, and transaction history.</p>
+                <div class="col-md-6">
+                    <h6><i class="fas fa-user text-info me-2"></i>Agent Information</h6>
+                    <div class="mb-3">
+                        <strong>Client Agent:</strong> ${data.client_by_agent_name || 'N/A'}
+                    </div>
+                    <div class="mb-3">
+                        <strong>Rent Agent:</strong> ${data.rent_by_agent_name || 'N/A'}
+                    </div>
+                    ${data.marketing_agent_name ? `
+                    <div class="mb-3">
+                        <strong>Marketing Agent:</strong> ${data.marketing_agent_name}
+                    </div>
+                    ` : ''}
+                    ${data.client_count > 1 ? `
+                    <div class="mb-3">
+                        <strong>Client Count:</strong> ${data.client_count} clients
+                    </div>
+                    ` : ''}
+                </div>
+                <div class="col-md-6">
+                    <h6><i class="fas fa-user-friends text-warning me-2"></i>Client Information</h6>
+                    ${data.client ? `
+                    <div class="mb-3">
+                        <strong>Client Name:</strong> ${data.client.full_name || 'N/A'}
+                    </div>
+                    <div class="mb-3">
+                        <strong>Email:</strong> ${data.client.email || 'N/A'}
+                    </div>
+                    <div class="mb-3">
+                        <strong>Phone:</strong> ${data.client.phone || 'N/A'}
+                    </div>
+                    ` : `
+                    <div class="mb-3 text-muted">
+                        <i class="fas fa-exclamation-triangle me-1"></i>
+                        No client information available
+                    </div>
+                    `}
                 </div>
             </div>
+            ${data.notes ? `
+            <div class="row mt-3">
+                <div class="col-12">
+                    <h6><i class="fas fa-sticky-note text-secondary me-2"></i>Notes</h6>
+                    <div class="bg-light p-3 rounded">
+                        <p class="mb-0">${data.notes}</p>
+                    </div>
+                </div>
+            </div>
+            ` : ''}
         `;
-    }, 1000);
+    })
+    .catch(error => {
+        console.error('Error fetching rental details:', error);
+        console.error('Error details:', {
+            message: error.message,
+            stack: error.stack,
+            rentalId: rentalId
+        });
+        document.getElementById('rentalDetailsContent').innerHTML = `
+            <div class="text-center py-4">
+                <i class="fas fa-exclamation-triangle fa-2x text-danger mb-3"></i>
+                <h6 class="text-danger">Error Loading Details</h6>
+                <p class="text-muted">Unable to load rental code details. Please try again.</p>
+                <p class="text-muted small">Error: ${error.message}</p>
+                <button class="btn btn-outline-primary btn-sm" onclick="showRentalDetails(${rentalId})">
+                    <i class="fas fa-refresh me-1"></i>Retry
+                </button>
+            </div>
+        `;
+    });
 }
 </script>
 @endpush
