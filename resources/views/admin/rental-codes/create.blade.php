@@ -692,26 +692,30 @@
     font-weight: 600;
 }
 
-/* Force Step 3 visibility only when it's the current step */
-#step-3.step-active {
+/* Force Step 3 visibility when it's the current step */
+#step-3.step-active,
+#step-3[style*="display: block"] {
     display: block !important;
     visibility: visible !important;
     opacity: 1 !important;
 }
 
-#step-3.step-active .card {
+#step-3.step-active .card,
+#step-3[style*="display: block"] .card {
     display: block !important;
     visibility: visible !important;
     opacity: 1 !important;
 }
 
-#step-3.step-active .card-body {
+#step-3.step-active .card-body,
+#step-3[style*="display: block"] .card-body {
     display: block !important;
     visibility: visible !important;
     opacity: 1 !important;
 }
 
-#step-3.step-active .form-group {
+#step-3.step-active .form-group,
+#step-3[style*="display: block"] .form-group {
     display: block !important;
     visibility: visible !important;
     opacity: 1 !important;
@@ -719,7 +723,10 @@
 
 #step-3.step-active input,
 #step-3.step-active select,
-#step-3.step-active textarea {
+#step-3.step-active textarea,
+#step-3[style*="display: block"] input,
+#step-3[style*="display: block"] select,
+#step-3[style*="display: block"] textarea {
     display: block !important;
     visibility: visible !important;
     opacity: 1 !important;
@@ -884,6 +891,8 @@ function changeStep(direction) {
         if (currentStep === 3) {
             console.log('=== STEP 3 DEBUG ===');
             console.log('Step 3 element:', nextStepElement);
+            console.log('Step 3 classes:', nextStepElement.className);
+            console.log('Step 3 style display:', nextStepElement.style.display);
             console.log('Step 3 innerHTML length:', nextStepElement.innerHTML.length);
             console.log('Step 3 children:', nextStepElement.children.length);
             console.log('Step 3 first child:', nextStepElement.children[0]);
@@ -925,6 +934,9 @@ function changeStep(direction) {
                 cardBody.style.opacity = '1';
                 console.log('Card body visibility forced');
             }
+            
+            // Check if step-active class is applied
+            console.log('Step 3 has step-active class:', nextStepElement.classList.contains('step-active'));
         }
     } else {
         console.error('Step element not found:', `step-${currentStep}`);
