@@ -597,7 +597,7 @@
                         <i class="fas fa-arrow-left me-1"></i> Previous
                     </button>
                     <div class="ms-auto">
-                        <button type="button" class="btn btn-primary" id="nextBtn" onclick="changeStep(1)">
+                        <button type="button" class="btn btn-primary" id="nextBtn" onclick="changeStep(1)" style="display: block;">
                             Next <i class="fas fa-arrow-right ms-1"></i>
                         </button>
                         <button type="submit" class="btn btn-success" id="submitBtn" style="display: none;">
@@ -726,6 +726,30 @@
 let currentStep = 1;
 const totalSteps = 4;
 
+// Immediate initialization to ensure buttons are visible
+function initializeNavigation() {
+    console.log('Initializing navigation immediately...');
+    const nextBtn = document.getElementById('nextBtn');
+    const prevBtn = document.getElementById('prevBtn');
+    const submitBtn = document.getElementById('submitBtn');
+    
+    if (nextBtn) {
+        nextBtn.style.display = 'block';
+        console.log('Next button made visible');
+    }
+    
+    if (prevBtn) {
+        prevBtn.style.display = 'none';
+    }
+    
+    if (submitBtn) {
+        submitBtn.style.display = 'none';
+    }
+}
+
+// Run immediately
+initializeNavigation();
+
 function changeStep(direction) {
     const currentStepElement = document.getElementById(`step-${currentStep}`);
     const nextStep = currentStep + direction;
@@ -771,16 +795,29 @@ function updateNavigationButtons() {
     if (prevBtn) {
         prevBtn.style.display = currentStep > 1 ? 'block' : 'none';
         console.log('Prev button display:', prevBtn.style.display);
+    } else {
+        console.error('Previous button not found!');
     }
     
     if (nextBtn) {
         nextBtn.style.display = currentStep < totalSteps ? 'block' : 'none';
         console.log('Next button display:', nextBtn.style.display);
+    } else {
+        console.error('Next button not found!');
     }
     
     if (submitBtn) {
         submitBtn.style.display = currentStep === totalSteps ? 'block' : 'none';
         console.log('Submit button display:', submitBtn.style.display);
+    } else {
+        console.error('Submit button not found!');
+    }
+    
+    // Force visibility if buttons exist but are hidden
+    if (nextBtn && currentStep < totalSteps) {
+        nextBtn.style.display = 'block';
+        nextBtn.style.visibility = 'visible';
+        console.log('Forced next button visibility');
     }
 }
 
