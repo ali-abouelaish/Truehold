@@ -42,10 +42,10 @@ class PropertyController extends Controller
             $query->byManagementCompany($request->management_company);
         }
 
-        // Agent name filtering removed - column doesn't exist
-        // if ($request->filled('agent_name')) {
-        //     $query->where('agent_name', 'like', "%{$request->agent_name}%");
-        // }
+        // Agent name filtering - only for authenticated users
+        if ($request->filled('agent_name') && auth()->check()) {
+            $query->where('agent_name', 'like', "%{$request->agent_name}%");
+        }
 
         if ($request->filled('couples_allowed')) {
             $query->byCouplesAllowed($request->couples_allowed);
@@ -55,8 +55,16 @@ class PropertyController extends Controller
         $locations = Property::distinct()->pluck('location')->filter()->sort()->values();
         $propertyTypes = Property::distinct()->pluck('property_type')->filter()->sort()->values();
         $availableDates = Property::distinct()->pluck('available_date')->filter()->sort()->values();
-        // $agentNames = Property::distinct()->pluck('agent_name')->filter()->sort()->values();
-        $agentNames = collect(); // Empty collection since agent_name column doesn't exist
+        
+        // Get agent names - only for authenticated users
+        if (auth()->check()) {
+            $agentNames = Property::distinct()->pluck('agent_name')->filter()->sort()->values();
+            \Log::info('Agent names found for authenticated user:', $agentNames->toArray());
+            \Log::info('Total properties with agent_name:', Property::whereNotNull('agent_name')->where('agent_name', '!=', '')->count());
+        } else {
+            $agentNames = collect(); // Empty collection for non-authenticated users
+            \Log::info('User not authenticated, agent names not available');
+        }
 
         $properties = $query->latest()->paginate(20);
 
@@ -125,10 +133,10 @@ class PropertyController extends Controller
             $query->byManagementCompany($request->management_company);
         }
 
-        // Agent name filtering removed - column doesn't exist
-        // if ($request->filled('agent_name')) {
-        //     $query->where('agent_name', 'like', "%{$request->agent_name}%");
-        // }
+        // Agent name filtering - only for authenticated users
+        if ($request->filled('agent_name') && auth()->check()) {
+            $query->where('agent_name', 'like', "%{$request->agent_name}%");
+        }
 
         if ($request->filled('couples_allowed')) {
             $query->byCouplesAllowed($request->couples_allowed);
@@ -138,13 +146,18 @@ class PropertyController extends Controller
         $locations = Property::distinct()->pluck('location')->filter()->sort()->values();
         $propertyTypes = Property::distinct()->pluck('property_type')->sort()->values();
         $availableDates = Property::distinct()->pluck('available_date')->sort()->values();
-        // $agentNames = Property::distinct()->pluck('agent_name')->filter()->sort()->values();
-        $agentNames = collect(); // Empty collection since agent_name column doesn't exist
+        
+        // Get agent names - only for authenticated users
+        if (auth()->check()) {
+            $agentNames = Property::distinct()->pluck('agent_name')->filter()->sort()->values();
+        } else {
+            $agentNames = collect(); // Empty collection for non-authenticated users
+        }
 
         // Select specific fields for map performance and include agent_name
         $properties = $query->select([
             'id', 'title', 'location', 'latitude', 'longitude', 'price', 'description',
-            'property_type', 'available_date', 'management_company',
+            'property_type', 'available_date', 'management_company', 'agent_name',
             'bills_included', 'furnishings', 'parking', 'garden', 'broadband',
             'housemates', 'total_rooms', 'couples_ok', 'smoking_ok', 'pets_ok',
             'min_age', 'max_age', 'photo_count', 'first_photo_url', 'all_photos', 'photos'

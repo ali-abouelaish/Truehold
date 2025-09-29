@@ -45,36 +45,9 @@
     <form action="{{ route('rental-codes.store') }}" method="POST" id="rentalCodeForm">
         @csrf
         
-        <!-- Progress Indicator -->
-        <div class="row mb-4">
-            <div class="col-12">
-                <div class="card">
-                    <div class="card-body">
-                        <div class="progress-steps">
-                            <div class="step active" data-step="1">
-                                <div class="step-circle">1</div>
-                                <div class="step-label">Rental Info</div>
-                            </div>
-                            <div class="step" data-step="2">
-                                <div class="step-circle">2</div>
-                                <div class="step-label">Client Details</div>
-                            </div>
-                            <div class="step" data-step="3">
-                                <div class="step-circle">3</div>
-                                <div class="step-label">Agent Info</div>
-                            </div>
-                            <div class="step" data-step="4">
-                                <div class="step-circle">4</div>
-                                <div class="step-label">Review</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
 
-        <!-- Step 1: Rental Information -->
-        <div class="row step-content" id="step-1">
+        <!-- Rental Information -->
+        <div class="row mb-4">
             <div class="col-12">
                 <div class="card shadow">
                     <div class="card-header">
@@ -190,27 +163,9 @@
             </div>
         </div>
 
-        <!-- Navigation Buttons -->
-        <div class="row mt-4">
-            <div class="col-12">
-                <div class="d-flex justify-content-between">
-                    <button type="button" class="btn btn-outline-secondary" id="prevBtn" onclick="changeStep(-1)" style="display: none;">
-                        <i class="fas fa-arrow-left me-1"></i> Previous
-                    </button>
-                    <div class="ms-auto">
-                        <button type="button" class="btn btn-primary" id="nextBtn" onclick="changeStep(1)" style="display: block !important; visibility: visible !important; opacity: 1 !important;">
-                            Next <i class="fas fa-arrow-right ms-1"></i>
-                        </button>
-                        <button type="submit" class="btn btn-success" id="submitBtn" style="display: none;">
-                            <i class="fas fa-save me-1"></i> Create Rental Code
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
 
-        <!-- Step 2: Client Information -->
-        <div class="row step-content" id="step-2" style="display: none;">
+        <!-- Client Information -->
+        <div class="row mb-4">
             <div class="col-12">
                 <div class="card shadow">
                     <div class="card-header">
@@ -420,8 +375,8 @@
             </div>
         </div>
 
-        <!-- Step 3: Agent Information -->
-        <div class="row step-content" id="step-3" style="display: none;">
+        <!-- Agent Information -->
+        <div class="row mb-4">
             <div class="col-12">
                 <div class="card shadow">
                     <div class="card-header">
@@ -430,30 +385,15 @@
                         </h5>
                     </div>
                     <div class="card-body">
-                        <!-- DEBUG: Step 3 Content Test -->
-                        <div class="alert alert-success mb-3">
-                            <strong>DEBUG:</strong> Step 3 (Agent Information) is loading correctly!
-                        </div>
-                        
                         <div class="row">
                             <div class="col-md-6">
-                                                                 <div class="form-group mb-3">
-                                     <label for="rent_by_agent" class="form-label">
-                                         Rent By Agent <span class="text-danger">*</span>
-                                     </label>
-                                     <div class="input-group">
-                                         <span class="input-group-text"><i class="fas fa-user-tie"></i></span>
+                            <div class="mb-3">
+                                <label for="rent_by_agent" class="form-label">Rent By Agent *</label>
                                          <select class="form-select @error('rent_by_agent') is-invalid @enderror" 
         id="rent_by_agent" name="rent_by_agent" required>
     <option value="">Select agent</option>
-
-    @if(config('app.debug'))
-        <option value="" disabled>DEBUG: {{ $agentUsers->count() }} agents found</option>
-    @endif
-
     @forelse($agentUsers as $user)
-        <option value="{{ $user->id }}" 
-                {{ old('rent_by_agent') == $user->id ? 'selected' : '' }}>
+                                        <option value="{{ $user->id }}" {{ old('rent_by_agent') == $user->id ? 'selected' : '' }}>
             {{ $user->name }}
             @if($user->agent && $user->agent->company_name)
                 ({{ $user->agent->company_name }})
@@ -463,50 +403,35 @@
         <option value="" disabled>No agents found</option>
     @endforelse
 </select>
-
-                                     </div>
                                      @error('rent_by_agent')
                                          <div class="invalid-feedback">{{ $message }}</div>
                                      @enderror
                                  </div>
                             </div>
-                            
-                        </div>
-                        
-                        <div class="row">
                             <div class="col-md-6">
-                                <div class="form-group mb-3">
-                                    <label for="marketing_agent" class="form-label">
-                                        Marketing Agent
-                                    </label>
-                                    <div class="input-group">
-                                        <span class="input-group-text"><i class="fas fa-bullhorn"></i></span>
+                            <div class="mb-3">
+                                <label for="marketing_agent" class="form-label">Marketing Agent</label>
                                         <select class="form-select @error('marketing_agent') is-invalid @enderror" 
                                                 id="marketing_agent" name="marketing_agent">
                                             <option value="">Select marketing agent</option>
                                             @forelse($marketingUsers as $user)
-                                                <option value="{{ $user->id }}" 
-                                                        {{ old('marketing_agent') == $user->id ? 'selected' : '' }}>
+                                        <option value="{{ $user->id }}" {{ old('marketing_agent') == $user->id ? 'selected' : '' }}>
                                                     {{ $user->name }}
                                                 </option>
                                             @empty
                                                 <option value="" disabled>No marketing users found</option>
                                             @endforelse
                                         </select>
-                                    </div>
                                     @error('marketing_agent')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
                                 </div>
                             </div>
-                            
+                    </div>
+                    <div class="row">
                             <div class="col-md-6">
-                                <div class="form-group mb-3">
-                                    <label for="client_count" class="form-label">
-                                        Number of Clients <span class="text-danger">*</span>
-                                    </label>
-                                    <div class="input-group">
-                                        <span class="input-group-text"><i class="fas fa-users"></i></span>
+                            <div class="mb-3">
+                                <label for="client_count" class="form-label">Number of Clients *</label>
                                         <select class="form-select @error('client_count') is-invalid @enderror" 
                                                 id="client_count" name="client_count" required>
                                             @for($i = 1; $i <= 10; $i++)
@@ -515,7 +440,6 @@
                                                 </option>
                                             @endfor
                                         </select>
-                                    </div>
                                     @error('client_count')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
@@ -524,22 +448,14 @@
                                     </small>
                                 </div>
                             </div>
-                        </div>
-                        
-                        <div class="row">
-                            <div class="col-12">
-                                <div class="form-group mb-3">
+                        <div class="col-md-6">
+                            <div class="mb-3">
                                     <label for="notes" class="form-label">Additional Notes</label>
-                                    <div class="input-group">
-                                        <span class="input-group-text"><i class="fas fa-sticky-note"></i></span>
                                         <textarea class="form-control @error('notes') is-invalid @enderror" 
-                                                  id="notes" name="notes" 
-                                                  rows="4" placeholder="Enter any additional notes or comments">{{ old('notes') }}</textarea>
-                                    </div>
+                                          id="notes" name="notes" rows="3" placeholder="Enter any additional notes">{{ old('notes') }}</textarea>
                                     @error('notes')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
-                                </div>
                             </div>
                         </div>
                     </div>
@@ -547,52 +463,18 @@
             </div>
         </div>
 
-        <!-- Step 4: Review and Submit -->
-        <div class="row step-content" id="step-4" style="display: none;">
+        <!-- Status and Submit -->
+        <div class="row mb-4">
             <div class="col-12">
                 <div class="card shadow">
                     <div class="card-header">
                         <h5 class="card-title mb-0">
-                            <i class="fas fa-check-circle text-primary me-2"></i>Review Information
+                            <i class="fas fa-check-circle text-primary me-2"></i>Status & Submit
                         </h5>
                     </div>
                     <div class="card-body">
                         <div class="row">
                             <div class="col-md-6">
-                                <h6 class="text-primary mb-3">Rental Information</h6>
-                                <div class="review-item">
-                                    <strong>Rental Code:</strong> <span id="review-rental-code"></span>
-                                </div>
-                                <div class="review-item">
-                                    <strong>Rental Date:</strong> <span id="review-rental-date"></span>
-                                </div>
-                                <div class="review-item">
-                                    <strong>Consultation Fee:</strong> <span id="review-consultation-fee"></span>
-                                </div>
-                                <div class="review-item">
-                                    <strong>Payment Method:</strong> <span id="review-payment-method"></span>
-                                </div>
-                            </div>
-                            
-                            <div class="col-md-6">
-                                <h6 class="text-primary mb-3">Client Information</h6>
-                                <div class="review-item">
-                                    <strong>Name:</strong> <span id="review-client-name"></span>
-                                </div>
-                                <div class="review-item">
-                                    <strong>Email:</strong> <span id="review-client-email"></span>
-                                </div>
-                                <div class="review-item">
-                                    <strong>Phone:</strong> <span id="review-client-phone"></span>
-                                </div>
-                                <div class="review-item">
-                                    <strong>Nationality:</strong> <span id="review-client-nationality"></span>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="row mt-4">
-                            <div class="col-12">
                                 <div class="form-group mb-3">
                                     <label for="status" class="form-label">Initial Status</label>
                                     <select class="form-select @error('status') is-invalid @enderror" 
@@ -608,6 +490,14 @@
                                 </div>
                             </div>
                         </div>
+                        
+                        <div class="row">
+                            <div class="col-12">
+                                <button type="submit" class="btn btn-success btn-lg">
+                                    <i class="fas fa-save me-2"></i>Create Rental Code
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -617,128 +507,6 @@
 </div>
 
 <style>
-.progress-steps {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin: 20px 0;
-}
-
-.step {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    flex: 1;
-    position: relative;
-}
-
-.step:not(:last-child)::after {
-    content: '';
-    position: absolute;
-    top: 15px;
-    left: 60%;
-    width: 80%;
-    height: 2px;
-    background-color: #e9ecef;
-    z-index: 1;
-}
-
-.step.active:not(:last-child)::after {
-    background-color: #007bff;
-}
-
-.step.completed:not(:last-child)::after {
-    background-color: #28a745;
-}
-
-.step-circle {
-    width: 30px;
-    height: 30px;
-    border-radius: 50%;
-    background-color: #e9ecef;
-    color: #6c757d;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: bold;
-    margin-bottom: 8px;
-    position: relative;
-    z-index: 2;
-}
-
-.step.active .step-circle {
-    background-color: #007bff;
-    color: white;
-}
-
-.step.completed .step-circle {
-    background-color: #28a745;
-    color: white;
-}
-
-.step-label {
-    font-size: 12px;
-    color: #6c757d;
-    text-align: center;
-}
-
-.step.active .step-label {
-    color: #007bff;
-    font-weight: 600;
-}
-
-.step.completed .step-label {
-    color: #28a745;
-    font-weight: 600;
-}
-
-/* Force Step 3 visibility - only when it's the active step */
-#step-3.step-active {
-    display: block !important;
-    visibility: visible !important;
-    opacity: 1 !important;
-    position: relative !important;
-    z-index: 10 !important;
-}
-
-#step-3.step-active .card {
-    display: block !important;
-    visibility: visible !important;
-    opacity: 1 !important;
-    position: relative !important;
-}
-
-#step-3.step-active .card-body {
-    display: block !important;
-    visibility: visible !important;
-    opacity: 1 !important;
-}
-
-#step-3.step-active .form-group {
-    display: block !important;
-    visibility: visible !important;
-    opacity: 1 !important;
-}
-
-#step-3.step-active input,
-#step-3.step-active select,
-#step-3.step-active textarea {
-    display: block !important;
-    visibility: visible !important;
-    opacity: 1 !important;
-    width: 100% !important;
-}
-
-.review-item {
-    margin-bottom: 10px;
-    padding: 8px 0;
-    border-bottom: 1px solid #f8f9fa;
-}
-
-.review-item:last-child {
-    border-bottom: none;
-}
-
 .form-group {
     margin-bottom: 1.5rem;
 }
@@ -766,301 +534,8 @@
 </style>
 
 <script>
-let currentStep = 1;
-const totalSteps = 4;
-
-// Immediate initialization to ensure buttons are visible
-function initializeNavigation() {
-    const nextBtn = document.getElementById('nextBtn');
-    const prevBtn = document.getElementById('prevBtn');
-    const submitBtn = document.getElementById('submitBtn');
-    
-    if (nextBtn) {
-        nextBtn.style.display = 'block';
-    }
-    
-    if (prevBtn) {
-        prevBtn.style.display = 'none';
-    }
-    
-    if (submitBtn) {
-        submitBtn.style.display = 'none';
-    }
-}
-
-// Run immediately
-initializeNavigation();
-
-// Initialize first step as active
-document.getElementById('step-1').classList.add('step-active');
-
-// Force button visibility immediately
-setTimeout(function() {
-    const nextBtn = document.getElementById('nextBtn');
-    if (nextBtn) {
-        nextBtn.style.display = 'block';
-        nextBtn.style.visibility = 'visible';
-        nextBtn.style.opacity = '1';
-        nextBtn.style.position = 'relative';
-        nextBtn.style.zIndex = '9999';
-    } else {
-        console.error('Next button still not found after timeout');
-    }
-}, 50);
-
-
-
-function changeStep(direction) {
-    const currentStepElement = document.getElementById(`step-${currentStep}`);
-    const nextStep = currentStep + direction;
-    
-    console.log('Step change:', { currentStep, nextStep, direction });
-    
-    if (nextStep < 1 || nextStep > totalSteps) return;
-    
-    // Hide current step
-    if (currentStepElement) {
-        currentStepElement.style.display = 'none';
-        currentStepElement.classList.remove('step-active');
-        console.log('Hiding step:', currentStep);
-    }
-    
-    // Update step indicators
-    const currentStepIndicator = document.querySelector(`.step[data-step="${currentStep}"]`);
-    if (currentStepIndicator) {
-        currentStepIndicator.classList.remove('active');
-        if (direction > 0) {
-            currentStepIndicator.classList.add('completed');
-        }
-    }
-    
-    currentStep = nextStep;
-    console.log('New current step:', currentStep);
-    
-    // Show next step
-    const nextStepElement = document.getElementById(`step-${currentStep}`);
-    console.log('Next step element:', nextStepElement);
-    
-    if (nextStepElement) {
-        nextStepElement.style.display = 'block';
-        nextStepElement.classList.add('step-active');
-        console.log('Showing step:', currentStep, 'Element:', nextStepElement);
-        
-        // Special handling for step 3 - ensure it's fully visible
-        if (currentStep === 3) {
-            console.log('Step 3 special handling triggered');
-            // Force step 3 to be visible with important styles
-            nextStepElement.style.display = 'block';
-            nextStepElement.style.visibility = 'visible';
-            nextStepElement.style.opacity = '1';
-            nextStepElement.style.position = 'relative';
-            nextStepElement.style.zIndex = '10';
-            
-            // Force all child elements to be visible
-            const allChildren = nextStepElement.querySelectorAll('*');
-            allChildren.forEach(element => {
-                element.style.display = 'block';
-                element.style.visibility = 'visible';
-                element.style.opacity = '1';
-            });
-            
-            // Specifically target card and form elements
-            const card = nextStepElement.querySelector('.card');
-            if (card) {
-                card.style.display = 'block';
-                card.style.visibility = 'visible';
-                card.style.opacity = '1';
-                card.style.position = 'relative';
-            }
-            
-            const cardBody = nextStepElement.querySelector('.card-body');
-            if (cardBody) {
-                cardBody.style.display = 'block';
-                cardBody.style.visibility = 'visible';
-                cardBody.style.opacity = '1';
-            }
-            
-            // Force form elements to be visible
-            const formElements = nextStepElement.querySelectorAll('input, select, textarea, .form-group, .form-label');
-            formElements.forEach(element => {
-                element.style.display = 'block';
-                element.style.visibility = 'visible';
-                element.style.opacity = '1';
-            });
-            
-            // Debug: Check if step 3 is actually visible
-            setTimeout(() => {
-                const step3Element = document.getElementById('step-3');
-                if (step3Element) {
-                    const computedStyle = window.getComputedStyle(step3Element);
-                    console.log('Step 3 Debug:', {
-                        display: computedStyle.display,
-                        visibility: computedStyle.visibility,
-                        opacity: computedStyle.opacity,
-                        height: computedStyle.height,
-                        width: computedStyle.width
-                    });
-                }
-            }, 100);
-        }
-    } else {
-        console.error('Step element not found:', `step-${currentStep}`);
-    }
-    
-    document.querySelector(`.step[data-step="${currentStep}"]`).classList.add('active');
-    
-    // Update navigation buttons
-    updateNavigationButtons();
-    
-    // Update review section if on last step
-    if (currentStep === totalSteps) {
-        updateReviewSection();
-    }
-}
-
-function updateNavigationButtons() {
-    const prevBtn = document.getElementById('prevBtn');
-    const nextBtn = document.getElementById('nextBtn');
-    const submitBtn = document.getElementById('submitBtn');
-    
-    
-    if (prevBtn) {
-        prevBtn.style.display = currentStep > 1 ? 'block' : 'none';
-    } else {
-        console.error('Previous button not found!');
-    }
-    
-    if (nextBtn) {
-        nextBtn.style.display = currentStep < totalSteps ? 'block' : 'none';
-    } else {
-        console.error('Next button not found!');
-    }
-    
-    if (submitBtn) {
-        submitBtn.style.display = currentStep === totalSteps ? 'block' : 'none';
-    } else {
-        console.error('Submit button not found!');
-    }
-    
-    // Force visibility if buttons exist but are hidden
-    if (nextBtn && currentStep < totalSteps) {
-        nextBtn.style.display = 'block';
-        nextBtn.style.visibility = 'visible';
-    }
-}
-
-function updateReviewSection() {
-    document.getElementById('review-rental-code').textContent = document.getElementById('rental_code').value;
-    document.getElementById('review-rental-date').textContent = document.getElementById('rental_date').value;
-    document.getElementById('review-consultation-fee').textContent = '£' + document.getElementById('consultation_fee').value;
-    document.getElementById('review-payment-method').textContent = document.getElementById('payment_method').value;
-    document.getElementById('review-client-name').textContent = document.getElementById('client_full_name').value;
-    document.getElementById('review-client-email').textContent = document.getElementById('client_email').value;
-    document.getElementById('review-client-phone').textContent = document.getElementById('client_phone_number').value;
-    document.getElementById('review-client-nationality').textContent = document.getElementById('client_nationality').value;
-}
-
-// Form validation
-function validateStep(step) {
-    const requiredFields = {
-        1: ['rental_code', 'rental_date', 'consultation_fee', 'payment_method'],
-        2: ['client_full_name', 'client_date_of_birth', 'client_phone_number', 'client_email', 'client_nationality', 'client_current_address'],
-        3: ['rent_by_agent']
-    };
-    
-    const fields = requiredFields[step] || [];
-    let isValid = true;
-    
-    fields.forEach(fieldId => {
-        const field = document.getElementById(fieldId);
-        if (!field.value.trim()) {
-            field.classList.add('is-invalid');
-            isValid = false;
-        } else {
-            field.classList.remove('is-invalid');
-        }
-    });
-    
-    return isValid;
-}
-
-// Override next button click to validate
-document.getElementById('nextBtn').addEventListener('click', function(e) {
-    if (!validateStep(currentStep)) {
-        e.preventDefault();
-        return false;
-    }
-});
-
-// Real-time validation
-document.querySelectorAll('input[required], select[required], textarea[required]').forEach(field => {
-    field.addEventListener('blur', function() {
-        if (this.value.trim()) {
-            this.classList.remove('is-invalid');
-            this.classList.add('is-valid');
-        } else {
-            this.classList.remove('is-valid');
-            this.classList.add('is-invalid');
-        }
-    });
-});
-
-// Auto-generate rental code
+// Client selection toggle
 document.addEventListener('DOMContentLoaded', function() {
-    
-    // Initialize navigation buttons
-    updateNavigationButtons();
-    
-    // Debug navigation buttons
-    const nextBtn = document.getElementById('nextBtn');
-    const prevBtn = document.getElementById('prevBtn');
-    const submitBtn = document.getElementById('submitBtn');
-    
-    
-    // Generate rental code button
-    const generateBtn = document.getElementById('generate-code');
-    const rentalCodeInput = document.getElementById('rental_code');
-    
-    if (generateBtn && rentalCodeInput) {
-        generateBtn.addEventListener('click', function() {
-            const url = '/test-rental-code';
-            
-            fetch(url, {
-                method: 'GET',
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest',
-                    'Accept': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                },
-                credentials: 'same-origin'
-            })
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    if (data.error) {
-                        throw new Error(data.error);
-                    }
-                    rentalCodeInput.value = data.code;
-                    updateReviewSection();
-                })
-                .catch(error => {
-                    console.error('Error generating rental code:', error);
-                    console.error('Error details:', error.message);
-                    alert('Error generating rental code: ' + error.message);
-                });
-        });
-        
-        // Auto-generate on page load
-        if (!rentalCodeInput.value) {
-            generateBtn.click();
-        }
-    }
-    
-    // Client selection toggle
     const existingClientRadio = document.getElementById('existing_client');
     const newClientRadio = document.getElementById('new_client');
     const existingClientSection = document.getElementById('existing-client-section');
@@ -1079,13 +554,32 @@ document.addEventListener('DOMContentLoaded', function() {
     existingClientRadio.addEventListener('change', toggleClientSections);
     newClientRadio.addEventListener('change', toggleClientSections);
     
-    // Initialize on page load
+    // Initialize
     toggleClientSections();
     
-    // Ensure navigation buttons are properly initialized
-    setTimeout(function() {
-        updateNavigationButtons();
-    }, 100);
+    // Generate rental code button
+    const generateBtn = document.getElementById('generate-code');
+    const rentalCodeInput = document.getElementById('rental_code');
+    
+    if (generateBtn && rentalCodeInput) {
+        generateBtn.addEventListener('click', function() {
+            fetch('/test-rental-code', {
+                method: 'GET',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                }
+            })
+            .then(response => response.json())
+                .then(data => {
+                if (data.code) {
+                    rentalCodeInput.value = data.code;
+                }
+                })
+                .catch(error => {
+                    console.error('Error generating rental code:', error);
+                });
+        });
+    }
 });
 </script>
 @endsection

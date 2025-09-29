@@ -181,4 +181,42 @@
      const submitBtn = document.getElementById('submitBtn');[m
      [m
 [31m-    console.log('Next button found:', nextBtn);[m
-[31m-    c
+[31m-    console.log('Prev button found:', prevBtn);[m
+[31m-    console.log('Submit button found:', submitBtn);[m
+     [m
+     // Generate rental code button[m
+     const generateBtn = document.getElementById('generate-code');[m
+[36m@@ -1074,9 +1002,7 @@[m [mfunction validateStep(step) {[m
+     [m
+     if (generateBtn && rentalCodeInput) {[m
+         generateBtn.addEventListener('click', function() {[m
+[31m-            console.log('Generate button clicked');[m
+             const url = '/test-rental-code';[m
+[31m-            console.log('Fetching URL:', url);[m
+             [m
+             fetch(url, {[m
+                 method: 'GET',[m
+[36m@@ -1088,15 +1014,12 @@[m [mfunction validateStep(step) {[m
+                 credentials: 'same-origin'[m
+             })[m
+                 .then(response => {[m
+[31m-                    console.log('Response status:', response.status);[m
+[31m-                    console.log('Response headers:', response.headers);[m
+                     if (!response.ok) {[m
+                         throw new Error(`HTTP error! status: ${response.status}`);[m
+                     }[m
+                     return response.json();[m
+                 })[m
+                 .then(data => {[m
+[31m-                    console.log('Received data:', data);[m
+                     if (data.error) {[m
+                         throw new Error(data.error);[m
+                     }[m
+[36m@@ -1140,7 +1063,6 @@[m [mfunction toggleClientSections() {[m
+     [m
+     // Ensure navigation buttons are properly initialized[m
+     setTimeout(function() {[m
+[31m-        console.log('Delayed navigation initialization...');[m
+         updateNavigationButtons();[m
+     }, 100);[m
+ });[m

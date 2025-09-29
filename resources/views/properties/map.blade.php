@@ -755,6 +755,9 @@
                 properties.forEach((property, index) => {
                     const lat = parseFloat(property.latitude);
                     const lng = parseFloat(property.longitude);
+                    const agentColor = getAgentColor(property.agent_name);
+                    
+                    console.log(`🎨 Property "${property.title}" (Agent: "${property.agent_name}") gets color:`, agentColor);
 
                     // Create marker
                         const marker = new google.maps.Marker({
@@ -764,9 +767,9 @@
                             icon: {
                                 path: google.maps.SymbolPath.CIRCLE,
                                 scale: 8,
-                            fillColor: getAgentColor(property.agent_name).fill,
+                            fillColor: agentColor.fill,
                                 fillOpacity: 1,
-                            strokeColor: getAgentColor(property.agent_name).stroke,
+                            strokeColor: agentColor.stroke,
                                 strokeWeight: 2
                             }
                         });
@@ -919,12 +922,15 @@
         function initializeAgentColors(properties) {
             const uniqueAgents = [...new Set(properties.map(p => p.agent_name).filter(a => a && a !== 'N/A' && a !== '' && a !== null))];
             
+            console.log('🎨 Found unique agents:', uniqueAgents);
+            
             uniqueAgents.forEach((agent, index) => {
                 const colorIndex = index % colorPalette.length;
                 agentColors[agent] = {
                     fill: colorPalette[colorIndex],
                     stroke: '#ffffff'
                 };
+                console.log(`🎨 Agent "${agent}" gets color: ${colorPalette[colorIndex]}`);
             });
 
             // Add Others category for null/empty values
