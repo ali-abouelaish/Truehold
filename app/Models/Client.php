@@ -23,6 +23,7 @@ class Client extends Model
         'area_of_interest',
         'moving_date',
         'notes',
+        'registration_status',
         'agent_id',
     ];
 
@@ -215,6 +216,42 @@ class Client extends Model
             default:
                 return 'text-gray-600 bg-gray-50';
         }
+    }
+
+    /**
+     * Check if client is registered.
+     */
+    public function isRegistered(): bool
+    {
+        return $this->registration_status === 'registered';
+    }
+
+    /**
+     * Check if client is unregistered.
+     */
+    public function isUnregistered(): bool
+    {
+        return $this->registration_status === 'unregistered';
+    }
+
+    /**
+     * Get registration status badge class.
+     */
+    public function getRegistrationBadgeClassAttribute(): string
+    {
+        return $this->isRegistered() 
+            ? 'bg-green-100 text-green-800' 
+            : 'bg-gray-100 text-gray-800';
+    }
+
+    /**
+     * Get registration status icon.
+     */
+    public function getRegistrationIconAttribute(): string
+    {
+        return $this->isRegistered() 
+            ? 'fas fa-check-circle' 
+            : 'fas fa-times-circle';
     }
 
     /**

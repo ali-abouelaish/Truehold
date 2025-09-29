@@ -415,6 +415,7 @@ class AdminController extends Controller
             'area_of_interest' => 'nullable|string|max:255',
             'moving_date' => 'nullable|date|after_or_equal:today',
             'notes' => 'nullable|string',
+            'registration_status' => 'nullable|in:registered,unregistered',
             'agent_user_id' => 'nullable|exists:users,id',
         ]);
 
@@ -458,6 +459,7 @@ class AdminController extends Controller
             'area_of_interest' => 'nullable|string|max:255',
             'moving_date' => 'nullable|date|after_or_equal:today',
             'notes' => 'nullable|string',
+            'registration_status' => 'nullable|in:registered,unregistered',
             'agent_user_id' => 'nullable|exists:users,id',
         ]);
 
@@ -488,5 +490,20 @@ class AdminController extends Controller
         $client->delete();
         return redirect()->route('admin.clients')
             ->with('success', 'Client deleted successfully!');
+    }
+
+    public function toggleRegistrationStatus(Request $request, \App\Models\Client $client)
+    {
+        $validated = $request->validate([
+            'registration_status' => 'required|in:registered,unregistered',
+        ]);
+
+        $client->update(['registration_status' => $validated['registration_status']]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Registration status updated successfully',
+            'new_status' => $client->registration_status,
+        ]);
     }
 }

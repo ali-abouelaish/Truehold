@@ -100,6 +100,7 @@ Route::middleware('auth')->prefix('admin')->group(function () {
     Route::get('/clients/{client}/edit', [AdminController::class, 'editClient'])->name('admin.clients.edit');
     Route::put('/clients/{client}', [AdminController::class, 'updateClient'])->name('admin.clients.update');
     Route::delete('/clients/{client}', [AdminController::class, 'destroyClient'])->name('admin.clients.destroy');
+    Route::post('/clients/{client}/toggle-registration', [AdminController::class, 'toggleRegistrationStatus'])->name('admin.clients.toggle-registration');
     
     // Rental Code Management Routes
     Route::resource('rental-codes', RentalCodeController::class);

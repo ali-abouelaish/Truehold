@@ -107,6 +107,9 @@
                         Moving Date
                     </th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Registration
+                    </th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Agent
                     </th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -180,6 +183,19 @@
                     </td>
                     
                     <td class="px-6 py-4">
+                        <div class="flex items-center space-x-2">
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $client->registration_badge_class }}">
+                                <i class="{{ $client->registration_icon }} mr-1"></i>
+                                {{ ucfirst($client->registration_status) }}
+                            </span>
+                            <button onclick="toggleRegistrationStatus({{ $client->id }}, '{{ $client->registration_status }}')" 
+                                    class="text-blue-600 hover:text-blue-900 text-xs" title="Toggle Registration Status">
+                                <i class="fas fa-sync-alt"></i>
+                            </button>
+                        </div>
+                    </td>
+                    
+                    <td class="px-6 py-4">
                         <div class="text-sm text-gray-900">
                             @if($client->agent)
                                 <div class="flex items-center">
@@ -235,6 +251,12 @@
                                             {{ $client->client_type === 'Student' ? 'bg-green-100 text-green-800' : 
                                                ($client->client_type === 'Professional' ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800') }}">
                                             {{ $client->client_type }}
+                                        </span>
+                                    </div>
+                                    <div><strong>Registration:</strong> 
+                                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium {{ $client->registration_badge_class }}">
+                                            <i class="{{ $client->registration_icon }} mr-1"></i>
+                                            {{ ucfirst($client->registration_status) }}
                                         </span>
                                     </div>
                                 </div>
@@ -334,6 +356,36 @@ function toggleClientDetails(clientId) {
         icon.classList.remove('fa-eye-slash');
         icon.classList.add('fa-eye');
         button.title = 'View Details';
+    }
+}
+
+function toggleRegistrationStatus(clientId, currentStatus) {
+    const newStatus = currentStatus === 'registered' ? 'unregistered' : 'registered';
+    
+    if (confirm(`Change registration status from "${currentStatus}" to "${newStatus}"?`)) {
+        fetch(`/admin/clients/${clientId}/toggle-registration`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            },
+            body: JSON.stringify({
+                registration_status: newStatus
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Reload the page to show updated status
+                location.reload();
+            } else {
+                alert('Error updating registration status: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error updating registration status');
+        });
     }
 }
 </script>

@@ -173,6 +173,36 @@
                                 </div>
                             </div>
                         </div>
+
+                        <!-- Registration Status Section -->
+                        <div class="row mt-4">
+                            <div class="col-12">
+                                <h5 class="text-primary mb-3">
+                                    <i class="fas fa-user-check mr-2"></i>Registration Status
+                                </h5>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label for="registration_status">Registration Status</label>
+                                    <select class="form-control @error('registration_status') is-invalid @enderror" 
+                                            id="registration_status" name="registration_status">
+                                        <option value="unregistered" {{ old('registration_status', $client->registration_status) == 'unregistered' ? 'selected' : '' }}>
+                                            Unregistered
+                                        </option>
+                                        <option value="registered" {{ old('registration_status', $client->registration_status) == 'registered' ? 'selected' : '' }}>
+                                            Registered
+                                        </option>
+                                    </select>
+                                    <small class="form-text text-muted">Client registration status</small>
+                                    @error('registration_status')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                            </div>
+                        </div>
                         
                         <div class="form-group">
                             <button type="submit" class="btn btn-primary">Update Client</button>
