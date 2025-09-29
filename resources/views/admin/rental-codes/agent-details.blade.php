@@ -872,22 +872,6 @@ document.addEventListener('DOMContentLoaded', function() {
 @push('styles')
 <style>
 /* Force modal to be perfectly centered */
-#rentalDetailsModal .modal-dialog {
-    position: fixed !important;
-    top: 50% !important;
-    left: 50% !important;
-    transform: translate(-50%, -50%) !important;
-    margin: 0 !important;
-    max-width: 800px !important;
-    width: 90% !important;
-    max-height: 90vh !important;
-    z-index: 1055 !important;
-}
-
-#rentalDetailsModal .modal-content {
-    max-height: 90vh;
-    overflow-y: auto;
-}
 
 /* Make charts 60% smaller */
 .chart-container {

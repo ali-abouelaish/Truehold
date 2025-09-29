@@ -75,8 +75,19 @@
                                     </option>
                                 @endforeach
                             </select>
-            </div>
-            <div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                <i class="fas fa-bullhorn mr-1"></i>Marketing Agent Filter
+                            </label>
+                            <select name="marketing_agent_filter" class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200">
+                                <option value="">All Agents</option>
+                                <option value="marketing_only" {{ $marketingAgentFilter == 'marketing_only' ? 'selected' : '' }}>Marketing Agents Only</option>
+                                <option value="rent_only" {{ $marketingAgentFilter == 'rent_only' ? 'selected' : '' }}>Rent Agents Only</option>
+                                <option value="both" {{ $marketingAgentFilter == 'both' ? 'selected' : '' }}>Both Rent & Marketing</option>
+                            </select>
+                        </div>
+                        <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">
                                 <i class="fas fa-check-circle mr-1"></i>Status
                             </label>

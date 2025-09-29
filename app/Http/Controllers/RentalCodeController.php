@@ -266,6 +266,7 @@ class RentalCodeController extends Controller
             'status' => ['nullable', 'in:pending,approved,completed,cancelled'],
             'payment_method' => ['nullable', 'in:Cash,Transfer'],
             'agent_search' => ['nullable', 'string', 'max:255'],
+            'marketing_agent_filter' => ['nullable', 'string', 'in:marketing_only,rent_only,both'],
         ]);
 
         $startDate = $validated['start_date'] ?? null;
@@ -273,6 +274,7 @@ class RentalCodeController extends Controller
         $status = $validated['status'] ?? null;
         $paymentMethod = $validated['payment_method'] ?? null;
         $agentSearch = $validated['agent_search'] ?? null;
+        $marketingAgentFilter = $validated['marketing_agent_filter'] ?? null;
 
         // Build query with filters
         $query = RentalCode::with('client');
@@ -537,8 +539,8 @@ class RentalCodeController extends Controller
                 }
             }
             
-            // Handle marketing agent earnings (whether same or different from rental agent)
-            if ($marketingDeduction > 0 && $marketingAgentName) {
+            // Handle marketing agent earnings (only if different from rental agent)
+            if ($marketingDeduction > 0 && $marketingAgentName && $marketingAgentName !== $agentName) {
                 if (!isset($byAgent[$marketingAgentName])) {
                     $byAgent[$marketingAgentName] = [
                         'name' => $marketingAgentName,
@@ -617,6 +619,20 @@ class RentalCodeController extends Controller
             // Apply agent search filter
             if ($agentSearch && stripos($agentName, $agentSearch) === false) {
                 continue;
+            }
+            
+            // Apply marketing agent filter
+            if ($marketingAgentFilter) {
+                $hasMarketingEarnings = $agentData['marketing_agent_earnings'] > 0;
+                $hasRentEarnings = $agentData['agent_earnings'] > 0;
+                
+                if ($marketingAgentFilter === 'marketing_only' && !$hasMarketingEarnings) {
+                    continue;
+                } elseif ($marketingAgentFilter === 'rent_only' && !$hasRentEarnings) {
+                    continue;
+                } elseif ($marketingAgentFilter === 'both' && (!$hasMarketingEarnings || !$hasRentEarnings)) {
+                    continue;
+                }
             }
             
             // Calculate average transaction value
@@ -761,6 +777,7 @@ class RentalCodeController extends Controller
             'status' => $status,
             'paymentMethod' => $paymentMethod,
             'agentSearch' => $agentSearch,
+            'marketingAgentFilter' => $marketingAgentFilter,
             'totalRentalCodes' => $rentalCodes->count(),
             'totalEarnings' => $summary['total_earnings'],
         ]);
@@ -949,11 +966,8 @@ class RentalCodeController extends Controller
                 $agentEarnings -= $marketingDeduction;
             }
             
-            // Add marketing earnings if this agent is the marketing agent
-            if (!empty($marketingAgent) && $marketingAgent == $agentId) {
-                $marketingEarnings = $clientCount > 1 ? 40.0 : 30.0;
-                $agentEarnings += $marketingEarnings;
-            }
+            // No extra marketing earnings if agent is both rent and marketing agent
+            // (They already get the full commission, no need for extra marketing money)
             
             $totalEarnings += $agentEarnings;
             
