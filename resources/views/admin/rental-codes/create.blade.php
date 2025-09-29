@@ -692,30 +692,45 @@
     font-weight: 600;
 }
 
-/* Force Step 3 visibility when it's the current step */
+/* Force Step 3 visibility - more aggressive approach */
 #step-3.step-active,
-#step-3[style*="display: block"] {
+#step-3[style*="display: block"],
+#step-3 {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    position: relative !important;
+    z-index: 10 !important;
+}
+
+#step-3.step-active *,
+#step-3[style*="display: block"] *,
+#step-3 * {
     display: block !important;
     visibility: visible !important;
     opacity: 1 !important;
 }
 
 #step-3.step-active .card,
-#step-3[style*="display: block"] .card {
+#step-3[style*="display: block"] .card,
+#step-3 .card {
     display: block !important;
     visibility: visible !important;
     opacity: 1 !important;
+    position: relative !important;
 }
 
 #step-3.step-active .card-body,
-#step-3[style*="display: block"] .card-body {
+#step-3[style*="display: block"] .card-body,
+#step-3 .card-body {
     display: block !important;
     visibility: visible !important;
     opacity: 1 !important;
 }
 
 #step-3.step-active .form-group,
-#step-3[style*="display: block"] .form-group {
+#step-3[style*="display: block"] .form-group,
+#step-3 .form-group {
     display: block !important;
     visibility: visible !important;
     opacity: 1 !important;
@@ -726,10 +741,14 @@
 #step-3.step-active textarea,
 #step-3[style*="display: block"] input,
 #step-3[style*="display: block"] select,
-#step-3[style*="display: block"] textarea {
+#step-3[style*="display: block"] textarea,
+#step-3 input,
+#step-3 select,
+#step-3 textarea {
     display: block !important;
     visibility: visible !important;
     opacity: 1 !important;
+    width: 100% !important;
 }
 
 .review-item {
@@ -839,37 +858,61 @@ function changeStep(direction) {
         nextStepElement.style.display = 'block';
         nextStepElement.classList.add('step-active');
         
-        // Special handling for step 3
+        // Special handling for step 3 - ensure it's fully visible
         if (currentStep === 3) {
-            // Check for form fields
-            const formFields = nextStepElement.querySelectorAll('input, select, textarea');
+            // Force step 3 to be visible with important styles
+            nextStepElement.style.display = 'block';
+            nextStepElement.style.visibility = 'visible';
+            nextStepElement.style.opacity = '1';
+            nextStepElement.style.position = 'relative';
+            nextStepElement.style.zIndex = '10';
             
-            // Force visibility of all elements in step 3
-            const allElements = nextStepElement.querySelectorAll('*');
-            
-            allElements.forEach((element, index) => {
-                if (element.style.display === 'none' || element.style.visibility === 'hidden') {
-                    element.style.display = 'block';
-                    element.style.visibility = 'visible';
-                    element.style.opacity = '1';
-                }
+            // Force all child elements to be visible
+            const allChildren = nextStepElement.querySelectorAll('*');
+            allChildren.forEach(element => {
+                element.style.display = 'block';
+                element.style.visibility = 'visible';
+                element.style.opacity = '1';
             });
             
-            // Force card visibility
+            // Specifically target card and form elements
             const card = nextStepElement.querySelector('.card');
             if (card) {
                 card.style.display = 'block';
                 card.style.visibility = 'visible';
                 card.style.opacity = '1';
+                card.style.position = 'relative';
             }
             
-            // Force card body visibility
             const cardBody = nextStepElement.querySelector('.card-body');
             if (cardBody) {
                 cardBody.style.display = 'block';
                 cardBody.style.visibility = 'visible';
                 cardBody.style.opacity = '1';
             }
+            
+            // Force form elements to be visible
+            const formElements = nextStepElement.querySelectorAll('input, select, textarea, .form-group, .form-label');
+            formElements.forEach(element => {
+                element.style.display = 'block';
+                element.style.visibility = 'visible';
+                element.style.opacity = '1';
+            });
+            
+            // Debug: Check if step 3 is actually visible
+            setTimeout(() => {
+                const step3Element = document.getElementById('step-3');
+                if (step3Element) {
+                    const computedStyle = window.getComputedStyle(step3Element);
+                    console.log('Step 3 Debug:', {
+                        display: computedStyle.display,
+                        visibility: computedStyle.visibility,
+                        opacity: computedStyle.opacity,
+                        height: computedStyle.height,
+                        width: computedStyle.width
+                    });
+                }
+            }, 100);
         }
     } else {
         console.error('Step element not found:', `step-${currentStep}`);
