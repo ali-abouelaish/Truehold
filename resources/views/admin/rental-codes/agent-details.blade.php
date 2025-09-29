@@ -871,8 +871,11 @@ document.addEventListener('DOMContentLoaded', function() {
 #rentalDetailsModal .modal-dialog {
     display: flex;
     align-items: center;
+    justify-content: center;
     min-height: calc(100vh - 1rem);
     margin: 0.5rem auto;
+    width: 100%;
+    max-width: 800px;
 }
 
 #rentalDetailsModal .modal-content {
@@ -886,7 +889,19 @@ document.addEventListener('DOMContentLoaded', function() {
     #rentalDetailsModal .modal-dialog {
         margin: 0.25rem;
         min-height: calc(100vh - 0.5rem);
+        max-width: 95%;
     }
+}
+
+/* Force horizontal centering */
+#rentalDetailsModal {
+    text-align: center;
+}
+
+#rentalDetailsModal .modal-dialog {
+    display: inline-block;
+    vertical-align: middle;
+    text-align: left;
 }
 </style>
 @endpush
