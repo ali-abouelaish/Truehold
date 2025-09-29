@@ -430,6 +430,11 @@
                         </h5>
                     </div>
                     <div class="card-body">
+                        <!-- DEBUG: Step 3 Content Test -->
+                        <div class="alert alert-success mb-3">
+                            <strong>DEBUG:</strong> Step 3 (Agent Information) is loading correctly!
+                        </div>
+                        
                         <div class="row">
                             <div class="col-md-6">
                                                                  <div class="form-group mb-3">
@@ -836,6 +841,22 @@ function changeStep(direction) {
     if (nextStepElement) {
         nextStepElement.style.display = 'block';
         console.log('Step', currentStep, 'displayed');
+        
+        // Special debugging for step 3
+        if (currentStep === 3) {
+            console.log('=== STEP 3 DEBUG ===');
+            console.log('Step 3 element:', nextStepElement);
+            console.log('Step 3 innerHTML length:', nextStepElement.innerHTML.length);
+            console.log('Step 3 children:', nextStepElement.children.length);
+            console.log('Step 3 first child:', nextStepElement.children[0]);
+            
+            // Check for form fields
+            const formFields = nextStepElement.querySelectorAll('input, select, textarea');
+            console.log('Step 3 form fields found:', formFields.length);
+            formFields.forEach((field, index) => {
+                console.log(`Field ${index}:`, field.name, field.type, field.placeholder);
+            });
+        }
     } else {
         console.error('Step element not found:', `step-${currentStep}`);
     }
