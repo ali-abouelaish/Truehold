@@ -65,6 +65,27 @@ class GroupViewingController extends Controller
 
         return redirect()->route('admin.group-viewings.index')->with('success', 'Group viewing created successfully.');
     }
+
+    public function attendees(GroupViewing $groupViewing)
+    {
+        $attendees = $groupViewing->attendees()->with('client')->get();
+        
+        return response()->json([
+            'attendees' => $attendees->map(function ($attendee) {
+                return [
+                    'id' => $attendee->id,
+                    'status' => $attendee->status,
+                    'notes' => $attendee->notes,
+                    'client' => [
+                        'id' => $attendee->client->id,
+                        'full_name' => $attendee->client->full_name,
+                        'email' => $attendee->client->email,
+                        'phone_number' => $attendee->client->phone_number,
+                    ]
+                ];
+            })
+        ]);
+    }
 }
 
 

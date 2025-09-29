@@ -86,7 +86,8 @@
                                         <span class="input-group-text"><i class="fas fa-calendar"></i></span>
                                         <input type="date" class="form-control @error('rental_date') is-invalid @enderror" 
                                                id="rental_date" name="rental_date" 
-                                               value="{{ old('rental_date') }}" required>
+                                               value="{{ old('rental_date') }}" 
+                                               min="{{ date('Y-m-d') }}" required>
                                     </div>
                                     @error('rental_date')
                                         <div class="invalid-feedback">{{ $message }}</div>
@@ -99,7 +100,7 @@
                                     </label>
                                     <div class="input-group">
                                         <span class="input-group-text">£</span>
-                                        <input type="number" step="0.01" class="form-control @error('consultation_fee') is-invalid @enderror" 
+                                        <input type="number" step="0.01" min="0" class="form-control @error('consultation_fee') is-invalid @enderror" 
                                                id="consultation_fee" name="consultation_fee" 
                                                value="{{ old('consultation_fee') }}" 
                                                placeholder="250.00" required>
@@ -272,7 +273,9 @@
                                         <input type="tel" class="form-control @error('client_phone_number') is-invalid @enderror" 
                                                id="client_phone_number" name="client_phone_number" 
                                                value="{{ old('client_phone_number') }}" 
-                                               placeholder="Enter phone number" required>
+                                               placeholder="Enter phone number" 
+                                               pattern="[\+]?[0-9\s\-\(\)]{10,}" 
+                                               title="Please enter a valid phone number" required>
                                     </div>
                                     @error('client_phone_number')
                                         <div class="invalid-feedback">{{ $message }}</div>
@@ -531,23 +534,88 @@
     background-color: #f8f9fa;
     border-bottom: 1px solid #e3e6f0;
 }
+
+/* Form validation styles */
+.form-control.is-valid {
+    border-color: #28a745;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3e%3cpath fill='%2328a745' d='m2.3 6.73.94-.94 1.44-1.44L4.3 3.3l-.94.94L2.3 6.73z'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right calc(0.375em + 0.1875rem) center;
+    background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+}
+
+.form-control.is-valid:focus {
+    border-color: #28a745;
+    box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25);
+}
+
+.form-control.is-invalid {
+    border-color: #dc3545;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' width='12' height='12' fill='none' stroke='%23dc3545'%3e%3ccircle cx='6' cy='6' r='4.5'/%3e%3cpath d='m5.8 4.6 1.4 1.4 1.4-1.4'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right calc(0.375em + 0.1875rem) center;
+    background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+}
+
+.form-control.is-invalid:focus {
+    border-color: #dc3545;
+    box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+}
+
+/* Validation feedback styling */
+.invalid-feedback {
+    display: block;
+    width: 100%;
+    margin-top: 0.25rem;
+    font-size: 0.875em;
+    color: #dc3545;
+}
+
+.valid-feedback {
+    display: block;
+    width: 100%;
+    margin-top: 0.25rem;
+    font-size: 0.875em;
+    color: #28a745;
+}
 </style>
 
 <script>
-// Client selection toggle
+// Client selection toggle and form validation
 document.addEventListener('DOMContentLoaded', function() {
     const existingClientRadio = document.getElementById('existing_client');
     const newClientRadio = document.getElementById('new_client');
     const existingClientSection = document.getElementById('existing-client-section');
     const newClientSection = document.getElementById('new-client-section');
+    const form = document.getElementById('rentalCodeForm');
     
     function toggleClientSections() {
         if (existingClientRadio.checked) {
             existingClientSection.style.display = 'block';
             newClientSection.style.display = 'none';
+            // Clear validation for new client fields
+            clearValidationForNewClientFields();
+            // Remove required attributes from new client fields
+            removeRequiredFromNewClientFields();
+            // Add required attribute to existing client field
+            addRequiredToExistingClientField();
+            // Clear and disable new client fields to prevent submission
+            clearAndDisableNewClientFields();
+            // Enable existing client field
+            enableExistingClientField();
         } else if (newClientRadio.checked) {
             existingClientSection.style.display = 'none';
             newClientSection.style.display = 'block';
+            // Clear validation for existing client field
+            clearValidationForExistingClientField();
+            // Remove required attribute from existing client field
+            removeRequiredFromExistingClientField();
+            // Add required attributes to new client fields
+            addRequiredToNewClientFields();
+            // Clear and disable existing client field
+            clearAndDisableExistingClientField();
+            // Enable new client fields
+            enableNewClientFields();
         }
     }
     
@@ -570,16 +638,320 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             })
             .then(response => response.json())
-                .then(data => {
+            .then(data => {
                 if (data.code) {
                     rentalCodeInput.value = data.code;
+                    clearFieldError('rental_code');
                 }
-                })
-                .catch(error => {
-                    console.error('Error generating rental code:', error);
-                });
+            })
+            .catch(error => {
+                console.error('Error generating rental code:', error);
+                showFieldError('rental_code', 'Failed to generate rental code');
+            });
         });
     }
+    
+    // Form validation functions
+    function validateField(fieldName, value, rules) {
+        const field = document.querySelector(`[name="${fieldName}"]`);
+        if (!field) return true;
+        
+        // Required validation
+        if (rules.required && (!value || value.trim() === '')) {
+            showFieldError(fieldName, `${getFieldLabel(fieldName)} is required`);
+            return false;
+        }
+        
+        // Email validation
+        if (rules.email && value && !isValidEmail(value)) {
+            showFieldError(fieldName, 'Please enter a valid email address');
+            return false;
+        }
+        
+        // Phone validation
+        if (rules.phone && value && !isValidPhone(value)) {
+            showFieldError(fieldName, 'Please enter a valid phone number');
+            return false;
+        }
+        
+        // Number validation
+        if (rules.numeric && value && isNaN(parseFloat(value))) {
+            showFieldError(fieldName, 'Please enter a valid number');
+            return false;
+        }
+        
+        // Min value validation
+        if (rules.min && value && parseFloat(value) < rules.min) {
+            showFieldError(fieldName, `Value must be at least ${rules.min}`);
+            return false;
+        }
+        
+        // Date validation
+        if (rules.date && value && !isValidDate(value)) {
+            showFieldError(fieldName, 'Please enter a valid date');
+            return false;
+        }
+        
+        // Future date validation
+        if (rules.futureDate && value && !isFutureDate(value)) {
+            showFieldError(fieldName, 'Date must be in the future');
+            return false;
+        }
+        
+        clearFieldError(fieldName);
+        return true;
+    }
+    
+    function showFieldError(fieldName, message) {
+        const field = document.querySelector(`[name="${fieldName}"]`);
+        if (!field) return;
+        
+        field.classList.add('is-invalid');
+        field.classList.remove('is-valid');
+        
+        // Remove existing error message
+        const existingError = field.parentNode.querySelector('.invalid-feedback');
+        if (existingError) {
+            existingError.remove();
+        }
+        
+        // Add new error message
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'invalid-feedback';
+        errorDiv.textContent = message;
+        field.parentNode.appendChild(errorDiv);
+    }
+    
+    function clearFieldError(fieldName) {
+        const field = document.querySelector(`[name="${fieldName}"]`);
+        if (!field) return;
+        
+        field.classList.remove('is-invalid');
+        field.classList.add('is-valid');
+        
+        const errorDiv = field.parentNode.querySelector('.invalid-feedback');
+        if (errorDiv) {
+            errorDiv.remove();
+        }
+    }
+    
+    function clearValidationForNewClientFields() {
+        const newClientFields = ['client_full_name', 'client_date_of_birth', 'client_phone_number', 'client_email', 'client_nationality', 'client_current_address'];
+        newClientFields.forEach(fieldName => {
+            clearFieldError(fieldName);
+        });
+    }
+    
+    function clearValidationForExistingClientField() {
+        clearFieldError('existing_client_id');
+    }
+    
+    function removeRequiredFromNewClientFields() {
+        const newClientFields = ['client_full_name', 'client_date_of_birth', 'client_phone_number', 'client_email', 'client_nationality', 'client_current_address'];
+        newClientFields.forEach(fieldName => {
+            const field = document.querySelector(`[name="${fieldName}"]`);
+            if (field) {
+                field.removeAttribute('required');
+            }
+        });
+    }
+    
+    function addRequiredToNewClientFields() {
+        const newClientFields = ['client_full_name', 'client_date_of_birth', 'client_phone_number', 'client_email', 'client_nationality', 'client_current_address'];
+        newClientFields.forEach(fieldName => {
+            const field = document.querySelector(`[name="${fieldName}"]`);
+            if (field) {
+                field.setAttribute('required', 'required');
+            }
+        });
+    }
+    
+    function removeRequiredFromExistingClientField() {
+        const field = document.querySelector('[name="existing_client_id"]');
+        if (field) {
+            field.removeAttribute('required');
+        }
+    }
+    
+    function addRequiredToExistingClientField() {
+        const field = document.querySelector('[name="existing_client_id"]');
+        if (field) {
+            field.setAttribute('required', 'required');
+        }
+    }
+    
+    function clearAndDisableNewClientFields() {
+        const newClientFields = ['client_full_name', 'client_date_of_birth', 'client_phone_number', 'client_email', 'client_nationality', 'client_current_address'];
+        newClientFields.forEach(fieldName => {
+            const field = document.querySelector(`[name="${fieldName}"]`);
+            if (field) {
+                field.value = '';
+                field.disabled = true;
+            }
+        });
+    }
+    
+    function clearAndDisableExistingClientField() {
+        const field = document.querySelector('[name="existing_client_id"]');
+        if (field) {
+            field.value = '';
+            field.disabled = true;
+        }
+    }
+    
+    function enableNewClientFields() {
+        const newClientFields = ['client_full_name', 'client_date_of_birth', 'client_phone_number', 'client_email', 'client_nationality', 'client_current_address'];
+        newClientFields.forEach(fieldName => {
+            const field = document.querySelector(`[name="${fieldName}"]`);
+            if (field) {
+                field.disabled = false;
+            }
+        });
+    }
+    
+    function enableExistingClientField() {
+        const field = document.querySelector('[name="existing_client_id"]');
+        if (field) {
+            field.disabled = false;
+        }
+    }
+    
+    function getFieldLabel(fieldName) {
+        const labels = {
+            'rental_code': 'Rental Code',
+            'rental_date': 'Rental Date',
+            'consultation_fee': 'Consultation Fee',
+            'payment_method': 'Payment Method',
+            'client_full_name': 'Client Full Name',
+            'client_date_of_birth': 'Client Date of Birth',
+            'client_phone_number': 'Client Phone Number',
+            'client_email': 'Client Email',
+            'client_nationality': 'Client Nationality',
+            'client_current_address': 'Client Current Address',
+            'existing_client_id': 'Existing Client',
+            'rent_by_agent': 'Rent By Agent',
+            'client_count': 'Client Count'
+        };
+        return labels[fieldName] || fieldName;
+    }
+    
+    function isValidEmail(email) {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return emailRegex.test(email);
+    }
+    
+    function isValidPhone(phone) {
+        const phoneRegex = /^[\+]?[0-9\s\-\(\)]{10,}$/;
+        return phoneRegex.test(phone);
+    }
+    
+    function isValidDate(dateString) {
+        const date = new Date(dateString);
+        return date instanceof Date && !isNaN(date);
+    }
+    
+    function isFutureDate(dateString) {
+        const date = new Date(dateString);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        return date > today;
+    }
+    
+    // Real-time validation for key fields
+    const validationRules = {
+        'rental_date': { required: true, date: true, futureDate: true },
+        'consultation_fee': { required: true, numeric: true, min: 0 },
+        'payment_method': { required: true },
+        'client_full_name': { required: true },
+        'client_date_of_birth': { required: true, date: true },
+        'client_phone_number': { required: true, phone: true },
+        'client_email': { required: true, email: true },
+        'client_nationality': { required: true },
+        'client_current_address': { required: true },
+        'existing_client_id': { required: true },
+        'rent_by_agent': { required: true },
+        'client_count': { required: true, numeric: true, min: 1 }
+    };
+    
+    // Add event listeners for real-time validation
+    Object.keys(validationRules).forEach(fieldName => {
+        const field = document.querySelector(`[name="${fieldName}"]`);
+        if (field) {
+            field.addEventListener('blur', function() {
+                const value = this.value;
+                const rules = validationRules[fieldName];
+                
+                // Check if field is required based on client selection
+                if (fieldName.startsWith('client_') && fieldName !== 'client_count') {
+                    const isNewClient = newClientRadio.checked;
+                    const isExistingClient = existingClientRadio.checked;
+                    
+                    if (fieldName === 'existing_client_id' && !isExistingClient) {
+                        clearFieldError(fieldName);
+                        return;
+                    }
+                    
+                    if (fieldName !== 'existing_client_id' && !isNewClient) {
+                        clearFieldError(fieldName);
+                        return;
+                    }
+                }
+                
+                validateField(fieldName, value, rules);
+            });
+            
+            field.addEventListener('input', function() {
+                // Clear error on input for better UX
+                if (this.classList.contains('is-invalid')) {
+                    const value = this.value;
+                    const rules = validationRules[fieldName];
+                    validateField(fieldName, value, rules);
+                }
+            });
+        }
+    });
+    
+    // Form submission validation
+    form.addEventListener('submit', function(e) {
+        let isValid = true;
+        
+        // Validate all required fields
+        Object.keys(validationRules).forEach(fieldName => {
+            const field = document.querySelector(`[name="${fieldName}"]`);
+            if (field) {
+                const value = field.value;
+                const rules = validationRules[fieldName];
+                
+                // Check if field should be validated based on client selection
+                if (fieldName.startsWith('client_') && fieldName !== 'client_count') {
+                    const isNewClient = newClientRadio.checked;
+                    const isExistingClient = existingClientRadio.checked;
+                    
+                    if (fieldName === 'existing_client_id' && !isExistingClient) {
+                        return;
+                    }
+                    
+                    if (fieldName !== 'existing_client_id' && !isNewClient) {
+                        return;
+                    }
+                }
+                
+                if (!validateField(fieldName, value, rules)) {
+                    isValid = false;
+                }
+            }
+        });
+        
+        if (!isValid) {
+            e.preventDefault();
+            // Scroll to first error
+            const firstError = form.querySelector('.is-invalid');
+            if (firstError) {
+                firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                firstError.focus();
+            }
+        }
+    });
 });
 </script>
 @endsection

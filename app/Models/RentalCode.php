@@ -20,7 +20,6 @@ class RentalCode extends Model
         'client_id',
         'client_count',
         'rent_by_agent',
-        'client_by_agent',
         'marketing_agent',
         'notes',
         'status',
@@ -57,25 +56,6 @@ class RentalCode extends Model
         }
     }
 
-    /**
-     * Get display name for client_by_agent (handles ID or name string)
-     */
-    public function getClientByAgentNameAttribute(): string
-    {
-        try {
-            $value = $this->client_by_agent;
-            if (empty($value)) {
-                return 'N/A';
-            }
-            if (is_numeric($value)) {
-                $user = \App\Models\User::find((int) $value);
-                return $user?->name ?? (string) $value;
-            }
-            return (string) $value;
-        } catch (\Throwable $e) {
-            return (string) ($this->client_by_agent ?? 'N/A');
-        }
-    }
 
     /**
      * Get display name for marketing_agent (handles ID or name string)

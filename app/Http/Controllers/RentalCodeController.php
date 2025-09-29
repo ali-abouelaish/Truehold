@@ -408,9 +408,7 @@ class RentalCodeController extends Controller
             // Debug logging
             \Log::info('Processing rental code', [
                 'code' => $code->rental_code ?? 'N/A',
-                'client_by_agent' => $code->client_by_agent,
                 'rent_by_agent' => $code->rent_by_agent,
-                'client_by_agent_name' => $code->client_by_agent_name,
                 'rent_by_agent_name' => $code->rent_by_agent_name,
                 'agent_id' => $agentId,
                 'agent_users_count' => count($agentUsers)
@@ -460,9 +458,7 @@ class RentalCodeController extends Controller
                 \Log::warning('No valid agent found for rental code', [
                     'code' => $code->rental_code ?? 'N/A',
                     'agent_id' => $agentId,
-                    'client_by_agent' => $code->client_by_agent,
                     'rent_by_agent' => $code->rent_by_agent,
-                    'client_by_agent_name' => $code->client_by_agent_name,
                     'rent_by_agent_name' => $code->rent_by_agent_name
                 ]);
                 
@@ -756,9 +752,7 @@ class RentalCodeController extends Controller
             
             // Create fallback agent name if needed
             if (empty($agentName)) {
-                if (!empty($code->client_by_agent_name)) {
-                    $agentName = $code->client_by_agent_name;
-                } elseif (!empty($code->rent_by_agent_name)) {
+                if (!empty($code->rent_by_agent_name)) {
                     $agentName = $code->rent_by_agent_name;
                 } elseif (!empty($agentId)) {
                     $agentName = is_string($agentId) ? trim($agentId) : "Agent-{$agentId}";
@@ -1034,7 +1028,7 @@ class RentalCodeController extends Controller
             $agentEarnings = $baseCommission * 0.55;
             
             $marketingAgent = $code->marketing_agent;
-            $agentId = $code->client_by_agent ?: $code->rent_by_agent;
+            $agentId = $code->rent_by_agent;
             
             if (!empty($marketingAgent) && $marketingAgent != $agentId) {
                 $marketingDeduction = $clientCount > 1 ? 40.0 : 30.0;

@@ -237,7 +237,7 @@
                                             $agentEarnings = $baseCommission * 0.55;
                                             
                                             $marketingAgent = $rental->marketing_agent;
-                                            $agentId = $rental->client_by_agent ?: $rental->rent_by_agent;
+                                            $agentId = $rental->rent_by_agent;
                                             
                                             if (!empty($marketingAgent) && $marketingAgent != $agentId) {
                                                 $marketingDeduction = $clientCount > 1 ? 40.0 : 30.0;

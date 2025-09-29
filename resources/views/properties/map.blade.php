@@ -262,7 +262,7 @@
         }
         
         #map {
-            height: calc(100vh - 200px);
+            height: calc(62.5vh - 125px);
             width: 100%;
         }
         
@@ -821,18 +821,18 @@
             // Get first image with fallback
             let imageHtml = '';
             if (property.high_quality_photos_array && property.high_quality_photos_array.length > 0) {
-                imageHtml = `<img src="${property.high_quality_photos_array[0]}" alt="${title}" class="property-image w-full h-32 sm:h-36 lg:h-40 object-cover" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />`;
+                imageHtml = `<img src="${property.high_quality_photos_array[0]}" alt="${title}" class="property-image w-full h-24 object-cover group-hover:scale-105 transition-transform duration-300" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />`;
             } else if (property.first_photo_url && property.first_photo_url !== 'N/A') {
-                imageHtml = `<img src="${property.first_photo_url}" alt="${title}" class="property-image w-full h-32 sm:h-36 lg:h-40 object-cover" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />`;
+                imageHtml = `<img src="${property.first_photo_url}" alt="${title}" class="property-image w-full h-24 object-cover group-hover:scale-105 transition-transform duration-300" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />`;
             } else if (property.photos && property.photos.length > 0) {
-                imageHtml = `<img src="${property.photos[0]}" alt="${title}" class="property-image w-full h-32 sm:h-36 lg:h-40 object-cover" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />`;
+                imageHtml = `<img src="${property.photos[0]}" alt="${title}" class="property-image w-full h-24 object-cover group-hover:scale-105 transition-transform duration-300" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />`;
             }
 
             // Add placeholder if no image
             if (!imageHtml) {
-                imageHtml = `<div class="flex items-center justify-center h-32 sm:h-36 lg:h-40 bg-gray-200"><i class="fas fa-home text-3xl sm:text-4xl lg:text-5xl text-gray-400"></i></div>`;
+                imageHtml = `<div class="flex items-center justify-center h-24 bg-gradient-to-br from-gray-100 to-gray-200"><i class="fas fa-home text-3xl text-gray-400"></i></div>`;
                     } else {
-                imageHtml += `<div class="flex items-center justify-center h-32 sm:h-36 lg:h-40 bg-gray-200" style="display: none;"><i class="fas fa-home text-3xl sm:text-4xl lg:text-5xl text-gray-400"></i></div>`;
+                imageHtml += `<div class="flex items-center justify-center h-24 bg-gradient-to-br from-gray-100 to-gray-200" style="display: none;"><i class="fas fa-home text-3xl text-gray-400"></i></div>`;
             }
 
             // Photo count badge
@@ -840,66 +840,64 @@
             if ((allPhotos && allPhotos.length > 0) || photoCount > 0) {
                 const count = allPhotos.length > 0 ? allPhotos.length : photoCount;
                 photoBadgeHtml = `
-                    <div class="absolute top-2 sm:top-4 right-2 sm:right-4 bg-black bg-opacity-80 backdrop-blur-sm border border-white border-opacity-20 text-white px-3 py-2 rounded-full font-semibold text-sm shadow-lg">
-                        <i class="fas fa-camera mr-1 sm:mr-2"></i>
+                    <div class="absolute top-2 right-2 bg-white/90 backdrop-blur-sm border border-white/20 text-gray-800 px-2 py-1 rounded-full font-semibold text-xs shadow-md">
+                        <i class="fas fa-camera mr-1"></i>
                         ${count}
-                        <span class="hidden sm:inline"> photos</span>
                     </div>
                 `;
             }
 
             return `
-                <div class="property-card w-56 max-w-xs bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden cursor-pointer group hover:shadow-xl transition-all duration-300" onclick="window.open('/properties/${propertyId}', '_blank')">
-                    <!-- Property Image -->
-                    <div class="relative h-32 sm:h-36 lg:h-40 bg-gray-200 overflow-hidden">
+                <div class="property-card w-30 max-w-30 bg-white rounded-xl shadow-lg border-0 overflow-hidden cursor-pointer group hover:shadow-xl hover:-translate-y-1 transition-all duration-300 transform" onclick="window.open('/properties/${propertyId}', '_blank')">
+                    <!-- Property Image with Overlay -->
+                    <div class="relative h-24 bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden">
                         ${imageHtml}
                         ${photoBadgeHtml}
+                        
+                        <!-- Gradient Overlay -->
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                        
+                        <!-- Price Badge -->
+                        <div class="absolute bottom-1 left-1 right-1">
+                            <div class="bg-white/95 backdrop-blur-sm rounded-md px-2 py-1 shadow-md">
+                                <div class="text-sm font-bold text-gray-900">${price}</div>
+                            </div>
+                        </div>
                     </div>
                     
                     <!-- Property Details -->
-                    <div class="p-3 sm:p-4 lg:p-5">
-                        <!-- Title -->
-                        <div class="flex items-start justify-between mb-2 sm:mb-3">
-                            <h3 class="font-bold text-sm sm:text-base text-gray-900 line-clamp-2 leading-tight group-hover:text-blue-600 transition-colors duration-300">
-                                ${title.length > 35 ? title.substring(0, 35) + '...' : title}
+                    <div class="p-3">
+                        <!-- Title and Location -->
+                        <div class="mb-2">
+                            <h3 class="font-bold text-xs text-gray-900 line-clamp-2 leading-tight group-hover:text-blue-600 transition-colors duration-300 mb-1">
+                                ${title.length > 25 ? title.substring(0, 25) + '...' : title}
                             </h3>
+                            <div class="flex items-center text-gray-500 text-xs">
+                                <i class="fas fa-map-marker-alt text-red-500 mr-1"></i>
+                                <span class="truncate">${location.length > 20 ? location.substring(0, 20) + '...' : location}</span>
+                            </div>
                         </div>
                         
-                        <!-- Location -->
-                        <div class="flex items-center text-gray-600 mb-2 sm:mb-3">
-                            <i class="fas fa-map-marker-alt text-red-500 mr-1 sm:mr-2 text-xs"></i>
-                            <span class="font-medium text-xs sm:text-sm">${location}</span>
-                        </div>
-                        
-                        <!-- Price and Type -->
-                        <div class="flex items-center justify-between mb-3 sm:mb-4">
-                            <span class="bg-gradient-to-r from-blue-600 to-blue-800 text-white px-3 py-1.5 rounded-full font-bold text-sm sm:text-base">
-                                ${price}
-                            </span>
-                            <span class="bg-gray-100 text-gray-700 px-2 py-1 rounded-full text-xs font-medium">
+                        <!-- Property Type Badge -->
+                        <div class="mb-3">
+                            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200">
+                                <i class="fas fa-home mr-1"></i>
                                 ${propertyType}
                             </span>
                         </div>
                         
-                        <!-- Description -->
-                        ${description && description !== 'N/A' ? `
-                            <p class="text-gray-600 mb-3 sm:mb-4 line-clamp-2 leading-relaxed text-xs sm:text-sm">
-                                ${description.length > 70 ? description.substring(0, 70) + '...' : description}
-                            </p>
-                        ` : ''}
-                        
                         <!-- Action Button -->
-                        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between space-y-1 sm:space-y-0">
-                            <div class="flex items-center space-x-2 w-full sm:w-auto">
-                                <span class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg font-medium text-center w-full sm:w-auto transition-colors duration-200 text-xs sm:text-sm">
-                                    <i class="fas fa-info-circle mr-1"></i>View Details
-                                </span>
-                            </div>
+                        <div class="flex flex-col space-y-1">
+                            <button class="w-full bg-gradient-to-r from-blue-600 via-blue-700 to-blue-800 hover:from-blue-700 hover:via-blue-800 hover:to-blue-900 text-white px-3 py-2 rounded-lg font-semibold text-xs transition-all duration-200 transform hover:scale-105 shadow-md hover:shadow-lg flex items-center justify-center">
+                                <i class="fas fa-eye mr-1"></i>
+                                View Details
+                            </button>
                             
                             ${availableDate && availableDate !== 'N/A' ? `
-                                <span class="text-xs text-green-600 bg-green-100 px-2 py-1 rounded-full font-medium border border-green-200 w-full sm:w-auto text-center">
-                                    <i class="fas fa-calendar mr-1"></i>${availableDate}
-                                </span>
+                                <div class="flex items-center justify-center text-xs text-green-600 bg-green-50 px-2 py-1 rounded-md font-medium border border-green-200">
+                                    <i class="fas fa-calendar mr-1"></i>
+                                    ${availableDate}
+                                </div>
                             ` : ''}
                         </div>
                     </div>

@@ -84,6 +84,7 @@ Route::middleware('auth')->prefix('admin')->group(function () {
     Route::get('/group-viewings', [GroupViewingController::class, 'index'])->name('admin.group-viewings.index');
     Route::get('/group-viewings/create', [GroupViewingController::class, 'create'])->name('admin.group-viewings.create');
     Route::post('/group-viewings', [GroupViewingController::class, 'store'])->name('admin.group-viewings.store');
+    Route::get('/group-viewings/{groupViewing}/attendees', [GroupViewingController::class, 'attendees'])->name('admin.group-viewings.attendees');
     
     // User Management Routes
     Route::get('/users', [AdminController::class, 'users'])->name('admin.users');
