@@ -431,7 +431,7 @@ function markAsPaid(rentalId) {
             return;
         }
         
-        fetch(`/rental-codes/${rentalId}/mark-paid`, {
+        fetch(`/admin/rental-codes/${rentalId}/mark-paid`, {
             method: 'POST',
             headers: {
                 'X-CSRF-TOKEN': csrfToken.getAttribute('content'),
@@ -548,7 +548,7 @@ function showRentalDetails(rentalId) {
     
     // Fetch actual rental details
     console.log('Fetching rental details for ID:', rentalId);
-    fetch(`/rental-codes/${rentalId}/details`, {
+        fetch(`/admin/rental-codes/${rentalId}/details`, {
         method: 'GET',
         headers: {
             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
@@ -741,7 +741,7 @@ function markSelectedAsPaid() {
     let errors = 0;
     
     rentalIds.forEach(rentalId => {
-        fetch(`/rental-codes/${rentalId}/mark-paid`, {
+        fetch(`/admin/rental-codes/${rentalId}/mark-paid`, {
             method: 'POST',
             headers: {
                 'X-CSRF-TOKEN': csrfToken.getAttribute('content'),
@@ -812,7 +812,7 @@ function markSelectedAsUnpaid() {
     let errors = 0;
     
     rentalIds.forEach(rentalId => {
-        fetch(`/rental-codes/${rentalId}/mark-unpaid`, {
+        fetch(`/admin/rental-codes/${rentalId}/mark-unpaid`, {
             method: 'POST',
             headers: {
                 'X-CSRF-TOKEN': csrfToken.getAttribute('content'),
