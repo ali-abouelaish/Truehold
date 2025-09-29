@@ -952,11 +952,12 @@ class RentalCodeController extends Controller
 
         $rentalCodes = $query->get();
 
-        // Filter rentals for this specific agent
+        // Filter rentals for this specific agent (both as rental agent and marketing agent)
         $agentRentals = $rentalCodes->filter(function ($code) use ($agentName) {
             $rentAgentName = $code->rent_by_agent_name;
+            $marketingAgentName = $code->marketing_agent_name;
             
-            return $rentAgentName === $agentName;
+            return $rentAgentName === $agentName || $marketingAgentName === $agentName;
         });
 
         // Calculate agent statistics
@@ -978,27 +979,36 @@ class RentalCodeController extends Controller
                 $baseCommission = $totalFee * 0.8;
             }
 
-            // Calculate agent earnings (55% of base commission)
-            $agentEarnings = $baseCommission * 0.55;
+            $agentEarnings = 0;
+            $marketingEarnings = 0;
             
-            // Check for marketing deduction and marketing earnings
-            $marketingAgent = $code->marketing_agent;
-            $agentId = $code->rent_by_agent;
+            // Check if agent is the rental agent
+            $rentAgentName = $code->rent_by_agent_name;
+            $marketingAgentName = $code->marketing_agent_name;
             
-            if (!empty($marketingAgent) && $marketingAgent != $agentId) {
-                $marketingDeduction = $clientCount > 1 ? 40.0 : 30.0;
-                $agentEarnings -= $marketingDeduction;
+            if ($rentAgentName === $agentName) {
+                // Agent is the rental agent - calculate rental earnings
+                $agentEarnings = $baseCommission * 0.55;
+                
+                // Check for marketing deduction if there's a different marketing agent
+                if (!empty($marketingAgentName) && $marketingAgentName !== $agentName) {
+                    $marketingDeduction = $clientCount > 1 ? 40.0 : 30.0;
+                    $agentEarnings -= $marketingDeduction;
+                }
             }
             
-            // No extra marketing earnings if agent is both rent and marketing agent
-            // (They already get the full commission, no need for extra marketing money)
+            if ($marketingAgentName === $agentName && $marketingAgentName !== $rentAgentName) {
+                // Agent is the marketing agent (and not the rental agent) - calculate marketing earnings
+                $marketingEarnings = $clientCount > 1 ? 40.0 : 30.0;
+            }
             
-            $totalEarnings += $agentEarnings;
+            $totalEarningsForThisCode = $agentEarnings + $marketingEarnings;
+            $totalEarnings += $totalEarningsForThisCode;
             
             if ($code->paid) {
-                $paidAmount += $agentEarnings;
+                $paidAmount += $totalEarningsForThisCode;
             } else {
-                $outstandingAmount += $agentEarnings;
+                $outstandingAmount += $totalEarningsForThisCode;
             }
         }
 
@@ -1037,23 +1047,37 @@ class RentalCodeController extends Controller
                 $baseCommission = $totalFee * 0.8;
             }
 
-            $agentEarnings = $baseCommission * 0.55;
+            $agentEarnings = 0;
+            $marketingEarnings = 0;
             
-            $marketingAgent = $code->marketing_agent;
-            $agentId = $code->rent_by_agent;
+            // Check if agent is the rental agent
+            $rentAgentName = $code->rent_by_agent_name;
+            $marketingAgentName = $code->marketing_agent_name;
             
-            if (!empty($marketingAgent) && $marketingAgent != $agentId) {
-                $marketingDeduction = $clientCount > 1 ? 40.0 : 30.0;
-                $agentEarnings -= $marketingDeduction;
+            if ($rentAgentName === $agentName) {
+                // Agent is the rental agent - calculate rental earnings
+                $agentEarnings = $baseCommission * 0.55;
+                
+                // Check for marketing deduction if there's a different marketing agent
+                if (!empty($marketingAgentName) && $marketingAgentName !== $agentName) {
+                    $marketingDeduction = $clientCount > 1 ? 40.0 : 30.0;
+                    $agentEarnings -= $marketingDeduction;
+                }
             }
             
-            $monthlyBreakdown[$monthKey]['total_earnings'] += $agentEarnings;
+            if ($marketingAgentName === $agentName && $marketingAgentName !== $rentAgentName) {
+                // Agent is the marketing agent (and not the rental agent) - calculate marketing earnings
+                $marketingEarnings = $clientCount > 1 ? 40.0 : 30.0;
+            }
+            
+            $totalEarningsForThisCode = $agentEarnings + $marketingEarnings;
+            $monthlyBreakdown[$monthKey]['total_earnings'] += $totalEarningsForThisCode;
             $monthlyBreakdown[$monthKey]['transaction_count'] += 1;
             
             if ($code->paid) {
-                $monthlyBreakdown[$monthKey]['paid_amount'] += $agentEarnings;
+                $monthlyBreakdown[$monthKey]['paid_amount'] += $totalEarningsForThisCode;
             } else {
-                $monthlyBreakdown[$monthKey]['outstanding_amount'] += $agentEarnings;
+                $monthlyBreakdown[$monthKey]['outstanding_amount'] += $totalEarningsForThisCode;
             }
         }
 

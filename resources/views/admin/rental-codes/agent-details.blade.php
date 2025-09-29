@@ -190,6 +190,7 @@
                                     <th>Client</th>
                                     <th>Fee</th>
                                     <th>Agent Earnings</th>
+                                    <th>Marketing Earnings</th>
                                     <th>Status</th>
                                     <th>Payment</th>
                                     <th>Actions</th>
@@ -234,20 +235,43 @@
                                                 $baseCommission = $totalFee * 0.8;
                                             }
                                             
-                                            $agentEarnings = $baseCommission * 0.55;
+                                            $agentEarnings = 0;
+                                            $marketingEarnings = 0;
+                                            $marketingDeduction = 0;
                                             
-                                            $marketingAgent = $rental->marketing_agent;
-                                            $agentId = $rental->rent_by_agent;
+                                            // Check if agent is the rental agent
+                                            $rentAgentName = $rental->rent_by_agent_name;
+                                            $marketingAgentName = $rental->marketing_agent_name;
                                             
-                                            if (!empty($marketingAgent) && $marketingAgent != $agentId) {
-                                                $marketingDeduction = $clientCount > 1 ? 40.0 : 30.0;
-                                                $agentEarnings -= $marketingDeduction;
+                                            if ($rentAgentName === $agentName) {
+                                                // Agent is the rental agent - calculate rental earnings
+                                                $agentEarnings = $baseCommission * 0.55;
+                                                
+                                                // Check for marketing deduction if there's a different marketing agent
+                                                if (!empty($marketingAgentName) && $marketingAgentName !== $agentName) {
+                                                    $marketingDeduction = $clientCount > 1 ? 40.0 : 30.0;
+                                                    $agentEarnings -= $marketingDeduction;
+                                                }
+                                            }
+                                            
+                                            if ($marketingAgentName === $agentName && $marketingAgentName !== $rentAgentName) {
+                                                // Agent is the marketing agent (and not the rental agent) - calculate marketing earnings
+                                                $marketingEarnings = $clientCount > 1 ? 40.0 : 30.0;
                                             }
                                         @endphp
                                         <strong>£{{ number_format($agentEarnings, 2) }}</strong>
-                                        @if($marketingDeduction ?? 0 > 0)
+                                        @if($marketingDeduction > 0)
                                             <br>
                                             <small class="text-danger">-£{{ number_format($marketingDeduction, 2) }} marketing</small>
+                                        @endif
+                                    </td>
+                                    <td>
+                                        @if($marketingEarnings > 0)
+                                            <strong class="text-success">£{{ number_format($marketingEarnings, 2) }}</strong>
+                                            <br>
+                                            <small class="text-success">Marketing bonus</small>
+                                        @else
+                                            <span class="text-muted">-</span>
                                         @endif
                                     </td>
                                     <td>
