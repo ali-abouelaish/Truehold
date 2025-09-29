@@ -317,7 +317,7 @@
         <!-- Billing Section -->
         <div class="billing-section">
             <div class="bill-to">
-                <h3 class="section-title">Bill To:</h3>
+                <h3 class="section-title">Receiver's Details:</h3>
                 <div class="client-info">
                     <p><strong>{{ $invoice->client_name }}</strong></p>
                 </div>

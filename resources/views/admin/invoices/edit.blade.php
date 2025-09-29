@@ -25,12 +25,12 @@
         @csrf
         @method('PUT')
         
-        <!-- Client Information -->
+        <!-- Receiver's Details -->
         <div class="bg-white rounded-lg shadow p-6">
-            <h3 class="text-lg font-semibold text-gray-900 mb-6">Client Information</h3>
+            <h3 class="text-lg font-semibold text-gray-900 mb-6">Receiver's Details</h3>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                    <label for="client_name" class="block text-sm font-medium text-gray-700 mb-2">Client Name *</label>
+                    <label for="client_name" class="block text-sm font-medium text-gray-700 mb-2">Receiver Name *</label>
                     <input type="text" id="client_name" name="client_name" value="{{ old('client_name', $invoice->client_name) }}" 
                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 @error('client_name') border-red-500 @enderror" required>
                     @error('client_name')
@@ -39,7 +39,7 @@
                 </div>
                 
                 <div>
-                    <label for="client_email" class="block text-sm font-medium text-gray-700 mb-2">Client Email</label>
+                    <label for="client_email" class="block text-sm font-medium text-gray-700 mb-2">Receiver Email</label>
                     <input type="email" id="client_email" name="client_email" value="{{ old('client_email', $invoice->client_email) }}" 
                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 @error('client_email') border-red-500 @enderror">
                     @error('client_email')
@@ -48,7 +48,7 @@
                 </div>
                 
                 <div>
-                    <label for="client_phone" class="block text-sm font-medium text-gray-700 mb-2">Client Phone</label>
+                    <label for="client_phone" class="block text-sm font-medium text-gray-700 mb-2">Receiver Phone</label>
                     <input type="text" id="client_phone" name="client_phone" value="{{ old('client_phone', $invoice->client_phone) }}" 
                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 @error('client_phone') border-red-500 @enderror">
                     @error('client_phone')
@@ -57,7 +57,7 @@
                 </div>
                 
                 <div class="md:col-span-2">
-                    <label for="client_address" class="block text-sm font-medium text-gray-700 mb-2">Client Address *</label>
+                    <label for="client_address" class="block text-sm font-medium text-gray-700 mb-2">Receiver Address *</label>
                     <textarea id="client_address" name="client_address" rows="3" 
                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 @error('client_address') border-red-500 @enderror" required>{{ old('client_address', $invoice->client_address) }}</textarea>
                     @error('client_address')

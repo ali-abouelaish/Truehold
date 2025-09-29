@@ -104,7 +104,7 @@
                 </div>
 
                 <div class="bg-white rounded-lg shadow p-6">
-                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Bill To</h3>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Receiver's Details</h3>
                     <div class="space-y-2">
                         <p class="font-medium text-gray-900">{{ $invoice->client_name }}</p>
                         <p class="text-gray-600">{{ nl2br(e($invoice->client_address)) }}</p>
