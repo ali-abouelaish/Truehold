@@ -800,4 +800,158 @@ class RentalCodeController extends Controller
             'message' => 'Rental code marked as unpaid successfully',
         ]);
     }
+
+    /**
+     * Show detailed agent earnings page
+     */
+    public function agentDetails(Request $request, $agentName)
+    {
+        $validated = $request->validate([
+            'start_date' => ['nullable', 'date'],
+            'end_date' => ['nullable', 'date', 'after_or_equal:start_date'],
+            'status' => ['nullable', 'in:pending,approved,completed,cancelled'],
+            'payment_method' => ['nullable', 'in:Cash,Transfer'],
+        ]);
+
+        $startDate = $validated['start_date'] ?? null;
+        $endDate = $validated['end_date'] ?? now()->format('Y-m-d');
+        $status = $validated['status'] ?? null;
+        $paymentMethod = $validated['payment_method'] ?? null;
+
+        // Build query with filters
+        $query = RentalCode::with('client');
+        
+        if ($startDate) {
+            $query->where('rental_date', '>=', $startDate);
+        }
+        if ($endDate) {
+            $query->where('rental_date', '<=', $endDate);
+        }
+        if ($status) {
+            $query->where('status', $status);
+        } else {
+            $query->where('status', '!=', 'cancelled');
+        }
+        if ($paymentMethod) {
+            $query->where('payment_method', $paymentMethod);
+        }
+
+        $rentalCodes = $query->get();
+
+        // Filter rentals for this specific agent
+        $agentRentals = $rentalCodes->filter(function ($code) use ($agentName) {
+            $clientAgentName = $code->client_by_agent_name;
+            $rentAgentName = $code->rent_by_agent_name;
+            
+            return $clientAgentName === $agentName || $rentAgentName === $agentName;
+        });
+
+        // Calculate agent statistics
+        $totalEarnings = 0;
+        $paidAmount = 0;
+        $outstandingAmount = 0;
+        $totalTransactions = $agentRentals->count();
+        $paidTransactions = $agentRentals->where('paid', true)->count();
+        $unpaidTransactions = $totalTransactions - $paidTransactions;
+
+        foreach ($agentRentals as $code) {
+            $totalFee = (float) ($code->consultation_fee ?? 0);
+            $paymentMethod = $code->payment_method ?? 'Cash';
+            $clientCount = $code->client_count ?? 1;
+            
+            // Calculate base commission after VAT
+            $baseCommission = $totalFee;
+            if ($paymentMethod === 'Transfer') {
+                $baseCommission = $totalFee * 0.8;
+            }
+
+            // Calculate agent earnings (55% of base commission)
+            $agentEarnings = $baseCommission * 0.55;
+            
+            // Check for marketing deduction
+            $marketingAgent = $code->marketing_agent;
+            $agentId = $code->client_by_agent ?: $code->rent_by_agent;
+            
+            if (!empty($marketingAgent) && $marketingAgent != $agentId) {
+                $marketingDeduction = $clientCount > 1 ? 40.0 : 30.0;
+                $agentEarnings -= $marketingDeduction;
+            }
+            
+            $totalEarnings += $agentEarnings;
+            
+            if ($code->paid) {
+                $paidAmount += $agentEarnings;
+            } else {
+                $outstandingAmount += $agentEarnings;
+            }
+        }
+
+        // Performance metrics
+        $performanceMetrics = [
+            'total_earnings' => $totalEarnings,
+            'paid_amount' => $paidAmount,
+            'outstanding_amount' => $outstandingAmount,
+            'total_transactions' => $totalTransactions,
+            'paid_transactions' => $paidTransactions,
+            'unpaid_transactions' => $unpaidTransactions,
+            'payment_rate' => $totalTransactions > 0 ? ($paidTransactions / $totalTransactions) * 100 : 0,
+            'avg_earnings_per_transaction' => $totalTransactions > 0 ? $totalEarnings / $totalTransactions : 0,
+        ];
+
+        // Monthly breakdown
+        $monthlyBreakdown = [];
+        foreach ($agentRentals as $code) {
+            $monthKey = $code->rental_date->format('Y-m');
+            if (!isset($monthlyBreakdown[$monthKey])) {
+                $monthlyBreakdown[$monthKey] = [
+                    'month' => $monthKey,
+                    'total_earnings' => 0,
+                    'paid_amount' => 0,
+                    'outstanding_amount' => 0,
+                    'transaction_count' => 0,
+                ];
+            }
+            
+            $totalFee = (float) ($code->consultation_fee ?? 0);
+            $paymentMethod = $code->payment_method ?? 'Cash';
+            $clientCount = $code->client_count ?? 1;
+            
+            $baseCommission = $totalFee;
+            if ($paymentMethod === 'Transfer') {
+                $baseCommission = $totalFee * 0.8;
+            }
+
+            $agentEarnings = $baseCommission * 0.55;
+            
+            $marketingAgent = $code->marketing_agent;
+            $agentId = $code->client_by_agent ?: $code->rent_by_agent;
+            
+            if (!empty($marketingAgent) && $marketingAgent != $agentId) {
+                $marketingDeduction = $clientCount > 1 ? 40.0 : 30.0;
+                $agentEarnings -= $marketingDeduction;
+            }
+            
+            $monthlyBreakdown[$monthKey]['total_earnings'] += $agentEarnings;
+            $monthlyBreakdown[$monthKey]['transaction_count'] += 1;
+            
+            if ($code->paid) {
+                $monthlyBreakdown[$monthKey]['paid_amount'] += $agentEarnings;
+            } else {
+                $monthlyBreakdown[$monthKey]['outstanding_amount'] += $agentEarnings;
+            }
+        }
+
+        ksort($monthlyBreakdown);
+
+        return view('admin.rental-codes.agent-details', [
+            'agentName' => $agentName,
+            'agentRentals' => $agentRentals,
+            'performanceMetrics' => $performanceMetrics,
+            'monthlyBreakdown' => $monthlyBreakdown,
+            'startDate' => $startDate,
+            'endDate' => $endDate,
+            'status' => $status,
+            'paymentMethod' => $paymentMethod,
+        ]);
+    }
 }

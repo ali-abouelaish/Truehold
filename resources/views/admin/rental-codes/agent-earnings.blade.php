@@ -353,10 +353,16 @@
                             </td>
                             
                             <td class="px-6 py-4 whitespace-nowrap">
-                                <button onclick="showAgentDetails('{{ $agent['name'] }}')" 
-                                        class="text-blue-600 hover:text-blue-800 font-medium">
-                                    <i class="fas fa-eye mr-1"></i>View Details
-                                </button>
+                                <div class="flex space-x-2">
+                                    <a href="{{ route('rental-codes.agent-details', $agent['name']) }}" 
+                                       class="text-blue-600 hover:text-blue-800 font-medium">
+                                        <i class="fas fa-user-tie mr-1"></i>Agent Details
+                                    </a>
+                                    <button onclick="showAgentDetails('{{ $agent['name'] }}')" 
+                                            class="text-green-600 hover:text-green-800 font-medium">
+                                        <i class="fas fa-eye mr-1"></i>Quick View
+                                    </button>
+                                </div>
                             </td>
                         </tr>
                         @empty
@@ -391,10 +397,16 @@
                                         <p class="text-xs text-gray-500">{{ $agent['transaction_count'] }} transactions</p>
                                     </div>
                             </div>
-                            <button onclick="showAgentDetails('{{ $agent['name'] }}')" 
-                                    class="text-gray-400 hover:text-gray-600">
-                                <i class="fas fa-ellipsis-v"></i>
-                            </button>
+                            <div class="flex space-x-2">
+                                <a href="{{ route('rental-codes.agent-details', $agent['name']) }}" 
+                                   class="text-blue-600 hover:text-blue-800">
+                                    <i class="fas fa-user-tie"></i>
+                                </a>
+                                <button onclick="showAgentDetails('{{ $agent['name'] }}')" 
+                                        class="text-gray-400 hover:text-gray-600">
+                                    <i class="fas fa-ellipsis-v"></i>
+                                </button>
+                            </div>
                         </div>
                         
                         <div class="space-y-3">
