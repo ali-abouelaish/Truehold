@@ -117,14 +117,20 @@ class ImportNewScrapeProperties extends Command
             }
 
             if ($existingProperty) {
-                // Update existing property
-                try {
-                    $existingProperty->update($cleanedData);
-                    $updatedCount++;
-                    $this->line("Updated: {$cleanedData['title']}");
-                } catch (\Exception $e) {
-                    $this->error("Error updating property: " . $e->getMessage());
-                    $errorCount++;
+                // Check if property is updatable
+                if ($existingProperty->updatable) {
+                    // Update existing property
+                    try {
+                        $existingProperty->update($cleanedData);
+                        $updatedCount++;
+                        $this->line("Updated: {$cleanedData['title']}");
+                    } catch (\Exception $e) {
+                        $this->error("Error updating property: " . $e->getMessage());
+                        $errorCount++;
+                    }
+                } else {
+                    // Skip updating if property is not updatable
+                    $this->line("Skipped (not updatable): {$cleanedData['title']}");
                 }
             } else {
                 // Add to batch for creation

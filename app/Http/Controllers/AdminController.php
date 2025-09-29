@@ -160,6 +160,7 @@ class AdminController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:8|confirmed',
+            'role' => 'required|string|in:agent,marketing_agent',
         ]);
 
         if ($validator->fails()) {
@@ -170,6 +171,7 @@ class AdminController extends Controller
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
+            'role' => $request->role,
         ]);
 
         return redirect()->route('admin.users')
@@ -509,5 +511,17 @@ class AdminController extends Controller
             'message' => 'Registration status updated successfully',
             'new_status' => $client->registration_status,
         ]);
+    }
+
+    /**
+     * Toggle the updatable status of a property
+     */
+    public function toggleUpdatable(Property $property)
+    {
+        $property->update(['updatable' => !$property->updatable]);
+        
+        return redirect()->back()->with('success', 
+            'Property updatable status changed to ' . ($property->updatable ? 'enabled' : 'disabled')
+        );
     }
 }

@@ -195,6 +195,9 @@
                         Photos
                     </th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Updatable
+                    </th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Actions
                     </th>
                 </tr>
@@ -268,6 +271,19 @@
                             <i class="fas fa-images mr-1"></i>
                             {{ $property->photo_count ?? 0 }} photos
                         </div>
+                    </td>
+                    
+                    <td class="px-6 py-4">
+                        <form method="POST" action="{{ route('admin.properties.toggle-updatable', $property) }}" class="inline">
+                            @csrf
+                            @method('PATCH')
+                            <button type="submit" 
+                                    class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium transition-colors duration-200 {{ $property->updatable ? 'bg-green-100 text-green-800 hover:bg-green-200' : 'bg-red-100 text-red-800 hover:bg-red-200' }}"
+                                    title="{{ $property->updatable ? 'Click to disable updates' : 'Click to enable updates' }}">
+                                <i class="fas {{ $property->updatable ? 'fa-check' : 'fa-times' }} mr-1"></i>
+                                {{ $property->updatable ? 'Yes' : 'No' }}
+                            </button>
+                        </form>
                     </td>
                     
                     <td class="px-6 py-4 text-sm font-medium">

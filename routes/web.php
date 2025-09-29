@@ -73,6 +73,7 @@ Route::middleware('auth')->prefix('admin')->group(function () {
     Route::post('/properties', [AdminController::class, 'store'])->name('admin.properties.store');
     Route::get('/properties/{property}/edit', [AdminController::class, 'edit'])->name('admin.properties.edit');
     Route::put('/properties/{property}', [AdminController::class, 'update'])->name('admin.properties.update');
+    Route::patch('/properties/{property}/toggle-updatable', [AdminController::class, 'toggleUpdatable'])->name('admin.properties.toggle-updatable');
     Route::delete('/properties/{property}', [AdminController::class, 'destroy'])->name('admin.properties.destroy');
     Route::post('/upload-image', [AdminController::class, 'uploadImage'])->name('admin.upload-image');
 

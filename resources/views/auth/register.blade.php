@@ -118,6 +118,17 @@
                                class="auth-input w-full" required>
                     </div>
                     
+                    <div>
+                        <label for="role" class="block text-sm font-semibold text-gray-700 mb-2">
+                            <i class="fas fa-user-tag mr-2 text-blue-600"></i>Role
+                        </label>
+                        <select id="role" name="role" class="auth-input w-full" required>
+                            <option value="">Select your role</option>
+                            <option value="agent" {{ old('role') == 'agent' ? 'selected' : '' }}>Agent</option>
+                            <option value="marketing_agent" {{ old('role') == 'marketing_agent' ? 'selected' : '' }}>Marketing Agent</option>
+                        </select>
+                    </div>
+                    
                     <button type="submit" class="auth-button w-full text-white py-3 px-4 rounded-lg font-medium">
                         <i class="fas fa-user-plus mr-2"></i>Create Account
                     </button>
