@@ -692,6 +692,39 @@
     font-weight: 600;
 }
 
+/* Force Step 3 visibility */
+#step-3 {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+#step-3 .card {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+#step-3 .card-body {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+#step-3 .form-group {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+#step-3 input,
+#step-3 select,
+#step-3 textarea {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
 .review-item {
     margin-bottom: 10px;
     padding: 8px 0;
@@ -856,6 +889,37 @@ function changeStep(direction) {
             formFields.forEach((field, index) => {
                 console.log(`Field ${index}:`, field.name, field.type, field.placeholder);
             });
+            
+            // Force visibility of all elements in step 3
+            const allElements = nextStepElement.querySelectorAll('*');
+            console.log('Total elements in Step 3:', allElements.length);
+            
+            allElements.forEach((element, index) => {
+                if (element.style.display === 'none' || element.style.visibility === 'hidden') {
+                    console.log(`Hidden element ${index}:`, element);
+                    element.style.display = 'block';
+                    element.style.visibility = 'visible';
+                    element.style.opacity = '1';
+                }
+            });
+            
+            // Force card visibility
+            const card = nextStepElement.querySelector('.card');
+            if (card) {
+                card.style.display = 'block';
+                card.style.visibility = 'visible';
+                card.style.opacity = '1';
+                console.log('Card visibility forced');
+            }
+            
+            // Force card body visibility
+            const cardBody = nextStepElement.querySelector('.card-body');
+            if (cardBody) {
+                cardBody.style.display = 'block';
+                cardBody.style.visibility = 'visible';
+                cardBody.style.opacity = '1';
+                console.log('Card body visibility forced');
+            }
         }
     } else {
         console.error('Step element not found:', `step-${currentStep}`);
