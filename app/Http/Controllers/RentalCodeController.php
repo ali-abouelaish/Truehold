@@ -56,7 +56,6 @@ class RentalCodeController extends Controller
             'client_company_university_address' => 'nullable|string',
             'client_position_role' => 'nullable|string|max:255',
             'rent_by_agent' => 'required|string|max:255',
-            'client_by_agent' => 'required|string|max:255',
             'marketing_agent' => 'nullable|string|max:255',
             'client_count' => 'required|integer|min:1|max:10',
             'notes' => 'nullable|string',
@@ -141,7 +140,6 @@ class RentalCodeController extends Controller
             'client_company_university_address' => 'nullable|string',
             'client_position_role' => 'nullable|string|max:255',
             'rent_by_agent' => 'required|string|max:255',
-            'client_by_agent' => 'required|string|max:255',
             'marketing_agent' => 'nullable|string|max:255',
             'client_count' => 'required|integer|min:1|max:10',
             'notes' => 'nullable|string',
@@ -383,8 +381,8 @@ class RentalCodeController extends Controller
                 }
             }
 
-            // Determine the agent (prioritize client_by_agent, fallback to rent_by_agent)
-            $agentId = $code->client_by_agent ?: $code->rent_by_agent;
+            // Determine the agent (use rent_by_agent)
+            $agentId = $code->rent_by_agent;
             $agentName = null;
             
             // Debug logging
@@ -404,7 +402,6 @@ class RentalCodeController extends Controller
                 \Log::info('Found agent by ID', ['agent_id' => $agentId, 'agent_name' => $agentName]);
             } else {
                 // Try to find agent by name from the rental code
-                $clientAgentName = $code->client_by_agent_name;
                 $rentAgentName = $code->rent_by_agent_name;
                 
                 // Prioritize client agent name
@@ -450,9 +447,7 @@ class RentalCodeController extends Controller
                 ]);
                 
                 // Create a fallback agent name for unregistered agents
-                if (!empty($code->client_by_agent_name)) {
-                    $agentName = $code->client_by_agent_name;
-                } elseif (!empty($code->rent_by_agent_name)) {
+                if (!empty($code->rent_by_agent_name)) {
                     $agentName = $code->rent_by_agent_name;
                 } elseif (!empty($agentId)) {
                     $agentName = is_string($agentId) ? trim($agentId) : "Agent-{$agentId}";
@@ -683,8 +678,8 @@ class RentalCodeController extends Controller
                 $baseCommission = $totalFee * 0.8;
             }
             
-            // Determine the agent (prioritize client_by_agent, fallback to rent_by_agent)
-            $agentId = $code->client_by_agent ?: $code->rent_by_agent;
+            // Determine the agent (use rent_by_agent)
+            $agentId = $code->rent_by_agent;
             $agentName = null;
             
             // First try to find agent by ID
@@ -692,7 +687,6 @@ class RentalCodeController extends Controller
                 $agentName = $agentUsers[(int)$agentId] ?? null;
             } else {
                 // Try to find agent by name from the rental code
-                $clientAgentName = $code->client_by_agent_name;
                 $rentAgentName = $code->rent_by_agent_name;
                 
                 // Prioritize client agent name
@@ -915,10 +909,9 @@ class RentalCodeController extends Controller
 
         // Filter rentals for this specific agent
         $agentRentals = $rentalCodes->filter(function ($code) use ($agentName) {
-            $clientAgentName = $code->client_by_agent_name;
             $rentAgentName = $code->rent_by_agent_name;
             
-            return $clientAgentName === $agentName || $rentAgentName === $agentName;
+            return $rentAgentName === $agentName;
         });
 
         // Calculate agent statistics
@@ -1050,7 +1043,6 @@ class RentalCodeController extends Controller
             'paid' => $rentalCode->paid,
             'paid_at' => $rentalCode->paid_at,
             'notes' => $rentalCode->notes,
-            'client_by_agent_name' => $rentalCode->client_by_agent_name,
             'rent_by_agent_name' => $rentalCode->rent_by_agent_name,
             'marketing_agent_name' => $rentalCode->marketing_agent_name,
             'client_count' => $rentalCode->client_count,

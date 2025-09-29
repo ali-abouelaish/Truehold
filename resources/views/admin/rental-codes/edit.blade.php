@@ -384,32 +384,6 @@
                                         </div>
                                     </div>
                                     
-                                    <div class="col-md-6">
-                                        <div class="form-group mb-3">
-                                            <label for="client_by_agent" class="form-label">
-                                                Client By Agent <span class="text-danger">*</span>
-                                            </label>
-                                            <div class="input-group">
-                                                <span class="input-group-text"><i class="fas fa-user-tie"></i></span>
-                                                <select class="form-select @error('client_by_agent') is-invalid @enderror" 
-                                                        id="client_by_agent" name="client_by_agent" required>
-                                                    <option value="">Select agent</option>
-                                                    @foreach($agentUsers as $user)
-                                                        <option value="{{ $user->id }}" 
-                                                                {{ old('client_by_agent', $rentalCode->client_by_agent) == $user->id ? 'selected' : '' }}>
-                                                            {{ $user->name }}
-                                                            @if($user->agent && $user->agent->company_name)
-                                                                ({{ $user->agent->company_name }})
-                                                            @endif
-                                                        </option>
-                                                    @endforeach
-                                                </select>
-                                            </div>
-                                            @error('client_by_agent')
-                                                <div class="invalid-feedback">{{ $message }}</div>
-                                            @enderror
-                                        </div>
-                                    </div>
                                 </div>
                                 
                                 <div class="row">

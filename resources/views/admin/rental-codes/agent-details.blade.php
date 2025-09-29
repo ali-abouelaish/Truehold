@@ -625,9 +625,6 @@ function showRentalDetails(rentalId) {
                 <div class="col-md-6">
                     <h6><i class="fas fa-user text-info me-2"></i>Agent Information</h6>
                     <div class="mb-3">
-                        <strong>Client Agent:</strong> ${data.client_by_agent_name || 'N/A'}
-                    </div>
-                    <div class="mb-3">
                         <strong>Rent Agent:</strong> ${data.rent_by_agent_name || 'N/A'}
                     </div>
                     ${data.marketing_agent_name ? `

@@ -391,34 +391,6 @@
                                  </div>
                             </div>
                             
-                            <div class="col-md-6">
-                                <div class="form-group mb-3">
-                                    <label for="client_by_agent" class="form-label">
-                                        Client By Agent <span class="text-danger">*</span>
-                                    </label>
-                                    <div class="input-group">
-                                        <span class="input-group-text"><i class="fas fa-user-tie"></i></span>
-                                        <select class="form-select @error('client_by_agent') is-invalid @enderror" 
-                                                id="client_by_agent" name="client_by_agent" required>
-                                            <option value="">Select agent</option>
-                                            @forelse($agentUsers as $user)
-                                                <option value="{{ $user->id }}" 
-                                                        {{ old('client_by_agent') == $user->id ? 'selected' : '' }}>
-                                                    {{ $user->name }}
-                                                    @if($user->agent && $user->agent->company_name)
-                                                        ({{ $user->agent->company_name }})
-                                                    @endif
-                                                </option>
-                                            @empty
-                                                <option value="" disabled>No agents found</option>
-                                            @endforelse
-                                        </select>
-                                    </div>
-                                    @error('client_by_agent')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
-                                </div>
-                            </div>
                         </div>
                         
                         <div class="row">
@@ -754,7 +726,7 @@ function validateStep(step) {
     const requiredFields = {
         1: ['rental_code', 'rental_date', 'consultation_fee', 'payment_method'],
         2: ['client_full_name', 'client_date_of_birth', 'client_phone_number', 'client_email', 'client_nationality', 'client_current_address'],
-        3: ['rent_by_agent', 'client_by_agent']
+        3: ['rent_by_agent']
     };
     
     const fields = requiredFields[step] || [];
