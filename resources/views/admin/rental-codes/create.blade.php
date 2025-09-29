@@ -190,6 +190,20 @@
             </div>
         </div>
 
+        <!-- TEST NAVIGATION - SIMPLE VERSION -->
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="alert alert-info">
+                    <strong>TEST:</strong> This should be visible after the rental information section.
+                </div>
+                <div class="d-flex justify-content-end">
+                    <button type="button" class="btn btn-primary btn-lg" onclick="alert('Next button clicked!')">
+                        NEXT BUTTON TEST
+                    </button>
+                </div>
+            </div>
+        </div>
+
         <!-- Step 2: Client Information -->
         <div class="row step-content" id="step-2" style="display: none;">
             <div class="col-12">
