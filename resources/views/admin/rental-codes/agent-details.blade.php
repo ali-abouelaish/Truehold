@@ -166,6 +166,12 @@
                     <div>
                         <span class="badge bg-success">{{ $performanceMetrics['paid_transactions'] }} Paid</span>
                         <span class="badge bg-warning">{{ $performanceMetrics['unpaid_transactions'] }} Outstanding</span>
+                        <button class="btn btn-success btn-sm ms-2" onclick="markSelectedAsPaid()" id="bulkMarkPaidBtn" disabled>
+                            <i class="fas fa-check me-1"></i>Mark Selected as Paid
+                        </button>
+                        <button class="btn btn-warning btn-sm ms-1" onclick="markSelectedAsUnpaid()" id="bulkMarkUnpaidBtn" disabled>
+                            <i class="fas fa-times me-1"></i>Mark Selected as Unpaid
+                        </button>
                     </div>
                 </div>
                 <div class="card-body">
@@ -173,6 +179,10 @@
                         <table class="table table-bordered" id="rentalCodesTable">
                             <thead>
                                 <tr>
+                                    <th>
+                                        <input type="checkbox" id="selectAll" onchange="toggleSelectAll()">
+                                        <label for="selectAll" class="ms-1">All</label>
+                                    </th>
                                     <th>Rental Code</th>
                                     <th>Date</th>
                                     <th>Client</th>
@@ -186,6 +196,9 @@
                             <tbody>
                                 @forelse($agentRentals as $rental)
                                 <tr>
+                                    <td>
+                                        <input type="checkbox" class="rental-checkbox" value="{{ $rental->id }}" data-rental-id="{{ $rental->id }}">
+                                    </td>
                                     <td>
                                         <strong>{{ $rental->rental_code }}</strong>
                                         <br>
@@ -404,14 +417,13 @@ new Chart(ctx, {
 function markAsPaid(rentalId) {
     console.log('markAsPaid function called with rentalId:', rentalId);
     
-    if (confirm('Are you sure you want to mark this rental as paid?')) {
-        console.log('Marking rental as paid:', rentalId);
-        
-        // Show loading state
-        const button = event.target.closest('button');
-        const originalText = button.innerHTML;
-        button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
-        button.disabled = true;
+    console.log('Marking rental as paid:', rentalId);
+    
+    // Show loading state
+    const button = event.target.closest('button');
+    const originalText = button.innerHTML;
+    button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+    button.disabled = true;
         
         const csrfToken = document.querySelector('meta[name="csrf-token"]');
         if (!csrfToken) {
@@ -677,5 +689,181 @@ function showRentalDetails(rentalId) {
         `;
     });
 }
+
+// Multiple select functionality
+function toggleSelectAll() {
+    const selectAll = document.getElementById('selectAll');
+    const checkboxes = document.querySelectorAll('.rental-checkbox');
+    
+    checkboxes.forEach(checkbox => {
+        checkbox.checked = selectAll.checked;
+    });
+    
+    updateBulkButtons();
+}
+
+function updateBulkButtons() {
+    const selectedCheckboxes = document.querySelectorAll('.rental-checkbox:checked');
+    const bulkMarkPaidBtn = document.getElementById('bulkMarkPaidBtn');
+    const bulkMarkUnpaidBtn = document.getElementById('bulkMarkUnpaidBtn');
+    
+    if (selectedCheckboxes.length > 0) {
+        bulkMarkPaidBtn.disabled = false;
+        bulkMarkUnpaidBtn.disabled = false;
+    } else {
+        bulkMarkPaidBtn.disabled = true;
+        bulkMarkUnpaidBtn.disabled = true;
+    }
+}
+
+function markSelectedAsPaid() {
+    const selectedCheckboxes = document.querySelectorAll('.rental-checkbox:checked');
+    const rentalIds = Array.from(selectedCheckboxes).map(cb => cb.dataset.rentalId);
+    
+    if (rentalIds.length === 0) {
+        alert('Please select at least one rental code.');
+        return;
+    }
+    
+    console.log('Marking multiple rentals as paid:', rentalIds);
+    
+    // Show loading state
+    const button = document.getElementById('bulkMarkPaidBtn');
+    const originalText = button.innerHTML;
+    button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+    button.disabled = true;
+    
+    const csrfToken = document.querySelector('meta[name="csrf-token"]');
+    if (!csrfToken) {
+        alert('CSRF token not found. Please refresh the page and try again.');
+        return;
+    }
+    
+    // Process each rental
+    let completed = 0;
+    let errors = 0;
+    
+    rentalIds.forEach(rentalId => {
+        fetch(`/rental-codes/${rentalId}/mark-paid`, {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': csrfToken.getAttribute('content'),
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+            },
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            completed++;
+            if (completed + errors === rentalIds.length) {
+                if (errors === 0) {
+                    alert(`Successfully marked ${completed} rental(s) as paid!`);
+                    location.reload();
+                } else {
+                    alert(`Marked ${completed} rental(s) as paid, but ${errors} failed.`);
+                }
+                button.innerHTML = originalText;
+                button.disabled = false;
+            }
+        })
+        .catch(error => {
+            console.error('Error marking rental as paid:', error);
+            errors++;
+            if (completed + errors === rentalIds.length) {
+                if (completed > 0) {
+                    alert(`Marked ${completed} rental(s) as paid, but ${errors} failed.`);
+                } else {
+                    alert('Failed to mark rentals as paid. Please try again.');
+                }
+                button.innerHTML = originalText;
+                button.disabled = false;
+            }
+        });
+    });
+}
+
+function markSelectedAsUnpaid() {
+    const selectedCheckboxes = document.querySelectorAll('.rental-checkbox:checked');
+    const rentalIds = Array.from(selectedCheckboxes).map(cb => cb.dataset.rentalId);
+    
+    if (rentalIds.length === 0) {
+        alert('Please select at least one rental code.');
+        return;
+    }
+    
+    console.log('Marking multiple rentals as unpaid:', rentalIds);
+    
+    // Show loading state
+    const button = document.getElementById('bulkMarkUnpaidBtn');
+    const originalText = button.innerHTML;
+    button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+    button.disabled = true;
+    
+    const csrfToken = document.querySelector('meta[name="csrf-token"]');
+    if (!csrfToken) {
+        alert('CSRF token not found. Please refresh the page and try again.');
+        return;
+    }
+    
+    // Process each rental
+    let completed = 0;
+    let errors = 0;
+    
+    rentalIds.forEach(rentalId => {
+        fetch(`/rental-codes/${rentalId}/mark-unpaid`, {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': csrfToken.getAttribute('content'),
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+            },
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            completed++;
+            if (completed + errors === rentalIds.length) {
+                if (errors === 0) {
+                    alert(`Successfully marked ${completed} rental(s) as unpaid!`);
+                    location.reload();
+                } else {
+                    alert(`Marked ${completed} rental(s) as unpaid, but ${errors} failed.`);
+                }
+                button.innerHTML = originalText;
+                button.disabled = false;
+            }
+        })
+        .catch(error => {
+            console.error('Error marking rental as unpaid:', error);
+            errors++;
+            if (completed + errors === rentalIds.length) {
+                if (completed > 0) {
+                    alert(`Marked ${completed} rental(s) as unpaid, but ${errors} failed.`);
+                } else {
+                    alert('Failed to mark rentals as unpaid. Please try again.');
+                }
+                button.innerHTML = originalText;
+                button.disabled = false;
+            }
+        });
+    });
+}
+
+// Add event listeners to checkboxes
+document.addEventListener('DOMContentLoaded', function() {
+    const checkboxes = document.querySelectorAll('.rental-checkbox');
+    checkboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', updateBulkButtons);
+    });
+});
 </script>
 @endpush
