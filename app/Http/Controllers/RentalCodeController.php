@@ -395,9 +395,15 @@ class RentalCodeController extends Controller
                     }
                 }
                 
-                // If no marketing agent found in registered users, use the value as is
+                // If no marketing agent found in registered users, try to resolve by ID
                 if (empty($marketingAgentName)) {
-                    $marketingAgentName = is_string($marketingAgent) ? trim($marketingAgent) : "Marketing-{$marketingAgent}";
+                    if (is_numeric($marketingAgent)) {
+                        // Try to get user name by ID
+                        $user = \App\Models\User::find((int)$marketingAgent);
+                        $marketingAgentName = $user ? $user->name : "Marketing-{$marketingAgent}";
+                    } else {
+                        $marketingAgentName = is_string($marketingAgent) ? trim($marketingAgent) : "Marketing-{$marketingAgent}";
+                    }
                 }
             }
 
@@ -466,7 +472,13 @@ class RentalCodeController extends Controller
                 if (!empty($code->rent_by_agent_name)) {
                     $agentName = $code->rent_by_agent_name;
                 } elseif (!empty($agentId)) {
-                    $agentName = is_string($agentId) ? trim($agentId) : "Agent-{$agentId}";
+                    if (is_numeric($agentId)) {
+                        // Try to get user name by ID
+                        $user = \App\Models\User::find((int)$agentId);
+                        $agentName = $user ? $user->name : "Agent-{$agentId}";
+                    } else {
+                        $agentName = is_string($agentId) ? trim($agentId) : "Agent-{$agentId}";
+                    }
                 } else {
                     $agentName = "Unknown Agent";
                 }
