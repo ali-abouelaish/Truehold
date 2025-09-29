@@ -692,10 +692,8 @@
     font-weight: 600;
 }
 
-/* Force Step 3 visibility - more aggressive approach */
-#step-3.step-active,
-#step-3[style*="display: block"],
-#step-3 {
+/* Force Step 3 visibility - only when it's the active step */
+#step-3.step-active {
     display: block !important;
     visibility: visible !important;
     opacity: 1 !important;
@@ -703,34 +701,20 @@
     z-index: 10 !important;
 }
 
-#step-3.step-active *,
-#step-3[style*="display: block"] *,
-#step-3 * {
-    display: block !important;
-    visibility: visible !important;
-    opacity: 1 !important;
-}
-
-#step-3.step-active .card,
-#step-3[style*="display: block"] .card,
-#step-3 .card {
+#step-3.step-active .card {
     display: block !important;
     visibility: visible !important;
     opacity: 1 !important;
     position: relative !important;
 }
 
-#step-3.step-active .card-body,
-#step-3[style*="display: block"] .card-body,
-#step-3 .card-body {
+#step-3.step-active .card-body {
     display: block !important;
     visibility: visible !important;
     opacity: 1 !important;
 }
 
-#step-3.step-active .form-group,
-#step-3[style*="display: block"] .form-group,
-#step-3 .form-group {
+#step-3.step-active .form-group {
     display: block !important;
     visibility: visible !important;
     opacity: 1 !important;
@@ -738,13 +722,7 @@
 
 #step-3.step-active input,
 #step-3.step-active select,
-#step-3.step-active textarea,
-#step-3[style*="display: block"] input,
-#step-3[style*="display: block"] select,
-#step-3[style*="display: block"] textarea,
-#step-3 input,
-#step-3 select,
-#step-3 textarea {
+#step-3.step-active textarea {
     display: block !important;
     visibility: visible !important;
     opacity: 1 !important;
@@ -836,30 +814,41 @@ function changeStep(direction) {
     const currentStepElement = document.getElementById(`step-${currentStep}`);
     const nextStep = currentStep + direction;
     
+    console.log('Step change:', { currentStep, nextStep, direction });
     
     if (nextStep < 1 || nextStep > totalSteps) return;
     
     // Hide current step
-    currentStepElement.style.display = 'none';
-    currentStepElement.classList.remove('step-active');
+    if (currentStepElement) {
+        currentStepElement.style.display = 'none';
+        currentStepElement.classList.remove('step-active');
+        console.log('Hiding step:', currentStep);
+    }
     
     // Update step indicators
-    document.querySelector(`.step[data-step="${currentStep}"]`).classList.remove('active');
-    if (direction > 0) {
-        document.querySelector(`.step[data-step="${currentStep}"]`).classList.add('completed');
+    const currentStepIndicator = document.querySelector(`.step[data-step="${currentStep}"]`);
+    if (currentStepIndicator) {
+        currentStepIndicator.classList.remove('active');
+        if (direction > 0) {
+            currentStepIndicator.classList.add('completed');
+        }
     }
     
     currentStep = nextStep;
+    console.log('New current step:', currentStep);
     
     // Show next step
     const nextStepElement = document.getElementById(`step-${currentStep}`);
+    console.log('Next step element:', nextStepElement);
     
     if (nextStepElement) {
         nextStepElement.style.display = 'block';
         nextStepElement.classList.add('step-active');
+        console.log('Showing step:', currentStep, 'Element:', nextStepElement);
         
         // Special handling for step 3 - ensure it's fully visible
         if (currentStep === 3) {
+            console.log('Step 3 special handling triggered');
             // Force step 3 to be visible with important styles
             nextStepElement.style.display = 'block';
             nextStepElement.style.visibility = 'visible';
