@@ -132,6 +132,15 @@
                                 <div class="text-sm text-gray-500">
                                     Age: {{ $client->age ?? 'N/A' }} ({{ $client->age_group }})
                                 </div>
+                                @if($client->agent)
+                                    <div class="text-xs text-blue-600 mt-1">
+                                        <i class="fas fa-user-tie mr-1"></i>Agent: {{ $client->agent->display_name }}
+                                    </div>
+                                @else
+                                    <div class="text-xs text-gray-400 mt-1">
+                                        <i class="fas fa-user-times mr-1"></i>No agent assigned
+                                    </div>
+                                @endif
                             </div>
                         </div>
                     </td>
@@ -183,16 +192,12 @@
                     </td>
                     
                     <td class="px-6 py-4">
-                        <div class="flex items-center space-x-2">
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $client->registration_badge_class }}">
-                                <i class="{{ $client->registration_icon }} mr-1"></i>
-                                {{ ucfirst($client->registration_status) }}
-                            </span>
-                            <button onclick="toggleRegistrationStatus({{ $client->id }}, '{{ $client->registration_status }}')" 
-                                    class="text-blue-600 hover:text-blue-900 text-xs" title="Toggle Registration Status">
-                                <i class="fas fa-sync-alt"></i>
-                            </button>
-                        </div>
+                        <button onclick="toggleRegistrationStatus({{ $client->id }}, '{{ $client->registration_status }}')" 
+                                class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $client->registration_badge_class }} hover:opacity-80 transition-opacity cursor-pointer" 
+                                title="Click to toggle registration status">
+                            <i class="{{ $client->registration_icon }} mr-1"></i>
+                            {{ ucfirst($client->registration_status) }}
+                        </button>
                     </td>
                     
                     <td class="px-6 py-4">
@@ -276,6 +281,38 @@
                                     @endif
                                     @if($client->position_role)
                                         <div><strong>Position/Role:</strong> {{ $client->position_role }}</div>
+                                    @endif
+                                </div>
+                            </div>
+
+                            <!-- Assigned Agent Information -->
+                            <div class="bg-white rounded-lg p-4 shadow-sm">
+                                <h6 class="font-semibold text-gray-900 mb-3 flex items-center">
+                                    <i class="fas fa-user-tie mr-2 text-purple-600"></i>Assigned Agent
+                                </h6>
+                                <div class="space-y-2 text-sm">
+                                    @if($client->agent)
+                                        <div><strong>Agent Name:</strong> {{ $client->agent->display_name }}</div>
+                                        @if($client->agent->company_name)
+                                            <div><strong>Company:</strong> {{ $client->agent->company_name }}</div>
+                                        @endif
+                                        @if($client->agent->phone)
+                                            <div><strong>Agent Phone:</strong> {{ $client->agent->phone }}</div>
+                                        @endif
+                                        @if($client->agent->email)
+                                            <div><strong>Agent Email:</strong> {{ $client->agent->email }}</div>
+                                        @endif
+                                        @if($client->agent->is_verified)
+                                            <div class="mt-2">
+                                                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                                    <i class="fas fa-check-circle mr-1"></i>Verified Agent
+                                                </span>
+                                            </div>
+                                        @endif
+                                    @else
+                                        <div class="text-gray-500 italic">
+                                            <i class="fas fa-user-times mr-2"></i>No agent assigned to this client
+                                        </div>
                                     @endif
                                 </div>
                             </div>
