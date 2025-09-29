@@ -864,3 +864,29 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 @endpush
+
+@push('styles')
+<style>
+/* Ensure modal is perfectly centered */
+#rentalDetailsModal .modal-dialog {
+    display: flex;
+    align-items: center;
+    min-height: calc(100vh - 1rem);
+    margin: 0.5rem auto;
+}
+
+#rentalDetailsModal .modal-content {
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+/* Center modal on all screen sizes */
+@media (max-width: 576px) {
+    #rentalDetailsModal .modal-dialog {
+        margin: 0.25rem;
+        min-height: calc(100vh - 0.5rem);
+    }
+}
+</style>
+@endpush
