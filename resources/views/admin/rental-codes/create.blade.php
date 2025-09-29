@@ -190,16 +190,21 @@
             </div>
         </div>
 
-        <!-- TEST NAVIGATION - SIMPLE VERSION -->
+        <!-- Navigation Buttons -->
         <div class="row mt-4">
             <div class="col-12">
-                <div class="alert alert-info">
-                    <strong>TEST:</strong> This should be visible after the rental information section.
-                </div>
-                <div class="d-flex justify-content-end">
-                    <button type="button" class="btn btn-primary btn-lg" onclick="alert('Next button clicked!')">
-                        NEXT BUTTON TEST
+                <div class="d-flex justify-content-between">
+                    <button type="button" class="btn btn-outline-secondary" id="prevBtn" onclick="changeStep(-1)" style="display: none;">
+                        <i class="fas fa-arrow-left me-1"></i> Previous
                     </button>
+                    <div class="ms-auto">
+                        <button type="button" class="btn btn-primary" id="nextBtn" onclick="changeStep(1)" style="display: block !important; visibility: visible !important; opacity: 1 !important;">
+                            Next <i class="fas fa-arrow-right ms-1"></i>
+                        </button>
+                        <button type="submit" class="btn btn-success" id="submitBtn" style="display: none;">
+                            <i class="fas fa-save me-1"></i> Create Rental Code
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -603,27 +608,6 @@
             </div>
         </div>
 
-        <!-- Navigation Buttons -->
-        <div class="row mt-4" style="display: block !important; visibility: visible !important;">
-            <div class="col-12" style="display: block !important; visibility: visible !important;">
-                <div class="d-flex justify-content-between" style="display: flex !important; visibility: visible !important;">
-                    <button type="button" class="btn btn-outline-secondary" id="prevBtn" onclick="changeStep(-1)" style="display: none;">
-                        <i class="fas fa-arrow-left me-1"></i> Previous
-                    </button>
-                    <div class="ms-auto">
-                        <button type="button" class="btn btn-primary" id="nextBtn" onclick="changeStep(1)" style="display: block !important; visibility: visible !important; opacity: 1 !important;">
-                            Next <i class="fas fa-arrow-right ms-1"></i>
-                        </button>
-                        <button type="button" class="btn btn-warning" onclick="alert('Test button works!')" style="display: inline-block !important; margin-left: 10px;">
-                            Test Button
-                        </button>
-                        <button type="submit" class="btn btn-success" id="submitBtn" style="display: none;">
-                            <i class="fas fa-save me-1"></i> Create Rental Code
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
     </form>
 </div>
 
