@@ -225,7 +225,10 @@ class PropertyController extends Controller
             'status' => 'nullable|in:available,rented,unavailable,on_hold',
         ]);
         
-        $property = Property::create($request->all());
+        $propertyData = $request->all();
+        $propertyData['updatable'] = false; // CRM-created properties should not be updated by imports
+        
+        $property = Property::create($propertyData);
         
         return redirect()->route('properties.show', $property)
             ->with('success', 'Property created successfully!');
