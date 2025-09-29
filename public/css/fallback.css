@@ -1,5 +1,24 @@
 /* Fallback CSS for when CDN libraries fail to load */
 
+/* Font Awesome font face declarations */
+@font-face {
+    font-family: "Font Awesome 6 Free";
+    font-style: normal;
+    font-weight: 900;
+    font-display: block;
+    src: url("webfonts/fa-solid-900.woff2") format("woff2"),
+         url("webfonts/fa-solid-900.ttf") format("truetype");
+}
+
+@font-face {
+    font-family: "Font Awesome 6 Brands";
+    font-style: normal;
+    font-weight: 400;
+    font-display: block;
+    src: url("webfonts/fa-brands-400.woff2") format("woff2"),
+         url("webfonts/fa-brands-400.ttf") format("truetype");
+}
+
 /* Basic Font Awesome icon fallbacks */
 .fas, .far, .fal, .fab, .fa {
     font-family: "Font Awesome 6 Free", "Font Awesome 6 Pro", "Font Awesome 5 Free", "Font Awesome 5 Pro", "FontAwesome", sans-serif;
