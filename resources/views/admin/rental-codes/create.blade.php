@@ -590,15 +590,18 @@
         </div>
 
         <!-- Navigation Buttons -->
-        <div class="row mt-4">
-            <div class="col-12">
-                <div class="d-flex justify-content-between">
+        <div class="row mt-4" style="display: block !important; visibility: visible !important;">
+            <div class="col-12" style="display: block !important; visibility: visible !important;">
+                <div class="d-flex justify-content-between" style="display: flex !important; visibility: visible !important;">
                     <button type="button" class="btn btn-outline-secondary" id="prevBtn" onclick="changeStep(-1)" style="display: none;">
                         <i class="fas fa-arrow-left me-1"></i> Previous
                     </button>
                     <div class="ms-auto">
-                        <button type="button" class="btn btn-primary" id="nextBtn" onclick="changeStep(1)" style="display: block;">
+                        <button type="button" class="btn btn-primary" id="nextBtn" onclick="changeStep(1)" style="display: block !important; visibility: visible !important; opacity: 1 !important;">
                             Next <i class="fas fa-arrow-right ms-1"></i>
+                        </button>
+                        <button type="button" class="btn btn-warning" onclick="alert('Test button works!')" style="display: inline-block !important; margin-left: 10px;">
+                            Test Button
                         </button>
                         <button type="submit" class="btn btn-success" id="submitBtn" style="display: none;">
                             <i class="fas fa-save me-1"></i> Create Rental Code
@@ -749,6 +752,53 @@ function initializeNavigation() {
 
 // Run immediately
 initializeNavigation();
+
+// Force button visibility immediately
+setTimeout(function() {
+    const nextBtn = document.getElementById('nextBtn');
+    if (nextBtn) {
+        nextBtn.style.display = 'block';
+        nextBtn.style.visibility = 'visible';
+        nextBtn.style.opacity = '1';
+        nextBtn.style.position = 'relative';
+        nextBtn.style.zIndex = '9999';
+        console.log('Forced Next button visibility with timeout');
+    } else {
+        console.error('Next button still not found after timeout');
+    }
+}, 50);
+
+// Debug function to show all buttons
+function debugButtons() {
+    console.log('=== BUTTON DEBUG ===');
+    const allButtons = document.querySelectorAll('button');
+    console.log('Total buttons found:', allButtons.length);
+    
+    allButtons.forEach((btn, index) => {
+        console.log(`Button ${index}:`, {
+            id: btn.id,
+            text: btn.textContent.trim(),
+            display: btn.style.display,
+            visibility: btn.style.visibility,
+            className: btn.className
+        });
+    });
+    
+    const nextBtn = document.getElementById('nextBtn');
+    console.log('Next button specifically:', nextBtn);
+    if (nextBtn) {
+        console.log('Next button styles:', {
+            display: nextBtn.style.display,
+            visibility: nextBtn.style.visibility,
+            opacity: nextBtn.style.opacity,
+            position: nextBtn.style.position,
+            zIndex: nextBtn.style.zIndex
+        });
+    }
+}
+
+// Run debug after a short delay
+setTimeout(debugButtons, 100);
 
 function changeStep(direction) {
     const currentStepElement = document.getElementById(`step-${currentStep}`);
