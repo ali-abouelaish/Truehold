@@ -506,8 +506,8 @@ class RentalCodeController extends Controller
                     $byAgent[$agentName]['entitled_amount'] += $agentEarnings;
                 }
                 
-                // Calculate outstanding amount
-                $byAgent[$agentName]['outstanding_amount'] = $byAgent[$agentName]['entitled_amount'] - $byAgent[$agentName]['paid_amount'];
+                // Calculate outstanding amount (never negative)
+                $byAgent[$agentName]['outstanding_amount'] = max(0, $byAgent[$agentName]['entitled_amount'] - $byAgent[$agentName]['paid_amount']);
                 
                 $byAgent[$agentName]['transactions'][] = [
                     'total_fee' => $totalFee,
@@ -578,8 +578,8 @@ class RentalCodeController extends Controller
                     $byAgent[$marketingAgentName]['entitled_amount'] += $marketingDeduction;
                 }
                 
-                // Calculate outstanding amount for marketing agent
-                $byAgent[$marketingAgentName]['outstanding_amount'] = $byAgent[$marketingAgentName]['entitled_amount'] - $byAgent[$marketingAgentName]['paid_amount'];
+                // Calculate outstanding amount for marketing agent (never negative)
+                $byAgent[$marketingAgentName]['outstanding_amount'] = max(0, $byAgent[$marketingAgentName]['entitled_amount'] - $byAgent[$marketingAgentName]['paid_amount']);
                 
                 $byAgent[$marketingAgentName]['transactions'][] = [
                     'total_fee' => $totalFee,
@@ -982,7 +982,7 @@ class RentalCodeController extends Controller
         $performanceMetrics = [
             'total_earnings' => $totalEarnings,
             'paid_amount' => $paidAmount,
-            'outstanding_amount' => $outstandingAmount,
+            'outstanding_amount' => max(0, $outstandingAmount),
             'total_transactions' => $totalTransactions,
             'paid_transactions' => $paidTransactions,
             'unpaid_transactions' => $unpaidTransactions,
