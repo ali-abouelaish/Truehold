@@ -466,64 +466,61 @@ function markAsPaid(rentalId) {
             button.innerHTML = originalText;
             button.disabled = false;
         });
-    }
 }
 
 // Mark as unpaid function
 function markAsUnpaid(rentalId) {
     console.log('markAsUnpaid function called with rentalId:', rentalId);
     
-    if (confirm('Are you sure you want to mark this rental as unpaid?')) {
-        console.log('Marking rental as unpaid:', rentalId);
-        
-        // Show loading state
-        const button = event.target.closest('button');
-        const originalText = button.innerHTML;
-        button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
-        button.disabled = true;
-        
-        const csrfToken = document.querySelector('meta[name="csrf-token"]');
-        if (!csrfToken) {
-            alert('CSRF token not found. Please refresh the page and try again.');
-            return;
+    console.log('Marking rental as unpaid:', rentalId);
+    
+    // Show loading state
+    const button = event.target.closest('button');
+    const originalText = button.innerHTML;
+    button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+    button.disabled = true;
+    
+    const csrfToken = document.querySelector('meta[name="csrf-token"]');
+    if (!csrfToken) {
+        alert('CSRF token not found. Please refresh the page and try again.');
+        return;
+    }
+    
+    fetch(`/rental-codes/${rentalId}/mark-unpaid`, {
+        method: 'POST',
+        headers: {
+            'X-CSRF-TOKEN': csrfToken.getAttribute('content'),
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+        },
+    })
+    .then(response => {
+        console.log('Response status:', response.status);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
         }
-        
-        fetch(`/rental-codes/${rentalId}/mark-unpaid`, {
-            method: 'POST',
-            headers: {
-                'X-CSRF-TOKEN': csrfToken.getAttribute('content'),
-                'Content-Type': 'application/json',
-                'Accept': 'application/json',
-            },
-        })
-        .then(response => {
-            console.log('Response status:', response.status);
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            return response.json();
-        })
-        .then(data => {
-            console.log('Response data:', data);
-            if (data.success) {
-                // Show success message
-                alert('Rental marked as unpaid successfully!');
-                location.reload();
-            } else {
-                alert('Error: ' + (data.message || 'Unknown error occurred'));
-                // Restore button
-                button.innerHTML = originalText;
-                button.disabled = false;
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('An error occurred while updating the rental code: ' + error.message);
+        return response.json();
+    })
+    .then(data => {
+        console.log('Response data:', data);
+        if (data.success) {
+            // Show success message
+            alert('Rental marked as unpaid successfully!');
+            location.reload();
+        } else {
+            alert('Error: ' + (data.message || 'Unknown error occurred'));
             // Restore button
             button.innerHTML = originalText;
             button.disabled = false;
-        });
-    }
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('An error occurred while updating the rental code: ' + error.message);
+        // Restore button
+        button.innerHTML = originalText;
+        button.disabled = false;
+    });
 }
 
 // Show rental details function
