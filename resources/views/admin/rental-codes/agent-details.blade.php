@@ -544,6 +544,19 @@ function showRentalDetails(rentalId) {
     }
     
     const modal = new bootstrap.Modal(modalElement);
+    
+    // Force center the modal
+    modalElement.addEventListener('shown.bs.modal', function() {
+        const modalDialog = modalElement.querySelector('.modal-dialog');
+        if (modalDialog) {
+            modalDialog.style.margin = '0 auto';
+            modalDialog.style.display = 'block';
+            modalDialog.style.position = 'relative';
+            modalDialog.style.left = '50%';
+            modalDialog.style.transform = 'translateX(-50%)';
+        }
+    });
+    
     modal.show();
     
     // Fetch actual rental details
@@ -867,15 +880,18 @@ document.addEventListener('DOMContentLoaded', function() {
 
 @push('styles')
 <style>
-/* Ensure modal is perfectly centered */
+/* Force modal to be centered */
+#rentalDetailsModal {
+    text-align: center !important;
+}
+
 #rentalDetailsModal .modal-dialog {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-height: calc(100vh - 1rem);
-    margin: 0.5rem auto;
-    width: 100%;
-    max-width: 800px;
+    display: inline-block !important;
+    vertical-align: middle !important;
+    text-align: left !important;
+    margin: 0 auto !important;
+    width: auto !important;
+    max-width: 800px !important;
 }
 
 #rentalDetailsModal .modal-content {
@@ -884,24 +900,12 @@ document.addEventListener('DOMContentLoaded', function() {
     overflow-y: auto;
 }
 
-/* Center modal on all screen sizes */
-@media (max-width: 576px) {
+/* Ensure proper centering on all screen sizes */
+@media (max-width: 768px) {
     #rentalDetailsModal .modal-dialog {
-        margin: 0.25rem;
-        min-height: calc(100vh - 0.5rem);
-        max-width: 95%;
+        max-width: 95% !important;
+        margin: 0.5rem auto !important;
     }
-}
-
-/* Force horizontal centering */
-#rentalDetailsModal {
-    text-align: center;
-}
-
-#rentalDetailsModal .modal-dialog {
-    display: inline-block;
-    vertical-align: middle;
-    text-align: left;
 }
 </style>
 @endpush
