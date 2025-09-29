@@ -15,8 +15,8 @@
     <!-- Bootstrap CSS - Local first, then CDN fallback -->
     <link href="{{ asset('css/bootstrap.min.css') }}" rel="stylesheet" onerror="this.onerror=null;this.href='https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css';">
     
-    <!-- Tailwind CSS - CDN fallback for server -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Tailwind CSS - Local fallback for production -->
+    <link href="{{ asset('css/tailwind.min.css') }}" rel="stylesheet" onerror="this.onerror=null;this.href='https://cdn.tailwindcss.com';">
     
     <!-- Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -464,5 +464,8 @@
     
     <!-- Chart.js for charts - Local first, then CDN fallback -->
     <script src="{{ asset('js/chart.min.js') }}" onerror="this.onerror=null;this.src='https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.min.js';"></script>
+    
+    <!-- Page-specific scripts -->
+    @stack('scripts')
 </body>
 </html>
