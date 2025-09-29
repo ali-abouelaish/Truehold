@@ -537,7 +537,7 @@ class RentalCodeController extends Controller
                 }
             }
             
-            // Handle marketing agent earnings if different from rental agent
+            // Handle marketing agent earnings (whether same or different from rental agent)
             if ($marketingDeduction > 0 && $marketingAgentName) {
                 if (!isset($byAgent[$marketingAgentName])) {
                     $byAgent[$marketingAgentName] = [
@@ -562,7 +562,11 @@ class RentalCodeController extends Controller
                 // Add marketing agent earnings
                 $byAgent[$marketingAgentName]['marketing_agent_earnings'] += $marketingDeduction;
                 $byAgent[$marketingAgentName]['total_earnings'] += $marketingDeduction;
-                $byAgent[$marketingAgentName]['transaction_count'] += 1;
+                
+                // Only increment transaction count if this is a different agent
+                if ($marketingAgentName !== $agentName) {
+                    $byAgent[$marketingAgentName]['transaction_count'] += 1;
+                }
                 
                 // Track paid amounts for marketing agent
                 $marketingIsPaid = $code->paid ?? false;
@@ -936,13 +940,19 @@ class RentalCodeController extends Controller
             // Calculate agent earnings (55% of base commission)
             $agentEarnings = $baseCommission * 0.55;
             
-            // Check for marketing deduction
+            // Check for marketing deduction and marketing earnings
             $marketingAgent = $code->marketing_agent;
-            $agentId = $code->client_by_agent ?: $code->rent_by_agent;
+            $agentId = $code->rent_by_agent;
             
             if (!empty($marketingAgent) && $marketingAgent != $agentId) {
                 $marketingDeduction = $clientCount > 1 ? 40.0 : 30.0;
                 $agentEarnings -= $marketingDeduction;
+            }
+            
+            // Add marketing earnings if this agent is the marketing agent
+            if (!empty($marketingAgent) && $marketingAgent == $agentId) {
+                $marketingEarnings = $clientCount > 1 ? 40.0 : 30.0;
+                $agentEarnings += $marketingEarnings;
             }
             
             $totalEarnings += $agentEarnings;
