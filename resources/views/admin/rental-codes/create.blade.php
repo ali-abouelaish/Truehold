@@ -798,9 +798,23 @@ function debugButtons() {
 // Run debug after a short delay
 setTimeout(debugButtons, 100);
 
+// Debug step content
+setTimeout(function() {
+    console.log('=== STEP CONTENT DEBUG ===');
+    for (let i = 1; i <= 4; i++) {
+        const stepElement = document.getElementById(`step-${i}`);
+        console.log(`Step ${i}:`, stepElement);
+        if (stepElement) {
+            console.log(`Step ${i} content:`, stepElement.innerHTML.substring(0, 100) + '...');
+        }
+    }
+}, 200);
+
 function changeStep(direction) {
     const currentStepElement = document.getElementById(`step-${currentStep}`);
     const nextStep = currentStep + direction;
+    
+    console.log('Changing step:', { currentStep, nextStep, direction });
     
     if (nextStep < 1 || nextStep > totalSteps) return;
     
@@ -816,7 +830,16 @@ function changeStep(direction) {
     currentStep = nextStep;
     
     // Show next step
-    document.getElementById(`step-${currentStep}`).style.display = 'block';
+    const nextStepElement = document.getElementById(`step-${currentStep}`);
+    console.log('Next step element:', nextStepElement);
+    
+    if (nextStepElement) {
+        nextStepElement.style.display = 'block';
+        console.log('Step', currentStep, 'displayed');
+    } else {
+        console.error('Step element not found:', `step-${currentStep}`);
+    }
+    
     document.querySelector(`.step[data-step="${currentStep}"]`).classList.add('active');
     
     // Update navigation buttons
