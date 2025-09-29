@@ -195,12 +195,6 @@
                         <span class="text-gray-600">Payment Terms:</span>
                         <span class="font-medium">{{ $invoice->payment_terms }}</span>
                     </div>
-                    @if($invoice->po_number)
-                    <div class="flex justify-between">
-                        <span class="text-gray-600">PO Number:</span>
-                        <span class="font-medium">{{ $invoice->po_number }}</span>
-                    </div>
-                    @endif
                 </div>
             </div>
 

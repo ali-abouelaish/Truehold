@@ -12,7 +12,6 @@ class Invoice extends Model
         'invoice_date',
         'due_date',
         'payment_terms',
-        'po_number',
         'company_name',
         'company_address',
         'company_phone',

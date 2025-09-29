@@ -306,9 +306,6 @@
                     <p><strong>Date:</strong> {{ $invoice->invoice_date->format('M d, Y') }}</p>
                     <p><strong>Payment Terms:</strong> {{ $invoice->payment_terms }}</p>
                     <p><strong>Due Date:</strong> {{ $invoice->due_date->format('M d, Y') }}</p>
-                    @if($invoice->po_number)
-                        <p><strong>PO Number:</strong> {{ $invoice->po_number }}</p>
-                    @endif
                 </div>
                 <div class="balance-due-box">
                     <strong>Balance Due:</strong>
