@@ -547,7 +547,11 @@ function showRentalDetails(rentalId) {
         return;
     }
     
- 
+    // Show the modal first
+    const modal = new bootstrap.Modal(modalElement);
+    console.log('Modal object created:', modal);
+    modal.show();
+    console.log('Modal show() called');
     
     // Fetch actual rental details
     console.log('Fetching rental details for ID:', rentalId);
@@ -872,8 +876,15 @@ document.addEventListener('DOMContentLoaded', function() {
 <style>
 /* Force modal to be perfectly centered */
 #rentalDetailsModal .modal-dialog {
-    max-width: 800px;
-    width: 90%;
+    position: fixed !important;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    margin: 0 !important;
+    max-width: 800px !important;
+    width: 90% !important;
+    max-height: 90vh !important;
+    z-index: 1055 !important;
 }
 
 #rentalDetailsModal .modal-content {
