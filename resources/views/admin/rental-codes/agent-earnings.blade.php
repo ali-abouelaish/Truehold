@@ -112,54 +112,54 @@
 </div>
 
         <!-- Summary Dashboard -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            <div class="bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl p-6 text-white">
+        <div class="grid grid-cols-2 gap-4 mb-6">
+            <div class="bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg p-4 text-white">
                 <div class="flex items-center justify-between">
                     <div>
-                        <p class="text-blue-100 text-sm font-medium">Total Agents</p>
-                        <p class="text-3xl font-bold">{{ $summary['total_agents'] }}</p>
+                        <p class="text-blue-100 text-xs font-medium">Total Agents</p>
+                        <p class="text-xl font-bold">{{ $summary['total_agents'] }}</p>
                     </div>
-                    <div class="bg-blue-400 bg-opacity-30 p-3 rounded-lg">
-                        <i class="fas fa-users text-2xl"></i>
+                    <div class="bg-blue-400 bg-opacity-30 p-2 rounded">
+                        <i class="fas fa-users text-lg"></i>
                     </div>
                 </div>
             </div>
             
-            <div class="bg-gradient-to-r from-green-500 to-green-600 rounded-xl p-6 text-white">
+            <div class="bg-gradient-to-r from-green-500 to-green-600 rounded-lg p-4 text-white">
                 <div class="flex items-center justify-between">
                     <div>
-                        <p class="text-green-100 text-sm font-medium">Total Earnings</p>
-                        <p class="text-3xl font-bold">£{{ number_format($summary['total_earnings'], 2) }}</p>
+                        <p class="text-green-100 text-xs font-medium">Total Earnings</p>
+                        <p class="text-xl font-bold">£{{ number_format($summary['total_earnings'], 2) }}</p>
                     </div>
-                    <div class="bg-green-400 bg-opacity-30 p-3 rounded-lg">
-                        <i class="fas fa-pound-sign text-2xl"></i>
+                    <div class="bg-green-400 bg-opacity-30 p-2 rounded">
+                        <i class="fas fa-pound-sign text-lg"></i>
+                    </div>
+                </div>
             </div>
-        </div>
-    </div>
     
-            <div class="bg-gradient-to-r from-purple-500 to-purple-600 rounded-xl p-6 text-white">
+            <div class="bg-gradient-to-r from-purple-500 to-purple-600 rounded-lg p-4 text-white">
                 <div class="flex items-center justify-between">
                     <div>
-                        <p class="text-purple-100 text-sm font-medium">Total Transactions</p>
-                        <p class="text-3xl font-bold">{{ $summary['total_transactions'] }}</p>
+                        <p class="text-purple-100 text-xs font-medium">Total Transactions</p>
+                        <p class="text-xl font-bold">{{ $summary['total_transactions'] }}</p>
+                    </div>
+                    <div class="bg-purple-400 bg-opacity-30 p-2 rounded">
+                        <i class="fas fa-file-invoice text-lg"></i>
+                    </div>
                 </div>
-                    <div class="bg-purple-400 bg-opacity-30 p-3 rounded-lg">
-                        <i class="fas fa-file-invoice text-2xl"></i>
             </div>
-        </div>
-    </div>
     
-            <div class="bg-gradient-to-r from-orange-500 to-orange-600 rounded-xl p-6 text-white">
+            <div class="bg-gradient-to-r from-orange-500 to-orange-600 rounded-lg p-4 text-white">
                 <div class="flex items-center justify-between">
                     <div>
-                        <p class="text-orange-100 text-sm font-medium">Avg per Agent</p>
-                        <p class="text-3xl font-bold">£{{ number_format($summary['avg_earnings_per_agent'], 2) }}</p>
+                        <p class="text-orange-100 text-xs font-medium">Avg per Agent</p>
+                        <p class="text-xl font-bold">£{{ number_format($summary['avg_earnings_per_agent'], 2) }}</p>
+                    </div>
+                    <div class="bg-orange-400 bg-opacity-30 p-2 rounded">
+                        <i class="fas fa-chart-bar text-lg"></i>
+                    </div>
                 </div>
-                    <div class="bg-orange-400 bg-opacity-30 p-3 rounded-lg">
-                        <i class="fas fa-chart-bar text-2xl"></i>
             </div>
-        </div>
-    </div>
 </div>
 
         <!-- Charts Section -->
