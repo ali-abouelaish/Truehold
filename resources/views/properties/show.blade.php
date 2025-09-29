@@ -876,6 +876,9 @@
                             </div>
                             <span>Interested Clients</span>
                         </h2>
+                        
+                        @auth
+                        <!-- Full client details for authenticated users -->
                         <ul class="divide-y divide-gray-200">
                             @forelse($property->interestedClients ?? [] as $client)
                                 <li class="py-3 flex items-start justify-between">
@@ -886,7 +889,6 @@
                                             <p class="text-xs text-gray-400 mt-1">Added {{ $client->pivot->created_at->diffForHumans() }}</p>
                                         @endif
                                     </div>
-                                    @auth
                                     <form method="POST" action="{{ route('admin.properties.interests.remove', [$property, $client]) }}" onsubmit="return confirm('Remove this client from interested list?')">
                                         @csrf
                                         @method('DELETE')
@@ -894,7 +896,6 @@
                                             <i class="fas fa-user-minus"></i>
                                         </button>
                                     </form>
-                                    @endauth
                                 </li>
                             @empty
                                 <li class="py-4 text-center text-gray-500">
@@ -903,6 +904,23 @@
                                 </li>
                             @endforelse
                         </ul>
+                        @else
+                        <!-- Privacy-protected view for non-authenticated users -->
+                        <div class="text-center py-8">
+                            <div class="bg-blue-50 border border-blue-200 rounded-lg p-6">
+                                <i class="fas fa-lock text-blue-600 text-3xl mb-4"></i>
+                                <h3 class="text-lg font-semibold text-blue-800 mb-2">Client Privacy Protected</h3>
+                                <p class="text-blue-600 mb-4">
+                                    {{ $property->interestedClients->count() }} client{{ $property->interestedClients->count() !== 1 ? 's' : '' }} 
+                                    {{ $property->interestedClients->count() === 1 ? 'is' : 'are' }} interested in this property
+                                </p>
+                                <p class="text-sm text-blue-500">
+                                    <i class="fas fa-info-circle mr-1"></i>
+                                    Full client details are only visible to authenticated users
+                                </p>
+                            </div>
+                        </div>
+                        @endauth
                     </div>
 
                     <!-- Enhanced Quick Actions -->

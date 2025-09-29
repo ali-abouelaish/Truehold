@@ -60,7 +60,7 @@ class PropertyController extends Controller
         if (auth()->check()) {
             $agentNames = Property::distinct()->pluck('agent_name')->filter()->sort()->values();
             \Log::info('Agent names found for authenticated user:', $agentNames->toArray());
-            \Log::info('Total properties with agent_name:', Property::whereNotNull('agent_name')->where('agent_name', '!=', '')->count());
+            \Log::info('Total properties with agent_name:', ['count' => Property::whereNotNull('agent_name')->where('agent_name', '!=', '')->count()]);
         } else {
             $agentNames = collect(); // Empty collection for non-authenticated users
             \Log::info('User not authenticated, agent names not available');
