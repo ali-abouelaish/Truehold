@@ -692,34 +692,34 @@
     font-weight: 600;
 }
 
-/* Force Step 3 visibility */
-#step-3 {
+/* Force Step 3 visibility only when it's the current step */
+#step-3.step-active {
     display: block !important;
     visibility: visible !important;
     opacity: 1 !important;
 }
 
-#step-3 .card {
+#step-3.step-active .card {
     display: block !important;
     visibility: visible !important;
     opacity: 1 !important;
 }
 
-#step-3 .card-body {
+#step-3.step-active .card-body {
     display: block !important;
     visibility: visible !important;
     opacity: 1 !important;
 }
 
-#step-3 .form-group {
+#step-3.step-active .form-group {
     display: block !important;
     visibility: visible !important;
     opacity: 1 !important;
 }
 
-#step-3 input,
-#step-3 select,
-#step-3 textarea {
+#step-3.step-active input,
+#step-3.step-active select,
+#step-3.step-active textarea {
     display: block !important;
     visibility: visible !important;
     opacity: 1 !important;
@@ -788,6 +788,9 @@ function initializeNavigation() {
 
 // Run immediately
 initializeNavigation();
+
+// Initialize first step as active
+document.getElementById('step-1').classList.add('step-active');
 
 // Force button visibility immediately
 setTimeout(function() {
@@ -858,6 +861,7 @@ function changeStep(direction) {
     
     // Hide current step
     currentStepElement.style.display = 'none';
+    currentStepElement.classList.remove('step-active');
     
     // Update step indicators
     document.querySelector(`.step[data-step="${currentStep}"]`).classList.remove('active');
@@ -873,6 +877,7 @@ function changeStep(direction) {
     
     if (nextStepElement) {
         nextStepElement.style.display = 'block';
+        nextStepElement.classList.add('step-active');
         console.log('Step', currentStep, 'displayed');
         
         // Special debugging for step 3
