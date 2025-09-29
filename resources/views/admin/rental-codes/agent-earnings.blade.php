@@ -12,16 +12,16 @@
                     <div class="bg-gradient-to-r from-blue-600 to-purple-600 p-3 rounded-xl">
                         <i class="fas fa-chart-line text-white text-2xl"></i>
                     </div>
-                    <div>
+    <div>
                         <h1 class="text-3xl font-bold text-gray-900">Agent Earnings Analytics</h1>
                         <p class="text-gray-600 mt-1">Comprehensive earnings analysis and performance insights</p>
                     </div>
-                </div>
+    </div>
                 <div class="flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-3">
-                    <a href="{{ route('rental-codes.index') }}" 
+        <a href="{{ route('rental-codes.index') }}" 
                        class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg font-medium transition-colors duration-200">
-                        <i class="fas fa-arrow-left mr-2"></i>Back to Rental Codes
-                    </a>
+            <i class="fas fa-arrow-left mr-2"></i>Back to Rental Codes
+        </a>
                     @if(count($agentEarnings) > 0)
                     <button onclick="exportToExcel()" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200">
                         <i class="fas fa-file-excel mr-2"></i>Export Excel
@@ -29,13 +29,13 @@
                     @endif
                 </div>
             </div>
-        </div>
     </div>
+</div>
 
     <!-- Advanced Filters -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <div class="bg-white rounded-xl shadow-sm border border-gray-200 mb-8">
-            <div class="px-6 py-4 border-b border-gray-200">
+    <div class="px-6 py-4 border-b border-gray-200">
                 <div class="flex items-center justify-between">
                     <h3 class="text-lg font-semibold text-gray-900 flex items-center">
                         <i class="fas fa-filter text-blue-600 mr-2"></i>
@@ -45,22 +45,22 @@
                         <i class="fas fa-chevron-down" id="filterToggleIcon"></i>
                     </button>
                 </div>
-            </div>
+    </div>
             <div class="p-6" id="filtersContent">
                 <form method="GET" action="{{ route('rental-codes.agent-earnings') }}" class="space-y-6">
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        <div>
+            <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">
                                 <i class="fas fa-calendar-alt mr-1"></i>Start Date
                             </label>
-                            <input type="date" name="start_date" value="{{ $startDate }}" 
+                <input type="date" name="start_date" value="{{ $startDate }}" 
                                    class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200">
-                        </div>
-                        <div>
+            </div>
+            <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">
                                 <i class="fas fa-calendar-alt mr-1"></i>End Date
                             </label>
-                            <input type="date" name="end_date" value="{{ $endDate }}" 
+                <input type="date" name="end_date" value="{{ $endDate }}" 
                                    class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200">
                         </div>
                         <div>
@@ -75,41 +75,41 @@
                                     </option>
                                 @endforeach
                             </select>
-                        </div>
-                        <div>
+            </div>
+            <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">
                                 <i class="fas fa-check-circle mr-1"></i>Status
                             </label>
                             <select name="status" class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200">
                                 <option value="">All Statuses</option>
-                                <option value="pending" {{ $status==='pending' ? 'selected' : '' }}>Pending</option>
-                                <option value="approved" {{ $status==='approved' ? 'selected' : '' }}>Approved</option>
-                                <option value="completed" {{ $status==='completed' ? 'selected' : '' }}>Completed</option>
-                                <option value="cancelled" {{ $status==='cancelled' ? 'selected' : '' }}>Cancelled</option>
-                            </select>
-                        </div>
-                        <div>
+                    <option value="pending" {{ $status==='pending' ? 'selected' : '' }}>Pending</option>
+                    <option value="approved" {{ $status==='approved' ? 'selected' : '' }}>Approved</option>
+                    <option value="completed" {{ $status==='completed' ? 'selected' : '' }}>Completed</option>
+                    <option value="cancelled" {{ $status==='cancelled' ? 'selected' : '' }}>Cancelled</option>
+                </select>
+            </div>
+            <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">
                                 <i class="fas fa-credit-card mr-1"></i>Payment Method
                             </label>
                             <select name="payment_method" class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200">
                                 <option value="">All Methods</option>
-                                <option value="Cash" {{ $paymentMethod==='Cash' ? 'selected' : '' }}>Cash</option>
-                                <option value="Transfer" {{ $paymentMethod==='Transfer' ? 'selected' : '' }}>Transfer</option>
-                            </select>
-                        </div>
+                    <option value="Cash" {{ $paymentMethod==='Cash' ? 'selected' : '' }}>Cash</option>
+                    <option value="Transfer" {{ $paymentMethod==='Transfer' ? 'selected' : '' }}>Transfer</option>
+                </select>
+            </div>
                         <div class="flex items-end space-x-3">
                             <button type="submit" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium transition-colors duration-200">
                                 <i class="fas fa-search mr-2"></i>Apply Filters
-                            </button>
+                </button>
                             <a href="{{ route('rental-codes.agent-earnings') }}" class="flex-1 bg-gray-500 hover:bg-gray-600 text-white px-6 py-2 rounded-lg font-medium text-center transition-colors duration-200">
-                                <i class="fas fa-times mr-2"></i>Clear
-                            </a>
+                    <i class="fas fa-times mr-2"></i>Clear
+                </a>
                         </div>
-                    </div>
-                </form>
             </div>
-        </div>
+        </form>
+    </div>
+</div>
 
         <!-- Summary Dashboard -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
@@ -133,34 +133,34 @@
                     </div>
                     <div class="bg-green-400 bg-opacity-30 p-3 rounded-lg">
                         <i class="fas fa-pound-sign text-2xl"></i>
-                    </div>
-                </div>
             </div>
-            
+        </div>
+    </div>
+    
             <div class="bg-gradient-to-r from-purple-500 to-purple-600 rounded-xl p-6 text-white">
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-purple-100 text-sm font-medium">Total Transactions</p>
                         <p class="text-3xl font-bold">{{ $summary['total_transactions'] }}</p>
-                    </div>
+                </div>
                     <div class="bg-purple-400 bg-opacity-30 p-3 rounded-lg">
                         <i class="fas fa-file-invoice text-2xl"></i>
-                    </div>
-                </div>
             </div>
-            
+        </div>
+    </div>
+    
             <div class="bg-gradient-to-r from-orange-500 to-orange-600 rounded-xl p-6 text-white">
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-orange-100 text-sm font-medium">Avg per Agent</p>
                         <p class="text-3xl font-bold">£{{ number_format($summary['avg_earnings_per_agent'], 2) }}</p>
-                    </div>
+                </div>
                     <div class="bg-orange-400 bg-opacity-30 p-3 rounded-lg">
                         <i class="fas fa-chart-bar text-2xl"></i>
-                    </div>
-                </div>
             </div>
         </div>
+    </div>
+</div>
 
         <!-- Charts Section -->
         @if(count($agentEarnings) > 0)
@@ -189,22 +189,22 @@
         </div>
         @endif
 
-        <!-- Agent Earnings Table -->
+<!-- Agent Earnings Table -->
         <div class="bg-white rounded-xl shadow-sm border border-gray-200">
-            <div class="px-6 py-4 border-b border-gray-200">
+    <div class="px-6 py-4 border-b border-gray-200">
                 <div class="flex items-center justify-between">
                     <div>
                         <h3 class="text-lg font-semibold text-gray-900">Agent Earnings Breakdown</h3>
-                        <p class="text-sm text-gray-500 mt-1">
+        <p class="text-sm text-gray-500 mt-1">
                             @if($startDate || $endDate)
                                 Period: {{ $startDate ? \Carbon\Carbon::parse($startDate)->format('d M Y') : 'Beginning' }}
                                 — {{ \Carbon\Carbon::parse($endDate)->format('d M Y') }}
                             @else
                                 All Time Data
                             @endif
-                            @if($status) • Status: {{ ucfirst($status) }} @endif
-                            @if($paymentMethod) • Payment: {{ $paymentMethod }} @endif
-                        </p>
+            @if($status) • Status: {{ ucfirst($status) }} @endif
+            @if($paymentMethod) • Payment: {{ $paymentMethod }} @endif
+        </p>
                     </div>
                     <div class="flex items-center space-x-2">
                         <span class="text-sm text-gray-500">{{ count($agentEarnings) }} agents</span>
@@ -218,26 +218,26 @@
                         </div>
                     </div>
                 </div>
-            </div>
-            
+    </div>
+    
             <!-- Table View -->
             <div id="tableView" class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-200">
-                    <thead class="bg-gray-50">
-                        <tr>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+        <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+                <tr>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Agent
-                            </th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    </th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Agent Earnings
-                            </th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    </th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Agency Earnings
-                            </th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Total Earnings
-                            </th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    </th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Total Earnings
+                    </th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Transactions
                             </th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -248,69 +248,69 @@
                             </th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Paid Amount
-                            </th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    </th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Outstanding
-                            </th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    </th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Last Activity
-                            </th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    </th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Actions
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody class="bg-white divide-y divide-gray-200">
+                    </th>
+                </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
                         @forelse($agentEarnings as $agent)
                         <tr class="hover:bg-gray-50 transition-colors duration-200">
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="flex items-center">
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="flex items-center">
                                     <div class="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center mr-4">
                                         <span class="text-white font-bold text-lg">
                                             {{ strtoupper(substr($agent['name'], 0, 2)) }}
                                         </span>
-                                    </div>
+                            </div>
                                     <div>
                                         <div class="text-sm font-semibold text-gray-900">{{ $agent['name'] }}</div>
                                         <div class="text-xs text-gray-500">{{ $agent['transaction_count'] }} total transactions</div>
-                                    </div>
-                                </div>
-                            </td>
-                            
-                            <td class="px-6 py-4 whitespace-nowrap">
+                            </div>
+                        </div>
+                    </td>
+                    
+                    <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="text-sm font-semibold text-gray-900">
                                     £{{ number_format($agent['agent_earnings'], 2) }}
-                                </div>
-                                <div class="text-xs text-gray-500">
+                        </div>
+                        <div class="text-xs text-gray-500">
                                     55% of commission
-                                </div>
-                            </td>
-                            
-                            <td class="px-6 py-4 whitespace-nowrap">
+                        </div>
+                    </td>
+                    
+                    <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="text-sm font-semibold text-gray-900">
                                     £{{ number_format($agent['agency_earnings'], 2) }}
-                                </div>
-                                <div class="text-xs text-gray-500">
+                        </div>
+                        <div class="text-xs text-gray-500">
                                     45% of commission
-                                </div>
-                            </td>
-                            
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-lg font-bold text-gray-900">
-                                    £{{ number_format($agent['total_earnings'], 2) }}
-                                </div>
-                                <div class="text-xs text-gray-500">
+                        </div>
+                    </td>
+                    
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="text-lg font-bold text-gray-900">
+                            £{{ number_format($agent['total_earnings'], 2) }}
+                        </div>
+                        <div class="text-xs text-gray-500">
                                     {{ $agent['transaction_count'] }} total
-                                </div>
-                            </td>
-                            
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                        </div>
+                    </td>
+                    
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
                                     {{ $agent['transaction_count'] }} transactions
-                                </span>
-                            </td>
-                            
-                            <td class="px-6 py-4 whitespace-nowrap">
+                        </span>
+                    </td>
+                    
+                    <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="text-sm text-gray-900">
                                     £{{ number_format($agent['marketing_deductions'], 2) }}
                                 </div>
@@ -335,19 +335,19 @@
                                 <div class="text-xs text-gray-500">
                                     Already paid
                                 </div>
-                            </td>
-                            
-                            <td class="px-6 py-4 whitespace-nowrap">
+                    </td>
+                    
+                    <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="text-sm font-semibold {{ $agent['outstanding_amount'] > 0 ? 'text-red-600' : 'text-green-600' }}">
                                     £{{ number_format($agent['outstanding_amount'], 2) }}
                                 </div>
                                 <div class="text-xs text-gray-500">
                                     {{ $agent['outstanding_amount'] > 0 ? 'Outstanding' : 'Up to date' }}
                                 </div>
-                            </td>
-                            
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm text-gray-900">
+                    </td>
+                    
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="text-sm text-gray-900">
                                     {{ $agent['last_transaction_date'] ? $agent['last_transaction_date']->format('d M Y') : 'N/A' }}
                                 </div>
                             </td>
@@ -362,22 +362,22 @@
                                             class="text-green-600 hover:text-green-800 font-medium">
                                         <i class="fas fa-eye mr-1"></i>Quick View
                                     </button>
-                                </div>
-                            </td>
-                        </tr>
-                        @empty
-                        <tr>
+                        </div>
+                    </td>
+                </tr>
+                @empty
+                <tr>
                             <td colspan="8" class="px-6 py-12 text-center">
                                 <div class="flex flex-col items-center">
                                     <i class="fas fa-chart-line text-6xl text-gray-300 mb-4"></i>
                                     <h3 class="text-lg font-medium text-gray-900 mb-2">No earnings data found</h3>
                                     <p class="text-gray-500">No rental codes found for the selected criteria</p>
-                                </div>
-                            </td>
-                        </tr>
-                        @endforelse
-                    </tbody>
-                </table>
+                        </div>
+                    </td>
+                </tr>
+                @endforelse
+            </tbody>
+        </table>
             </div>
 
             <!-- Cards View -->
@@ -395,8 +395,8 @@
                                     <div>
                                         <h4 class="font-semibold text-gray-900">{{ $agent['name'] }}</h4>
                                         <p class="text-xs text-gray-500">{{ $agent['transaction_count'] }} transactions</p>
-                                    </div>
-                            </div>
+    </div>
+</div>
                             <div class="flex space-x-2">
                                 <a href="{{ route('rental-codes.agent-details', $agent['name']) }}" 
                                    class="text-blue-600 hover:text-blue-800">
@@ -405,7 +405,7 @@
                                 <button onclick="showAgentDetails('{{ $agent['name'] }}')" 
                                         class="text-gray-400 hover:text-gray-600">
                                     <i class="fas fa-ellipsis-v"></i>
-                                </button>
+        </button>
                             </div>
                         </div>
                         
@@ -436,10 +436,10 @@
                                 <div class="flex justify-between items-center text-xs">
                                     <span class="text-orange-600">Marketing Deductions: £{{ number_format($agent['marketing_deductions'], 2) }}</span>
                                     <span class="text-green-600">Marketing Earnings: £{{ number_format($agent['marketing_agent_earnings'], 2) }}</span>
-                                </div>
-                            </div>
-                            @endif
-                            
+    </div>
+</div>
+@endif
+
                             <div class="mt-2 pt-2 border-t border-gray-200">
                                 <div class="flex justify-between items-center text-xs">
                                     <span class="text-blue-600">Paid: £{{ number_format($agent['paid_amount'], 2) }}</span>

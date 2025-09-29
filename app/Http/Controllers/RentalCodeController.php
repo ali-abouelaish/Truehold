@@ -278,7 +278,7 @@ class RentalCodeController extends Controller
 
         // Build query with filters
         $query = RentalCode::with('client');
-        
+
         if ($startDate) {
             $query->where('rental_date', '>=', $startDate);
         }
