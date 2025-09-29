@@ -31,7 +31,10 @@ class RentalCodeController extends Controller
         // Get users who are marketing agents
         $marketingUsers = User::where('role', 'marketing_agent')->get();
         
-        return view('admin.rental-codes.create', compact('agentUsers', 'marketingUsers'));
+        // Get existing clients for selection
+        $existingClients = Client::orderBy('full_name')->get();
+        
+        return view('admin.rental-codes.create', compact('agentUsers', 'marketingUsers', 'existingClients'));
     }
 
     /**
@@ -46,12 +49,14 @@ class RentalCodeController extends Controller
             'payment_method' => 'required|string|in:Cash,Transfer',
             'property' => 'nullable|string',
             'licensor' => 'nullable|string',
-            'client_full_name' => 'required|string|max:255',
-            'client_date_of_birth' => 'required|date',
-            'client_phone_number' => 'required|string|max:20',
-            'client_email' => 'required|email|max:255',
-            'client_nationality' => 'required|string|max:100',
-            'client_current_address' => 'required|string',
+            'client_selection_type' => 'required|in:existing,new',
+            'existing_client_id' => 'required_if:client_selection_type,existing|exists:clients,id',
+            'client_full_name' => 'required_if:client_selection_type,new|string|max:255',
+            'client_date_of_birth' => 'required_if:client_selection_type,new|date',
+            'client_phone_number' => 'required_if:client_selection_type,new|string|max:20',
+            'client_email' => 'required_if:client_selection_type,new|email|max:255',
+            'client_nationality' => 'required_if:client_selection_type,new|string|max:100',
+            'client_current_address' => 'required_if:client_selection_type,new|string',
             'client_company_university_name' => 'nullable|string|max:255',
             'client_company_university_address' => 'nullable|string',
             'client_position_role' => 'nullable|string|max:255',
@@ -111,7 +116,10 @@ class RentalCodeController extends Controller
         // Get users who are marketing agents
         $marketingUsers = User::where('role', 'marketing_agent')->get();
         
-        return view('admin.rental-codes.edit', compact('rentalCode', 'agentUsers', 'marketingUsers'));
+        // Get existing clients for selection
+        $existingClients = Client::orderBy('full_name')->get();
+        
+        return view('admin.rental-codes.edit', compact('rentalCode', 'agentUsers', 'marketingUsers', 'existingClients'));
     }
 
     /**
@@ -130,12 +138,14 @@ class RentalCodeController extends Controller
             'payment_method' => 'required|string|in:Cash,Transfer',
             'property' => 'nullable|string',
             'licensor' => 'nullable|string',
-            'client_full_name' => 'required|string|max:255',
-            'client_date_of_birth' => 'required|date',
-            'client_phone_number' => 'required|string|max:20',
-            'client_email' => 'required|email|max:255',
-            'client_nationality' => 'required|string|max:100',
-            'client_current_address' => 'required|string',
+            'client_selection_type' => 'required|in:existing,new',
+            'existing_client_id' => 'required_if:client_selection_type,existing|exists:clients,id',
+            'client_full_name' => 'required_if:client_selection_type,new|string|max:255',
+            'client_date_of_birth' => 'required_if:client_selection_type,new|date',
+            'client_phone_number' => 'required_if:client_selection_type,new|string|max:20',
+            'client_email' => 'required_if:client_selection_type,new|email|max:255',
+            'client_nationality' => 'required_if:client_selection_type,new|string|max:100',
+            'client_current_address' => 'required_if:client_selection_type,new|string',
             'client_company_university_name' => 'nullable|string|max:255',
             'client_company_university_address' => 'nullable|string',
             'client_position_role' => 'nullable|string|max:255',
@@ -187,7 +197,15 @@ class RentalCodeController extends Controller
      */
     private function handleClient(array $data)
     {
-        // Try to find existing client by phone number
+        // If selecting existing client
+        if ($data['client_selection_type'] === 'existing') {
+            $client = Client::findOrFail($data['existing_client_id']);
+            \Log::info("Using existing client: {$client->full_name} (ID: {$client->id})");
+            return $client;
+        }
+        
+        // If creating new client
+        // Try to find existing client by phone number first
         $client = Client::where('phone_number', $data['client_phone_number'])->first();
         
         // Prepare client data with proper date formatting

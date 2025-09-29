@@ -200,23 +200,79 @@
                         </h5>
                     </div>
                     <div class="card-body">
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-group mb-3">
-                                    <label for="client_full_name" class="form-label">
-                                        Full Name <span class="text-danger">*</span>
-                                    </label>
-                                    <div class="input-group">
-                                        <span class="input-group-text"><i class="fas fa-user"></i></span>
-                                        <input type="text" class="form-control @error('client_full_name') is-invalid @enderror" 
-                                               id="client_full_name" name="client_full_name" 
-                                               value="{{ old('client_full_name') }}" 
-                                               placeholder="Enter full name" required>
+                        <!-- Client Selection Type -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <div class="form-group">
+                                    <label class="form-label">Client Selection</label>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="client_selection_type" 
+                                                       id="existing_client" value="existing" 
+                                                       {{ old('client_selection_type', 'existing') === 'existing' ? 'checked' : '' }}>
+                                                <label class="form-check-label" for="existing_client">
+                                                    <i class="fas fa-user-check text-primary me-2"></i>Select Existing Client
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="client_selection_type" 
+                                                       id="new_client" value="new" 
+                                                       {{ old('client_selection_type') === 'new' ? 'checked' : '' }}>
+                                                <label class="form-check-label" for="new_client">
+                                                    <i class="fas fa-user-plus text-success me-2"></i>Create New Client
+                                                </label>
+                                            </div>
+                                        </div>
                                     </div>
-                                    @error('client_full_name')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
                                 </div>
+                            </div>
+                        </div>
+
+                        <!-- Existing Client Selection -->
+                        <div id="existing-client-section" class="client-section">
+                            <div class="form-group mb-3">
+                                <label for="existing_client_id" class="form-label">
+                                    Select Client <span class="text-danger">*</span>
+                                </label>
+                                <select class="form-control @error('existing_client_id') is-invalid @enderror" 
+                                        id="existing_client_id" name="existing_client_id">
+                                    <option value="">Choose a client...</option>
+                                    @foreach($existingClients as $client)
+                                        <option value="{{ $client->id }}" {{ old('existing_client_id') == $client->id ? 'selected' : '' }}>
+                                            {{ $client->full_name }} 
+                                            @if($client->phone_number) - {{ $client->phone_number }}@endif
+                                            @if($client->registration_status) ({{ ucfirst($client->registration_status) }})@endif
+                                        </option>
+                                    @endforeach
+                                </select>
+                                @error('existing_client_id')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        </div>
+
+                        <!-- New Client Form -->
+                        <div id="new-client-section" class="client-section" style="display: none;">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group mb-3">
+                                        <label for="client_full_name" class="form-label">
+                                            Full Name <span class="text-danger">*</span>
+                                        </label>
+                                        <div class="input-group">
+                                            <span class="input-group-text"><i class="fas fa-user"></i></span>
+                                            <input type="text" class="form-control @error('client_full_name') is-invalid @enderror" 
+                                                   id="client_full_name" name="client_full_name" 
+                                                   value="{{ old('client_full_name') }}" 
+                                                   placeholder="Enter full name">
+                                        </div>
+                                        @error('client_full_name')
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
+                                    </div>
                                 
                                 <div class="form-group mb-3">
                                     <label for="client_date_of_birth" class="form-label">
@@ -817,6 +873,28 @@ document.addEventListener('DOMContentLoaded', function() {
             generateBtn.click();
         }
     }
+    
+    // Client selection toggle
+    const existingClientRadio = document.getElementById('existing_client');
+    const newClientRadio = document.getElementById('new_client');
+    const existingClientSection = document.getElementById('existing-client-section');
+    const newClientSection = document.getElementById('new-client-section');
+    
+    function toggleClientSections() {
+        if (existingClientRadio.checked) {
+            existingClientSection.style.display = 'block';
+            newClientSection.style.display = 'none';
+        } else if (newClientRadio.checked) {
+            existingClientSection.style.display = 'none';
+            newClientSection.style.display = 'block';
+        }
+    }
+    
+    existingClientRadio.addEventListener('change', toggleClientSections);
+    newClientRadio.addEventListener('change', toggleClientSections);
+    
+    // Initialize on page load
+    toggleClientSections();
 });
 </script>
 @endsection
