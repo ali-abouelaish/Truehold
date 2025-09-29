@@ -151,7 +151,9 @@
                     <h6 class="m-0 font-weight-bold text-primary">Monthly Performance</h6>
                 </div>
                 <div class="card-body">
-                    <canvas id="monthlyChart" height="100"></canvas>
+                    <div class="chart-container">
+                        <canvas id="monthlyChart"></canvas>
+                    </div>
                 </div>
             </div>
         </div>
@@ -391,6 +393,8 @@ new Chart(ctx, {
     },
     options: {
         responsive: true,
+        maintainAspectRatio: false,
+        height: 200,
         scales: {
             y: {
                 beginAtZero: true,
@@ -880,18 +884,16 @@ document.addEventListener('DOMContentLoaded', function() {
 
 @push('styles')
 <style>
-/* Force modal to be centered */
-#rentalDetailsModal {
-    text-align: center !important;
-}
-
+/* Force modal to be perfectly centered */
 #rentalDetailsModal .modal-dialog {
-    display: inline-block !important;
-    vertical-align: middle !important;
-    text-align: left !important;
-    margin: 0 auto !important;
-    width: auto !important;
+    position: fixed !important;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    margin: 0 !important;
     max-width: 800px !important;
+    width: 90% !important;
+    max-height: 90vh !important;
 }
 
 #rentalDetailsModal .modal-content {
@@ -900,11 +902,25 @@ document.addEventListener('DOMContentLoaded', function() {
     overflow-y: auto;
 }
 
-/* Ensure proper centering on all screen sizes */
+/* Make charts 60% smaller */
+.chart-container {
+    height: 200px !important;
+    width: 100% !important;
+}
+
+#monthlyPerformanceChart {
+    height: 200px !important;
+}
+
+/* Responsive adjustments */
 @media (max-width: 768px) {
     #rentalDetailsModal .modal-dialog {
+        width: 95% !important;
         max-width: 95% !important;
-        margin: 0.5rem auto !important;
+    }
+    
+    .chart-container {
+        height: 150px !important;
     }
 }
 </style>
