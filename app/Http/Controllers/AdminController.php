@@ -132,6 +132,7 @@ class AdminController extends Controller
         // Create property data
         $propertyData = $request->except(['photos']);
         $propertyData['photos'] = $photos; // Store as array (Laravel will handle JSON conversion)
+        $propertyData['all_photos'] = implode(',', $photos); // Store as comma-separated string for compatibility
         $propertyData['first_photo_url'] = $photos[0] ?? null;
         $propertyData['photo_count'] = count($photos);
         $propertyData['updatable'] = false; // CRM-created properties should not be updated by imports
@@ -305,6 +306,7 @@ class AdminController extends Controller
         // Update property data
         $propertyData = $request->except(['images', 'first_photo']);
         $propertyData['photos'] = $currentPhotos; // Store as array (Laravel will handle JSON conversion)
+        $propertyData['all_photos'] = implode(',', $currentPhotos); // Store as comma-separated string for compatibility
         $propertyData['first_photo_url'] = $currentPhotos[0] ?? null;
         $propertyData['photo_count'] = count($currentPhotos);
 

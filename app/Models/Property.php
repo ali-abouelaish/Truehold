@@ -38,6 +38,18 @@ class Property extends Model
         }
     }
 
+    /**
+     * Set the all_photos attribute - ensure it's always stored as comma-separated string
+     */
+    public function setAllPhotosAttribute($value)
+    {
+        if (is_array($value)) {
+            $this->attributes['all_photos'] = implode(',', $value);
+        } else {
+            $this->attributes['all_photos'] = $value;
+        }
+    }
+
     // Get all photos as an array (from photos column)
     public function getPhotosArrayAttribute()
     {
@@ -84,28 +96,32 @@ class Property extends Model
     // Get all photos as an array from the all_photos column
     public function getAllPhotosArrayAttribute()
     {
-        if (empty($this->all_photos)) {
-            return [];
-        }
-        
-        // If all_photos is already an array, return it
-        if (is_array($this->all_photos)) {
-            return $this->all_photos;
-        }
-        
-        // If all_photos is a string, split by comma and clean up
-        if (is_string($this->all_photos)) {
-            $photos = explode(',', $this->all_photos);
-            $cleanedPhotos = [];
-            
-            foreach ($photos as $photo) {
-                $photo = trim($photo);
-                if (!empty($photo) && filter_var($photo, FILTER_VALIDATE_URL)) {
-                    $cleanedPhotos[] = $photo;
-                }
+        // First try to get from all_photos field
+        if (!empty($this->all_photos)) {
+            // If all_photos is already an array, return it
+            if (is_array($this->all_photos)) {
+                return $this->all_photos;
             }
             
-            return $cleanedPhotos;
+            // If all_photos is a string, split by comma and clean up
+            if (is_string($this->all_photos)) {
+                $photos = explode(',', $this->all_photos);
+                $cleanedPhotos = [];
+                
+                foreach ($photos as $photo) {
+                    $photo = trim($photo);
+                    if (!empty($photo) && filter_var($photo, FILTER_VALIDATE_URL)) {
+                        $cleanedPhotos[] = $photo;
+                    }
+                }
+                
+                return $cleanedPhotos;
+            }
+        }
+        
+        // Fallback to photos field for CRM-created properties
+        if (!empty($this->photos)) {
+            return $this->getPhotosArrayAttribute();
         }
         
         return [];
@@ -122,6 +138,7 @@ class Property extends Model
             if (strpos($photo, 'spareroom.co.uk') !== false && strpos($photo, '/square/') !== false) {
                 $highQualityPhotos[] = str_replace('/square/', '/large/', $photo);
             } else {
+                // For CRM-created properties, the photos are already high quality
                 $highQualityPhotos[] = $photo;
             }
         }
