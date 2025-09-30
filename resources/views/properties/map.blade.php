@@ -1048,7 +1048,8 @@
         function filterProperties() {
             const location = document.getElementById('locationFilter').value;
             const propertyType = document.getElementById('propertyTypeFilter').value;
-            const agent = document.getElementById('agentFilter').value;
+            const agentElement = document.getElementById('agentFilter');
+            const agent = agentElement ? agentElement.value : '';
             const minPrice = parseFloat(document.getElementById('minPriceFilter').value) || 0;
             const maxPrice = parseFloat(document.getElementById('maxPriceFilter').value) || Infinity;
             const couplesAllowed = document.getElementById('couplesAllowedFilter').value;
@@ -1087,13 +1088,27 @@
                 }
 
                 // Couples allowed filter
-                if (couplesAllowed && property.couples_allowed) {
-                    const propertyCouplesAllowed = property.couples_allowed.toLowerCase();
-                    if (couplesAllowed === 'yes' && !propertyCouplesAllowed.includes('yes') && !propertyCouplesAllowed.includes('welcome')) {
-                        return false;
+                if (couplesAllowed) {
+                    const propertyCouplesOk = property.couples_ok;
+                    const propertyCouplesAllowed = property.couples_allowed;
+                    
+                    if (couplesAllowed === 'yes') {
+                        // Check if couples are welcome
+                        const isCouplesWelcome = (propertyCouplesOk && propertyCouplesOk.toString().toLowerCase().includes('yes')) ||
+                                              (propertyCouplesAllowed && propertyCouplesAllowed.toString().toLowerCase().includes('yes')) ||
+                                              (propertyCouplesAllowed && propertyCouplesAllowed.toString().toLowerCase().includes('welcome'));
+                        if (!isCouplesWelcome) {
+                            return false;
+                        }
                     }
-                    if (couplesAllowed === 'no' && !propertyCouplesAllowed.includes('no') && !propertyCouplesAllowed.includes('singles')) {
-                        return false;
+                    if (couplesAllowed === 'no') {
+                        // Check if singles only
+                        const isSinglesOnly = (propertyCouplesOk && propertyCouplesOk.toString().toLowerCase().includes('no')) ||
+                                            (propertyCouplesAllowed && propertyCouplesAllowed.toString().toLowerCase().includes('no')) ||
+                                            (propertyCouplesAllowed && propertyCouplesAllowed.toString().toLowerCase().includes('singles'));
+                        if (!isSinglesOnly) {
+                            return false;
+                        }
                     }
                 }
 
@@ -1106,6 +1121,8 @@
 
         // Apply filters and update map
         function applyFilters() {
+            console.log('🔍 Applying filters...');
+            
             const validProperties = filterProperties().filter(property => {
                 const lat = parseFloat(property.latitude);
                 const lng = parseFloat(property.longitude);
@@ -1113,6 +1130,8 @@
                        lat >= -90 && lat <= 90 && 
                        lng >= -180 && lng <= 180;
             });
+
+            console.log(`📍 Filtered to ${validProperties.length} valid properties`);
 
             // Update property count
             document.getElementById('propertyCount').textContent = 
@@ -1132,7 +1151,10 @@
         function clearFilters() {
             document.getElementById('locationFilter').value = '';
             document.getElementById('propertyTypeFilter').value = '';
-            document.getElementById('agentFilter').value = '';
+            const agentFilter = document.getElementById('agentFilter');
+            if (agentFilter) {
+                agentFilter.value = '';
+            }
             document.getElementById('minPriceFilter').value = '';
             document.getElementById('maxPriceFilter').value = '';
             document.getElementById('couplesAllowedFilter').value = '';
@@ -1171,7 +1193,10 @@
                 document.getElementById('propertyTypeFilter').value = urlParams.get('property_type');
             }
             if (urlParams.get('agent_name')) {
-                document.getElementById('agentFilter').value = urlParams.get('agent_name');
+                const agentFilter = document.getElementById('agentFilter');
+                if (agentFilter) {
+                    agentFilter.value = urlParams.get('agent_name');
+                }
             }
             if (urlParams.get('min_price')) {
                 document.getElementById('minPriceFilter').value = urlParams.get('min_price');
@@ -1190,9 +1215,14 @@
             const selectFilters = [
                 'locationFilter',
                 'propertyTypeFilter', 
-                'agentFilter',
                 'couplesAllowedFilter'
             ];
+
+            // Add agent filter only if it exists (when user is authenticated)
+            const agentFilter = document.getElementById('agentFilter');
+            if (agentFilter) {
+                selectFilters.push('agentFilter');
+            }
 
             selectFilters.forEach(filterId => {
                 const element = document.getElementById(filterId);
