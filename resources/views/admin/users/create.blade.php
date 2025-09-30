@@ -1,6 +1,6 @@
 @extends('layouts.admin')
 
-@section('page-title', 'Create New Agent')
+@section('page-title', 'Create New User')
 
 @section('content')
 <div class="py-12">
@@ -8,7 +8,7 @@
         <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
             <div class="p-6 text-gray-900">
                 <div class="flex justify-between items-center mb-6">
-                    <h2 class="text-2xl font-bold text-gray-900">Create New Agent User</h2>
+                    <h2 class="text-2xl font-bold text-gray-900">Create New User</h2>
                     <a href="{{ route('admin.users') }}" 
                        class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded">
                         <i class="fas fa-arrow-left mr-2"></i>Back to Users
@@ -54,14 +54,35 @@
                     </div>
 
                     <div>
-                        <label for="role" class="block text-sm font-medium text-gray-700">Role</label>
-                        <select name="role" id="role" required
-                                class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
-                            <option value="">Select a role</option>
-                            <option value="agent" {{ old('role') == 'agent' ? 'selected' : '' }}>Agent</option>
-                            <option value="marketing_agent" {{ old('role') == 'marketing_agent' ? 'selected' : '' }}>Marketing Agent</option>
-                        </select>
-                        @error('role')
+                        <label for="roles" class="block text-sm font-medium text-gray-700">Roles</label>
+                        <div class="mt-2 space-y-2">
+                            <div class="flex items-center">
+                                <input type="checkbox" name="roles[]" id="role_agent" value="agent" 
+                                       {{ in_array('agent', old('roles', [])) ? 'checked' : '' }}
+                                       class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                                <label for="role_agent" class="ml-2 block text-sm text-gray-900">
+                                    Agent
+                                </label>
+                            </div>
+                            <div class="flex items-center">
+                                <input type="checkbox" name="roles[]" id="role_marketing_agent" value="marketing_agent" 
+                                       {{ in_array('marketing_agent', old('roles', [])) ? 'checked' : '' }}
+                                       class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                                <label for="role_marketing_agent" class="ml-2 block text-sm text-gray-900">
+                                    Marketing Agent
+                                </label>
+                            </div>
+                            <div class="flex items-center">
+                                <input type="checkbox" name="roles[]" id="role_admin" value="admin" 
+                                       {{ in_array('admin', old('roles', [])) ? 'checked' : '' }}
+                                       class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                                <label for="role_admin" class="ml-2 block text-sm text-gray-900">
+                                    Admin
+                                </label>
+                            </div>
+                        </div>
+                        <p class="mt-1 text-sm text-gray-500">Select one or more roles for this user. Users can have multiple roles.</p>
+                        @error('roles')
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                         @enderror
                     </div>
@@ -73,7 +94,7 @@
                         </a>
                         <button type="submit" 
                                 class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-                            <i class="fas fa-save mr-2"></i>Create Agent
+                            <i class="fas fa-save mr-2"></i>Create User
                         </button>
                     </div>
                 </form>

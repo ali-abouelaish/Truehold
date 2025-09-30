@@ -293,19 +293,21 @@
                 </a>
 
                 <div class="px-4 mt-6 mb-4">
-                    <span class="sidebar-text text-xs font-semibold text-gray-500 uppercase tracking-wider">Site</span>
+                    <span class="sidebar-text text-xs font-semibold text-gray-500 uppercase tracking-wider">Public Access</span>
                 </div>
                 
                 <a href="{{ route('properties.index') }}" 
-                   class="sidebar-item flex items-center px-4 py-3 text-gray-700 hover:text-blue-600">
-                    <i class="fas fa-home sidebar-icon mr-3 text-lg"></i>
-                    <span class="sidebar-text">View Site</span>
+                   class="sidebar-item flex items-center px-4 py-3 text-gray-700 hover:text-blue-600 bg-blue-50 border-l-4 border-blue-500">
+                    <i class="fas fa-globe sidebar-icon mr-3 text-lg text-blue-600"></i>
+                    <span class="sidebar-text font-medium">View Public Site</span>
+                    <i class="fas fa-external-link-alt ml-auto text-xs text-blue-500"></i>
                 </a>
                 
                 <a href="{{ route('properties.map') }}" 
-                   class="sidebar-item flex items-center px-4 py-3 text-gray-700 hover:text-blue-600">
-                    <i class="fas fa-map sidebar-icon mr-3 text-lg"></i>
-                    <span class="sidebar-text">Map View</span>
+                   class="sidebar-item flex items-center px-4 py-3 text-gray-700 hover:text-blue-600 bg-green-50 border-l-4 border-green-500">
+                    <i class="fas fa-map-marked-alt sidebar-icon mr-3 text-lg text-green-600"></i>
+                    <span class="sidebar-text font-medium">Interactive Map</span>
+                    <i class="fas fa-external-link-alt ml-auto text-xs text-green-500"></i>
                 </a>
             </nav>
 

@@ -8,10 +8,10 @@
         <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
             <div class="p-6 text-gray-900">
                 <div class="flex justify-between items-center mb-6">
-                    <h2 class="text-2xl font-bold text-gray-900">Agent Users Management</h2>
+                    <h2 class="text-2xl font-bold text-gray-900">User Management</h2>
                     <a href="{{ route('admin.users.create') }}" 
                        class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-                        <i class="fas fa-plus mr-2"></i>Create New Agent
+                        <i class="fas fa-plus mr-2"></i>Create New User
                     </a>
                 </div>
 
@@ -38,6 +38,9 @@
                                     Email
                                 </th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Roles
+                                </th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                     Created
                                 </th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -60,6 +63,20 @@
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <div class="text-sm text-gray-900">{{ $user->email }}</div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="flex flex-wrap gap-1">
+                                            @foreach($user->getAllRoles() as $role)
+                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                                                    @if($role === 'admin') bg-red-100 text-red-800
+                                                    @elseif($role === 'agent') bg-blue-100 text-blue-800
+                                                    @elseif($role === 'marketing_agent') bg-green-100 text-green-800
+                                                    @else bg-gray-100 text-gray-800
+                                                    @endif">
+                                                    {{ ucfirst(str_replace('_', ' ', $role)) }}
+                                                </span>
+                                            @endforeach
+                                        </div>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <div class="text-sm text-gray-900">{{ $user->created_at->format('M d, Y') }}</div>

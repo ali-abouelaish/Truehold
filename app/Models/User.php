@@ -24,6 +24,7 @@ class User extends Authenticatable
         'email',
         'password',
         'role',
+        'roles',
     ];
 
     /**
@@ -46,6 +47,7 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'roles' => 'array',
         ];
     }
 
@@ -86,7 +88,8 @@ class User extends Authenticatable
      */
     public function hasRole(string $role): bool
     {
-        return $this->role === $role;
+        // Check both old role system and new roles array
+        return $this->role === $role || in_array($role, $this->roles ?? []);
     }
 
     /**
@@ -102,7 +105,7 @@ class User extends Authenticatable
      */
     public function isAgentByRole(): bool
     {
-        return $this->role === 'agent';
+        return $this->hasRole('agent');
     }
 
     /**
@@ -110,7 +113,57 @@ class User extends Authenticatable
      */
     public function isMarketingAgent(): bool
     {
-        return $this->role === 'marketing_agent';
+        return $this->hasRole('marketing_agent');
+    }
+
+    /**
+     * Add a role to the user.
+     */
+    public function addRole(string $role): void
+    {
+        $roles = $this->roles ?? [];
+        if (!in_array($role, $roles)) {
+            $roles[] = $role;
+            $this->roles = $roles;
+            $this->save();
+        }
+    }
+
+    /**
+     * Remove a role from the user.
+     */
+    public function removeRole(string $role): void
+    {
+        $roles = $this->roles ?? [];
+        $roles = array_filter($roles, fn($r) => $r !== $role);
+        $this->roles = array_values($roles);
+        $this->save();
+    }
+
+    /**
+     * Get all roles for the user.
+     */
+    public function getAllRoles(): array
+    {
+        $roles = $this->roles ?? [];
+        // Include the legacy role if it exists and is not already in roles
+        if ($this->role && !in_array($this->role, $roles)) {
+            $roles[] = $this->role;
+        }
+        return array_unique($roles);
+    }
+
+    /**
+     * Check if user has any of the given roles.
+     */
+    public function hasAnyRole(array $roles): bool
+    {
+        foreach ($roles as $role) {
+            if ($this->hasRole($role)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**

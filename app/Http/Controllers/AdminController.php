@@ -110,10 +110,9 @@ class AdminController extends Controller
             'property_type' => 'required|string|max:100',
             'available_date' => 'nullable|string|max:100',
             'status' => 'required|string|in:available,rented,unavailable',
-            'management_company' => 'nullable|string|max:255',
             'amenities' => 'nullable|string',
-            'images' => 'required|array|min:1',
-            'images.*' => 'image|mimes:jpeg,png,jpg,gif|max:2048',
+            'photos' => 'required|array|min:1',
+            'photos.*' => 'image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
         if ($validator->fails()) {
@@ -122,8 +121,8 @@ class AdminController extends Controller
 
         // Handle image uploads
         $photos = [];
-        if ($request->hasFile('images')) {
-            foreach ($request->file('images') as $image) {
+        if ($request->hasFile('photos')) {
+            foreach ($request->file('photos') as $image) {
                 $filename = time() . '_' . uniqid() . '_' . $image->getClientOriginalName();
                 $path = Storage::disk('public')->putFileAs('images/properties', $image, $filename);
                 $photos[] = Storage::disk('public')->url($path);
@@ -131,7 +130,7 @@ class AdminController extends Controller
         }
 
         // Create property data
-        $propertyData = $request->except(['images']);
+        $propertyData = $request->except(['photos']);
         $propertyData['photos'] = $photos; // Store as array (Laravel will handle JSON conversion)
         $propertyData['first_photo_url'] = $photos[0] ?? null;
         $propertyData['photo_count'] = count($photos);
@@ -161,7 +160,8 @@ class AdminController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:8|confirmed',
-            'role' => 'required|string|in:agent,marketing_agent',
+            'roles' => 'required|array|min:1',
+            'roles.*' => 'string|in:agent,marketing_agent,admin',
         ]);
 
         if ($validator->fails()) {
@@ -172,11 +172,12 @@ class AdminController extends Controller
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
-            'role' => $request->role,
+            'roles' => $request->roles,
+            'role' => $request->roles[0] ?? 'user', // Set primary role for backward compatibility
         ]);
 
         return redirect()->route('admin.users')
-            ->with('success', 'Agent user created successfully!');
+            ->with('success', 'User created successfully!');
     }
 
     public function editUser(User $user)
@@ -190,6 +191,8 @@ class AdminController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
             'password' => 'nullable|string|min:8|confirmed',
+            'roles' => 'nullable|array',
+            'roles.*' => 'string|in:agent,marketing_agent,admin',
         ]);
 
         if ($validator->fails()) {
@@ -205,10 +208,15 @@ class AdminController extends Controller
             $userData['password'] = Hash::make($request->password);
         }
 
+        // Handle roles
+        if ($request->has('roles')) {
+            $userData['roles'] = $request->roles;
+        }
+
         $user->update($userData);
 
         return redirect()->route('admin.users')
-            ->with('success', 'Agent user updated successfully!');
+            ->with('success', 'User updated successfully!');
     }
 
     public function destroyUser(User $user)
@@ -398,8 +406,8 @@ class AdminController extends Controller
 
     public function createClient()
     {
-        $agentUsers = \App\Models\User::where('role', 'agent')->with('agent')->get();
-        $marketingUsers = \App\Models\User::where('role', 'marketing_agent')->get();
+        $agentUsers = \App\Models\User::whereHas('agent')->orWhere('role', 'agent')->orWhereJsonContains('roles', 'agent')->with('agent')->get();
+        $marketingUsers = \App\Models\User::where('role', 'marketing_agent')->orWhereJsonContains('roles', 'marketing_agent')->get();
         return view('admin.clients.create', compact('agentUsers', 'marketingUsers'));
     }
 
@@ -444,8 +452,8 @@ class AdminController extends Controller
 
     public function editClient(\App\Models\Client $client)
     {
-        $agentUsers = \App\Models\User::where('role', 'agent')->with('agent')->get();
-        $marketingUsers = \App\Models\User::where('role', 'marketing_agent')->get();
+        $agentUsers = \App\Models\User::whereHas('agent')->orWhere('role', 'agent')->orWhereJsonContains('roles', 'agent')->with('agent')->get();
+        $marketingUsers = \App\Models\User::where('role', 'marketing_agent')->orWhereJsonContains('roles', 'marketing_agent')->get();
         return view('admin.clients.edit', compact('client', 'agentUsers', 'marketingUsers'));
     }
 

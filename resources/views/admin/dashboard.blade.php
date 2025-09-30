@@ -86,10 +86,46 @@
     </div>
 </div>
 
+<!-- Primary Navigation -->
+<div class="bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg shadow-lg mb-8">
+    <div class="px-6 py-4">
+        <h3 class="text-lg font-medium text-white mb-4">Quick Access</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <a href="{{ route('properties.index') }}" 
+               class="flex items-center p-4 bg-white bg-opacity-20 backdrop-blur-sm border border-white border-opacity-30 rounded-lg hover:bg-opacity-30 transition-all duration-200 group">
+                <div class="w-12 h-12 bg-white bg-opacity-20 rounded-lg flex items-center justify-center mr-4 group-hover:bg-opacity-30 transition-all">
+                    <i class="fas fa-globe text-white text-xl"></i>
+                </div>
+                <div>
+                    <p class="font-medium text-white">View Public Site</p>
+                    <p class="text-sm text-blue-100">See how properties appear to visitors</p>
+                </div>
+                <div class="ml-auto">
+                    <i class="fas fa-external-link-alt text-white opacity-60"></i>
+                </div>
+            </a>
+
+            <a href="{{ route('properties.map') }}" 
+               class="flex items-center p-4 bg-white bg-opacity-20 backdrop-blur-sm border border-white border-opacity-30 rounded-lg hover:bg-opacity-30 transition-all duration-200 group">
+                <div class="w-12 h-12 bg-white bg-opacity-20 rounded-lg flex items-center justify-center mr-4 group-hover:bg-opacity-30 transition-all">
+                    <i class="fas fa-map-marked-alt text-white text-xl"></i>
+                </div>
+                <div>
+                    <p class="font-medium text-white">Interactive Map</p>
+                    <p class="text-sm text-blue-100">Explore properties on map</p>
+                </div>
+                <div class="ml-auto">
+                    <i class="fas fa-external-link-alt text-white opacity-60"></i>
+                </div>
+            </a>
+        </div>
+    </div>
+</div>
+
 <!-- Quick Actions -->
 <div class="bg-white rounded-lg shadow-sm border border-gray-200 mb-8">
     <div class="px-6 py-4 border-b border-gray-200">
-        <h3 class="text-lg font-medium text-gray-900">Quick Actions</h3>
+        <h3 class="text-lg font-medium text-gray-900">Management Actions</h3>
     </div>
     <div class="p-6">
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -126,14 +162,14 @@
                 </div>
             </a>
 
-            <a href="{{ route('properties.map') }}" 
-               class="flex items-center p-4 bg-orange-50 border border-orange-200 rounded-lg hover:bg-orange-100 transition-colors">
-                <div class="w-10 h-10 bg-orange-600 rounded-lg flex items-center justify-center mr-4">
-                    <i class="fas fa-map text-white"></i>
+            <a href="{{ route('admin.clients') }}" 
+               class="flex items-center p-4 bg-indigo-50 border border-indigo-200 rounded-lg hover:bg-indigo-100 transition-colors">
+                <div class="w-10 h-10 bg-indigo-600 rounded-lg flex items-center justify-center mr-4">
+                    <i class="fas fa-users text-white"></i>
                 </div>
                 <div>
-                    <p class="font-medium text-orange-900">Map View</p>
-                    <p class="text-sm text-orange-600">Interactive map</p>
+                    <p class="font-medium text-indigo-900">Manage Clients</p>
+                    <p class="text-sm text-indigo-600">View all clients</p>
                 </div>
             </a>
         </div>
@@ -147,13 +183,18 @@
         <div class="px-6 py-4 border-b border-gray-200">
             <div class="flex items-center justify-between">
                 <h3 class="text-lg font-medium text-gray-900">Recent Properties</h3>
-                <a href="{{ route('admin.properties') }}" class="text-sm text-blue-600 hover:text-blue-800">View all</a>
+                <div class="flex space-x-2">
+                    <a href="{{ route('properties.index') }}" class="text-sm text-blue-600 hover:text-blue-800 flex items-center">
+                        <i class="fas fa-external-link-alt mr-1"></i>View Site
+                    </a>
+                    <a href="{{ route('admin.properties') }}" class="text-sm text-gray-600 hover:text-gray-800">Manage all</a>
+                </div>
             </div>
         </div>
         <div class="p-6">
             <div class="space-y-4">
                 @foreach($recentProperties as $property)
-                <div class="flex items-center space-x-4 p-3 bg-gray-50 rounded-lg">
+                <div class="flex items-center space-x-4 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
                     <div class="w-12 h-12 bg-gray-200 rounded-lg flex items-center justify-center">
                         @if($property->first_photo_url)
                             <img src="{{ $property->first_photo_url }}" alt="Property" class="w-12 h-12 rounded-lg object-cover">
@@ -261,6 +302,29 @@
                 <p class="text-xs text-gray-500">{{ App\Models\Property::distinct('location')->count() }} areas</p>
             </div>
         </div>
+    </div>
+</div>
+
+<!-- Floating Action Buttons -->
+<div class="fixed bottom-6 right-6 z-50">
+    <div class="flex flex-col space-y-3">
+        <!-- Map Button -->
+        <a href="{{ route('properties.map') }}" 
+           class="group relative bg-green-600 hover:bg-green-700 text-white p-4 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105">
+            <i class="fas fa-map-marked-alt text-xl"></i>
+            <div class="absolute right-full mr-3 top-1/2 transform -translate-y-1/2 bg-gray-900 text-white text-sm px-3 py-2 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap">
+                View Interactive Map
+            </div>
+        </a>
+        
+        <!-- Site Button -->
+        <a href="{{ route('properties.index') }}" 
+           class="group relative bg-blue-600 hover:bg-blue-700 text-white p-4 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105">
+            <i class="fas fa-globe text-xl"></i>
+            <div class="absolute right-full mr-3 top-1/2 transform -translate-y-1/2 bg-gray-900 text-white text-sm px-3 py-2 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap">
+                View Public Site
+            </div>
+        </a>
     </div>
 </div>
 @endsection

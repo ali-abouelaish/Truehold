@@ -1147,8 +1147,8 @@ class RentalCodeController extends Controller
      */
     public function marketingAgents()
     {
-        $marketingAgents = User::where('role', 'marketing_agent')->get();
-        $allUsers = User::whereIn('role', ['agent', 'user'])->get();
+        $marketingAgents = User::where('role', 'marketing_agent')->orWhereJsonContains('roles', 'marketing_agent')->get();
+        $allUsers = User::whereIn('role', ['agent', 'user'])->orWhereJsonContains('roles', 'agent')->get();
         
         return view('admin.marketing-agents.index', compact('marketingAgents', 'allUsers'));
     }
@@ -1163,7 +1163,7 @@ class RentalCodeController extends Controller
         ]);
 
         $user = User::findOrFail($validated['user_id']);
-        $user->update(['role' => 'marketing_agent']);
+        $user->addRole('marketing_agent');
 
         return redirect()->route('marketing-agents.index')
             ->with('success', 'User has been assigned as a marketing agent.');
@@ -1174,7 +1174,7 @@ class RentalCodeController extends Controller
      */
     public function removeMarketingAgent(User $user)
     {
-        $user->update(['role' => 'user']);
+        $user->removeRole('marketing_agent');
         
         return redirect()->route('marketing-agents.index')
             ->with('success', 'Marketing agent role has been removed.');
