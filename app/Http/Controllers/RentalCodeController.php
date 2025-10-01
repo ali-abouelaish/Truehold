@@ -394,22 +394,29 @@ class RentalCodeController extends Controller
     /**
      * Generate the next rental code
      */
-    public function generateCode()
+public function generateCode()
     {
         try {
             // Get the last rental code
             $lastRentalCode = RentalCode::orderBy('id', 'desc')->first();
             
             if (!$lastRentalCode) {
-                // First rental code
-                $nextNumber = 1;
+                // First rental code starts from CC0121
+                $nextNumber = 121;
             } else {
-                // Extract number from last code (e.g., "CC0051" -> 51)
+                // Extract number from last code (e.g., "CC0121" -> 121)
                 preg_match('/CC(\d+)/', $lastRentalCode->rental_code, $matches);
-                $nextNumber = isset($matches[1]) ? (int)$matches[1] + 1 : 1;
+                if (isset($matches[1])) {
+                    $lastNumber = (int)$matches[1];
+                    // If the last number is less than 121, start from 121
+                    $nextNumber = $lastNumber >= 121 ? $lastNumber + 1 : 121;
+                } else {
+                    // If no valid number found, start from 121
+                    $nextNumber = 121;
+                }
             }
             
-            // Format as CC0001, CC0002, etc.
+            // Format as CC0121, CC0122, etc.
             $newCode = 'CC' . str_pad($nextNumber, 4, '0', STR_PAD_LEFT);
             
             return response()->json(['code' => $newCode]);

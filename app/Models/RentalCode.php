@@ -82,11 +82,27 @@ class RentalCode extends Model
      */
     public static function generateRentalCode(): string
     {
-        do {
-            $code = 'CC' . str_pad(rand(1, 9999), 4, '0', STR_PAD_LEFT);
-        } while (self::where('rental_code', $code)->exists());
-
-        return $code;
+        // Get the last rental code
+        $lastRentalCode = self::orderBy('id', 'desc')->first();
+        
+        if (!$lastRentalCode) {
+            // First rental code starts from CC0121
+            $nextNumber = 121;
+        } else {
+            // Extract number from last code (e.g., "CC0121" -> 121)
+            preg_match('/CC(\d+)/', $lastRentalCode->rental_code, $matches);
+            if (isset($matches[1])) {
+                $lastNumber = (int)$matches[1];
+                // If the last number is less than 121, start from 121
+                $nextNumber = $lastNumber >= 121 ? $lastNumber + 1 : 121;
+            } else {
+                // If no valid number found, start from 121
+                $nextNumber = 121;
+            }
+        }
+        
+        // Format as CC0121, CC0122, etc.
+        return 'CC' . str_pad($nextNumber, 4, '0', STR_PAD_LEFT);
     }
 
     /**
