@@ -650,17 +650,31 @@ document.addEventListener('DOMContentLoaded', function() {
     
     if (generateBtn && rentalCodeInput) {
         generateBtn.addEventListener('click', function() {
+            console.log('Generate button clicked');
+            console.log('Fetching from: /admin/rental-codes/generate-code');
+            
             fetch('/admin/rental-codes/generate-code', {
                 method: 'GET',
                 headers: {
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
                 }
             })
-            .then(response => response.json())
+            .then(response => {
+                console.log('Response status:', response.status);
+                console.log('Response headers:', response.headers);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
             .then(data => {
+                console.log('Response data:', data);
                 if (data.code) {
                     rentalCodeInput.value = data.code;
                     clearFieldError('rental_code');
+                    console.log('Rental code set to:', data.code);
                 } else if (data.error) {
                     console.error('Error generating rental code:', data.error);
                     showFieldError('rental_code', data.error);
@@ -668,7 +682,7 @@ document.addEventListener('DOMContentLoaded', function() {
             })
             .catch(error => {
                 console.error('Error generating rental code:', error);
-                showFieldError('rental_code', 'Failed to generate rental code');
+                showFieldError('rental_code', 'Failed to generate rental code: ' + error.message);
             });
         });
     }
@@ -976,4 +990,5 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 </script>
+@endsection
 @endsection

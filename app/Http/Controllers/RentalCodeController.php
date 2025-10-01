@@ -397,12 +397,16 @@ class RentalCodeController extends Controller
 public function generateCode()
     {
         try {
+            \Log::info('GenerateCode method called');
+            
             // Get the last rental code
             $lastRentalCode = RentalCode::orderBy('id', 'desc')->first();
+            \Log::info('Last rental code: ' . ($lastRentalCode ? $lastRentalCode->rental_code : 'None'));
             
             if (!$lastRentalCode) {
                 // First rental code starts from CC0121
                 $nextNumber = 121;
+                \Log::info('No existing rental codes, starting from 121');
             } else {
                 // Extract number from last code (e.g., "CC0121" -> 121)
                 preg_match('/CC(\d+)/', $lastRentalCode->rental_code, $matches);
@@ -410,19 +414,22 @@ public function generateCode()
                     $lastNumber = (int)$matches[1];
                     // If the last number is less than 121, start from 121
                     $nextNumber = $lastNumber >= 121 ? $lastNumber + 1 : 121;
+                    \Log::info('Last number: ' . $lastNumber . ', next number: ' . $nextNumber);
                 } else {
                     // If no valid number found, start from 121
                     $nextNumber = 121;
+                    \Log::info('No valid number found, starting from 121');
                 }
             }
             
             // Format as CC0121, CC0122, etc.
             $newCode = 'CC' . str_pad($nextNumber, 4, '0', STR_PAD_LEFT);
+            \Log::info('Generated code: ' . $newCode);
             
             return response()->json(['code' => $newCode]);
         } catch (\Exception $e) {
             \Log::error('Error generating rental code: ' . $e->getMessage());
-            return response()->json(['error' => 'Failed to generate rental code'], 500);
+            return response()->json(['error' => 'Failed to generate rental code: ' . $e->getMessage()], 500);
         }
     }
 
