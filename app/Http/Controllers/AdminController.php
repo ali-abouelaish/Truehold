@@ -125,7 +125,7 @@ class AdminController extends Controller
             foreach ($request->file('photos') as $image) {
                 $filename = time() . '_' . uniqid() . '_' . $image->getClientOriginalName();
                 $path = Storage::disk('public')->putFileAs('images/properties', $image, $filename);
-                $photos[] = Storage::disk('public')->url($path);
+                $photos[] = \App\Helpers\StorageHelper::getStorageUrl($path);
             }
         }
 
@@ -245,15 +245,26 @@ class AdminController extends Controller
         $validator = Validator::make($request->all(), [
             'title' => 'required|string|max:255',
             'location' => 'required|string|max:255',
-            'latitude' => 'required|numeric|between:-90,90',
-            'longitude' => 'required|numeric|between:-180,180',
+            'latitude' => 'nullable|numeric|between:-90,90',
+            'longitude' => 'nullable|numeric|between:-180,180',
             'price' => 'required|numeric|min:0',
-            'description' => 'required|string',
-            'property_type' => 'required|string|max:100',
+            'description' => 'nullable|string',
+            'property_type' => 'nullable|string|max:100',
             'available_date' => 'nullable|string|max:100',
             'status' => 'required|string|in:available,rented,unavailable',
             'management_company' => 'nullable|string|max:255',
             'amenities' => 'nullable|string',
+            'bedrooms' => 'nullable|integer|min:0|max:20',
+            'bathrooms' => 'nullable|numeric|min:0|max:20',
+            'min_term' => 'nullable|string|max:100',
+            'max_term' => 'nullable|string|max:100',
+            'deposit' => 'nullable|string|max:100',
+            'bills_included' => 'nullable|string|in:yes,no,some',
+            'parking' => 'nullable|string|in:yes,no,street',
+            'housemates' => 'nullable|integer|min:0|max:20',
+            'agent_name' => 'nullable|string|max:255',
+            'couples_ok' => 'nullable|string|in:yes,no',
+            'link' => 'nullable|url|max:500',
             'images' => 'nullable|array',
             'images.*' => 'image|mimes:jpeg,png,jpg,gif|max:2048',
             'removed_images' => 'nullable|string',
@@ -288,7 +299,7 @@ class AdminController extends Controller
             foreach ($request->file('images') as $image) {
                 $filename = time() . '_' . uniqid() . '_' . $image->getClientOriginalName();
                 $path = Storage::disk('public')->putFileAs('images/properties', $image, $filename);
-                $currentPhotos[] = Storage::disk('public')->url($path);
+                $currentPhotos[] = \App\Helpers\StorageHelper::getStorageUrl($path);
             }
         }
 
@@ -304,7 +315,7 @@ class AdminController extends Controller
         }
 
         // Update property data
-        $propertyData = $request->except(['images', 'first_photo']);
+        $propertyData = $request->except(['images', 'first_photo', 'removed_images']);
         $propertyData['photos'] = $currentPhotos; // Store as array (Laravel will handle JSON conversion)
         $propertyData['all_photos'] = implode(',', $currentPhotos); // Store as comma-separated string for compatibility
         $propertyData['first_photo_url'] = $currentPhotos[0] ?? null;
@@ -384,7 +395,7 @@ class AdminController extends Controller
             // Store in public/images/properties
             $path = Storage::disk('public')->putFileAs('images/properties', $file, $filename);
             
-            $url = Storage::disk('public')->url($path);
+            $url = \App\Helpers\StorageHelper::getStorageUrl($path);
             
             return response()->json([
                 'success' => true,

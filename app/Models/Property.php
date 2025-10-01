@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use App\Helpers\StorageHelper;
 
 class Property extends Model
 {
@@ -138,12 +139,25 @@ class Property extends Model
             if (strpos($photo, 'spareroom.co.uk') !== false && strpos($photo, '/square/') !== false) {
                 $highQualityPhotos[] = str_replace('/square/', '/large/', $photo);
             } else {
-                // For CRM-created properties, the photos are already high quality
-                $highQualityPhotos[] = $photo;
+                // For CRM-created properties, ensure proper URL formatting
+                $highQualityPhotos[] = StorageHelper::getStorageUrl($photo);
             }
         }
         
         return $highQualityPhotos;
+    }
+    
+    // Get properly formatted photos array for display
+    public function getFormattedPhotosArrayAttribute()
+    {
+        $photos = $this->getPhotosArrayAttribute();
+        $formattedPhotos = [];
+        
+        foreach ($photos as $photo) {
+            $formattedPhotos[] = StorageHelper::getStorageUrl($photo);
+        }
+        
+        return $formattedPhotos;
     }
 
     // Get formatted price with comprehensive error handling
