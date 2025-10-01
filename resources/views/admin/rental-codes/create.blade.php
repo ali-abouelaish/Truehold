@@ -650,7 +650,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     if (generateBtn && rentalCodeInput) {
         generateBtn.addEventListener('click', function() {
-            fetch('/test-rental-code', {
+            fetch('/admin/rental-codes/generate-code', {
                 method: 'GET',
                 headers: {
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
@@ -661,6 +661,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (data.code) {
                     rentalCodeInput.value = data.code;
                     clearFieldError('rental_code');
+                } else if (data.error) {
+                    console.error('Error generating rental code:', data.error);
+                    showFieldError('rental_code', data.error);
                 }
             })
             .catch(error => {
