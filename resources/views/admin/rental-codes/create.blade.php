@@ -58,25 +58,25 @@
                     <div class="card-body">
                         <div class="row">
                             <div class="col-md-6">
-                                                                 <div class="form-group mb-3">
-                                     <label for="rental_code" class="form-label">
-                                         Rental Code <span class="text-danger">*</span>
-                                     </label>
-                                     <div class="input-group">
-                                         <span class="input-group-text"><i class="fas fa-key"></i></span>
-                                         <input type="text" class="form-control @error('rental_code') is-invalid @enderror" 
-                                                id="rental_code" name="rental_code" 
-                                                value="{{ old('rental_code') }}" 
-                                                placeholder="Auto-generated" readonly>
-                                         <button type="button" class="btn btn-outline-secondary" id="generate-code">
-                                             <i class="fas fa-sync-alt"></i> Generate
-                                         </button>
-                                     </div>
-                                     @error('rental_code')
-                                         <div class="invalid-feedback">{{ $message }}</div>
-                                     @enderror
-                                     <small class="form-text text-muted">Rental code will be auto-generated in format: CC0001, CC0002, etc.</small>
-                                 </div>
+                                <div class="form-group mb-3">
+                                    <label for="rental_code" class="form-label">
+                                        Rental Code <span class="text-danger">*</span>
+                                    </label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="fas fa-key"></i></span>
+                                        <input type="text" class="form-control @error('rental_code') is-invalid @enderror" 
+                                               id="rental_code" name="rental_code" 
+                                               value="{{ old('rental_code', \App\Models\RentalCode::generateRentalCode()) }}" 
+                                               placeholder="Auto-generated" readonly>
+                                        <span class="input-group-text bg-success text-white">
+                                            <i class="fas fa-check"></i> Auto-generated
+                                        </span>
+                                    </div>
+                                    @error('rental_code')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                    <small class="form-text text-muted">Rental code is automatically generated in format: CC0121, CC0122, etc.</small>
+                                </div>
                                 
                                 <div class="form-group mb-3">
                                     <label for="rental_date" class="form-label">
@@ -644,48 +644,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    // Generate rental code button
-    const generateBtn = document.getElementById('generate-code');
-    const rentalCodeInput = document.getElementById('rental_code');
-    
-    if (generateBtn && rentalCodeInput) {
-        generateBtn.addEventListener('click', function() {
-            console.log('Generate button clicked');
-            console.log('Fetching from: /admin/rental-codes/generate-code');
-            
-            fetch('/admin/rental-codes/generate-code', {
-                method: 'GET',
-                headers: {
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json'
-                }
-            })
-            .then(response => {
-                console.log('Response status:', response.status);
-                console.log('Response headers:', response.headers);
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                return response.json();
-            })
-            .then(data => {
-                console.log('Response data:', data);
-                if (data.code) {
-                    rentalCodeInput.value = data.code;
-                    clearFieldError('rental_code');
-                    console.log('Rental code set to:', data.code);
-                } else if (data.error) {
-                    console.error('Error generating rental code:', data.error);
-                    showFieldError('rental_code', data.error);
-                }
-            })
-            .catch(error => {
-                console.error('Error generating rental code:', error);
-                showFieldError('rental_code', 'Failed to generate rental code: ' + error.message);
-            });
-        });
-    }
+    // Rental code is now auto-generated on page load, no button needed
     
     // Form validation functions
     function validateField(fieldName, value, rules) {
