@@ -154,14 +154,8 @@ class PropertyController extends Controller
             $agentNames = collect(); // Empty collection for non-authenticated users
         }
 
-        // Select specific fields for map performance and include agent_name
-        $properties = $query->select([
-            'id', 'title', 'location', 'latitude', 'longitude', 'price', 'description',
-            'property_type', 'available_date', 'management_company', 'agent_name',
-            'bills_included', 'furnishings', 'parking', 'garden', 'broadband',
-            'housemates', 'total_rooms', 'couples_ok', 'smoking_ok', 'pets_ok',
-            'min_age', 'max_age', 'photo_count', 'first_photo_url', 'all_photos', 'photos'
-        ])->limit(400)->get();
+        // Get properties with all necessary fields for map display
+        $properties = $query->limit(400)->get();
 
         // Log validation results for debugging
         \Log::info('Map query results', [

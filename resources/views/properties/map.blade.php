@@ -859,8 +859,8 @@
                         
                         <!-- Price Badge -->
                         <div class="absolute bottom-1 left-1 right-1">
-                            <div class="bg-white/95 backdrop-blur-sm rounded-md px-2 py-1 shadow-md">
-                                <div class="text-sm font-bold text-gray-900">${price}</div>
+                            <div class="bg-gradient-to-r from-green-500 to-green-600 text-white rounded-md px-3 py-2 shadow-lg">
+                                <div class="text-sm font-bold text-center">${price}</div>
                             </div>
                         </div>
                     </div>
@@ -878,8 +878,11 @@
                             </div>
                         </div>
                         
-                        <!-- Property Type Badge -->
-                        <div class="mb-3">
+                        <!-- Price and Property Type -->
+                        <div class="mb-3 flex items-center justify-between">
+                            <div class="text-lg font-bold text-green-600">
+                                ${price}
+                            </div>
                             <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200">
                                 <i class="fas fa-home mr-1"></i>
                                 ${propertyType}
