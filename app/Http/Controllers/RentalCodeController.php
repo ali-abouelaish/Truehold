@@ -44,7 +44,7 @@ class RentalCodeController extends Controller
     {
         // Build validation rules dynamically
         $validationRules = [
-            'rental_code' => 'required|string|unique:rental_codes,rental_code',
+            'rental_code' => 'nullable|string|unique:rental_codes,rental_code',
             'rental_date' => 'required|date',
             'consultation_fee' => 'required|numeric|min:0',
             'payment_method' => 'required|string|in:Cash,Transfer',
@@ -114,6 +114,11 @@ class RentalCodeController extends Controller
         }
         
         $validated = $request->validate($validationRules, $customMessages);
+
+        // Auto-generate rental code if not provided
+        if (empty($validated['rental_code'])) {
+            $validated['rental_code'] = RentalCode::generateRentalCode();
+        }
 
         // Handle client creation or retrieval
         if ($validated['client_selection_type'] === 'existing') {

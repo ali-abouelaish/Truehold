@@ -710,11 +710,11 @@
                                     @endif
                                     
                                     <!-- Enhanced Photo Count Badge -->
-                                    @if(($property->all_photos_array && count($property->all_photos_array) > 0) || $property->photo_count > 0)
+                                    @if(($property->high_quality_photos_array && count($property->high_quality_photos_array) > 0) || $property->photo_count > 0)
                                         <div class="photo-badge absolute top-2 sm:top-4 right-2 sm:right-4">
                                             <i class="fas fa-camera mr-1 sm:mr-2"></i>
-                                            @if($property->all_photos_array && count($property->all_photos_array) > 0)
-                                                {{ count($property->all_photos_array) }}
+                                            @if($property->high_quality_photos_array && count($property->high_quality_photos_array) > 0)
+                                                {{ count($property->high_quality_photos_array) }}
                                             @else
                                                 {{ $property->photo_count }}
                                             @endif

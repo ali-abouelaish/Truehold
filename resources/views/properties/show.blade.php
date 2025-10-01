@@ -643,7 +643,7 @@
                             
                             <!-- Enhanced Thumbnail Navigation -->
                             <div class="thumbnail-grid">
-                                @foreach($property->all_photos_array as $index => $photoUrl)
+                                @foreach($property->high_quality_photos_array as $index => $photoUrl)
                                     <div class="thumbnail {{ $index === 0 ? 'active' : '' }}" onclick="showImage({{ $index }})">
                                         <img src="{{ $photoUrl }}" 
                                              alt="Thumbnail {{ $index + 1 }}" 

@@ -131,10 +131,19 @@ class Property extends Model
     // Get high-quality photos array (converts square thumbnails to large images)
     public function getHighQualityPhotosArrayAttribute()
     {
+        // First try to get from all_photos field (scraped properties)
         $photos = $this->getAllPhotosArrayAttribute();
+        
+        // If no photos from all_photos, try photos field (CRM-created properties)
+        if (empty($photos)) {
+            $photos = $this->getPhotosArrayAttribute();
+        }
+        
         $highQualityPhotos = [];
         
         foreach ($photos as $photo) {
+            if (empty($photo)) continue;
+            
             // Convert Spareroom square thumbnails to large images
             if (strpos($photo, 'spareroom.co.uk') !== false && strpos($photo, '/square/') !== false) {
                 $highQualityPhotos[] = str_replace('/square/', '/large/', $photo);
