@@ -418,23 +418,57 @@
         <!-- Current Photos with Delete Functionality -->
         @if($property->photos && is_array($property->photos) && count($property->photos) > 0)
         <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">Current Photos</label>
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div class="flex items-center justify-between mb-2">
+                <label class="block text-sm font-medium text-gray-700">Current Photos</label>
+                <div class="flex items-center space-x-3">
+                    <span class="text-sm text-gray-500 photo-count">{{ count($property->photos) }} photo(s)</span>
+                    @if(count($property->photos) > 1)
+                    <button type="button" id="delete-all-btn" onclick="removeAllPhotos()" 
+                            class="text-red-600 hover:text-red-700 text-sm font-medium">
+                        <i class="fas fa-trash mr-1"></i>Delete All
+                    </button>
+                    @endif
+                </div>
+            </div>
+            <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
                 @foreach($property->photos as $index => $photo)
-                <div class="relative group" id="photo-container-{{ $index }}">
+                <div class="relative group transition-all duration-300" id="photo-container-{{ $index }}">
                     <img src="{{ $photo }}" alt="Property Photo {{ $index + 1 }}" 
-                         class="w-full h-24 object-cover rounded-lg border">
+                         class="w-full h-24 object-cover rounded-lg border shadow-sm hover:shadow-md transition-shadow">
+                    
+                    <!-- Hover overlay with delete button -->
                     <div class="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center">
-                        <button type="button" onclick="removePhoto({{ $index }})" 
-                                class="text-white hover:text-red-400 p-2">
-                            <i class="fas fa-trash"></i>
-                        </button>
+                        <div class="flex flex-col items-center space-y-2">
+                            <button type="button" onclick="removePhoto({{ $index }})" 
+                                    class="bg-red-600 hover:bg-red-700 text-white p-2 rounded-full transition-colors"
+                                    title="Delete this photo">
+                                <i class="fas fa-trash text-sm"></i>
+                            </button>
+                            <span class="text-white text-xs">Delete</span>
+                        </div>
                     </div>
+                    
+                    <!-- Photo number badge -->
+                    <div class="absolute top-2 left-2 bg-black bg-opacity-70 text-white text-xs px-2 py-1 rounded">
+                        {{ $index + 1 }}
+                    </div>
+                    
                     <input type="hidden" name="existing_photos[]" value="{{ $photo }}" id="photo-input-{{ $index }}">
                 </div>
                 @endforeach
             </div>
             <input type="hidden" name="removed_images" id="removed_images" value="">
+            
+            <!-- Instructions -->
+            <div class="mt-3 text-sm text-gray-600">
+                <i class="fas fa-info-circle mr-1"></i>
+                Hover over photos to delete them. Changes will be saved when you submit the form.
+            </div>
+        </div>
+        @else
+        <div class="text-center py-8 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
+            <i class="fas fa-images text-4xl text-gray-400 mb-2"></i>
+            <p class="text-gray-500">No photos uploaded yet</p>
         </div>
         @endif
         
@@ -625,13 +659,18 @@
 
 <script>
 let removedPhotoIndices = [];
+let totalPhotos = {{ $property->photos && is_array($property->photos) ? count($property->photos) : 0 }};
 
 function removePhoto(index) {
     if (confirm('Are you sure you want to remove this photo?')) {
-        // Hide the photo container
+        // Hide the photo container with animation
         const photoContainer = document.getElementById('photo-container-' + index);
         if (photoContainer) {
-            photoContainer.style.display = 'none';
+            photoContainer.style.opacity = '0';
+            photoContainer.style.transform = 'scale(0.8)';
+            setTimeout(() => {
+                photoContainer.style.display = 'none';
+            }, 300);
         }
         
         // Remove the hidden input
@@ -643,7 +682,74 @@ function removePhoto(index) {
         // Add to removed indices
         removedPhotoIndices.push(index);
         document.getElementById('removed_images').value = JSON.stringify(removedPhotoIndices);
+        
+        // Update photo count
+        updatePhotoCount();
+        
+        // Show success message
+        showNotification('Photo removed successfully', 'success');
     }
+}
+
+function removeAllPhotos() {
+    if (confirm('Are you sure you want to remove ALL photos? This action cannot be undone.')) {
+        const photoContainers = document.querySelectorAll('[id^="photo-container-"]');
+        const photoInputs = document.querySelectorAll('input[name="existing_photos[]"]');
+        
+        // Hide all photo containers
+        photoContainers.forEach((container, index) => {
+            container.style.opacity = '0';
+            container.style.transform = 'scale(0.8)';
+            setTimeout(() => {
+                container.style.display = 'none';
+            }, 300);
+        });
+        
+        // Remove all hidden inputs
+        photoInputs.forEach(input => input.remove());
+        
+        // Add all indices to removed list
+        for (let i = 0; i < totalPhotos; i++) {
+            if (!removedPhotoIndices.includes(i)) {
+                removedPhotoIndices.push(i);
+            }
+        }
+        
+        document.getElementById('removed_images').value = JSON.stringify(removedPhotoIndices);
+        updatePhotoCount();
+        showNotification('All photos removed successfully', 'success');
+    }
+}
+
+function updatePhotoCount() {
+    const remainingPhotos = totalPhotos - removedPhotoIndices.length;
+    const countElement = document.querySelector('.photo-count');
+    if (countElement) {
+        countElement.textContent = remainingPhotos + ' photo(s)';
+    }
+    
+    // Show/hide delete all button
+    const deleteAllBtn = document.getElementById('delete-all-btn');
+    if (deleteAllBtn) {
+        deleteAllBtn.style.display = remainingPhotos > 0 ? 'block' : 'none';
+    }
+}
+
+function showNotification(message, type = 'info') {
+    // Create notification element
+    const notification = document.createElement('div');
+    notification.className = `fixed top-4 right-4 z-50 px-4 py-2 rounded-lg text-white ${
+        type === 'success' ? 'bg-green-600' : 
+        type === 'error' ? 'bg-red-600' : 'bg-blue-600'
+    }`;
+    notification.textContent = message;
+    
+    document.body.appendChild(notification);
+    
+    // Remove after 3 seconds
+    setTimeout(() => {
+        notification.remove();
+    }, 3000);
 }
 
 function openDeleteModal() {
@@ -657,11 +763,13 @@ function closeDeleteModal() {
 // Close modal when clicking outside
 document.addEventListener('DOMContentLoaded', function() {
     const modal = document.getElementById('deleteModal');
-    modal.addEventListener('click', function(e) {
-        if (e.target === modal) {
-            closeDeleteModal();
-        }
-    });
+    if (modal) {
+        modal.addEventListener('click', function(e) {
+            if (e.target === modal) {
+                closeDeleteModal();
+            }
+        });
+    }
     
     // Close modal with Escape key
     document.addEventListener('keydown', function(e) {
@@ -669,6 +777,9 @@ document.addEventListener('DOMContentLoaded', function() {
             closeDeleteModal();
         }
     });
+    
+    // Initialize photo count
+    updatePhotoCount();
 });
 </script>
 @endsection

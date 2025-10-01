@@ -252,18 +252,6 @@
                                 Transactions
                             </th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Marketing Deductions
-                            </th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Marketing Earnings
-                            </th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Paid Amount
-                    </th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Outstanding
-                    </th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Last Activity
                     </th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -272,17 +260,30 @@
                 </tr>
             </thead>
             <tbody class="bg-white divide-y divide-gray-200">
-                        @forelse($agentEarnings as $agent)
-                        <tr class="hover:bg-gray-50 transition-colors duration-200">
+                        @forelse($agentEarnings as $index => $agent)
+                        <tr class="hover:bg-gray-50 transition-colors duration-200 {{ $loop->first ? 'bg-gradient-to-r from-yellow-50 to-orange-50 border-l-4 border-yellow-400' : '' }}">
                     <td class="px-6 py-4 whitespace-nowrap">
                         <div class="flex items-center">
-                                    <div class="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center mr-4">
-                                        <span class="text-white font-bold text-lg">
+                                    <div class="w-12 h-12 {{ $loop->first ? 'bg-gradient-to-r from-yellow-400 to-yellow-600' : 'bg-gradient-to-r from-blue-500 to-purple-600' }} rounded-full flex items-center justify-center mr-4 relative overflow-visible">
+                                        @if($loop->first)
+                                            <div class="crown-container">
+                                                <i class="fas fa-crown" id="crown-icon-{{ $index }}"></i>
+                                                <span class="crown-fallback" id="crown-fallback-{{ $index }}" style="display: none;">👑</span>
+                                            </div>
+                                        @endif
+                                        <span class="text-white font-bold text-xl relative z-10 drop-shadow-lg">
                                             {{ strtoupper(substr($agent['name'], 0, 2)) }}
                                         </span>
                             </div>
                                     <div>
-                                        <div class="text-sm font-semibold text-gray-900">{{ $agent['name'] }}</div>
+                                        <div class="text-sm font-semibold text-gray-900 flex items-center">
+                                            {{ $agent['name'] }}
+                                            @if($loop->first)
+                                                <span class="ml-2 bg-yellow-100 text-yellow-800 text-xs font-medium px-2 py-1 rounded-full flex items-center">
+                                                    <i class="fas fa-crown mr-1"></i>Top Earner
+                                                </span>
+                                            @endif
+                                        </div>
                                         <div class="text-xs text-gray-500">{{ $agent['transaction_count'] }} total transactions</div>
                             </div>
                         </div>
@@ -307,10 +308,13 @@
                     </td>
                     
                     <td class="px-6 py-4 whitespace-nowrap">
-                        <div class="text-lg font-bold text-gray-900">
+                        <div class="text-lg font-bold {{ $loop->first ? 'text-yellow-600' : 'text-gray-900' }} flex items-center">
+                            @if($loop->first)
+                                <i class="fas fa-crown mr-2 text-yellow-500"></i>
+                            @endif
                             £{{ number_format($agent['total_earnings'], 2) }}
                         </div>
-                        <div class="text-xs text-gray-500">
+                        <div class="text-xs {{ $loop->first ? 'text-yellow-600' : 'text-gray-500' }}">
                                     {{ $agent['transaction_count'] }} total
                         </div>
                     </td>
@@ -319,42 +323,6 @@
                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
                                     {{ $agent['transaction_count'] }} transactions
                         </span>
-                    </td>
-                    
-                    <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm text-gray-900">
-                                    £{{ number_format($agent['marketing_deductions'], 2) }}
-                                </div>
-                                <div class="text-xs text-gray-500">
-                                    £30 per different marketing agent
-                                </div>
-                            </td>
-                            
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm text-gray-900">
-                                    £{{ number_format($agent['marketing_agent_earnings'], 2) }}
-                                </div>
-                                <div class="text-xs text-gray-500">
-                                    Marketing agent earnings
-                                </div>
-                            </td>
-                            
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm text-gray-900">
-                                    £{{ number_format($agent['paid_amount'], 2) }}
-                                </div>
-                                <div class="text-xs text-gray-500">
-                                    Already paid
-                                </div>
-                    </td>
-                    
-                    <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm font-semibold {{ $agent['outstanding_amount'] > 0 ? 'text-red-600' : 'text-green-600' }}">
-                                    £{{ number_format($agent['outstanding_amount'], 2) }}
-                                </div>
-                                <div class="text-xs text-gray-500">
-                                    {{ $agent['outstanding_amount'] > 0 ? 'Outstanding' : 'Up to date' }}
-                                </div>
                     </td>
                     
                     <td class="px-6 py-4 whitespace-nowrap">
@@ -378,7 +346,7 @@
                 </tr>
                 @empty
                 <tr>
-                            <td colspan="8" class="px-6 py-12 text-center">
+                            <td colspan="6" class="px-6 py-12 text-center">
                                 <div class="flex flex-col items-center">
                                     <i class="fas fa-chart-line text-6xl text-gray-300 mb-4"></i>
                                     <h3 class="text-lg font-medium text-gray-900 mb-2">No earnings data found</h3>
@@ -394,17 +362,30 @@
             <!-- Cards View -->
             <div id="cardsView" class="hidden p-6">
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    @foreach($agentEarnings as $agent)
-                    <div class="bg-gradient-to-br from-white to-gray-50 rounded-xl border border-gray-200 p-6 hover:shadow-lg transition-shadow duration-200">
+                    @foreach($agentEarnings as $index => $agent)
+                    <div class="bg-gradient-to-br from-white to-gray-50 rounded-xl border border-gray-200 p-6 hover:shadow-lg transition-shadow duration-200 {{ $loop->first ? 'ring-2 ring-yellow-400 bg-gradient-to-br from-yellow-50 to-orange-50' : '' }}">
                         <div class="flex items-center justify-between mb-4">
                             <div class="flex items-center">
-                                <div class="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center mr-3">
-                                    <span class="text-white font-bold text-lg">
+                                <div class="w-12 h-12 {{ $loop->first ? 'bg-gradient-to-r from-yellow-400 to-yellow-600' : 'bg-gradient-to-r from-blue-500 to-purple-600' }} rounded-full flex items-center justify-center mr-3 relative overflow-visible">
+                                    @if($loop->first)
+                                        <div class="crown-container">
+                                            <i class="fas fa-crown" id="crown-icon-card-{{ $index }}"></i>
+                                            <span class="crown-fallback" id="crown-fallback-card-{{ $index }}" style="display: none;">👑</span>
+                                        </div>
+                                    @endif
+                                    <span class="text-white font-bold text-xl relative z-10 drop-shadow-lg">
                                         {{ strtoupper(substr($agent['name'], 0, 2)) }}
                                     </span>
                                 </div>
                                     <div>
-                                        <h4 class="font-semibold text-gray-900">{{ $agent['name'] }}</h4>
+                                        <h4 class="font-semibold text-gray-900 flex items-center">
+                                            {{ $agent['name'] }}
+                                            @if($loop->first)
+                                                <span class="ml-2 bg-yellow-100 text-yellow-800 text-xs font-medium px-2 py-1 rounded-full flex items-center">
+                                                    <i class="fas fa-crown mr-1"></i>Top
+                                                </span>
+                                            @endif
+                                        </h4>
                                         <p class="text-xs text-gray-500">{{ $agent['transaction_count'] }} transactions</p>
     </div>
 </div>
@@ -422,8 +403,13 @@
                         
                         <div class="space-y-3">
                             <div class="flex justify-between items-center">
-                                <span class="text-sm text-gray-600">Total Earnings</span>
-                                <span class="text-lg font-bold text-gray-900">£{{ number_format($agent['total_earnings'], 2) }}</span>
+                                <span class="text-sm {{ $loop->first ? 'text-yellow-600' : 'text-gray-600' }}">Total Earnings</span>
+                                <span class="text-lg font-bold {{ $loop->first ? 'text-yellow-600' : 'text-gray-900' }} flex items-center">
+                                    @if($loop->first)
+                                        <i class="fas fa-crown mr-1 text-yellow-500"></i>
+                                    @endif
+                                    £{{ number_format($agent['total_earnings'], 2) }}
+                                </span>
                             </div>
                             
                             <div class="grid grid-cols-2 gap-3">
@@ -442,21 +428,13 @@
                                 <span>{{ $agent['last_transaction_date'] ? $agent['last_transaction_date']->format('d M') : 'N/A' }}</span>
                             </div>
                             
-                            @if($agent['marketing_deductions'] > 0 || $agent['marketing_agent_earnings'] > 0)
                             <div class="mt-2 pt-2 border-t border-gray-200">
                                 <div class="flex justify-between items-center text-xs">
-                                    <span class="text-orange-600">Marketing Deductions: £{{ number_format($agent['marketing_deductions'], 2) }}</span>
-                                    <span class="text-green-600">Marketing Earnings: £{{ number_format($agent['marketing_agent_earnings'], 2) }}</span>
-    </div>
-</div>
-@endif
-
-                            <div class="mt-2 pt-2 border-t border-gray-200">
-                                <div class="flex justify-between items-center text-xs">
-                                    <span class="text-blue-600">Paid: £{{ number_format($agent['paid_amount'], 2) }}</span>
-                                    <span class="{{ $agent['outstanding_amount'] > 0 ? 'text-red-600' : 'text-green-600' }}">
-                                        Outstanding: £{{ number_format($agent['outstanding_amount'], 2) }}
-                                    </span>
+                                    <span class="text-gray-500">Last Activity: {{ $agent['last_transaction_date'] ? $agent['last_transaction_date']->format('d M Y') : 'N/A' }}</span>
+                                    <a href="{{ route('rental-codes.agent-details', $agent['name']) }}" 
+                                       class="text-blue-600 hover:text-blue-800 text-xs font-medium">
+                                        View Details →
+                                    </a>
                                 </div>
                             </div>
                         </div>
@@ -714,6 +692,100 @@ function exportToExcel() {
 document.addEventListener('DOMContentLoaded', function() {
     const filtersContent = document.getElementById('filtersContent');
     filtersContent.style.display = 'block';
+    
+    // Immediate crown fallback check
+    function checkCrownFallback() {
+        // Check if FontAwesome is loaded by testing a simple icon
+        const testDiv = document.createElement('div');
+        testDiv.innerHTML = '<i class="fas fa-crown"></i>';
+        document.body.appendChild(testDiv);
+        const testIcon = testDiv.querySelector('i');
+        const isFontAwesomeLoaded = window.getComputedStyle(testIcon).fontFamily.includes('Font Awesome') || 
+                                   window.getComputedStyle(testIcon).fontFamily.includes('FontAwesome');
+        document.body.removeChild(testDiv);
+        
+        console.log('FontAwesome loaded:', isFontAwesomeLoaded);
+        
+        if (!isFontAwesomeLoaded) {
+            console.log('FontAwesome not detected, showing emoji fallbacks');
+            // Emoji fallbacks are already shown by default CSS
+        } else {
+            console.log('FontAwesome detected, switching to FontAwesome icons');
+            // Add class to enable FontAwesome icons
+            document.body.classList.add('fontawesome-loaded');
+        }
+    }
+    
+    // Run immediately
+    checkCrownFallback();
+    
+    // Debug: Check if crown containers exist
+    setTimeout(() => {
+        console.log('Debug: Checking for crown containers...');
+        const allCrownContainers = document.querySelectorAll('.crown-container');
+        console.log('All crown containers found:', allCrownContainers.length);
+        
+        // Also check for any elements with crown-related classes
+        const crownElements = document.querySelectorAll('[class*="crown"]');
+        console.log('All crown-related elements:', crownElements.length);
+        
+        // Check for agent rows and cards
+        const agentRows = document.querySelectorAll('tbody tr');
+        const agentCards = document.querySelectorAll('#cardsView .grid > div');
+        console.log('Agent rows found:', agentRows.length);
+        console.log('Agent cards found:', agentCards.length);
+        
+        // Check if there are any agents at all
+        const agentNames = document.querySelectorAll('[class*="agent"], [class*="Agent"]');
+        console.log('Elements with "agent" in class:', agentNames.length);
+        
+        allCrownContainers.forEach((container, index) => {
+            console.log(`Container ${index}:`, {
+                element: container,
+                parent: container.parentElement,
+                visible: container.offsetParent !== null,
+                display: window.getComputedStyle(container).display,
+                position: window.getComputedStyle(container).position
+            });
+        });
+    }, 500);
+    
+    // Check crown visibility after FontAwesome detection
+    setTimeout(() => {
+        console.log('Checking crown visibility...');
+        const crownContainers = document.querySelectorAll('.crown-container');
+        console.log('Found crown containers:', crownContainers.length);
+        
+        crownContainers.forEach((container, index) => {
+            const icon = container.querySelector('i.fas.fa-crown');
+            const fallback = container.querySelector('.crown-fallback');
+            
+            console.log(`Crown container ${index}:`, {
+                container: container,
+                icon: icon,
+                fallback: fallback,
+                iconVisible: icon ? icon.offsetParent !== null : false,
+                fallbackVisible: fallback ? fallback.offsetParent !== null : false
+            });
+            
+            if (icon && fallback) {
+                // Check if FontAwesome icon is working
+                const iconStyle = window.getComputedStyle(icon);
+                const isIconWorking = iconStyle.fontFamily.includes('Font Awesome') || 
+                                    iconStyle.fontFamily.includes('FontAwesome');
+                
+                if (isIconWorking && document.body.classList.contains('fontawesome-loaded')) {
+                    console.log('FontAwesome icon working, hiding fallback');
+                    icon.style.display = 'block';
+                    fallback.style.display = 'none';
+                } else {
+                    console.log('FontAwesome icon not working, showing fallback');
+                    icon.style.display = 'none';
+                    fallback.style.display = 'block';
+                }
+            }
+        });
+    }, 1000);
 });
 </script>
 
@@ -734,6 +806,77 @@ document.addEventListener('DOMContentLoaded', function() {
     .border {
         border: 1px solid #000 !important;
     }
+}
+
+/* Crown visibility fixes */
+.crown-container {
+    z-index: 5;
+    position: absolute;
+    top: -10px;
+    right: -10px;
+    width: 20px;
+    height: 20px;
+    background: #FCD34D;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    border: 2px solid #F59E0B;
+}
+
+.crown-container i {
+    color: #92400E;
+    font-size: 12px;
+}
+
+/* Ensure crown is visible */
+.relative {
+    overflow: visible !important;
+}
+
+/* Fallback crown emoji - show by default, hide if FontAwesome loads */
+.crown-fallback {
+    font-size: 14px;
+    color: #92400E;
+    display: block !important;
+}
+
+.crown-container i {
+    display: none;
+}
+
+/* Show FontAwesome icon only if FontAwesome is loaded */
+.fontawesome-loaded .crown-container i {
+    display: block !important;
+}
+
+.fontawesome-loaded .crown-fallback {
+    display: none !important;
+}
+
+/* Ensure crown containers are visible */
+.crown-container {
+    display: flex !important;
+    visibility: visible !important;
+}
+
+/* Ensure initials are always visible */
+.relative span {
+    z-index: 10 !important;
+    position: relative !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5) !important;
+    font-weight: 900 !important;
+}
+
+/* Golden gradient for top earner */
+.from-yellow-400 {
+    --tw-gradient-from: #fbbf24;
+    --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, rgba(251, 191, 36, 0));
+}
+
+.to-yellow-600 {
+    --tw-gradient-to: #d97706;
 }
 </style>
 @endsection
