@@ -42,37 +42,107 @@ class RentalCodeController extends Controller
      */
     public function store(Request $request)
     {
-        $validated = $request->validate([
+        // Build validation rules dynamically
+        $validationRules = [
             'rental_code' => 'required|string|unique:rental_codes,rental_code',
             'rental_date' => 'required|date',
             'consultation_fee' => 'required|numeric|min:0',
             'payment_method' => 'required|string|in:Cash,Transfer',
-            'property' => 'nullable|string',
-            'licensor' => 'nullable|string',
+            'property' => 'required|string',
+            'licensor' => 'required|string',
             'client_selection_type' => 'required|in:existing,new',
             'existing_client_id' => 'required_if:client_selection_type,existing|exists:clients,id',
-            'client_full_name' => 'required_if:client_selection_type,new|string|max:255',
-            'client_date_of_birth' => 'required_if:client_selection_type,new|date',
-            'client_phone_number' => 'required_if:client_selection_type,new|string|max:20',
-            'client_email' => 'required_if:client_selection_type,new|email|max:255',
-            'client_nationality' => 'required_if:client_selection_type,new|string|max:100',
-            'client_current_address' => 'required_if:client_selection_type,new|string',
-            'client_company_university_name' => 'nullable|string|max:255',
-            'client_company_university_address' => 'nullable|string',
-            'client_position_role' => 'nullable|string|max:255',
             'rent_by_agent' => 'required|string|max:255',
-            'marketing_agent' => 'nullable|string|max:255',
+            'marketing_agent' => 'required|string|max:255',
             'client_count' => 'required|integer|min:1|max:10',
-            'notes' => 'nullable|string',
+            'notes' => 'required|string',
             'status' => 'required|string|in:pending,approved,completed,cancelled',
-        ]);
+        ];
+        
+        // Add dynamic client validation if creating new clients
+        if ($request->input('client_selection_type') === 'new') {
+            $clientCount = $request->input('client_count', 1);
+            for ($i = 1; $i <= $clientCount; $i++) {
+                $validationRules["client_{$i}_full_name"] = 'required|string|max:255';
+                $validationRules["client_{$i}_date_of_birth"] = 'required|date';
+                $validationRules["client_{$i}_phone_number"] = 'required|string|max:20';
+                $validationRules["client_{$i}_email"] = 'required|email|max:255';
+                $validationRules["client_{$i}_nationality"] = 'required|string|max:100';
+                $validationRules["client_{$i}_current_address"] = 'required|string';
+                $validationRules["client_{$i}_company_university_name"] = 'required|string|max:255';
+                $validationRules["client_{$i}_company_university_address"] = 'required|string';
+                $validationRules["client_{$i}_position_role"] = 'required|string|max:255';
+                $validationRules["client_{$i}_current_landlord_name"] = 'required|string|max:255';
+                $validationRules["client_{$i}_current_landlord_contact_info"] = 'required|string';
+            }
+        }
+        
+        // Build custom error messages
+        $customMessages = [
+            'rental_code.required' => 'Rental code is required.',
+            'rental_code.unique' => 'This rental code already exists.',
+            'rental_date.required' => 'Rental date is required.',
+            'consultation_fee.required' => 'Consultation fee is required.',
+            'payment_method.required' => 'Payment method is required.',
+            'property.required' => 'Property is required.',
+            'licensor.required' => 'Licensor is required.',
+            'client_selection_type.required' => 'Please select whether to use an existing client or create a new one.',
+            'existing_client_id.required_if' => 'Please select an existing client.',
+            'rent_by_agent.required' => 'Rent by agent is required.',
+            'marketing_agent.required' => 'Marketing agent is required.',
+            'client_count.required' => 'Client count is required.',
+            'notes.required' => 'Notes are required.',
+            'status.required' => 'Status is required.',
+        ];
+        
+        // Add dynamic client error messages
+        if ($request->input('client_selection_type') === 'new') {
+            $clientCount = $request->input('client_count', 1);
+            for ($i = 1; $i <= $clientCount; $i++) {
+                $customMessages["client_{$i}_full_name.required"] = "Client {$i} full name is required.";
+                $customMessages["client_{$i}_date_of_birth.required"] = "Client {$i} date of birth is required.";
+                $customMessages["client_{$i}_phone_number.required"] = "Client {$i} phone number is required.";
+                $customMessages["client_{$i}_email.required"] = "Client {$i} email is required.";
+                $customMessages["client_{$i}_nationality.required"] = "Client {$i} nationality is required.";
+                $customMessages["client_{$i}_current_address.required"] = "Client {$i} current address is required.";
+                $customMessages["client_{$i}_company_university_name.required"] = "Client {$i} company/university name is required.";
+                $customMessages["client_{$i}_company_university_address.required"] = "Client {$i} company/university address is required.";
+                $customMessages["client_{$i}_position_role.required"] = "Client {$i} position/role is required.";
+                $customMessages["client_{$i}_current_landlord_name.required"] = "Client {$i} current landlord name is required.";
+                $customMessages["client_{$i}_current_landlord_contact_info.required"] = "Client {$i} current landlord contact info is required.";
+            }
+        }
+        
+        $validated = $request->validate($validationRules, $customMessages);
 
         // Handle client creation or retrieval
-        $client = $this->handleClient($validated);
+        if ($validated['client_selection_type'] === 'existing') {
+            $client = Client::find($validated['existing_client_id']);
+        } else {
+            // Handle multiple new clients
+            $clients = $this->handleMultipleClients($validated);
+            $client = $clients->first(); // Use first client as primary
+        }
 
         // Create rental code with client_id
         $rentalCodeData = $validated;
         $rentalCodeData['client_id'] = $client->id;
+        
+        // Set the assigned agent from the current session user
+        $currentUser = auth()->user();
+        if ($currentUser) {
+            // Use agent company name if available, otherwise use user name
+            if ($currentUser->agent && $currentUser->agent->company_name) {
+                $rentalCodeData['rent_by_agent'] = $currentUser->agent->company_name;
+                $rentalCodeData['client_by_agent'] = $currentUser->agent->company_name;
+            } else {
+                $rentalCodeData['rent_by_agent'] = $currentUser->name;
+                $rentalCodeData['client_by_agent'] = $currentUser->name;
+            }
+        } else {
+            $rentalCodeData['rent_by_agent'] = 'Unknown Agent';
+            $rentalCodeData['client_by_agent'] = 'Unknown Agent';
+        }
         
         // Remove client fields from rental code data as they're now in the client record
         $clientFields = [
@@ -218,11 +288,35 @@ class RentalCodeController extends Controller
             'company_university_name' => $data['client_company_university_name'],
             'company_university_address' => $data['client_company_university_address'],
             'position_role' => $data['client_position_role'],
+            'current_landlord_name' => $data['client_current_landlord_name'] ?? null,
+            'current_landlord_contact_info' => $data['client_current_landlord_contact_info'] ?? null,
         ];
         
-        // Add phone number only for new clients
+        // Add phone number and assign current user as agent for new clients
         if (!$client) {
             $clientData['phone_number'] = $data['client_phone_number'];
+            // Assign current user as the agent for new clients
+            $currentUser = auth()->user();
+            if ($currentUser) {
+                // Check if user has an agent profile
+                if ($currentUser->agent) {
+                    $clientData['agent_id'] = $currentUser->agent->id;
+                } else {
+                    // If user doesn't have agent profile but has agent role, create one or find existing
+                    if ($currentUser->hasRole('agent')) {
+                        // Try to find or create an agent profile for this user
+                        $agent = \App\Models\Agent::firstOrCreate(
+                            ['user_id' => $currentUser->id],
+                            [
+                                'company_name' => $currentUser->name . ' Agency',
+                                'is_verified' => false,
+                                'is_featured' => false,
+                            ]
+                        );
+                        $clientData['agent_id'] = $agent->id;
+                    }
+                }
+            }
         }
         
         if ($client) {
@@ -243,6 +337,58 @@ class RentalCodeController extends Controller
         }
         
         return $client;
+    }
+
+    /**
+     * Handle multiple client creation
+     */
+    private function handleMultipleClients(array $data)
+    {
+        $clients = collect();
+        $clientCount = $data['client_count'] ?? 1;
+        
+        for ($i = 1; $i <= $clientCount; $i++) {
+            $clientData = [
+                'full_name' => $data["client_{$i}_full_name"] ?? '',
+                'date_of_birth' => $data["client_{$i}_date_of_birth"] ?? null,
+                'phone_number' => $data["client_{$i}_phone_number"] ?? '',
+                'email' => $data["client_{$i}_email"] ?? '',
+                'nationality' => $data["client_{$i}_nationality"] ?? '',
+                'current_address' => $data["client_{$i}_current_address"] ?? '',
+                'company_university_name' => $data["client_{$i}_company_university_name"] ?? '',
+                'company_university_address' => $data["client_{$i}_company_university_address"] ?? '',
+                'position_role' => $data["client_{$i}_position_role"] ?? '',
+                'current_landlord_name' => $data["client_{$i}_current_landlord_name"] ?? null,
+                'current_landlord_contact_info' => $data["client_{$i}_current_landlord_contact_info"] ?? null,
+            ];
+            
+            // Assign current user as the agent for new clients
+            $currentUser = auth()->user();
+            if ($currentUser) {
+                if ($currentUser->agent) {
+                    $clientData['agent_id'] = $currentUser->agent->id;
+                } else {
+                    if ($currentUser->hasRole('agent')) {
+                        $agent = \App\Models\Agent::firstOrCreate(
+                            ['user_id' => $currentUser->id],
+                            [
+                                'company_name' => $currentUser->name . ' Agency',
+                                'is_verified' => false,
+                                'is_featured' => false,
+                            ]
+                        );
+                        $clientData['agent_id'] = $agent->id;
+                    }
+                }
+            }
+            
+            $client = Client::create($clientData);
+            $clients->push($client);
+            
+            \Log::info("Created client {$i}: {$client->full_name} (ID: {$client->id})");
+        }
+        
+        return $clients;
     }
 
     /**

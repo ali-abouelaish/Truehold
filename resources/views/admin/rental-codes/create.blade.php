@@ -137,7 +137,7 @@
                                         <input type="text" class="form-control @error('property') is-invalid @enderror" 
                                                id="property" name="property" 
                                                value="{{ old('property') }}" 
-                                               placeholder="Property address or description">
+                                               placeholder="Property address or description" required>
                                     </div>
                                     @error('property')
                                         <div class="invalid-feedback">{{ $message }}</div>
@@ -151,7 +151,7 @@
                                         <input type="text" class="form-control @error('licensor') is-invalid @enderror" 
                                                id="licensor" name="licensor" 
                                                value="{{ old('licensor') }}" 
-                                               placeholder="Property owner or licensor">
+                                               placeholder="Property owner or licensor" required>
                                     </div>
                                     @error('licensor')
                                         <div class="invalid-feedback">{{ $message }}</div>
@@ -229,154 +229,12 @@
                             </div>
                         </div>
 
-                        <!-- New Client Form -->
+                        <!-- New Client Forms -->
                         <div id="new-client-section" class="client-section" style="display: none;">
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="form-group mb-3">
-                                        <label for="client_full_name" class="form-label">
-                                            Full Name <span class="text-danger">*</span>
-                                        </label>
-                                        <div class="input-group">
-                                            <span class="input-group-text"><i class="fas fa-user"></i></span>
-                                            <input type="text" class="form-control @error('client_full_name') is-invalid @enderror" 
-                                                   id="client_full_name" name="client_full_name" 
-                                                   value="{{ old('client_full_name') }}" 
-                                                   placeholder="Enter full name">
-                                        </div>
-                                        @error('client_full_name')
-                                            <div class="invalid-feedback">{{ $message }}</div>
-                                        @enderror
-                                    </div>
-                                
-                                <div class="form-group mb-3">
-                                    <label for="client_date_of_birth" class="form-label">
-                                        Date of Birth <span class="text-danger">*</span>
-                                    </label>
-                                    <div class="input-group">
-                                        <span class="input-group-text"><i class="fas fa-birthday-cake"></i></span>
-                                        <input type="date" class="form-control @error('client_date_of_birth') is-invalid @enderror" 
-                                               id="client_date_of_birth" name="client_date_of_birth" 
-                                               value="{{ old('client_date_of_birth') }}" required>
-                                    </div>
-                                    @error('client_date_of_birth')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
-                                </div>
-                                
-                                <div class="form-group mb-3">
-                                    <label for="client_phone_number" class="form-label">
-                                        Phone Number <span class="text-danger">*</span>
-                                    </label>
-                                    <div class="input-group">
-                                        <span class="input-group-text"><i class="fas fa-phone"></i></span>
-                                        <input type="tel" class="form-control @error('client_phone_number') is-invalid @enderror" 
-                                               id="client_phone_number" name="client_phone_number" 
-                                               value="{{ old('client_phone_number') }}" 
-                                               placeholder="Enter phone number" 
-                                               pattern="[\+]?[0-9\s\-\(\)]{10,}" 
-                                               title="Please enter a valid phone number" required>
-                                    </div>
-                                    @error('client_phone_number')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
-                                </div>
-                                
-                                <div class="form-group mb-3">
-                                    <label for="client_email" class="form-label">
-                                        Email <span class="text-danger">*</span>
-                                    </label>
-                                    <div class="input-group">
-                                        <span class="input-group-text"><i class="fas fa-envelope"></i></span>
-                                        <input type="email" class="form-control @error('client_email') is-invalid @enderror" 
-                                               id="client_email" name="client_email" 
-                                               value="{{ old('client_email') }}" 
-                                               placeholder="Enter email address" required>
-                                    </div>
-                                    @error('client_email')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
-                                </div>
-                                
-                                <div class="form-group mb-3">
-                                    <label for="client_nationality" class="form-label">
-                                        Nationality <span class="text-danger">*</span>
-                                    </label>
-                                    <div class="input-group">
-                                        <span class="input-group-text"><i class="fas fa-flag"></i></span>
-                                        <input type="text" class="form-control @error('client_nationality') is-invalid @enderror" 
-                                               id="client_nationality" name="client_nationality" 
-                                               value="{{ old('client_nationality') }}" 
-                                               placeholder="Enter nationality" required>
-                                    </div>
-                                    @error('client_nationality')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
-                                </div>
-                            </div>
-                            
-                            <div class="col-md-6">
-                                <div class="form-group mb-3">
-                                    <label for="client_current_address" class="form-label">
-                                        Current Address <span class="text-danger">*</span>
-                                    </label>
-                                    <div class="input-group">
-                                        <span class="input-group-text"><i class="fas fa-map-marker-alt"></i></span>
-                                        <textarea class="form-control @error('client_current_address') is-invalid @enderror" 
-                                                  id="client_current_address" name="client_current_address" 
-                                                  rows="3" placeholder="Enter current address" required>{{ old('client_current_address') }}</textarea>
-                                    </div>
-                                    @error('client_current_address')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
-                                </div>
-                                
-                                <div class="form-group mb-3">
-                                    <label for="client_company_university_name" class="form-label">Company/University Name</label>
-                                    <div class="input-group">
-                                        <span class="input-group-text"><i class="fas fa-building"></i></span>
-                                        <input type="text" class="form-control @error('client_company_university_name') is-invalid @enderror" 
-                                               id="client_company_university_name" name="client_company_university_name" 
-                                               value="{{ old('client_company_university_name') }}" 
-                                               placeholder="Enter company or university name">
-                                    </div>
-                                    @error('client_company_university_name')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
-                                </div>
-                                
-                                <div class="form-group mb-3">
-                                    <label for="client_company_university_address" class="form-label">Company/University Address</label>
-                                    <div class="input-group">
-                                        <span class="input-group-text"><i class="fas fa-map-marker-alt"></i></span>
-                                        <textarea class="form-control @error('client_company_university_address') is-invalid @enderror" 
-                                                  id="client_company_university_address" name="client_company_university_address" 
-                                                  rows="3" placeholder="Enter company or university address">{{ old('client_company_university_address') }}</textarea>
-                                    </div>
-                                    @error('client_company_university_address')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
-                                </div>
-                                
-                                <div class="form-group mb-3">
-                                    <label for="client_position_role" class="form-label">Position/Role</label>
-                                    <div class="input-group">
-                                        <span class="input-group-text"><i class="fas fa-briefcase"></i></span>
-                                        <input type="text" class="form-control @error('client_position_role') is-invalid @enderror" 
-                                               id="client_position_role" name="client_position_role" 
-                                               value="{{ old('client_position_role') }}" 
-                                               placeholder="Enter position or role">
-                                    </div>
-                                    @error('client_position_role')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
-                                </div>
+                            <div id="client-forms-container">
+                                <!-- Client forms will be dynamically generated here -->
                             </div>
                         </div>
-                    </div>
-                </div>
-            </div>
-        </div>
 
         <!-- Agent Information -->
         <div class="row mb-4">
@@ -392,30 +250,26 @@
                             <div class="col-md-6">
                             <div class="mb-3">
                                 <label for="rent_by_agent" class="form-label">Rent By Agent *</label>
-                                         <select class="form-select @error('rent_by_agent') is-invalid @enderror" 
-        id="rent_by_agent" name="rent_by_agent" required>
-    <option value="">Select agent</option>
-    @forelse($agentUsers as $user)
-                                        <option value="{{ $user->id }}" {{ old('rent_by_agent') == $user->id ? 'selected' : '' }}>
-            {{ $user->name }}
-            @if($user->agent && $user->agent->company_name)
-                ({{ $user->agent->company_name }})
-            @endif
-        </option>
-    @empty
-        <option value="" disabled>No agents found</option>
-    @endforelse
-</select>
-                                     @error('rent_by_agent')
-                                         <div class="invalid-feedback">{{ $message }}</div>
-                                     @enderror
-                                 </div>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-user-tie"></i></span>
+                                    <input type="text" class="form-control" 
+                                           id="rent_by_agent_display" 
+                                           value="{{ auth()->user()->agent && auth()->user()->agent->company_name ? auth()->user()->agent->company_name : auth()->user()->name }}" 
+                                           readonly>
+                                    <input type="hidden" name="rent_by_agent" 
+                                           value="{{ auth()->user()->agent && auth()->user()->agent->company_name ? auth()->user()->agent->company_name : auth()->user()->name }}">
+                                </div>
+                                <small class="form-text text-muted">Automatically assigned from your session</small>
+                                @error('rent_by_agent')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
                             </div>
                             <div class="col-md-6">
                             <div class="mb-3">
                                 <label for="marketing_agent" class="form-label">Marketing Agent</label>
                                         <select class="form-select @error('marketing_agent') is-invalid @enderror" 
-                                                id="marketing_agent" name="marketing_agent">
+                                                id="marketing_agent" name="marketing_agent" required>
                                             <option value="">Select marketing agent</option>
                                             @forelse($marketingUsers as $user)
                                         <option value="{{ $user->id }}" {{ old('marketing_agent') == $user->id ? 'selected' : '' }}>
@@ -455,7 +309,7 @@
                             <div class="mb-3">
                                     <label for="notes" class="form-label">Additional Notes</label>
                                         <textarea class="form-control @error('notes') is-invalid @enderror" 
-                                          id="notes" name="notes" rows="3" placeholder="Enter any additional notes">{{ old('notes') }}</textarea>
+                                          id="notes" name="notes" rows="3" placeholder="Enter any additional notes" required>{{ old('notes') }}</textarea>
                                     @error('notes')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
@@ -606,6 +460,8 @@ document.addEventListener('DOMContentLoaded', function() {
         } else if (newClientRadio.checked) {
             existingClientSection.style.display = 'none';
             newClientSection.style.display = 'block';
+            // Generate client forms based on client count
+            generateClientForms();
             // Clear validation for existing client field
             clearValidationForExistingClientField();
             // Remove required attribute from existing client field
@@ -622,8 +478,171 @@ document.addEventListener('DOMContentLoaded', function() {
     existingClientRadio.addEventListener('change', toggleClientSections);
     newClientRadio.addEventListener('change', toggleClientSections);
     
+    // Client count change handler
+    const clientCountSelect = document.getElementById('client_count');
+    if (clientCountSelect) {
+        clientCountSelect.addEventListener('change', function() {
+            if (newClientRadio.checked) {
+                generateClientForms();
+            }
+        });
+    }
+    
+    // Generate dynamic client forms
+    function generateClientForms() {
+        const container = document.getElementById('client-forms-container');
+        const clientCount = parseInt(document.getElementById('client_count').value) || 1;
+        
+        if (!container) {
+            console.error('Client forms container not found!');
+            return;
+        }
+        
+        container.innerHTML = '';
+        
+        for (let i = 1; i <= clientCount; i++) {
+            const clientForm = createClientForm(i);
+            container.appendChild(clientForm);
+        }
+    }
+    
+    // Create a single client form
+    function createClientForm(clientIndex) {
+        const formDiv = document.createElement('div');
+        formDiv.className = 'card mb-4';
+        formDiv.innerHTML = `
+            <div class="card-header">
+                <h6 class="mb-0">Client ${clientIndex} Details</h6>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group mb-3">
+                            <label for="client_${clientIndex}_full_name" class="form-label">Full Name *</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-user"></i></span>
+                                <input type="text" class="form-control" id="client_${clientIndex}_full_name" name="client_${clientIndex}_full_name" placeholder="Enter full name" required>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group mb-3">
+                            <label for="client_${clientIndex}_date_of_birth" class="form-label">Date of Birth *</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-birthday-cake"></i></span>
+                                <input type="date" class="form-control" id="client_${clientIndex}_date_of_birth" name="client_${clientIndex}_date_of_birth" required>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group mb-3">
+                            <label for="client_${clientIndex}_phone_number" class="form-label">Phone Number *</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-phone"></i></span>
+                                <input type="tel" class="form-control" id="client_${clientIndex}_phone_number" name="client_${clientIndex}_phone_number" placeholder="Enter phone number" required>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group mb-3">
+                            <label for="client_${clientIndex}_email" class="form-label">Email *</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-envelope"></i></span>
+                                <input type="email" class="form-control" id="client_${clientIndex}_email" name="client_${clientIndex}_email" placeholder="Enter email address" required>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group mb-3">
+                            <label for="client_${clientIndex}_nationality" class="form-label">Nationality *</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-flag"></i></span>
+                                <input type="text" class="form-control" id="client_${clientIndex}_nationality" name="client_${clientIndex}_nationality" placeholder="Enter nationality" required>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <div class="form-group mb-3">
+                            <label for="client_${clientIndex}_current_address" class="form-label">Current Address *</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-map-marker-alt"></i></span>
+                                <textarea class="form-control" id="client_${clientIndex}_current_address" name="client_${clientIndex}_current_address" rows="3" placeholder="Enter current address" required></textarea>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group mb-3">
+                            <label for="client_${clientIndex}_company_university_name" class="form-label">Company/University Name *</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-building"></i></span>
+                                <input type="text" class="form-control" id="client_${clientIndex}_company_university_name" name="client_${clientIndex}_company_university_name" placeholder="Enter company or university name" required>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group mb-3">
+                            <label for="client_${clientIndex}_company_university_address" class="form-label">Company/University Address *</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-map-marker-alt"></i></span>
+                                <textarea class="form-control" id="client_${clientIndex}_company_university_address" name="client_${clientIndex}_company_university_address" rows="3" placeholder="Enter company or university address" required></textarea>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group mb-3">
+                            <label for="client_${clientIndex}_position_role" class="form-label">Position/Role *</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-briefcase"></i></span>
+                                <input type="text" class="form-control" id="client_${clientIndex}_position_role" name="client_${clientIndex}_position_role" placeholder="Enter position or role" required>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group mb-3">
+                            <label for="client_${clientIndex}_current_landlord_name" class="form-label">Current Landlord/Agency Name *</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-home"></i></span>
+                                <input type="text" class="form-control" id="client_${clientIndex}_current_landlord_name" name="client_${clientIndex}_current_landlord_name" placeholder="Enter landlord or agency name" required>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group mb-3">
+                            <label for="client_${clientIndex}_current_landlord_contact_info" class="form-label">Current Landlord/Agency Contact Info *</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-phone"></i></span>
+                                <textarea class="form-control" id="client_${clientIndex}_current_landlord_contact_info" name="client_${clientIndex}_current_landlord_contact_info" rows="3" placeholder="Phone, email, address, or other contact details..." required></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        return formDiv;
+    }
+    
     // Initialize
     toggleClientSections();
+    
+    // Add form submission debugging
+    const form = document.getElementById('rentalCodeForm');
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            console.log('Form submission started');
+            console.log('Form data:', new FormData(form));
+            
+            // Check if all required fields are filled
+            const requiredFields = form.querySelectorAll('[required]');
+            let missingFields = [];
+            
+            requiredFields.forEach(field => {
+                if (!field.value.trim()) {
+                    missingFields.push(field.name || field.id);
+                }
+            });
+            
+            if (missingFields.length > 0) {
+                console.log('Missing required fields:', missingFields);
+                e.preventDefault();
+                alert('Please fill in all required fields: ' + missingFields.join(', '));
+                return false;
+            }
+            
+            console.log('Form validation passed, submitting...');
+        });
+    }
     
     // Generate rental code button
     const generateBtn = document.getElementById('generate-code');

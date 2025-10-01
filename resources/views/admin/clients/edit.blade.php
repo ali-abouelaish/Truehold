@@ -61,6 +61,28 @@
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
                                 </div>
+                                
+                                <div class="form-group mb-3">
+                                    <label for="current_landlord_name">Current Landlord/Agency Name</label>
+                                    <input type="text" class="form-control @error('current_landlord_name') is-invalid @enderror" 
+                                           id="current_landlord_name" name="current_landlord_name" value="{{ old('current_landlord_name', $client->current_landlord_name) }}"
+                                           placeholder="Enter landlord or agency name">
+                                    <small class="form-text text-muted">Name of current landlord or letting agency</small>
+                                    @error('current_landlord_name')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                                
+                                <div class="form-group mb-3">
+                                    <label for="current_landlord_contact_info">Current Landlord/Agency Contact Info</label>
+                                    <textarea class="form-control @error('current_landlord_contact_info') is-invalid @enderror" 
+                                              id="current_landlord_contact_info" name="current_landlord_contact_info" rows="3" 
+                                              placeholder="Phone, email, address, or other contact details...">{{ old('current_landlord_contact_info', $client->current_landlord_contact_info) }}</textarea>
+                                    <small class="form-text text-muted">Contact details of current landlord or letting agency</small>
+                                    @error('current_landlord_contact_info')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
                             </div>
                             
                             <div class="col-md-6">
@@ -111,6 +133,10 @@
                                             </option>
                                         @endforeach
                                     </select>
+                                    <small class="form-text text-muted">
+                                        <i class="fas fa-info-circle"></i> 
+                                        Default: {{ auth()->user()->name }}@if(auth()->user()->agent && auth()->user()->agent->company_name) ({{ auth()->user()->agent->company_name }})@endif
+                                    </small>
                                     @error('agent_user_id')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
@@ -188,6 +214,7 @@
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
                                 </div>
+                                
                             </div>
                         </div>
 

@@ -21,6 +21,23 @@ Route::get('/properties', [PropertyController::class, 'index'])->name('propertie
 Route::get('/properties/map', [PropertyController::class, 'map'])->name('properties.map');
 Route::get('/properties/{property}', [PropertyController::class, 'show'])->name('properties.show');
 Route::get('/rental-codes/agent-earnings', [RentalCodeController::class, 'agentEarnings'])->name('rental-codes.agent-earnings');
+
+// Storage file serving route
+Route::get('/storage/{path}', function ($path) {
+    $filePath = storage_path('app/public/' . $path);
+    
+    if (!file_exists($filePath)) {
+        abort(404);
+    }
+    
+    $mimeType = mime_content_type($filePath);
+    $fileSize = filesize($filePath);
+    
+    return response()->file($filePath, [
+        'Content-Type' => $mimeType,
+        'Content-Length' => $fileSize,
+    ]);
+})->where('path', '.*')->name('storage.serve');
     
 // Temporary public route for testing rental code generation
 Route::get('/test-rental-code', function () {

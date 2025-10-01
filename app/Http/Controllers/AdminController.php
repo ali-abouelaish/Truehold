@@ -417,21 +417,40 @@ class AdminController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'full_name' => 'required|string|max:255',
-            'date_of_birth' => 'nullable|date|before:today',
-            'phone_number' => 'nullable|string|max:20',
-            'email' => 'nullable|email|max:255',
-            'nationality' => 'nullable|string|max:100',
-            'current_address' => 'nullable|string',
-            'company_university_name' => 'nullable|string|max:255',
-            'company_university_address' => 'nullable|string',
-            'position_role' => 'nullable|string|max:255',
-            'budget' => 'nullable|numeric|min:0',
-            'area_of_interest' => 'nullable|string|max:255',
-            'moving_date' => 'nullable|date|after_or_equal:today',
+            'date_of_birth' => 'required|date|before:today',
+            'phone_number' => 'required|string|max:20',
+            'email' => 'required|email|max:255',
+            'nationality' => 'required|string|max:100',
+            'current_address' => 'required|string',
+            'company_university_name' => 'required|string|max:255',
+            'company_university_address' => 'required|string',
+            'position_role' => 'required|string|max:255',
+            'budget' => 'required|numeric|min:0',
+            'area_of_interest' => 'required|string|max:255',
+            'moving_date' => 'required|date|after_or_equal:today',
             'notes' => 'nullable|string',
-            'registration_status' => 'nullable|in:registered,unregistered',
-            'agent_user_id' => 'nullable|exists:users,id',
+            'current_landlord_name' => 'required|string|max:255',
+            'current_landlord_contact_info' => 'required|string',
+            'registration_status' => 'required|in:registered,unregistered',
+            'agent_user_id' => 'required|exists:users,id',
             'marketing_agent_id' => 'nullable|exists:users,id',
+        ], [
+            'full_name.required' => 'Full name is required.',
+            'date_of_birth.required' => 'Date of birth is required.',
+            'phone_number.required' => 'Phone number is required.',
+            'email.required' => 'Email is required.',
+            'nationality.required' => 'Nationality is required.',
+            'current_address.required' => 'Current address is required.',
+            'company_university_name.required' => 'Company/University name is required.',
+            'company_university_address.required' => 'Company/University address is required.',
+            'position_role.required' => 'Position/Role is required.',
+            'budget.required' => 'Budget is required.',
+            'area_of_interest.required' => 'Area of interest is required.',
+            'moving_date.required' => 'Moving date is required.',
+            'current_landlord_name.required' => 'Current landlord name is required.',
+            'current_landlord_contact_info.required' => 'Current landlord contact info is required.',
+            'registration_status.required' => 'Registration status is required.',
+            'agent_user_id.required' => 'Assigned agent is required.',
         ]);
 
         if ($validator->fails()) {
@@ -439,11 +458,50 @@ class AdminController extends Controller
         }
 
         $data = $request->all();
-        // Map selected agent user -> agents.id if available
-        if (!empty($data['agent_user_id'])) {
-            $agentId = \App\Models\Agent::where('user_id', $data['agent_user_id'])->value('id');
-            $data['agent_id'] = $agentId; // may be null if no profile exists
+        
+        // Always assign current user as agent (session-based)
+        $currentUser = auth()->user();
+        if ($currentUser) {
+            if ($currentUser->agent) {
+                $data['agent_id'] = $currentUser->agent->id;
+                \Log::info("Using existing agent profile. Agent ID: " . $currentUser->agent->id);
+            } else {
+                // Create agent profile for current user
+                $agent = \App\Models\Agent::firstOrCreate(
+                    ['user_id' => $currentUser->id],
+                    [
+                        'company_name' => $currentUser->name . ' Agency',
+                        'is_verified' => false,
+                        'is_featured' => false,
+                    ]
+                );
+                $data['agent_id'] = $agent->id;
+                \Log::info("Created new agent profile. Agent ID: " . $agent->id);
+            }
+        } else {
+            \Log::warning("No authenticated user found for agent assignment");
         }
+        
+        \Log::info("Final agent_id being assigned: " . ($data['agent_id'] ?? 'NULL'));
+        
+        // Ensure agent_id is set - if not, create a default agent profile
+        if (empty($data['agent_id'])) {
+            $currentUser = auth()->user();
+            if ($currentUser) {
+                $agent = \App\Models\Agent::firstOrCreate(
+                    ['user_id' => $currentUser->id],
+                    [
+                        'company_name' => $currentUser->name . ' Agency',
+                        'is_verified' => false,
+                        'is_featured' => false,
+                    ]
+                );
+                $data['agent_id'] = $agent->id;
+                \Log::info("Fallback: Created agent profile. Agent ID: " . $agent->id);
+            }
+        }
+        
+        // Remove agent_user_id as we're using session-based assignment
         unset($data['agent_user_id']);
 
         \App\Models\Client::create($data);
@@ -475,6 +533,8 @@ class AdminController extends Controller
             'area_of_interest' => 'nullable|string|max:255',
             'moving_date' => 'nullable|date|after_or_equal:today',
             'notes' => 'nullable|string',
+            'current_landlord_name' => 'nullable|string|max:255',
+            'current_landlord_contact_info' => 'nullable|string',
             'registration_status' => 'nullable|in:registered,unregistered',
             'agent_user_id' => 'nullable|exists:users,id',
             'marketing_agent_id' => 'nullable|exists:users,id',

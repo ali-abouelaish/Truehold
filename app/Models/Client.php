@@ -23,6 +23,8 @@ class Client extends Model
         'area_of_interest',
         'moving_date',
         'notes',
+        'current_landlord_name',
+        'current_landlord_contact_info',
         'registration_status',
         'agent_id',
         'marketing_agent_id',
