@@ -14,16 +14,17 @@ class AdminPermissionSeeder extends Seeder
      */
     public function run(): void
     {
-        // Define all available sections
+        // Define all available sections matching the navigation checks
         $sections = [
             'dashboard',
             'properties',
             'clients',
-            'rental-codes',
-            'call-logs',
+            'rental_codes',
+            'call_logs',
             'invoices',
-            'viewings',
-            'admin-permissions'
+            'group_viewings',
+            'users',
+            'admin_permissions'
         ];
 
         // Give full admin permissions to user ID 2
