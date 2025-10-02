@@ -10,6 +10,7 @@ use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\GroupViewingController;
 use App\Http\Controllers\CallLogController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\UserPermissionController;
 
 Route::get('/', function () {
     return redirect('/properties');
@@ -160,7 +161,28 @@ Route::middleware('auth')->prefix('admin')->group(function () {
     Route::post('/invoices/{invoice}/mark-paid', [InvoiceController::class, 'markAsPaid'])->name('admin.invoices.mark-paid');
     Route::post('/invoices/{invoice}/duplicate', [InvoiceController::class, 'duplicate'])->name('admin.invoices.duplicate');
     
-    // Call Log Management Routes
+    // Call Log Management Routes - Specific routes first
+    Route::get('/call-logs/stats', [CallLogController::class, 'stats'])->name('admin.call-logs.stats');
+    Route::get('/call-logs/follow-ups', [CallLogController::class, 'followUps'])->name('admin.call-logs.follow-ups');
+    Route::get('/call-logs/recent', [CallLogController::class, 'recent'])->name('admin.call-logs.recent');
+    Route::get('/call-logs/check-phone', [CallLogController::class, 'checkPhone'])->name('admin.call-logs.check-phone');
+    Route::get('/call-logs/previous-calls', [CallLogController::class, 'getPreviousCalls'])->name('admin.call-logs.previous-calls');
+    Route::post('/call-logs/{call_log}/update-next-step', [CallLogController::class, 'updateNextStep'])->name('admin.call-logs.update-next-step');
+    
+    // Admin Permissions Management
+    // New simplified permission system
+    Route::get('/user-permissions', [UserPermissionController::class, 'index'])->name('admin.user-permissions.index')->middleware('admin.permission:admin_permissions,view');
+    Route::get('/user-permissions/{user}/edit', [UserPermissionController::class, 'edit'])->name('admin.user-permissions.edit')->middleware('admin.permission:admin_permissions,edit');
+    Route::put('/user-permissions/{user}', [UserPermissionController::class, 'update'])->name('admin.user-permissions.update')->middleware('admin.permission:admin_permissions,edit');
+    Route::delete('/user-permissions/{user}/reset', [UserPermissionController::class, 'reset'])->name('admin.user-permissions.reset')->middleware('admin.permission:admin_permissions,delete');
+    
+    // Old complex permission system (keeping for now)
+    Route::get('/permissions', [App\Http\Controllers\AdminPermissionController::class, 'index'])->name('admin.permissions.index')->middleware('admin.permission:admin_permissions,view');
+    Route::get('/permissions/{user}/edit', [App\Http\Controllers\AdminPermissionController::class, 'edit'])->name('admin.permissions.edit')->middleware('admin.permission:admin_permissions,edit');
+    Route::put('/permissions/{user}', [App\Http\Controllers\AdminPermissionController::class, 'update'])->name('admin.permissions.update')->middleware('admin.permission:admin_permissions,edit');
+    Route::delete('/permissions/{user}/reset', [App\Http\Controllers\AdminPermissionController::class, 'reset'])->name('admin.permissions.reset')->middleware('admin.permission:admin_permissions,delete');
+    
+    // Resource routes after specific routes
     Route::resource('call-logs', CallLogController::class)->names([
         'index' => 'admin.call-logs.index',
         'create' => 'admin.call-logs.create',
@@ -170,9 +192,6 @@ Route::middleware('auth')->prefix('admin')->group(function () {
         'update' => 'admin.call-logs.update',
         'destroy' => 'admin.call-logs.destroy'
     ]);
-    Route::get('/call-logs/stats', [CallLogController::class, 'stats'])->name('admin.call-logs.stats');
-    Route::get('/call-logs/follow-ups', [CallLogController::class, 'followUps'])->name('admin.call-logs.follow-ups');
-    Route::get('/call-logs/recent', [CallLogController::class, 'recent'])->name('admin.call-logs.recent');
 });
 
 // Profile routes - require authentication

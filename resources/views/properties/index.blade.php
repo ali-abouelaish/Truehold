@@ -6,20 +6,33 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
-    <title>LET CONNECT - Find Your Perfect Home</title>
+    <title>TRUEHOLD - Find Your Perfect Home</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     
     <style>
-        body {
+        /* Dark Mode Properties Index */
+        html, body {
             font-family: 'Inter', sans-serif;
+            background-color: #343E4E !important;
+            color: #d1d5db !important;
+            min-height: 100vh;
+        }
+        
+        html {
+            background-color: #343E4E !important;
+        }
+        
+        .min-h-screen {
+            background-color: #343E4E !important;
         }
         
         .gradient-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #1f2937 0%, #374151 100%);
             position: relative;
             overflow: hidden;
+            border-bottom: 1px solid #374151;
         }
         
         .gradient-header::before {
@@ -29,7 +42,7 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: linear-gradient(135deg, rgba(102, 126, 234, 0.9) 0%, rgba(118, 75, 162, 0.9) 100%);
+            background: linear-gradient(135deg, rgba(31, 41, 55, 0.9) 0%, rgba(55, 65, 81, 0.9) 100%);
             z-index: 1;
         }
         
@@ -39,39 +52,42 @@
         }
         
         .glass-card {
-            background: rgba(255, 255, 255, 0.95);
+            background: rgba(31, 41, 55, 0.95);
             backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-            color: #1f2937;
+            border: 1px solid rgba(75, 85, 99, 0.3);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            color: #d1d5db;
         }
         
         .glass-card:hover {
-            background: rgba(255, 255, 255, 0.98);
-            border-color: rgba(255, 255, 255, 0.4);
-            color: #111827;
+            background: rgba(55, 65, 81, 0.98);
+            border-color: rgba(251, 191, 36, 0.4);
+            color: #f9fafb;
             transform: scale(1.05);
         }
         
         .filters-section {
-            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
-            border-bottom: 1px solid rgba(229, 231, 235, 0.5);
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            background: linear-gradient(135deg, #1f2937 0%, #374151 100%);
+            border-bottom: 1px solid rgba(75, 85, 99, 0.5);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
         }
         
         .property-card {
-            background: white;
+            background: #1f2937;
             border-radius: 20px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
-            border: 1px solid rgba(229, 231, 235, 0.5);
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.4), 0 5px 20px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(75, 85, 99, 0.5);
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             overflow: hidden;
+            height: 100%; /* Equal height for all cards */
+            display: flex;
+            flex-direction: column;
         }
         
         .property-card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 25px 80px rgba(0, 0, 0, 0.15);
-            border-color: #3b82f6;
+            transform: translateY(-12px);
+            box-shadow: 0 30px 100px rgba(0, 0, 0, 0.5), 0 10px 40px rgba(0, 0, 0, 0.3);
+            border-color: #fbbf24;
         }
         
         .property-image {
@@ -80,6 +96,38 @@
         
         .property-card:hover .property-image {
             transform: scale(1.08);
+        }
+        
+        /* Equal height cards with proper content distribution */
+        .property-card .p-8 {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        
+        /* Enhanced shadows for better depth */
+        .property-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(251, 191, 36, 0.1) 0%, rgba(0, 0, 0, 0.1) 100%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            border-radius: 20px;
+            pointer-events: none;
+        }
+        
+        .property-card:hover::before {
+            opacity: 1;
+        }
+        
+        /* Ensure grid items are equal height */
+        .grid > .block {
+            display: flex;
         }
         
         .photo-badge {
@@ -94,18 +142,18 @@
         }
         
         .price-tag {
-            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
-            color: white;
+            background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+            color: #1f2937;
             padding: 0.75rem 1.5rem;
             border-radius: 50px;
             font-weight: 700;
-            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+            box-shadow: 0 4px 15px rgba(251, 191, 36, 0.3);
             transition: all 0.3s ease;
         }
         
         .price-tag:hover {
             transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(59, 130, 246, 0.4);
+            box-shadow: 0 8px 25px rgba(251, 191, 36, 0.4);
         }
         
         .type-badge {
@@ -118,14 +166,14 @@
         }
         
         .action-button {
-            background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
-            color: #1f2937;
+            background: linear-gradient(135deg, #374151 0%, #4b5563 100%);
+            color: #d1d5db;
             padding: 0.75rem 1.5rem;
             border-radius: 12px;
             font-weight: 600;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
-            border: 1px solid #d1d5db;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            border: 1px solid #6b7280;
             cursor: pointer;
             display: inline-flex;
             align-items: center;
@@ -136,21 +184,21 @@
         
         .action-button:hover {
             transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
-            background: linear-gradient(135deg, #e5e7eb 0%, #d1d5db 100%);
-            border-color: #9ca3af;
-            color: #111827;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+            background: linear-gradient(135deg, #4b5563 0%, #6b7280 100%);
+            border-color: #fbbf24;
+            color: #f9fafb;
         }
         
         .secondary-button {
-            background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
-            color: #374151;
+            background: linear-gradient(135deg, #1f2937 0%, #374151 100%);
+            color: #9ca3af;
             padding: 0.75rem 1.5rem;
             border-radius: 12px;
             font-weight: 600;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.06);
-            border: 1px solid #e5e7eb;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            border: 1px solid #6b7280;
             cursor: pointer;
             display: inline-flex;
             align-items: center;
@@ -161,21 +209,156 @@
         
         .secondary-button:hover {
             transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
-            background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
-            border-color: #d1d5db;
-            color: #1f2937;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+            background: linear-gradient(135deg, #4b5563 0%, #6b7280 100%);
+            border-color: #fbbf24;
+            color: #f9fafb;
+        }
+        
+        /* Dark mode overrides for all elements */
+        .bg-white { background-color: #1f2937 !important; }
+        .bg-gray-50 { background-color: #111827 !important; }
+        .bg-gray-100 { background-color: #1f2937 !important; }
+        .bg-gray-200 { background-color: #374151 !important; }
+        .bg-gray-300 { background-color: #4b5563 !important; }
+        .bg-gray-400 { background-color: #6b7280 !important; }
+        .bg-gray-500 { background-color: #9ca3af !important; }
+        .bg-gray-600 { background-color: #d1d5db !important; }
+        .bg-gray-700 { background-color: #f3f4f6 !important; }
+        .bg-gray-800 { background-color: #f9fafb !important; }
+        .bg-gray-900 { background-color: #ffffff !important; }
+        
+        .text-gray-900 { color: #f9fafb !important; }
+        .text-gray-800 { color: #f3f4f6 !important; }
+        .text-gray-700 { color: #d1d5db !important; }
+        .text-gray-600 { color: #9ca3af !important; }
+        .text-gray-500 { color: #6b7280 !important; }
+        .text-gray-400 { color: #4b5563 !important; }
+        .text-gray-300 { color: #374151 !important; }
+        .text-gray-200 { color: #1f2937 !important; }
+        .text-gray-100 { color: #111827 !important; }
+        
+        .border-gray-200 { border-color: #374151 !important; }
+        .border-gray-300 { border-color: #4b5563 !important; }
+        .border-gray-400 { border-color: #6b7280 !important; }
+        .border-gray-500 { border-color: #9ca3af !important; }
+        
+        /* Form elements */
+        input, select, textarea {
+            background-color: #374151 !important;
+            border-color: #4b5563 !important;
+            color: #d1d5db !important;
+        }
+        
+        input::placeholder, textarea::placeholder, select::placeholder {
+            color: #9ca3af !important;
+        }
+        
+        input:focus, select:focus, textarea:focus {
+            border-color: #fbbf24 !important;
+            box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.1) !important;
+        }
+        
+        /* Cards and containers */
+        .card, .glass-card {
+            background-color: #1f2937 !important;
+            border-color: #374151 !important;
+            color: #d1d5db !important;
+        }
+        
+        /* Buttons */
+        .btn, .button {
+            background: linear-gradient(135deg, #374151, #4b5563) !important;
+            border: 1px solid #6b7280 !important;
+            color: #d1d5db !important;
+        }
+        
+        .btn:hover, .button:hover {
+            background: linear-gradient(135deg, #4b5563, #6b7280) !important;
+            border-color: #fbbf24 !important;
+            color: #f9fafb !important;
+        }
+        
+        /* Links */
+        a {
+            color: #d1d5db !important;
+        }
+        
+        a:hover {
+            color: #fbbf24 !important;
+        }
+        
+        /* Headers */
+        h1, h2, h3, h4, h5, h6 {
+            color: #f9fafb !important;
+        }
+        
+        /* Text elements */
+        p, div, span {
+            color: #d1d5db !important;
+        }
+        
+        small {
+            color: #9ca3af !important;
+        }
+        
+        strong {
+            color: #ffffff !important;
+        }
+        
+        /* Navigation */
+        nav {
+            background-color: #1f2937 !important;
+            border-bottom-color: #374151 !important;
+        }
+        
+        /* Footer */
+        footer {
+            background-color: #343E4E !important;
+            border-top-color: #374151 !important;
+        }
+        
+        /* Ensure all backgrounds are dark */
+        * {
+            background-color: inherit;
+        }
+        
+        .bg-white, .bg-gray-50, .bg-gray-100 {
+            background-color: #1f2937 !important;
+        }
+        
+        .bg-gray-200 {
+            background-color: #374151 !important;
+        }
+        
+        .bg-gray-300 {
+            background-color: #4b5563 !important;
+        }
+        
+        /* Main content areas */
+        .container, .max-w-7xl, .max-w-6xl, .max-w-5xl, .max-w-4xl {
+            background-color: #343E4E !important;
+        }
+        
+        /* Sections and divs */
+        section, div, main, article, aside {
+            background-color: transparent !important;
+        }
+        
+        /* Override any remaining light backgrounds */
+        [class*="bg-"]:not([class*="bg-gray-9"]):not([class*="bg-gray-8"]):not([class*="bg-gray-7"]) {
+            background-color: #1f2937 !important;
         }
         
         .search-button {
-            background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
-            color: #065f46;
+            background: linear-gradient(135deg, #fbbf24, #f59e0b);
+            color: #111827;
             padding: 1rem 2rem;
             border-radius: 12px;
             font-weight: 600;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.15);
-            border: 1px solid #bbf7d0;
+            box-shadow: 0 4px 15px rgba(251, 191, 36, 0.3);
+            border: 2px solid #f59e0b;
             cursor: pointer;
             display: inline-flex;
             align-items: center;
@@ -185,10 +368,10 @@
         
         .search-button:hover {
             transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(16, 185, 129, 0.2);
-            background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
-            border-color: #86efac;
-            color: #064e3b;
+            box-shadow: 0 8px 25px rgba(251, 191, 36, 0.4);
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            border-color: #d97706;
+            color: #111827;
         }
         
         .filter-input {
@@ -326,38 +509,48 @@
             }
         }
         
-        /* Mobile filter toggle */
+        /* Filter toggle button */
         .filter-toggle {
             display: block;
             width: 100%;
-            padding: 12px;
-            background: #f8fafc;
-            border: 1px solid #e2e8f0;
-            border-radius: 8px;
+            padding: 16px 20px;
+            background: linear-gradient(135deg, #374151, #4b5563);
+            border: 2px solid #6b7280;
+            border-radius: 12px;
             text-align: center;
             font-weight: 600;
-            color: #475569;
-            margin-bottom: 16px;
+            color: #d1d5db;
+            margin-bottom: 20px;
             transition: all 0.3s ease;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
         }
         
         .filter-toggle:hover {
-            background: #f1f5f9;
-            border-color: #cbd5e1;
+            background: linear-gradient(135deg, #4b5563, #6b7280);
+            border-color: #fbbf24;
+            color: #f9fafb;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        }
+        
+        .filter-toggle:active {
+            transform: translateY(0);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
         }
         
         .filters-content {
             display: none;
-        }
-        
-        @media (min-width: 640px) {
-            .filters-content {
-                display: block;
-            }
+            opacity: 0;
+            max-height: 0;
+            overflow: hidden;
+            transition: all 0.3s ease;
         }
         
         .filters-content.show {
             display: block;
+            opacity: 1;
+            max-height: 2000px;
         }
         
         /* Mobile pagination */
@@ -488,9 +681,6 @@
                     </div>
                     <div class="flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-4 w-full sm:w-auto">
                         @auth
-                        <a href="{{ route('admin.dashboard') }}" class="text-gray-600 hover:text-gray-800 font-medium transition-colors duration-200 text-sm sm:text-base">
-                            <i class="fas fa-cog mr-2"></i>Admin
-                        </a>
                         @else
                         <a href="{{ route('login') }}" class="text-gray-600 hover:text-gray-800 font-medium transition-colors duration-200 text-sm sm:text-base">
                             <i class="fas fa-sign-in-alt mr-2"></i>Login
@@ -519,14 +709,14 @@
         <!-- Enhanced Filters -->
         <div class="filters-section">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
-                <!-- Mobile filter toggle -->
-                <button type="button" class="filter-toggle sm:hidden w-full mb-4" onclick="toggleFilters()">
+                <!-- Filter toggle button -->
+                <button type="button" class="filter-toggle w-full mb-4" onclick="toggleFilters()">
                     <i class="fas fa-filter mr-2"></i>
                     <span id="filterToggleText">Show Filters</span>
                     <i class="fas fa-chevron-down ml-2" id="filterToggleIcon"></i>
                 </button>
                 
-                <div class="filters-content sm:block" id="filtersContent">
+                <div class="filters-content" id="filtersContent">
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 sm:mb-8 space-y-4 sm:space-y-0">
                         <h2 class="text-xl sm:text-2xl font-bold text-gray-800 flex items-center space-x-2 sm:space-x-3">
                             <div class="bg-blue-100 p-2 sm:p-3 rounded-full">
@@ -535,12 +725,6 @@
                             <span>Search Filters</span>
                         </h2>
                         <div class="flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-4 w-full sm:w-auto">
-                            <a href="{{ route('properties.index') }}" class="text-gray-600 hover:text-gray-800 font-medium transition-colors duration-300 text-sm sm:text-base">
-                                <i class="fas fa-times mr-2"></i>Clear Filters
-                            </a>
-                            <a href="{{ route('properties.map') }}" class="text-blue-600 hover:text-blue-800 font-medium transition-colors duration-300 text-sm sm:text-base">
-                                <i class="fas fa-map-marked-alt mr-2"></i>Switch to Map View
-                            </a>
                         </div>
                     </div>
                     
@@ -676,15 +860,15 @@
             @endif
 
             <!-- Enhanced Results Summary -->
-            <div class="results-summary mb-6 sm:mb-8 animate-fade-in">
+            <div class="results-summary mb-6 sm:mb-8 animate-fade-in" style="background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%); border: 2px solid #fbbf24; border-radius: 16px; padding: 24px; box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);">
                 <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between space-y-2 sm:space-y-0">
-                    <div class="text-gray-700 text-sm sm:text-base">
-                        <span class="font-bold text-lg sm:text-xl">{{ $properties->total() }}</span> properties found
+                    <div style="color: #fbbf24; font-size: 14px;">
+                        <span style="font-weight: bold; font-size: 20px; color: #ffffff; text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);">{{ $properties->total() }}</span> properties found
                         @if(request('location') || request('property_type') || request('min_price') || request('max_price') || request('available_date'))
-                            <span class="text-gray-500 ml-2">(filtered)</span>
+                            <span style="color: #fbbf24; margin-left: 8px;">(filtered)</span>
                         @endif
                     </div>
-                    <div class="text-xs sm:text-sm text-gray-600 bg-white px-3 sm:px-4 py-2 rounded-full shadow-sm">
+                    <div style="font-size: 12px; color: #1a1a1a; background: linear-gradient(135deg, #fbbf24, #f59e0b); padding: 8px 16px; border-radius: 20px; box-shadow: 0 4px 15px rgba(251, 191, 36, 0.4); border: 2px solid #f59e0b;">
                         Showing {{ $properties->firstItem() ?? 0 }}-{{ $properties->lastItem() ?? 0 }} of {{ $properties->total() }}
                     </div>
                 </div>

@@ -6,7 +6,10 @@
 <div class="container mx-auto px-4 py-6">
     <div class="flex justify-between items-center mb-6">
         <h1 class="text-3xl font-bold text-gray-900">Call Logs</h1>
-        <a href="{{ route('admin.call-logs.create') }}" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+        <a href="{{ route('admin.call-logs.create') }}" class="font-bold py-2 px-4 rounded transition-colors"
+           style="background: linear-gradient(135deg, #1f2937, #374151); border: 1px solid #fbbf24; color: #fbbf24;"
+           onmouseover="this.style.background='linear-gradient(135deg, #fbbf24, #f59e0b)'; this.style.color='#1f2937';"
+           onmouseout="this.style.background='linear-gradient(135deg, #1f2937, #374151)'; this.style.color='#fbbf24';">
             Add New Call Log
         </a>
     </div>
@@ -20,7 +23,7 @@
     <!-- Filters -->
     <div class="bg-white shadow rounded-lg p-6 mb-6">
         <h2 class="text-lg font-semibold mb-4">Filters</h2>
-        <form method="GET" action="{{ route('admin.call-logs.index') }}" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <form method="GET" action="{{ route('admin.call-logs.index') }}" class="grid grid-cols-1 md:grid-cols-5 gap-4">
             <div>
                 <label class="block text-sm font-medium text-gray-700">Agent</label>
                 <select name="agent_id" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">
@@ -31,6 +34,13 @@
                         </option>
                     @endforeach
                 </select>
+            </div>
+            
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Phone Number</label>
+                <input type="text" name="landlord_phone" value="{{ request('landlord_phone') }}" 
+                       placeholder="Search by phone number" 
+                       class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">
             </div>
             
             <div>
@@ -76,8 +86,12 @@
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Agent</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Landlord</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Phone</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Property</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Beds</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Bathrooms</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Next Step</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Outcome</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
@@ -96,12 +110,32 @@
                                 {{ $callLog->landlord_name }}
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                {{ $callLog->landlord_phone ?? 'N/A' }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                 {{ Str::limit($callLog->property_address, 30) }}
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
-                                    {{ ucfirst(str_replace('_', ' ', $callLog->call_type)) }}
-                                </span>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                £{{ number_format($callLog->advertised_rent ?? 0, 0) }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                {{ $callLog->number_of_beds ?? 'N/A' }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                {{ $callLog->number_of_bathrooms ?? 'N/A' }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                <select class="next-step-status border-gray-300 rounded-md text-sm w-40" 
+                                        data-call-log-id="{{ $callLog->id }}"
+                                        onchange="updateNextStepStatus({{ $callLog->id }}, this.value)">
+                                    <option value="">Select Next Step</option>
+                                    <option value="send_terms" {{ $callLog->next_step_status == 'send_terms' ? 'selected' : '' }}>Send Terms</option>
+                                    <option value="send_compliance_docs" {{ $callLog->next_step_status == 'send_compliance_docs' ? 'selected' : '' }}>Send Compliance Docs</option>
+                                    <option value="awaiting_response" {{ $callLog->next_step_status == 'awaiting_response' ? 'selected' : '' }}>Awaiting Response</option>
+                                    <option value="collect_keys" {{ $callLog->next_step_status == 'collect_keys' ? 'selected' : '' }}>Collect Keys</option>
+                                    <option value="tenant_reference_started" {{ $callLog->next_step_status == 'tenant_reference_started' ? 'selected' : '' }}>Tenant Reference Started</option>
+                                    <option value="other" {{ $callLog->next_step_status == 'other' ? 'selected' : '' }}>Other</option>
+                                </select>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
@@ -128,7 +162,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="8" class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">
+                            <td colspan="12" class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">
                                 No call logs found.
                             </td>
                         </tr>
@@ -209,4 +243,78 @@
         </div>
     </div>
 </div>
+
+<script>
+function updateNextStepStatus(callLogId, nextStepStatus) {
+    // Show loading state
+    const select = document.querySelector(`select[data-call-log-id="${callLogId}"]`);
+    select.disabled = true;
+    select.classList.add('opacity-50');
+    
+    // Send AJAX request
+    fetch(`/admin/call-logs/${callLogId}/update-next-step`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+            'X-Requested-With': 'XMLHttpRequest'
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+            next_step_status: nextStepStatus
+        })
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        // Show success message
+        showNotification('Next step status updated successfully', 'success');
+        
+        // Re-enable select
+        select.disabled = false;
+        select.classList.remove('opacity-50');
+    })
+    .catch(error => {
+        console.error('Error updating next step status:', error);
+        
+        // Show error message
+        showNotification('Error updating next step status', 'error');
+        
+        // Re-enable select
+        select.disabled = false;
+        select.classList.remove('opacity-50');
+        
+        // Revert the value
+        select.value = select.getAttribute('data-original-value') || '';
+    });
+}
+
+function showNotification(message, type) {
+    const notification = document.createElement('div');
+    notification.className = `fixed top-4 right-4 px-4 py-3 rounded z-50 ${
+        type === 'success' 
+            ? 'bg-green-100 border border-green-400 text-green-700' 
+            : 'bg-red-100 border border-red-400 text-red-700'
+    }`;
+    notification.textContent = message;
+    document.body.appendChild(notification);
+    
+    // Remove notification after 3 seconds
+    setTimeout(() => {
+        notification.remove();
+    }, 3000);
+}
+
+// Store original values for revert functionality
+document.addEventListener('DOMContentLoaded', function() {
+    const nextStepSelects = document.querySelectorAll('.next-step-status');
+    nextStepSelects.forEach(select => {
+        select.setAttribute('data-original-value', select.value);
+    });
+});
+</script>
 @endsection

@@ -3,22 +3,348 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Property Map - LET CONNECT</title>
+    <title>Property Map - TRUEHOLD</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     @vite(['resources/css/app.css'])
     
     <style>
+        /* Admin Dashboard Dark Mode Styling */
         body {
+            background-color: #111827 !important;
+            color: #f9fafb !important;
             font-family: 'Inter', sans-serif;
             margin: 0;
             padding: 0;
         }
         
+        html {
+            background-color: #111827 !important;
+        }
+        
+        .main-content {
+            background-color: #111827 !important;
+        }
+        
+        /* Dark mode overrides */
+        .bg-white {
+            background-color: #1f2937 !important;
+            border-color: #374151 !important;
+        }
+        
+        .text-gray-900 {
+            color: #d1d5db !important;
+        }
+        
+        .text-gray-700 {
+            color: #9ca3af !important;
+        }
+        
+        .text-gray-500 {
+            color: #6b7280 !important;
+        }
+        
+        /* Lighter placeholders */
+        input::placeholder, textarea::placeholder, select::placeholder {
+            color: #9ca3af !important;
+        }
+        
+        /* Form inputs dark mode */
+        input, textarea, select {
+            background-color: #374151 !important;
+            border-color: #4b5563 !important;
+            color: #d1d5db !important;
+        }
+        
+        input:focus, textarea:focus, select:focus {
+            border-color: #fbbf24 !important;
+            box-shadow: 0 0 0 1px #fbbf24 !important;
+        }
+        
+        /* All labels lighter - comprehensive coverage */
+        label, .form-label, .label, .field-label, .control-label, .input-label,
+        .col-form-label, .custom-control-label, .form-check-label, .radio-label,
+        .checkbox-label, .switch-label, .toggle-label, .btn-label,
+        .nav-label, .menu-label, .sidebar-label, .card-label,
+        .table-label, .list-label, .item-label, .section-label {
+            color: #d1d5db !important;
+        }
+        
+        /* Field labels and descriptions */
+        .field-label, .field-description, .help-text {
+            color: #d1d5db !important;
+        }
+        
+        /* Required field indicators */
+        .required, .asterisk {
+            color: #fbbf24 !important;
+        }
+        
+        /* Form groups and containers */
+        .form-group, .form-control-group {
+            margin-bottom: 1rem;
+        }
+        
+        /* Input groups */
+        .input-group-text {
+            background-color: #374151 !important;
+            border-color: #4b5563 !important;
+            color: #d1d5db !important;
+        }
+        
+        /* Form validation */
+        .is-invalid {
+            border-color: #ef4444 !important;
+        }
+        
+        .invalid-feedback {
+            color: #ef4444 !important;
+        }
+        
+        .is-valid {
+            border-color: #10b981 !important;
+        }
+        
+        /* Form sections and headers */
+        .form-section, .card-header h3, .card-header h4, .card-header h5, .card-header h6 {
+            color: #d1d5db !important;
+        }
+        
+        /* Help text and descriptions */
+        .form-text, .help-block, .field-help {
+            color: #9ca3af !important;
+        }
+        
+        /* Specific form elements */
+        .form-control, .form-select, .form-check-input {
+            background-color: #374151 !important;
+            border-color: #4b5563 !important;
+            color: #d1d5db !important;
+        }
+        
+        .form-control:focus, .form-select:focus {
+            background-color: #374151 !important;
+            border-color: #fbbf24 !important;
+            box-shadow: 0 0 0 0.2rem rgba(251, 191, 36, 0.25) !important;
+            color: #d1d5db !important;
+        }
+        
+        /* Checkboxes and radio buttons */
+        .form-check-label {
+            color: #d1d5db !important;
+        }
+        
+        .form-check-input:checked {
+            background-color: #fbbf24 !important;
+            border-color: #fbbf24 !important;
+        }
+        
+        /* Select dropdowns */
+        select option {
+            background-color: #374151 !important;
+            color: #d1d5db !important;
+        }
+        
+        /* Text areas */
+        textarea.form-control {
+            background-color: #374151 !important;
+            border-color: #4b5563 !important;
+            color: #d1d5db !important;
+        }
+        
+        /* Admin panel specific labels */
+        .admin-label, .panel-label, .dashboard-label, .content-label,
+        .widget-label, .component-label, .module-label, .feature-label,
+        .setting-label, .option-label, .config-label, .preference-label {
+            color: #d1d5db !important;
+        }
+        
+        /* Table and list labels */
+        th, .table-header, .list-header, .group-header {
+            color: #d1d5db !important;
+        }
+        
+        /* Navigation labels */
+        .nav-link, .menu-item, .sidebar-link {
+            color: #d1d5db !important;
+        }
+        
+        /* Card and widget labels */
+        .card-title, .widget-title, .panel-title, .section-title {
+            color: #d1d5db !important;
+        }
+        
+        /* Button labels */
+        .btn-text, .button-text, .link-text {
+            color: #d1d5db !important;
+        }
+        
+        /* Catch-all for any remaining labels */
+        [class*="label"], [class*="title"], [class*="header"] {
+            color: #d1d5db !important;
+        }
+        
+        /* Override any white text that should be lighter */
+        .text-white {
+            color: #d1d5db !important;
+        }
+        
+        /* Ensure all form-related text is lighter */
+        .form-text, .form-description, .field-description {
+            color: #9ca3af !important;
+        }
+        
+        .border-gray-200 {
+            border-color: #374151 !important;
+        }
+        
+        .bg-gray-50 {
+            background-color: #374151 !important;
+        }
+        
+        .bg-gray-100 {
+            background-color: #4b5563 !important;
+        }
+        
+        /* Gold accent colors */
+        .text-blue-600, .text-green-600, .text-purple-600, .text-orange-600, .text-red-600, .text-indigo-600, .text-teal-600, .text-yellow-600 {
+            color: #fbbf24 !important;
+        }
+        
+        .border-blue-200, .border-green-200, .border-purple-200, .border-orange-200, .border-red-200, .border-indigo-200, .border-teal-200, .border-yellow-200 {
+            border-color: #fbbf24 !important;
+        }
+        
+        /* Tables dark mode */
+        table {
+            background-color: #1f2937 !important;
+            color: #d1d5db !important;
+        }
+        
+        th {
+            background-color: #374151 !important;
+            color: #d1d5db !important;
+            border-color: #4b5563 !important;
+        }
+        
+        td {
+            background-color: #1f2937 !important;
+            color: #d1d5db !important;
+            border-color: #4b5563 !important;
+        }
+        
+        tr:hover td {
+            background-color: #374151 !important;
+        }
+        
+        /* Cards dark mode */
+        .card, .bg-white {
+            background-color: #1f2937 !important;
+            border-color: #374151 !important;
+        }
+        
+        /* Standardized button styles */
+        .btn, button, input[type="submit"], input[type="button"], input[type="reset"] {
+            background: linear-gradient(135deg, #374151, #4b5563) !important;
+            border: 1px solid #6b7280 !important;
+            color: #d1d5db !important;
+            padding: 0.5rem 1rem !important;
+            border-radius: 0.375rem !important;
+            font-weight: 500 !important;
+            transition: all 0.3s ease !important;
+            text-decoration: none !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            cursor: pointer !important;
+        }
+        
+        .btn:hover, button:hover, input[type="submit"]:hover, input[type="button"]:hover, input[type="reset"]:hover {
+            background: linear-gradient(135deg, #4b5563, #6b7280) !important;
+            border-color: #fbbf24 !important;
+            color: #f9fafb !important;
+            transform: translateY(-1px) !important;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+        }
+        
+        .btn:active, button:active, input[type="submit"]:active, input[type="button"]:active, input[type="reset"]:active {
+            transform: translateY(0) !important;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2) !important;
+        }
+        
+        /* Primary buttons (gold accent) */
+        .btn-primary, .btn-success, .btn-warning, .btn-info {
+            background: linear-gradient(135deg, #fbbf24, #f59e0b) !important;
+            border-color: #f59e0b !important;
+            color: #111827 !important;
+        }
+        
+        .btn-primary:hover, .btn-success:hover, .btn-warning:hover, .btn-info:hover {
+            background: linear-gradient(135deg, #f59e0b, #d97706) !important;
+            border-color: #d97706 !important;
+            color: #111827 !important;
+        }
+        
+        /* Danger buttons (red) */
+        .btn-danger, .btn-delete, .btn-remove {
+            background: linear-gradient(135deg, #ef4444, #dc2626) !important;
+            border-color: #dc2626 !important;
+            color: #ffffff !important;
+        }
+        
+        .btn-danger:hover, .btn-delete:hover, .btn-remove:hover {
+            background: linear-gradient(135deg, #dc2626, #b91c1c) !important;
+            border-color: #b91c1c !important;
+            color: #ffffff !important;
+        }
+        
+        /* Secondary buttons (dark gray) */
+        .btn-secondary, .btn-outline, .btn-cancel {
+            background: linear-gradient(135deg, #374151, #4b5563) !important;
+            border-color: #6b7280 !important;
+            color: #d1d5db !important;
+        }
+        
+        .btn-secondary:hover, .btn-outline:hover, .btn-cancel:hover {
+            background: linear-gradient(135deg, #4b5563, #6b7280) !important;
+            border-color: #9ca3af !important;
+            color: #f9fafb !important;
+        }
+        
+        /* Button sizes */
+        .btn-sm {
+            padding: 0.25rem 0.5rem !important;
+            font-size: 0.875rem !important;
+        }
+        
+        .btn-lg {
+            padding: 0.75rem 1.5rem !important;
+            font-size: 1.125rem !important;
+        }
+        
+        /* Button states */
+        .btn:disabled, button:disabled, input[type="submit"]:disabled, input[type="button"]:disabled, input[type="reset"]:disabled {
+            opacity: 0.5 !important;
+            cursor: not-allowed !important;
+            transform: none !important;
+        }
+        
+        /* Remove all white backgrounds */
+        .bg-white, .bg-gray-50, .bg-gray-100, .bg-gray-200, .bg-gray-300, .bg-gray-400, .bg-gray-500, .bg-gray-600, .bg-gray-700, .bg-gray-800, .bg-gray-900 {
+            background-color: #1f2937 !important;
+        }
+        
+        /* Make all text light */
+        .text-gray-900, .text-gray-800, .text-gray-700, .text-gray-600, .text-gray-500, .text-gray-400, .text-gray-300, .text-gray-200, .text-gray-100, .text-gray-50 {
+            color: #d1d5db !important;
+        }
+        
+        /* Map-specific styling */
         .gradient-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #1f2937 0%, #374151 100%);
             position: relative;
             overflow: hidden;
+            border-bottom: 1px solid #374151;
         }
         
         .gradient-header::before {
@@ -28,7 +354,7 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: linear-gradient(135deg, rgba(102, 126, 234, 0.9) 0%, rgba(118, 75, 162, 0.9) 100%);
+            background: linear-gradient(135deg, rgba(31, 41, 55, 0.9) 0%, rgba(55, 65, 81, 0.9) 100%);
             z-index: 1;
         }
         
@@ -38,118 +364,113 @@
         }
         
         .glass-card {
-            background: rgba(255, 255, 255, 0.95);
+            background: rgba(31, 41, 55, 0.95);
             backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-            color: #1f2937;
+            border: 1px solid rgba(75, 85, 99, 0.3);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            color: #d1d5db;
         }
         
         .glass-card:hover {
-            background: rgba(255, 255, 255, 0.98);
-            border-color: rgba(255, 255, 255, 0.4);
-            color: #111827;
+            background: rgba(55, 65, 81, 0.98);
+            border-color: rgba(251, 191, 36, 0.4);
+            color: #f9fafb;
             transform: scale(1.05);
         }
         
         .filters-section {
-            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
-            border-bottom: 1px solid rgba(229, 231, 235, 0.5);
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            background: linear-gradient(135deg, #1f2937 0%, #374151 100%);
+            border-bottom: 1px solid rgba(75, 85, 99, 0.5);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
         }
         
         .action-button {
-            background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
-            color: #1f2937;
-            padding: 0.75rem 1.5rem;
-            border-radius: 12px;
-            font-weight: 600;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
-            border: 1px solid #d1d5db;
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-            text-decoration: none;
+            background: linear-gradient(135deg, #374151, #4b5563) !important;
+            border: 1px solid #6b7280 !important;
+            color: #d1d5db !important;
+            padding: 0.5rem 1rem !important;
+            border-radius: 0.375rem !important;
+            font-weight: 500 !important;
+            transition: all 0.3s ease !important;
+            text-decoration: none !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            cursor: pointer !important;
         }
         
         .action-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
-            background: linear-gradient(135deg, #e5e7eb 0%, #d1d5db 100%);
-            border-color: #9ca3af;
-            color: #111827;
+            background: linear-gradient(135deg, #4b5563, #6b7280) !important;
+            border-color: #fbbf24 !important;
+            color: #f9fafb !important;
+            transform: translateY(-1px) !important;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
         }
         
         .secondary-button {
-            background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
-            color: #374151;
-            padding: 0.75rem 1.5rem;
-            border-radius: 12px;
-            font-weight: 600;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.06);
-            border: 1px solid #e5e7eb;
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-            text-decoration: none;
+            background: linear-gradient(135deg, #374151, #4b5563) !important;
+            border: 1px solid #6b7280 !important;
+            color: #d1d5db !important;
+            padding: 0.5rem 1rem !important;
+            border-radius: 0.375rem !important;
+            font-weight: 500 !important;
+            transition: all 0.3s ease !important;
+            text-decoration: none !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            cursor: pointer !important;
         }
         
         .secondary-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
-            background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
-            border-color: #d1d5db;
-            color: #1f2937;
+            background: linear-gradient(135deg, #4b5563, #6b7280) !important;
+            border-color: #9ca3af !important;
+            color: #f9fafb !important;
+            transform: translateY(-1px) !important;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
         }
         
         .search-button {
-            background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
-            color: #065f46;
-            padding: 1rem 2rem;
-            border-radius: 12px;
-            font-weight: 600;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.15);
-            border: 1px solid #bbf7d0;
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
+            background: linear-gradient(135deg, #fbbf24, #f59e0b) !important;
+            border-color: #f59e0b !important;
+            color: #111827 !important;
+            padding: 0.5rem 1rem !important;
+            border-radius: 0.375rem !important;
+            font-weight: 500 !important;
+            transition: all 0.3s ease !important;
+            text-decoration: none !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            cursor: pointer !important;
         }
         
         .search-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(16, 185, 129, 0.2);
-            background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
-            border-color: #86efac;
-            color: #064e3b;
+            background: linear-gradient(135deg, #f59e0b, #d97706) !important;
+            border-color: #d97706 !important;
+            color: #111827 !important;
+            transform: translateY(-1px) !important;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
         }
         
         .filter-input {
-            background: white;
-            border: 2px solid #e5e7eb;
-            border-radius: 12px;
-            padding: 0.875rem 1rem;
-            transition: all 0.3s ease;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            background-color: #374151 !important;
+            border-color: #4b5563 !important;
+            color: #d1d5db !important;
+            border-radius: 0.375rem !important;
+            padding: 0.5rem 1rem !important;
+            transition: all 0.3s ease !important;
         }
         
         .filter-input:focus {
-            outline: none;
-            border-color: #3b82f6;
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+            outline: none !important;
+            border-color: #fbbf24 !important;
+            box-shadow: 0 0 0 1px #fbbf24 !important;
         }
         
         .filter-label {
             font-weight: 600;
-            color: #374151;
+            color: #d1d5db !important;
             margin-bottom: 0.5rem;
             display: block;
         }
@@ -177,12 +498,12 @@
         }
         
         .success-message {
-            background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
-            border: 1px solid #10b981;
-            color: #065f46;
+            background: linear-gradient(135deg, #1f2937 0%, #374151 100%);
+            border: 1px solid #fbbf24;
+            color: #d1d5db;
             padding: 1.5rem;
             border-radius: 16px;
-            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.2);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
             margin-bottom: 2rem;
         }
         
@@ -195,38 +516,48 @@
             to { opacity: 1; transform: translateY(0); }
         }
         
-        /* Mobile filter toggle */
+        /* Filter toggle button */
         .filter-toggle {
             display: block;
             width: 100%;
-            padding: 12px;
-            background: #f8fafc;
-            border: 1px solid #e2e8f0;
-            border-radius: 8px;
+            padding: 16px 20px;
+            background: linear-gradient(135deg, #374151, #4b5563);
+            border: 2px solid #6b7280;
+            border-radius: 12px;
             text-align: center;
             font-weight: 600;
-            color: #475569;
-            margin-bottom: 16px;
+            color: #d1d5db;
+            margin-bottom: 20px;
             transition: all 0.3s ease;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
         }
         
         .filter-toggle:hover {
-            background: #f1f5f9;
-            border-color: #cbd5e1;
+            background: linear-gradient(135deg, #4b5563, #6b7280);
+            border-color: #fbbf24;
+            color: #f9fafb;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        }
+        
+        .filter-toggle:active {
+            transform: translateY(0);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
         }
         
         .filters-content {
             display: none;
-        }
-        
-        @media (min-width: 640px) {
-            .filters-content {
-                display: block;
-            }
+            opacity: 0;
+            max-height: 0;
+            overflow: hidden;
+            transition: all 0.3s ease;
         }
         
         .filters-content.show {
             display: block;
+            opacity: 1;
+            max-height: 2000px;
         }
         
         /* Mobile-first responsive design */
@@ -273,9 +604,11 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            background: white;
+            background: #1f2937;
+            color: #d1d5db;
             padding: 30px;
             border-radius: 15px;
+            border: 1px solid #374151;
             box-shadow: 0 10px 30px rgba(0,0,0,0.2);
             text-align: center;
             z-index: 1000;
@@ -471,9 +804,6 @@
                     </div>
                     <div class="flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-4 w-full sm:w-auto">
                         @auth
-                        <a href="{{ route('admin.dashboard') }}" class="text-gray-600 hover:text-gray-800 font-medium transition-colors duration-200 text-sm sm:text-base">
-                            <i class="fas fa-cog mr-2"></i>Admin
-                        </a>
                         @else
                         <a href="{{ route('login') }}" class="text-gray-600 hover:text-gray-800 font-medium transition-colors duration-200 text-sm sm:text-base">
                             <i class="fas fa-sign-in-alt mr-2"></i>Login
@@ -502,14 +832,14 @@
         <!-- Enhanced Filters -->
         <div class="filters-section">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
-                <!-- Mobile filter toggle -->
-                <button type="button" class="filter-toggle sm:hidden w-full mb-4" onclick="toggleFilters()">
+                <!-- Filter toggle button -->
+                <button type="button" class="filter-toggle w-full mb-4" onclick="toggleFilters()">
                     <i class="fas fa-filter mr-2"></i>
                     <span id="filterToggleText">Show Filters</span>
                     <i class="fas fa-chevron-down ml-2" id="filterToggleIcon"></i>
                 </button>
                 
-                <div class="filters-content sm:block" id="filtersContent">
+                <div class="filters-content" id="filtersContent">
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 sm:mb-8 space-y-4 sm:space-y-0">
                         <h2 class="text-xl sm:text-2xl font-bold text-gray-800 flex items-center space-x-2 sm:space-x-3">
                             <div class="bg-blue-100 p-2 sm:p-3 rounded-full">
@@ -657,16 +987,89 @@
                 // Hide loading screen
                 document.getElementById('loadingScreen').style.display = 'none';
                 
-                // Create map
+                // Create map with dark theme
                 map = new google.maps.Map(document.getElementById('map'), {
                     center: { lat: 51.5074, lng: -0.1278 }, // London center
                     zoom: 12,
                     mapTypeId: google.maps.MapTypeId.ROADMAP,
                     styles: [
+                        { elementType: "geometry", stylers: [{ color: "#242f3e" }] },
+                        { elementType: "labels.text.stroke", stylers: [{ color: "#242f3e" }] },
+                        { elementType: "labels.text.fill", stylers: [{ color: "#746855" }] },
                         {
-                            featureType: 'poi',
-                            elementType: 'labels',
-                            stylers: [{ visibility: 'off' }]
+                            featureType: "administrative.locality",
+                            elementType: "labels.text.fill",
+                            stylers: [{ color: "#d59563" }]
+                        },
+                        {
+                            featureType: "poi",
+                            elementType: "labels.text.fill",
+                            stylers: [{ color: "#d59563" }]
+                        },
+                        {
+                            featureType: "poi.park",
+                            elementType: "geometry",
+                            stylers: [{ color: "#263c3f" }]
+                        },
+                        {
+                            featureType: "poi.park",
+                            elementType: "labels.text.fill",
+                            stylers: [{ color: "#6b9a76" }]
+                        },
+                        {
+                            featureType: "road",
+                            elementType: "geometry",
+                            stylers: [{ color: "#38414e" }]
+                        },
+                        {
+                            featureType: "road",
+                            elementType: "geometry.stroke",
+                            stylers: [{ color: "#212a37" }]
+                        },
+                        {
+                            featureType: "road",
+                            elementType: "labels.text.fill",
+                            stylers: [{ color: "#9ca5b3" }]
+                        },
+                        {
+                            featureType: "road.highway",
+                            elementType: "geometry",
+                            stylers: [{ color: "#746855" }]
+                        },
+                        {
+                            featureType: "road.highway",
+                            elementType: "geometry.stroke",
+                            stylers: [{ color: "#1f2835" }]
+                        },
+                        {
+                            featureType: "road.highway",
+                            elementType: "labels.text.fill",
+                            stylers: [{ color: "#f3d19c" }]
+                        },
+                        {
+                            featureType: "transit",
+                            elementType: "geometry",
+                            stylers: [{ color: "#2f3948" }]
+                        },
+                        {
+                            featureType: "transit.station",
+                            elementType: "labels.text.fill",
+                            stylers: [{ color: "#d59563" }]
+                        },
+                        {
+                            featureType: "water",
+                            elementType: "geometry",
+                            stylers: [{ color: "#17263c" }]
+                        },
+                        {
+                            featureType: "water",
+                            elementType: "labels.text.fill",
+                            stylers: [{ color: "#515c6d" }]
+                        },
+                        {
+                            featureType: "water",
+                            elementType: "labels.text.stroke",
+                            stylers: [{ color: "#17263c" }]
                         }
                     ]
                 });

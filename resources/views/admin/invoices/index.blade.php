@@ -10,7 +10,10 @@
             <p class="text-gray-600 mt-2">Manage your business invoices</p>
         </div>
         <a href="{{ route('admin.invoices.create') }}" 
-           class="bg-gray-800 hover:bg-gray-900 text-white font-medium py-3 px-6 rounded-lg transition duration-200 flex items-center">
+           class="font-medium py-3 px-6 rounded-lg transition duration-200 flex items-center"
+           style="background: linear-gradient(135deg, #1f2937, #374151); border: 1px solid #fbbf24; color: #fbbf24;"
+           onmouseover="this.style.background='linear-gradient(135deg, #fbbf24, #f59e0b)'; this.style.color='#1f2937';"
+           onmouseout="this.style.background='linear-gradient(135deg, #1f2937, #374151)'; this.style.color='#fbbf24';">
             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
             </svg>

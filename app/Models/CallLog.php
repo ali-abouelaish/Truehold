@@ -32,17 +32,15 @@ class CallLog extends Model
         // Property Details
         'property_address',
         'property_type',
+        'number_of_beds',
+        'number_of_bathrooms',
         'advertised_rent',
         'availability_date',
         'vacant_keys',
         'furnished',
         
         // Discovery & Compliance
-        'works_pending',
-        'compliance_epc',
-        'compliance_eicr',
-        'compliance_gas',
-        'compliance_licence',
+        'room_link',
         'landlord_priority',
         'discovery_notes',
         
@@ -79,10 +77,6 @@ class CallLog extends Model
         'viewing_datetime' => 'datetime',
         'follow_up_datetime' => 'datetime',
         'vacant_keys' => 'boolean',
-        'compliance_epc' => 'boolean',
-        'compliance_eicr' => 'boolean',
-        'compliance_gas' => 'boolean',
-        'compliance_licence' => 'boolean',
         'viewing_booked' => 'boolean',
         'follow_up_needed' => 'boolean',
         'send_sms' => 'boolean',
@@ -147,5 +141,90 @@ class CallLog extends Model
     public function scopeByDateRange($query, $startDate, $endDate)
     {
         return $query->whereBetween('call_datetime', [$startDate, $endDate]);
+    }
+
+    /**
+     * Scope a query to filter by phone number.
+     */
+    public function scopeByPhone($query, $phone)
+    {
+        // Extract just the digits from the input phone number
+        $inputDigits = preg_replace('/[^\d]/', '', $phone);
+        
+        return $query->where(function($q) use ($phone, $inputDigits) {
+            // Exact match
+            $q->where('landlord_phone', $phone)
+              // Match by digits only (ignoring spaces, dashes, etc.)
+              ->orWhereRaw("REGEXP_REPLACE(landlord_phone, '[^0-9]', '') = ?", [$inputDigits]);
+        });
+    }
+
+    /**
+     * Check if a phone number has been called before.
+     */
+    public static function hasBeenCalledBefore($phone, $excludeId = null)
+    {
+        if (empty($phone)) {
+            return false;
+        }
+
+        $query = static::byPhone($phone);
+        
+        if ($excludeId) {
+            $query->where('id', '!=', $excludeId);
+        }
+
+        return $query->exists();
+    }
+
+    /**
+     * Get previous call logs for a phone number.
+     */
+    public static function getPreviousCalls($phone, $excludeId = null)
+    {
+        if (empty($phone)) {
+            return collect();
+        }
+
+        $query = static::byPhone($phone)
+            ->with('agent')
+            ->orderBy('call_datetime', 'desc');
+        
+        if ($excludeId) {
+            $query->where('id', '!=', $excludeId);
+        }
+
+        return $query->get();
+    }
+
+    /**
+     * Get call history summary for a phone number.
+     */
+    public static function getCallHistorySummary($phone, $excludeId = null)
+    {
+        if (empty($phone)) {
+            return null;
+        }
+
+        $query = static::byPhone($phone);
+        
+        if ($excludeId) {
+            $query->where('id', '!=', $excludeId);
+        }
+
+        $calls = $query->get();
+        
+        if ($calls->isEmpty()) {
+            return null;
+        }
+
+        return [
+            'total_calls' => $calls->count(),
+            'last_call_date' => $calls->first()->call_datetime,
+            'call_outcomes' => $calls->pluck('call_outcome')->unique()->values(),
+            'landlord_names' => $calls->pluck('landlord_name')->unique()->values(),
+            'property_addresses' => $calls->pluck('property_address')->unique()->values(),
+            'recent_notes' => $calls->take(3)->pluck('agent_notes')->filter()->values(),
+        ];
     }
 }

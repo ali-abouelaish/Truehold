@@ -28,7 +28,7 @@ class CreateSuperUser extends Command
      */
     public function handle()
     {
-        $this->info('🚀 Creating a new Super User for LET CONNECT');
+        $this->info('🚀 Creating a new Super User for TRUEHOLD');
         $this->newLine();
 
         // Get user input

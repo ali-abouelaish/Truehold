@@ -44,9 +44,6 @@
                         <h1 class="text-3xl font-bold text-white">Property Scraper</h1>
                     </div>
                     <div class="flex items-center space-x-4">
-                            <a href="{{ route('admin.dashboard') }}" class="text-blue-400 hover:text-white transition-colors">
-                                <i class="fas fa-cog mr-2"></i>Admin Dashboard
-                            </a>
                     </div>
                 </div>
             </div>

@@ -173,4 +173,58 @@ class User extends Authenticatable
     {
         return $this->hasMany(CallLog::class, 'agent_id');
     }
+
+    /**
+     * Get the admin permissions for this user.
+     */
+    public function adminPermissions(): HasMany
+    {
+        return $this->hasMany(AdminPermission::class);
+    }
+
+    /**
+     * Get the user permissions for this user.
+     */
+    public function userPermissions(): HasMany
+    {
+        return $this->hasMany(UserPermission::class);
+    }
+
+    /**
+     * Check if user has permission for a specific section and action.
+     */
+    public function hasAdminPermission(string $section, string $action = 'view'): bool
+    {
+        // Super admin has all permissions
+        if ($this->email === 'admin@letconnect.com') {
+            return true;
+        }
+        
+        // Check new simplified permission system first
+        $userPermission = $this->userPermissions()
+            ->where('section', $section)
+            ->where('can_access', true)
+            ->first();
+            
+        if ($userPermission) {
+            return true; // If they have access to the section, they can do everything
+        }
+        
+        // Fallback to old complex system for backward compatibility
+        $permission = $this->adminPermissions()
+            ->where('section', $section)
+            ->first();
+
+        if (!$permission) {
+            return false;
+        }
+
+        return match($action) {
+            'view' => $permission->can_view,
+            'create' => $permission->can_create,
+            'edit' => $permission->can_edit,
+            'delete' => $permission->can_delete,
+            default => false
+        };
+    }
 }

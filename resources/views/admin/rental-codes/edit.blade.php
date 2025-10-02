@@ -15,10 +15,16 @@
                     <p class="text-muted mb-0">Update rental code: <strong>{{ $rentalCode->rental_code }}</strong></p>
                 </div>
                 <div class="btn-group">
-                    <a href="{{ route('rental-codes.show', $rentalCode) }}" class="btn btn-outline-info">
+                    <a href="{{ route('rental-codes.show', $rentalCode) }}" class="btn transition-colors"
+                       style="background: linear-gradient(135deg, #1e40af, #3b82f6); border: 1px solid #3b82f6; color: #ffffff; text-decoration: none;"
+                       onmouseover="this.style.background='linear-gradient(135deg, #3b82f6, #2563eb)'; this.style.borderColor='#2563eb';"
+                       onmouseout="this.style.background='linear-gradient(135deg, #1e40af, #3b82f6)'; this.style.borderColor='#3b82f6';">
                         <i class="fas fa-eye me-1"></i> View Details
                     </a>
-                    <a href="{{ route('rental-codes.index') }}" class="btn btn-outline-secondary">
+                    <a href="{{ route('rental-codes.index') }}" class="btn transition-colors"
+                       style="background: linear-gradient(135deg, #374151, #4b5563); border: 1px solid #6b7280; color: #d1d5db; text-decoration: none;"
+                       onmouseover="this.style.background='linear-gradient(135deg, #4b5563, #6b7280)'; this.style.borderColor='#fbbf24'; this.style.color='#f9fafb';"
+                       onmouseout="this.style.background='linear-gradient(135deg, #374151, #4b5563)'; this.style.borderColor='#6b7280'; this.style.color='#d1d5db';">
                         <i class="fas fa-arrow-left me-1"></i> Back to List
                     </a>
                 </div>

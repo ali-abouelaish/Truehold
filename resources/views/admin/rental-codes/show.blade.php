@@ -2,6 +2,183 @@
 
 @section('title', 'Rental Code Details')
 
+<style>
+/* Dark mode styles for rental codes show page */
+.card {
+    background-color: #1f2937 !important;
+    border-color: #374151 !important;
+}
+
+.card-header {
+    background-color: #374151 !important;
+    border-color: #4b5563 !important;
+}
+
+.card-header.bg-primary {
+    background-color: #1e40af !important;
+}
+
+.card-header.bg-info {
+    background-color: #0891b2 !important;
+}
+
+.card-header.bg-success {
+    background-color: #059669 !important;
+}
+
+.card-header.bg-warning {
+    background-color: #d97706 !important;
+}
+
+.card-header.bg-danger {
+    background-color: #dc2626 !important;
+}
+
+.card-body {
+    background-color: #1f2937 !important;
+    color: #d1d5db !important;
+}
+
+.info-label {
+    color: #9ca3af !important;
+    font-weight: 500;
+}
+
+.info-value {
+    color: #d1d5db !important;
+}
+
+.text-muted {
+    color: #6b7280 !important;
+}
+
+.text-success {
+    color: #10b981 !important;
+}
+
+.text-warning {
+    color: #f59e0b !important;
+}
+
+.text-danger {
+    color: #ef4444 !important;
+}
+
+.text-info {
+    color: #06b6d4 !important;
+}
+
+.text-primary {
+    color: #3b82f6 !important;
+}
+
+.alert {
+    background-color: #374151 !important;
+    border-color: #4b5563 !important;
+    color: #d1d5db !important;
+}
+
+.alert-success {
+    background-color: #064e3b !important;
+    border-color: #10b981 !important;
+    color: #d1d5db !important;
+}
+
+.alert-info {
+    background-color: #164e63 !important;
+    border-color: #06b6d4 !important;
+    color: #d1d5db !important;
+}
+
+.alert-warning {
+    background-color: #78350f !important;
+    border-color: #f59e0b !important;
+    color: #d1d5db !important;
+}
+
+.alert-danger {
+    background-color: #7f1d1d !important;
+    border-color: #ef4444 !important;
+    color: #d1d5db !important;
+}
+
+.badge {
+    background-color: #374151 !important;
+    color: #d1d5db !important;
+    border: 1px solid #4b5563 !important;
+}
+
+.badge.bg-primary {
+    background-color: #1e40af !important;
+    color: #ffffff !important;
+}
+
+.badge.bg-success {
+    background-color: #059669 !important;
+    color: #ffffff !important;
+}
+
+.badge.bg-warning {
+    background-color: #d97706 !important;
+    color: #ffffff !important;
+}
+
+.badge.bg-danger {
+    background-color: #dc2626 !important;
+    color: #ffffff !important;
+}
+
+.badge.bg-info {
+    background-color: #0891b2 !important;
+    color: #ffffff !important;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    color: #d1d5db !important;
+}
+
+p, div, span {
+    color: #d1d5db !important;
+}
+
+small {
+    color: #9ca3af !important;
+}
+
+strong {
+    color: #f9fafb !important;
+}
+
+.fw-bold {
+    color: #f9fafb !important;
+}
+
+.table {
+    background-color: #1f2937 !important;
+    color: #d1d5db !important;
+}
+
+.table th {
+    background-color: #374151 !important;
+    color: #d1d5db !important;
+    border-color: #4b5563 !important;
+}
+
+.table td {
+    background-color: #1f2937 !important;
+    color: #d1d5db !important;
+    border-color: #4b5563 !important;
+}
+
+.table-striped tbody tr:nth-of-type(odd) td {
+    background-color: #374151 !important;
+}
+
+.table-hover tbody tr:hover td {
+    background-color: #4b5563 !important;
+}
+</style>
+
 @section('content')
 <div class="container-fluid">
     <!-- Header Section -->
@@ -15,10 +192,16 @@
                     <p class="text-muted mb-0">View and manage rental code information</p>
                 </div>
                 <div class="btn-group">
-                    <a href="{{ route('rental-codes.edit', $rentalCode) }}" class="btn btn-warning">
+                    <a href="{{ route('rental-codes.edit', $rentalCode) }}" class="btn transition-colors"
+                       style="background: linear-gradient(135deg, #d97706, #f59e0b); border: 1px solid #f59e0b; color: #ffffff; text-decoration: none;"
+                       onmouseover="this.style.background='linear-gradient(135deg, #f59e0b, #d97706)'; this.style.borderColor='#d97706';"
+                       onmouseout="this.style.background='linear-gradient(135deg, #d97706, #f59e0b)'; this.style.borderColor='#f59e0b';">
                         <i class="fas fa-edit me-1"></i> Edit
                     </a>
-                    <a href="{{ route('rental-codes.index') }}" class="btn btn-outline-secondary">
+                    <a href="{{ route('rental-codes.index') }}" class="btn transition-colors"
+                       style="background: linear-gradient(135deg, #374151, #4b5563); border: 1px solid #6b7280; color: #d1d5db; text-decoration: none;"
+                       onmouseover="this.style.background='linear-gradient(135deg, #4b5563, #6b7280)'; this.style.borderColor='#fbbf24'; this.style.color='#f9fafb';"
+                       onmouseout="this.style.background='linear-gradient(135deg, #374151, #4b5563)'; this.style.borderColor='#6b7280'; this.style.color='#d1d5db';">
                         <i class="fas fa-arrow-left me-1"></i> Back to List
                     </a>
                 </div>

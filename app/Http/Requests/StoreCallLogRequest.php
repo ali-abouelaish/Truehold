@@ -39,17 +39,15 @@ class StoreCallLogRequest extends FormRequest
             // Property Details
             'property_address' => [$isNoAnswer ? 'nullable' : 'required', 'string', 'max:500'],
             'property_type' => [$isNoAnswer ? 'nullable' : 'required', 'in:studio,one_bed,two_bed,hmo,other'],
+            'number_of_beds' => ['nullable', 'integer', 'min:0', 'max:20'],
+            'number_of_bathrooms' => ['nullable', 'integer', 'min:0', 'max:10'],
             'advertised_rent' => [$isNoAnswer ? 'nullable' : 'required', 'numeric', 'min:0', 'max:99999.99'],
             'availability_date' => ['nullable', 'date'],
             'vacant_keys' => ['boolean'],
             'furnished' => [$isNoAnswer ? 'nullable' : 'required', 'in:furnished,unfurnished,part_furnished,other'],
             
             // Discovery & Compliance
-            'works_pending' => ['nullable', 'string'],
-            'compliance_epc' => ['boolean'],
-            'compliance_eicr' => ['boolean'],
-            'compliance_gas' => ['boolean'],
-            'compliance_licence' => ['boolean'],
+            'room_link' => ['nullable', 'url'],
             'landlord_priority' => [$isNoAnswer ? 'nullable' : 'required', 'in:speed,best_price,hands_off,other'],
             'discovery_notes' => ['nullable', 'string'],
             
@@ -64,6 +62,12 @@ class StoreCallLogRequest extends FormRequest
             'viewing_booked' => ['boolean'],
             'viewing_datetime' => ['nullable', 'date'],
             'follow_up_needed' => ['boolean'],
+            
+            // Automation Actions
+            'send_sms' => ['nullable', 'boolean'],
+            'send_email' => ['nullable', 'boolean'],
+            'send_whatsapp' => ['nullable', 'boolean'],
+            'remove_automation' => ['nullable', 'boolean'],
             'follow_up_datetime' => ['nullable', 'date'],
             'next_step_status' => [$isNoAnswer ? 'nullable' : 'required', 'in:send_terms,send_compliance_docs,awaiting_response,collect_keys,tenant_reference_started,other'],
             'call_outcome' => ['required', 'in:instruction_won,pending,lost,not_interested'],

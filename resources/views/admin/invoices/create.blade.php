@@ -180,7 +180,10 @@
                 Cancel
             </a>
             <button type="submit" 
-                    class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition duration-200">
+                    class="font-bold py-3 px-6 rounded-lg transition duration-200"
+                    style="background: linear-gradient(135deg, #1f2937, #374151); border: 1px solid #fbbf24; color: #fbbf24;"
+                    onmouseover="this.style.background='linear-gradient(135deg, #fbbf24, #f59e0b)'; this.style.color='#1f2937';"
+                    onmouseout="this.style.background='linear-gradient(135deg, #1f2937, #374151)'; this.style.color='#fbbf24';">
                 Create Invoice
             </button>
         </div>

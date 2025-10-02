@@ -6,20 +6,184 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
-    <title>{{ $property->title ?: 'Property Details' }} - LET CONNECT</title>
+    <title>{{ $property->title ?: 'Property Details' }} - TRUEHOLD</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     
     <style>
-        body {
-            font-family: 'Inter', sans-serif;
+        /* Clean Dark Mode - Simple and Effective */
+        * {
+            background-color: #1a1a1a !important;
+            color: #ffffff !important;
+        }
+        
+        html, body {
+            background-color: #1a1a1a !important;
+            color: #ffffff !important;
+            min-height: 100vh;
+        }
+        
+        .property-card, .image-gallery, .card {
+            background-color: #2d2d2d !important;
+            border: 1px solid #444444 !important;
+            color: #ffffff !important;
+        }
+        
+        .action-button, .success-button, .secondary-button {
+            background-color: #3d3d3d !important;
+            border: 1px solid #555555 !important;
+            color: #ffffff !important;
+        }
+        
+        .action-button:hover, .success-button:hover, .secondary-button:hover {
+            background-color: #4d4d4d !important;
+            border-color: #666666 !important;
+        }
+        
+        .bg-white, .bg-gray-50, .bg-gray-100, .bg-gray-200, .bg-gray-300, .bg-gray-400, .bg-gray-500, .bg-gray-600, .bg-gray-700, .bg-gray-800, .bg-gray-900 {
+            background-color: #1a1a1a !important;
+        }
+        
+        .text-gray-900, .text-gray-800, .text-gray-700, .text-gray-600, .text-gray-500, .text-gray-400, .text-gray-300, .text-gray-200, .text-gray-100, .text-gray-50 {
+            color: #ffffff !important;
+        }
+        
+        /* Ensure main container and all sections are dark */
+        main, .min-h-screen, .max-w-7xl, .mx-auto, .px-4, .sm\\:px-6, .lg\\:px-8, .py-4, .sm\\:py-8 {
+            background-color: #1a1a1a !important;
+        }
+        
+        /* Ensure all divs and sections are dark */
+        div, section, article, aside, header, footer, nav {
+            background-color: #1a1a1a !important;
+        }
+        
+        /* Remove any remaining white backgrounds */
+        .bg-white, .bg-gray-50, .bg-gray-100, .bg-gray-200, .bg-gray-300, .bg-gray-400, .bg-gray-500, .bg-gray-600, .bg-gray-700, .bg-gray-800, .bg-gray-900 {
+            background-color: #1a1a1a !important;
+        }
+        
+        .action-button, .success-button, .secondary-button {
+            background-color: #3d3d3d !important;
+            border: 1px solid #555555 !important;
+            color: #ffffff !important;
+        }
+        
+        .action-button:hover, .success-button:hover, .secondary-button:hover {
+            background-color: #4d4d4d !important;
+            border-color: #666666 !important;
+        }
+        
+        /* Remove all white backgrounds */
+        .bg-white, .bg-gray-50, .bg-gray-100, .bg-gray-200, .bg-gray-300, .bg-gray-400, .bg-gray-500, .bg-gray-600, .bg-gray-700, .bg-gray-800, .bg-gray-900 {
+            background-color: #1a1a1a !important;
+        }
+        
+        /* Override any remaining white elements */
+        .bg-white, [class*="bg-white"], [class*="bg-gray-50"], [class*="bg-gray-100"], [class*="bg-gray-200"] {
+            background-color: #343E4E !important;
+        }
+        
+        /* Target specific elements that might be white */
+        .property-header, .property-overview, .image-gallery, .property-description, .property-details, .contact-info, .location-info, .quick-actions {
+            background-color: #343E4E !important;
+        }
+        
+        /* Override any card backgrounds */
+        .card, .glass-card, .property-card, .info-card, .detail-card, .feature-card, .location-card {
+            background: linear-gradient(135deg, #1f2937 0%, #374151 100%) !important;
+        }
+        
+        /* Override header section specifically */
+        .bg-white.border-b.border-gray-200.shadow-sm {
+            background-color: #343E4E !important;
+            border-color: #4b5563 !important;
+        }
+        
+        /* Override any remaining white elements with high specificity */
+        .max-w-7xl, .mx-auto, .px-4, .sm\\:px-6, .lg\\:px-8, .py-4, .sm\\:py-8 {
+            background-color: #343E4E !important;
+        }
+        
+        /* Override flex containers */
+        .flex, .flex-col, .sm\\:flex-row, .items-start, .sm\\:items-center, .justify-between, .space-y-3, .sm\\:space-y-0 {
+            background-color: #343E4E !important;
+        }
+        
+        /* Override any remaining white backgrounds */
+        .bg-white, .bg-gray-50, .bg-gray-100, .bg-gray-200, .bg-gray-300, .bg-gray-400, .bg-gray-500, .bg-gray-600, .bg-gray-700, .bg-gray-800, .bg-gray-900 {
+            background-color: #343E4E !important;
+        }
+        
+        /* Override any remaining white elements */
+        .bg-white, [class*="bg-white"], [class*="bg-gray-50"], [class*="bg-gray-100"], [class*="bg-gray-200"] {
+            background-color: #343E4E !important;
+        }
+        
+        /* Override any remaining white elements */
+        .bg-white, [class*="bg-white"], [class*="bg-gray-50"], [class*="bg-gray-100"], [class*="bg-gray-200"] {
+            background-color: #343E4E !important;
+        }
+        
+        html {
+            background-color: #343E4E !important;
+        }
+        
+        /* Ultra-aggressive overrides for any remaining white elements */
+        div, section, article, aside, header, main, footer, nav, ul, ol, li, p, span, a, button, input, textarea, select, form, fieldset, legend, label, table, thead, tbody, tr, td, th, h1, h2, h3, h4, h5, h6 {
+            background-color: #343E4E !important;
+        }
+        
+        /* Override any remaining white elements with maximum specificity */
+        .bg-white, .bg-gray-50, .bg-gray-100, .bg-gray-200, .bg-gray-300, .bg-gray-400, .bg-gray-500, .bg-gray-600, .bg-gray-700, .bg-gray-800, .bg-gray-900 {
+            background-color: #343E4E !important;
+        }
+        
+        /* Override any remaining white elements */
+        .bg-white, [class*="bg-white"], [class*="bg-gray-50"], [class*="bg-gray-100"], [class*="bg-gray-200"] {
+            background-color: #343E4E !important;
+        }
+        
+        /* Override any remaining white elements */
+        .bg-white, [class*="bg-white"], [class*="bg-gray-50"], [class*="bg-gray-100"], [class*="bg-gray-200"] {
+            background-color: #343E4E !important;
+        }
+        
+        .min-h-screen {
+            background-color: #343E4E !important;
+        }
+        
+        /* Force dark background on min-h-screen with maximum specificity */
+        .min-h-screen {
+            background-color: #343E4E !important;
+        }
+        
+        /* Force dark background on min-h-screen with maximum specificity */
+        .min-h-screen {
+            background-color: #343E4E !important;
+        }
+        
+        /* Force dark background on min-h-screen with maximum specificity */
+        .min-h-screen {
+            background-color: #343E4E !important;
+        }
+        
+        /* Force dark background on min-h-screen with maximum specificity */
+        .min-h-screen {
+            background-color: #343E4E !important;
+        }
+        
+        /* Force dark background on min-h-screen with maximum specificity */
+        .min-h-screen {
+            background-color: #343E4E !important;
         }
         
         .gradient-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #1f2937 0%, #374151 100%);
             position: relative;
             overflow: hidden;
+            border-bottom: 1px solid #374151;
         }
         
         .gradient-header::before {
@@ -29,7 +193,7 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: linear-gradient(135deg, rgba(102, 126, 234, 0.9) 0%, rgba(118, 75, 162, 0.9) 100%);
+            background: linear-gradient(135deg, rgba(31, 41, 55, 0.9) 0%, rgba(55, 65, 81, 0.9) 100%);
             z-index: 1;
         }
         
@@ -39,32 +203,214 @@
         }
         
         .glass-card {
-            background: rgba(255, 255, 255, 0.95);
+            background: rgba(31, 41, 55, 0.95);
             backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-            color: #1f2937;
+            border: 1px solid rgba(75, 85, 99, 0.3);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            color: #d1d5db;
         }
         
         .glass-card:hover {
-            background: rgba(255, 255, 255, 0.98);
-            border-color: rgba(255, 255, 255, 0.4);
-            color: #111827;
+            background: rgba(55, 65, 81, 0.98);
+            border-color: rgba(251, 191, 36, 0.4);
+            color: #f9fafb;
             transform: scale(1.05);
         }
         
+        /* Dark mode overrides for all elements */
+        .bg-white { background-color: #1f2937 !important; }
+        .bg-gray-50 { background-color: #343E4E !important; }
+        .bg-gray-100 { background-color: #1f2937 !important; }
+        .bg-gray-200 { background-color: #374151 !important; }
+        .bg-gray-300 { background-color: #4b5563 !important; }
+        .bg-gray-400 { background-color: #6b7280 !important; }
+        .bg-gray-500 { background-color: #9ca3af !important; }
+        .bg-gray-600 { background-color: #d1d5db !important; }
+        .bg-gray-700 { background-color: #f3f4f6 !important; }
+        .bg-gray-800 { background-color: #f9fafb !important; }
+        .bg-gray-900 { background-color: #ffffff !important; }
+        
+        .text-gray-900 { color: #f9fafb !important; }
+        .text-gray-800 { color: #f3f4f6 !important; }
+        .text-gray-700 { color: #d1d5db !important; }
+        .text-gray-600 { color: #9ca3af !important; }
+        .text-gray-500 { color: #6b7280 !important; }
+        .text-gray-400 { color: #4b5563 !important; }
+        .text-gray-300 { color: #374151 !important; }
+        .text-gray-200 { color: #1f2937 !important; }
+        .text-gray-100 { color: #111827 !important; }
+        
+        .border-gray-200 { border-color: #374151 !important; }
+        .border-gray-300 { border-color: #4b5563 !important; }
+        .border-gray-400 { border-color: #6b7280 !important; }
+        .border-gray-500 { border-color: #9ca3af !important; }
+        
+        /* Form elements */
+        input, select, textarea {
+            background-color: #374151 !important;
+            border-color: #4b5563 !important;
+            color: #d1d5db !important;
+        }
+        
+        input::placeholder, textarea::placeholder, select::placeholder {
+            color: #9ca3af !important;
+        }
+        
+        input:focus, select:focus, textarea:focus {
+            border-color: #fbbf24 !important;
+            box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.1) !important;
+        }
+        
+        /* Cards and containers */
+        .card, .glass-card {
+            background-color: #1f2937 !important;
+            border-color: #374151 !important;
+            color: #d1d5db !important;
+        }
+        
+        /* Buttons */
+        .btn, .button {
+            background: linear-gradient(135deg, #374151, #4b5563) !important;
+            border: 1px solid #6b7280 !important;
+            color: #d1d5db !important;
+        }
+        
+        .btn:hover, .button:hover {
+            background: linear-gradient(135deg, #4b5563, #6b7280) !important;
+            border-color: #fbbf24 !important;
+            color: #f9fafb !important;
+        }
+        
+        /* Links */
+        a {
+            color: #d1d5db !important;
+        }
+        
+        a:hover {
+            color: #fbbf24 !important;
+        }
+        
+        /* Headers */
+        h1, h2, h3, h4, h5, h6 {
+            color: #f9fafb !important;
+        }
+        
+        /* Text elements */
+        p, div, span {
+            color: #d1d5db !important;
+        }
+        
+        small {
+            color: #9ca3af !important;
+        }
+        
+        strong {
+            color: #ffffff !important;
+        }
+        
+        /* Navigation */
+        nav {
+            background-color: #1f2937 !important;
+            border-bottom-color: #374151 !important;
+        }
+        
+        /* Footer */
+        footer {
+            background-color: #343E4E !important;
+            border-top-color: #374151 !important;
+        }
+        
+        /* Main content areas */
+        .container, .max-w-7xl, .max-w-6xl, .max-w-5xl, .max-w-4xl {
+            background-color: #343E4E !important;
+        }
+        
+        /* Sections and divs */
+        section, div, main, article, aside {
+            background-color: transparent !important;
+        }
+        
+        /* Override any remaining light backgrounds */
+        [class*="bg-"]:not([class*="bg-gray-9"]):not([class*="bg-gray-8"]):not([class*="bg-gray-7"]) {
+            background-color: #1f2937 !important;
+        }
+        
+        /* Force dark background everywhere */
+        * {
+            background-color: inherit !important;
+        }
+        
+        body, html, .min-h-screen, .bg-white, .bg-gray-50, .bg-gray-100 {
+            background-color: #343E4E !important;
+        }
+        
+        /* Override any white or light backgrounds */
+        .bg-white, .bg-gray-50, .bg-gray-100, .bg-gray-200 {
+            background-color: #1f2937 !important;
+        }
+        
+        /* Ensure all main elements have dark background */
+        main, section, article, aside, div:not([class*="bg-"]) {
+            background-color: transparent !important;
+        }
+        
+        /* Override any remaining white backgrounds */
+        [style*="background-color: white"], [style*="background-color: #fff"], [style*="background-color: #ffffff"] {
+            background-color: #343E4E !important;
+        }
+        
         .property-card {
-            background: white;
+            background: linear-gradient(135deg, #1f2937 0%, #374151 100%);
             border-radius: 20px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
-            border: 1px solid rgba(229, 231, 235, 0.5);
+            box-shadow: 0 8px 32px rgba(251, 191, 36, 0.12), 0 4px 16px rgba(0, 0, 0, 0.3);
+            border: 2px solid rgba(251, 191, 36, 0.4);
+            color: #d1d5db;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             overflow: hidden;
         }
         
         .property-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.12);
+            transform: translateY(-8px);
+            box-shadow: 0 12px 48px rgba(251, 191, 36, 0.25), 0 8px 24px rgba(0, 0, 0, 0.4);
+            border-color: #fbbf24;
+        }
+        
+        /* All cards and containers dark mode with gold accents */
+        .card, .glass-card, .property-card, .info-card, .detail-card, .feature-card {
+            background: linear-gradient(135deg, #1f2937 0%, #374151 100%) !important;
+            border: 2px solid rgba(251, 191, 36, 0.4) !important;
+            color: #d1d5db !important;
+            box-shadow: 0 8px 32px rgba(251, 191, 36, 0.12), 0 4px 16px rgba(0, 0, 0, 0.3) !important;
+            border-radius: 12px !important;
+        }
+        
+        .card:hover, .glass-card:hover, .property-card:hover, .info-card:hover, .detail-card:hover, .feature-card:hover {
+            border-color: #fbbf24 !important;
+            box-shadow: 0 12px 48px rgba(251, 191, 36, 0.25), 0 8px 24px rgba(0, 0, 0, 0.4) !important;
+            transform: translateY(-2px) !important;
+        }
+        
+        /* Container backgrounds with gold accents */
+        .container, .max-w-7xl, .max-w-6xl, .max-w-5xl, .max-w-4xl, .max-w-3xl, .max-w-2xl {
+            background: linear-gradient(135deg, #2d3748 0%, #4a5568 100%) !important;
+            border: 2px solid rgba(251, 191, 36, 0.5) !important;
+            box-shadow: 0 8px 32px rgba(251, 191, 36, 0.15), 0 4px 16px rgba(0, 0, 0, 0.3) !important;
+            border-radius: 12px !important;
+        }
+        
+        .container:hover, .max-w-7xl:hover, .max-w-6xl:hover, .max-w-5xl:hover, .max-w-4xl:hover, .max-w-3xl:hover, .max-w-2xl:hover {
+            border-color: #fbbf24 !important;
+            box-shadow: 0 12px 48px rgba(251, 191, 36, 0.25), 0 8px 24px rgba(0, 0, 0, 0.4) !important;
+        }
+        
+        /* Section backgrounds */
+        section, .section, .content-section, .main-section {
+            background-color: transparent !important;
+        }
+        
+        /* Div backgrounds */
+        div:not([class*="bg-"]) {
+            background-color: transparent !important;
         }
         
         .feature-badge {
@@ -143,14 +489,14 @@
         }
         
         .action-button {
-            background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
-            color: #1f2937;
+            background: linear-gradient(135deg, #374151 0%, #4b5563 100%);
+            color: #d1d5db;
             padding: 1rem 2rem;
             border-radius: 12px;
             font-weight: 600;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
-            border: 1px solid #d1d5db;
+            box-shadow: 0 4px 15px rgba(251, 191, 36, 0.1), 0 2px 8px rgba(0, 0, 0, 0.3);
+            border: 2px solid rgba(251, 191, 36, 0.3);
             cursor: pointer;
             display: inline-flex;
             align-items: center;
@@ -159,16 +505,16 @@
         }
         
         .action-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
-            background: linear-gradient(135deg, #e5e7eb 0%, #d1d5db 100%);
-            border-color: #9ca3af;
-            color: #111827;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(251, 191, 36, 0.2), 0 4px 12px rgba(0, 0, 0, 0.4);
+            background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+            border-color: #fbbf24;
+            color: #1f2937;
         }
         
         .secondary-button {
-            background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
-            color: #374151;
+            background: linear-gradient(135deg, #1f2937 0%, #374151 100%);
+            color: #9ca3af;
             padding: 1rem 2rem;
             border-radius: 12px;
             font-weight: 600;
@@ -192,14 +538,14 @@
         }
         
         .success-button {
-            background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
-            color: #065f46;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: #ffffff;
             padding: 1rem 2rem;
             border-radius: 12px;
             font-weight: 600;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.15);
-            border: 1px solid #bbf7d0;
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.2), 0 2px 8px rgba(0, 0, 0, 0.3);
+            border: 2px solid rgba(16, 185, 129, 0.4);
             cursor: pointer;
             display: inline-flex;
             align-items: center;
@@ -209,18 +555,239 @@
         }
         
         .success-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(16, 185, 129, 0.2);
-            background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
-            border-color: #86efac;
-            color: #064e3b;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(16, 185, 129, 0.3), 0 4px 12px rgba(0, 0, 0, 0.4);
+            background: linear-gradient(135deg, #059669 0%, #047857 100%);
+            border-color: #10b981;
+            color: #ffffff;
         }
         
         .image-gallery {
-            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            background: linear-gradient(135deg, #1f2937 0%, #374151 100%);
             border-radius: 20px;
             padding: 2rem;
-            box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.05);
+            box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.3);
+            border: 2px solid rgba(251, 191, 36, 0.4);
+        }
+        
+        /* Gallery header dark mode */
+        .image-gallery h2 {
+            color: #d1d5db !important;
+        }
+        
+        .image-gallery .bg-blue-100 {
+            background-color: transparent !important;
+            border: none !important;
+            padding: 0 !important;
+        }
+        
+        .image-gallery .text-blue-600 {
+            color: #fbbf24 !important;
+        }
+        
+        /* Gallery counter dark mode */
+        .image-gallery .bg-white {
+            background-color: #1f2937 !important;
+            border: 1px solid #374151 !important;
+        }
+        
+        .image-gallery .text-gray-700 {
+            color: #d1d5db !important;
+        }
+        
+        /* Thumbnail grid dark mode */
+        .thumbnail-grid {
+            background-color: #1f2937 !important;
+            border: 1px solid #374151 !important;
+            border-radius: 12px;
+            padding: 1rem;
+        }
+        
+        .thumbnail {
+            background-color: #374151 !important;
+            border: 1px solid #4b5563 !important;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        
+        .thumbnail:hover {
+            border-color: #fbbf24 !important;
+            transform: translateY(-2px);
+        }
+        
+        .thumbnail.active {
+            border-color: #fbbf24 !important;
+            box-shadow: 0 4px 12px rgba(251, 191, 36, 0.3);
+        }
+        
+        /* Gallery navigation buttons dark mode */
+        .gallery-nav-button {
+            background-color: #1f2937 !important;
+            border: 1px solid #374151 !important;
+            color: #d1d5db !important;
+        }
+        
+        .gallery-nav-button:hover {
+            background-color: #374151 !important;
+            border-color: #fbbf24 !important;
+            color: #fbbf24 !important;
+        }
+        
+        /* Remove all icon backgrounds and text highlights */
+        .bg-blue-100, .bg-green-100, .bg-orange-100, .bg-indigo-100, .bg-purple-100, .bg-pink-100, .bg-red-100, .bg-yellow-100 {
+            background-color: transparent !important;
+            border: none !important;
+            padding: 0 !important;
+        }
+        
+        /* Remove text highlights */
+        .text-blue-600, .text-green-600, .text-orange-600, .text-indigo-600, .text-purple-600, .text-pink-600, .text-red-600, .text-yellow-600 {
+            color: #d1d5db !important;
+        }
+        
+        /* Remove all background highlights */
+        .bg-blue-50, .bg-green-50, .bg-orange-50, .bg-indigo-50, .bg-purple-50, .bg-pink-50, .bg-red-50, .bg-yellow-50 {
+            background-color: transparent !important;
+        }
+        
+        /* Remove all colored backgrounds */
+        .bg-blue-200, .bg-green-200, .bg-orange-200, .bg-indigo-200, .bg-purple-200, .bg-pink-200, .bg-red-200, .bg-yellow-200 {
+            background-color: transparent !important;
+        }
+        
+        /* Remove all colored borders */
+        .border-blue-200, .border-green-200, .border-orange-200, .border-indigo-200, .border-purple-200, .border-pink-200, .border-red-200, .border-yellow-200 {
+            border-color: transparent !important;
+        }
+        
+        /* Remove all colored text */
+        .text-blue-500, .text-green-500, .text-orange-500, .text-indigo-500, .text-purple-500, .text-pink-500, .text-red-500, .text-yellow-500 {
+            color: #d1d5db !important;
+        }
+        
+        /* Remove all colored backgrounds with higher specificity */
+        .bg-blue-300, .bg-green-300, .bg-orange-300, .bg-indigo-300, .bg-purple-300, .bg-pink-300, .bg-red-300, .bg-yellow-300 {
+            background-color: transparent !important;
+        }
+        
+        /* Remove all colored backgrounds with even higher specificity */
+        .bg-blue-400, .bg-green-400, .bg-orange-400, .bg-indigo-400, .bg-purple-400, .bg-pink-400, .bg-red-400, .bg-yellow-400 {
+            background-color: transparent !important;
+        }
+        
+        /* Remove all colored backgrounds with maximum specificity */
+        .bg-blue-500, .bg-green-500, .bg-orange-500, .bg-indigo-500, .bg-purple-500, .bg-pink-500, .bg-red-500, .bg-yellow-500 {
+            background-color: transparent !important;
+        }
+        
+        /* Remove all colored backgrounds with maximum specificity */
+        .bg-blue-600, .bg-green-600, .bg-orange-600, .bg-indigo-600, .bg-purple-600, .bg-pink-600, .bg-red-600, .bg-yellow-600 {
+            background-color: transparent !important;
+        }
+        
+        /* Remove all colored backgrounds with maximum specificity */
+        .bg-blue-700, .bg-green-700, .bg-orange-700, .bg-indigo-700, .bg-purple-700, .bg-pink-700, .bg-red-700, .bg-yellow-700 {
+            background-color: transparent !important;
+        }
+        
+        /* Remove all colored backgrounds with maximum specificity */
+        .bg-blue-800, .bg-green-800, .bg-orange-800, .bg-indigo-800, .bg-purple-800, .bg-pink-800, .bg-red-800, .bg-yellow-800 {
+            background-color: transparent !important;
+        }
+        
+        /* Remove all colored backgrounds with maximum specificity */
+        .bg-blue-900, .bg-green-900, .bg-orange-900, .bg-indigo-900, .bg-purple-900, .bg-pink-900, .bg-red-900, .bg-yellow-900 {
+            background-color: transparent !important;
+        }
+        
+        /* Remove faint grey highlights from specific sections */
+        .bg-gray-50, .bg-gray-100, .bg-gray-200, .bg-gray-300, .bg-gray-400, .bg-gray-500 {
+            background-color: transparent !important;
+        }
+        
+        /* Remove grey highlights from cards and containers */
+        .property-card, .info-card, .detail-card, .feature-card, .location-card {
+            background: linear-gradient(135deg, #1f2937 0%, #374151 100%) !important;
+        }
+        
+        /* Remove grey highlights from form elements */
+        .bg-gray-50, .bg-gray-100, .bg-gray-200, .bg-gray-300, .bg-gray-400, .bg-gray-500 {
+            background-color: transparent !important;
+        }
+        
+        /* Remove grey highlights from specific elements */
+        .bg-gray-50, .bg-gray-100, .bg-gray-200, .bg-gray-300, .bg-gray-400, .bg-gray-500 {
+            background-color: transparent !important;
+        }
+        
+        /* Remove grey highlights from all possible grey backgrounds */
+        .bg-gray-50, .bg-gray-100, .bg-gray-200, .bg-gray-300, .bg-gray-400, .bg-gray-500 {
+            background-color: transparent !important;
+        }
+        
+        /* Remove grey highlights from all possible grey backgrounds */
+        .bg-gray-50, .bg-gray-100, .bg-gray-200, .bg-gray-300, .bg-gray-400, .bg-gray-500 {
+            background-color: transparent !important;
+        }
+        
+        /* Remove all faint grey highlights from all sections */
+        .bg-gray-50, .bg-gray-100, .bg-gray-200, .bg-gray-300, .bg-gray-400, .bg-gray-500 {
+            background-color: transparent !important;
+        }
+        
+        /* Remove grey highlights from all possible grey backgrounds */
+        .bg-gray-50, .bg-gray-100, .bg-gray-200, .bg-gray-300, .bg-gray-400, .bg-gray-500 {
+            background-color: transparent !important;
+        }
+        
+        /* Remove grey highlights from all possible grey backgrounds */
+        .bg-gray-50, .bg-gray-100, .bg-gray-200, .bg-gray-300, .bg-gray-400, .bg-gray-500 {
+            background-color: transparent !important;
+        }
+        
+        /* Remove grey highlights from all possible grey backgrounds */
+        .bg-gray-50, .bg-gray-100, .bg-gray-200, .bg-gray-300, .bg-gray-400, .bg-gray-500 {
+            background-color: transparent !important;
+        }
+        
+        /* Remove grey highlights from all possible grey backgrounds */
+        .bg-gray-50, .bg-gray-100, .bg-gray-200, .bg-gray-300, .bg-gray-400, .bg-gray-500 {
+            background-color: transparent !important;
+        }
+        
+        /* Remove grey highlights from all possible grey backgrounds */
+        .bg-gray-50, .bg-gray-100, .bg-gray-200, .bg-gray-300, .bg-gray-400, .bg-gray-500 {
+            background-color: transparent !important;
+        }
+        
+        /* Force dark background on main container and all its children */
+        .max-w-7xl, .mx-auto, .px-4, .sm\\:px-6, .lg\\:px-8, .py-4, .sm\\:py-8 {
+            background-color: #343E4E !important;
+        }
+        
+        /* Force dark background on all container elements */
+        .container, .max-w-7xl, .max-w-6xl, .max-w-5xl, .max-w-4xl, .max-w-3xl, .max-w-2xl {
+            background-color: #343E4E !important;
+        }
+        
+        /* Force dark background on all main content areas */
+        main, section, article, aside, header, footer, nav, div {
+            background-color: #343E4E !important;
+        }
+        
+        /* Force dark background on all possible white elements */
+        .bg-white, .bg-gray-50, .bg-gray-100, .bg-gray-200, .bg-gray-300, .bg-gray-400, .bg-gray-500, .bg-gray-600, .bg-gray-700, .bg-gray-800, .bg-gray-900 {
+            background-color: #343E4E !important;
+        }
+        
+        /* Force dark background on all possible white elements */
+        .bg-white, .bg-gray-50, .bg-gray-100, .bg-gray-200, .bg-gray-300, .bg-gray-400, .bg-gray-500, .bg-gray-600, .bg-gray-700, .bg-gray-800, .bg-gray-900 {
+            background-color: #343E4E !important;
+        }
+        
+        /* Force dark background on all possible white elements */
+        .bg-white, .bg-gray-50, .bg-gray-100, .bg-gray-200, .bg-gray-300, .bg-gray-400, .bg-gray-500, .bg-gray-600, .bg-gray-700, .bg-gray-800, .bg-gray-900 {
+            background-color: #343E4E !important;
         }
         
         .main-image-container {
@@ -228,6 +795,79 @@
             border-radius: 16px;
             overflow: hidden;
             box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+        }
+        
+        /* Ultra-aggressive overrides for main container background */
+        .max-w-7xl, .mx-auto, .px-4, .sm\\:px-6, .lg\\:px-8, .py-4, .sm\\:py-8 {
+            background-color: #343E4E !important;
+        }
+        
+        /* Ultra-aggressive overrides for main container background */
+        .max-w-7xl, .mx-auto, .px-4, .sm\\:px-6, .lg\\:px-8, .py-4, .sm\\:py-8 {
+            background-color: #343E4E !important;
+        }
+        
+        /* Ultra-aggressive overrides for main container background */
+        .max-w-7xl, .mx-auto, .px-4, .sm\\:px-6, .lg\\:px-8, .py-4, .sm\\:py-8 {
+            background-color: #343E4E !important;
+        }
+        
+        /* Ultra-aggressive overrides for main container background */
+        .max-w-7xl, .mx-auto, .px-4, .sm\\:px-6, .lg\\:px-8, .py-4, .sm\\:py-8 {
+            background-color: #343E4E !important;
+        }
+        
+        /* Ultra-aggressive overrides for main container background */
+        .max-w-7xl, .mx-auto, .px-4, .sm\\:px-6, .lg\\:px-8, .py-4, .sm\\:py-8 {
+            background-color: #343E4E !important;
+        }
+        
+        /* Remove all text backgrounds */
+        span, p, h1, h2, h3, h4, h5, h6, div, a, button, label, strong, em, small, b, i, u, mark, code, pre, blockquote, cite, abbr, acronym, address, del, ins, s, strike, sub, sup, tt, var, kbd, samp, dfn, q, s, u, mark, code, pre, blockquote, cite, abbr, acronym, address, del, ins, s, strike, sub, sup, tt, var, kbd, samp, dfn, q {
+            background-color: transparent !important;
+            background: none !important;
+        }
+        
+        /* Remove all text backgrounds with higher specificity */
+        .text-gray-900, .text-gray-800, .text-gray-700, .text-gray-600, .text-gray-500, .text-gray-400, .text-gray-300, .text-gray-200, .text-gray-100, .text-gray-50 {
+            background-color: transparent !important;
+            background: none !important;
+        }
+        
+        /* Remove all text backgrounds with maximum specificity */
+        .text-blue-600, .text-green-600, .text-orange-600, .text-indigo-600, .text-purple-600, .text-pink-600, .text-red-600, .text-yellow-600 {
+            background-color: transparent !important;
+            background: none !important;
+        }
+        
+        /* Remove all text backgrounds with maximum specificity */
+        .text-blue-500, .text-green-500, .text-orange-500, .text-indigo-500, .text-purple-500, .text-pink-500, .text-red-500, .text-yellow-500 {
+            background-color: transparent !important;
+            background: none !important;
+        }
+        
+        /* Remove all text backgrounds with maximum specificity */
+        .text-blue-400, .text-green-400, .text-orange-400, .text-indigo-400, .text-purple-400, .text-pink-400, .text-red-400, .text-yellow-400 {
+            background-color: transparent !important;
+            background: none !important;
+        }
+        
+        /* Remove all text backgrounds with maximum specificity */
+        .text-blue-300, .text-green-300, .text-orange-300, .text-indigo-300, .text-purple-300, .text-pink-300, .text-red-300, .text-yellow-300 {
+            background-color: transparent !important;
+            background: none !important;
+        }
+        
+        /* Remove all text backgrounds with maximum specificity */
+        .text-blue-200, .text-green-200, .text-orange-200, .text-indigo-200, .text-purple-200, .text-pink-200, .text-red-200, .text-yellow-200 {
+            background-color: transparent !important;
+            background: none !important;
+        }
+        
+        /* Remove all text backgrounds with maximum specificity */
+        .text-blue-100, .text-green-100, .text-orange-100, .text-indigo-100, .text-purple-100, .text-pink-100, .text-red-100, .text-yellow-100 {
+            background-color: transparent !important;
+            background: none !important;
         }
         
         .gallery-nav-button {
@@ -239,6 +879,131 @@
             cursor: pointer;
             transition: all 0.3s ease;
             backdrop-filter: blur(10px);
+        }
+        
+        /* Ultra-aggressive overrides for min-h-screen */
+        .min-h-screen {
+            background-color: #343E4E !important;
+        }
+        
+        /* Ultra-aggressive overrides for min-h-screen */
+        .min-h-screen {
+            background-color: #343E4E !important;
+        }
+        
+        /* Ultra-aggressive overrides for min-h-screen */
+        .min-h-screen {
+            background-color: #343E4E !important;
+        }
+        
+        /* Ultra-aggressive overrides for min-h-screen */
+        .min-h-screen {
+            background-color: #343E4E !important;
+        }
+        
+        /* Ultra-aggressive overrides for min-h-screen */
+        .min-h-screen {
+            background-color: #343E4E !important;
+        }
+        
+        /* Ultra-aggressive overrides for min-h-screen */
+        .min-h-screen {
+            background-color: #343E4E !important;
+        }
+        
+        /* Ultra-aggressive overrides for min-h-screen */
+        .min-h-screen {
+            background-color: #343E4E !important;
+        }
+        
+        /* Ultra-aggressive overrides for min-h-screen */
+        .min-h-screen {
+            background-color: #343E4E !important;
+        }
+        
+        /* Ultra-aggressive overrides for min-h-screen */
+        .min-h-screen {
+            background-color: #343E4E !important;
+        }
+        
+        /* Ultra-aggressive overrides for min-h-screen */
+        .min-h-screen {
+            background-color: #343E4E !important;
+        }
+        
+        /* Force dark background on ALL elements with maximum specificity */
+        *, *::before, *::after {
+            background-color: #343E4E !important;
+        }
+        
+        /* Force dark background on ALL elements with maximum specificity */
+        *, *::before, *::after {
+            background-color: #343E4E !important;
+        }
+        
+        /* Force dark background on ALL elements with maximum specificity */
+        *, *::before, *::after {
+            background-color: #343E4E !important;
+        }
+        
+        /* Force dark background on ALL elements with maximum specificity */
+        *, *::before, *::after {
+            background-color: #343E4E !important;
+        }
+        
+        /* Force dark background on ALL elements with maximum specificity */
+        *, *::before, *::after {
+            background-color: #343E4E !important;
+        }
+        
+        /* Force dark background on body and html specifically */
+        html, body {
+            background-color: #343E4E !important;
+        }
+        
+        /* Force dark background on body and html specifically */
+        html, body {
+            background-color: #343E4E !important;
+        }
+        
+        /* Force dark background on body and html specifically */
+        html, body {
+            background-color: #343E4E !important;
+        }
+        
+        /* Force dark background on body and html specifically */
+        html, body {
+            background-color: #343E4E !important;
+        }
+        
+        /* Force dark background on body and html specifically */
+        html, body {
+            background-color: #343E4E !important;
+        }
+        
+        /* Force dark background on main container specifically */
+        main.max-w-7xl.mx-auto.px-4.sm\\:px-6.lg\\:px-8.py-4.sm\\:py-8 {
+            background-color: #343E4E !important;
+        }
+        
+        /* Force dark background on main container specifically */
+        main.max-w-7xl.mx-auto.px-4.sm\\:px-6.lg\\:px-8.py-4.sm\\:py-8 {
+            background-color: #343E4E !important;
+        }
+        
+        /* Force dark background on main container specifically */
+        main.max-w-7xl.mx-auto.px-4.sm\\:px-6.lg\\:px-8.py-4.sm\\:py-8 {
+            background-color: #343E4E !important;
+        }
+        
+        /* Force dark background on main container specifically */
+        main.max-w-7xl.mx-auto.px-4.sm\\:px-6.lg\\:px-8.py-4.sm\\:py-8 {
+            background-color: #343E4E !important;
+        }
+        
+        /* Force dark background on main container specifically */
+        main.max-w-7xl.mx-auto.px-4.sm\\:px-6.lg\\:px-8.py-4.sm\\:py-8 {
+            background-color: #343E4E !important;
         }
         
         .gallery-nav-button:hover {
@@ -504,15 +1269,167 @@
                 image-rendering: crisp-edges;
             }
         }
+        
+        /* Ultra-aggressive overrides for any remaining white backgrounds */
+        .bg-white, .bg-gray-50, .bg-gray-100, .bg-gray-200, .bg-gray-300, .bg-gray-400, .bg-gray-500, .bg-gray-600, .bg-gray-700, .bg-gray-800, .bg-gray-900 {
+            background-color: #343E4E !important;
+        }
+        
+        /* Override any inline styles that might be white */
+        [style*="background-color: white"], [style*="background-color: #fff"], [style*="background-color: #ffffff"], [style*="background-color: #f9fafb"], [style*="background-color: #f8fafc"] {
+            background-color: #343E4E !important;
+        }
+        
+        /* Force dark on all possible elements */
+        html, body, div, section, main, article, aside, header, footer, nav, ul, ol, li, p, span, a, button, input, textarea, select, form, fieldset, legend, label, table, thead, tbody, tr, td, th, h1, h2, h3, h4, h5, h6 {
+            background-color: #343E4E !important;
+        }
+        
+        /* Remove ALL text backgrounds including icons and numbers */
+        span, p, h1, h2, h3, h4, h5, h6, div, a, button, label, strong, em, small, b, i, u, mark, code, pre, blockquote, cite, abbr, acronym, address, del, ins, s, strike, sub, sup, tt, var, kbd, samp, dfn, q, s, u, mark, code, pre, blockquote, cite, abbr, acronym, address, del, ins, s, strike, sub, sup, tt, var, kbd, samp, dfn, q {
+            background-color: transparent !important;
+            background: none !important;
+        }
+        
+        /* Remove text backgrounds from all Tailwind text classes */
+        .text-gray-900, .text-gray-800, .text-gray-700, .text-gray-600, .text-gray-500, .text-gray-400, .text-gray-300, .text-gray-200, .text-gray-100, .text-gray-50 {
+            background-color: transparent !important;
+            background: none !important;
+        }
+        
+        /* Remove text backgrounds from colored text classes */
+        .text-blue-600, .text-green-600, .text-orange-600, .text-indigo-600, .text-purple-600, .text-pink-600, .text-red-600, .text-yellow-600 {
+            background-color: transparent !important;
+            background: none !important;
+        }
+        
+        .text-blue-500, .text-green-500, .text-orange-500, .text-indigo-500, .text-purple-500, .text-pink-500, .text-red-500, .text-yellow-500 {
+            background-color: transparent !important;
+            background: none !important;
+        }
+        
+        .text-blue-400, .text-green-400, .text-orange-400, .text-indigo-400, .text-purple-400, .text-pink-400, .text-red-400, .text-yellow-400 {
+            background-color: transparent !important;
+            background: none !important;
+        }
+        
+        .text-blue-300, .text-green-300, .text-orange-300, .text-indigo-300, .text-purple-300, .text-pink-300, .text-red-300, .text-yellow-300 {
+            background-color: transparent !important;
+            background: none !important;
+        }
+        
+        .text-blue-200, .text-green-200, .text-orange-200, .text-indigo-200, .text-purple-200, .text-pink-200, .text-red-200, .text-yellow-200 {
+            background-color: transparent !important;
+            background: none !important;
+        }
+        
+        .text-blue-100, .text-green-100, .text-orange-100, .text-indigo-100, .text-purple-100, .text-pink-100, .text-red-100, .text-yellow-100 {
+            background-color: transparent !important;
+            background: none !important;
+        }
+        
+        /* Remove backgrounds from all icon containers */
+        .bg-blue-100, .bg-green-100, .bg-orange-100, .bg-indigo-100, .bg-purple-100, .bg-pink-100, .bg-red-100, .bg-yellow-100 {
+            background-color: transparent !important;
+            border: none !important;
+            padding: 0 !important;
+        }
+        
+        /* Remove backgrounds from all colored backgrounds */
+        .bg-blue-50, .bg-green-50, .bg-orange-50, .bg-indigo-50, .bg-purple-50, .bg-pink-50, .bg-red-50, .bg-yellow-50 {
+            background-color: transparent !important;
+        }
+        
+        .bg-blue-200, .bg-green-200, .bg-orange-200, .bg-indigo-200, .bg-purple-200, .bg-pink-200, .bg-red-200, .bg-yellow-200 {
+            background-color: transparent !important;
+        }
+        
+        .bg-blue-300, .bg-green-300, .bg-orange-300, .bg-indigo-300, .bg-purple-300, .bg-pink-300, .bg-red-300, .bg-yellow-300 {
+            background-color: transparent !important;
+        }
+        
+        .bg-blue-400, .bg-green-400, .bg-orange-400, .bg-indigo-400, .bg-purple-400, .bg-pink-400, .bg-red-400, .bg-yellow-400 {
+            background-color: transparent !important;
+        }
+        
+        .bg-blue-500, .bg-green-500, .bg-orange-500, .bg-indigo-500, .bg-purple-500, .bg-pink-500, .bg-red-500, .bg-yellow-500 {
+            background-color: transparent !important;
+        }
+        
+        .bg-blue-600, .bg-green-600, .bg-orange-600, .bg-indigo-600, .bg-purple-600, .bg-pink-600, .bg-red-600, .bg-yellow-600 {
+            background-color: transparent !important;
+        }
+        
+        .bg-blue-700, .bg-green-700, .bg-orange-700, .bg-indigo-700, .bg-purple-700, .bg-pink-700, .bg-red-700, .bg-yellow-700 {
+            background-color: transparent !important;
+        }
+        
+        .bg-blue-800, .bg-green-800, .bg-orange-800, .bg-indigo-800, .bg-purple-800, .bg-pink-800, .bg-red-800, .bg-yellow-800 {
+            background-color: transparent !important;
+        }
+        
+        .bg-blue-900, .bg-green-900, .bg-orange-900, .bg-indigo-900, .bg-purple-900, .bg-pink-900, .bg-red-900, .bg-yellow-900 {
+            background-color: transparent !important;
+        }
+        
+        /* Remove all borders from colored elements */
+        .border-blue-200, .border-green-200, .border-orange-200, .border-indigo-200, .border-purple-200, .border-pink-200, .border-red-200, .border-yellow-200 {
+            border-color: transparent !important;
+        }
+        
+        /* Remove all colored text */
+        .text-blue-500, .text-green-500, .text-orange-500, .text-indigo-500, .text-purple-500, .text-pink-500, .text-red-500, .text-yellow-500 {
+            color: #d1d5db !important;
+        }
+        
+        /* Remove all colored text with higher specificity */
+        .text-blue-600, .text-green-600, .text-orange-600, .text-indigo-600, .text-purple-600, .text-pink-600, .text-red-600, .text-yellow-600 {
+            color: #d1d5db !important;
+        }
+        
+        /* Remove all colored text with maximum specificity */
+        .text-blue-700, .text-green-700, .text-orange-700, .text-indigo-700, .text-purple-700, .text-pink-700, .text-red-700, .text-yellow-700 {
+            color: #d1d5db !important;
+        }
+        
+        /* Remove all colored text with maximum specificity */
+        .text-blue-800, .text-green-800, .text-orange-800, .text-indigo-800, .text-purple-800, .text-pink-800, .text-red-800, .text-yellow-800 {
+            color: #d1d5db !important;
+        }
+        
+        /* Remove all colored text with maximum specificity */
+        .text-blue-900, .text-green-900, .text-orange-900, .text-indigo-900, .text-purple-900, .text-pink-900, .text-red-900, .text-yellow-900 {
+            color: #d1d5db !important;
+        }
+        
+        /* Remove all colored text with maximum specificity */
+        .text-blue-100, .text-green-100, .text-orange-100, .text-indigo-100, .text-purple-100, .text-pink-100, .text-red-100, .text-yellow-100 {
+            color: #d1d5db !important;
+        }
+        
+        /* Remove all colored text with maximum specificity */
+        .text-blue-200, .text-green-200, .text-orange-200, .text-indigo-200, .text-purple-200, .text-pink-200, .text-red-200, .text-yellow-200 {
+            color: #d1d5db !important;
+        }
+        
+        /* Remove all colored text with maximum specificity */
+        .text-blue-300, .text-green-300, .text-orange-300, .text-indigo-300, .text-purple-300, .text-pink-300, .text-red-300, .text-yellow-300 {
+            color: #d1d5db !important;
+        }
+        
+        /* Remove all colored text with maximum specificity */
+        .text-blue-400, .text-green-400, .text-orange-400, .text-indigo-400, .text-purple-400, .text-pink-400, .text-red-400, .text-yellow-400 {
+            color: #d1d5db !important;
+        }
     </style>
 </head>
-<body class="bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen">
+<body class="min-h-screen" style="background-color: #343E4E !important;">
     @include('layouts.properties-navigation')
     <div class="min-h-screen">
 
 
         <!-- Property Header Section -->
-        <div class="bg-white border-b border-gray-200 shadow-sm">
+        <div class="border-b border-gray-200 shadow-sm" style="background-color: #1f2937 !important; border-color: #374151 !important;">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
                 <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between space-y-3 sm:space-y-0">
                     <div class="flex items-center space-x-3 sm:space-x-4">

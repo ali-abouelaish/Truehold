@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>{{ config('app.name', 'LET CONNECT') }} - Admin Panel</title>
+    <title>{{ config('app.name', 'TRUEHOLD') }} - Admin Panel</title>
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net">
@@ -25,6 +25,385 @@
     <link href="{{ asset('css/fallback.css') }}" rel="stylesheet">
     
     <style>
+        /* Dark Mode Admin Panel */
+        body {
+            background-color: #111827 !important;
+            color: #f9fafb !important;
+        }
+        
+        .main-content {
+            background-color: #111827 !important;
+        }
+        
+        /* Dark mode overrides */
+        .bg-white {
+            background-color: #1f2937 !important;
+            border-color: #374151 !important;
+        }
+        
+        .text-gray-900 {
+            color: #d1d5db !important;
+        }
+        
+        .text-gray-700 {
+            color: #9ca3af !important;
+        }
+        
+        .text-gray-500 {
+            color: #6b7280 !important;
+        }
+        
+        /* Lighter placeholders */
+        input::placeholder, textarea::placeholder, select::placeholder {
+            color: #9ca3af !important;
+        }
+        
+        /* Form inputs dark mode */
+        input, textarea, select {
+            background-color: #374151 !important;
+            border-color: #4b5563 !important;
+            color: #d1d5db !important;
+        }
+        
+        input:focus, textarea:focus, select:focus {
+            border-color: #fbbf24 !important;
+            box-shadow: 0 0 0 1px #fbbf24 !important;
+        }
+        
+        /* All labels lighter - comprehensive coverage */
+        label, .form-label, .label, .field-label, .control-label, .input-label,
+        .col-form-label, .custom-control-label, .form-check-label, .radio-label,
+        .checkbox-label, .switch-label, .toggle-label, .btn-label,
+        .nav-label, .menu-label, .sidebar-label, .card-label,
+        .table-label, .list-label, .item-label, .section-label {
+            color: #d1d5db !important;
+        }
+        
+        /* Field labels and descriptions */
+        .field-label, .field-description, .help-text {
+            color: #d1d5db !important;
+        }
+        
+        /* Required field indicators */
+        .required, .asterisk {
+            color: #fbbf24 !important;
+        }
+        
+        /* Form groups and containers */
+        .form-group, .form-control-group {
+            margin-bottom: 1rem;
+        }
+        
+        /* Input groups */
+        .input-group-text {
+            background-color: #374151 !important;
+            border-color: #4b5563 !important;
+            color: #d1d5db !important;
+        }
+        
+        /* Form validation */
+        .is-invalid {
+            border-color: #ef4444 !important;
+        }
+        
+        .invalid-feedback {
+            color: #ef4444 !important;
+        }
+        
+        .is-valid {
+            border-color: #10b981 !important;
+        }
+        
+        /* Form sections and headers */
+        .form-section, .card-header h3, .card-header h4, .card-header h5, .card-header h6 {
+            color: #d1d5db !important;
+        }
+        
+        /* Help text and descriptions */
+        .form-text, .help-block, .field-help {
+            color: #9ca3af !important;
+        }
+        
+        /* Specific form elements */
+        .form-control, .form-select, .form-check-input {
+            background-color: #374151 !important;
+            border-color: #4b5563 !important;
+            color: #d1d5db !important;
+        }
+        
+        .form-control:focus, .form-select:focus {
+            background-color: #374151 !important;
+            border-color: #fbbf24 !important;
+            box-shadow: 0 0 0 0.2rem rgba(251, 191, 36, 0.25) !important;
+            color: #d1d5db !important;
+        }
+        
+        /* Checkboxes and radio buttons */
+        .form-check-label {
+            color: #d1d5db !important;
+        }
+        
+        .form-check-input:checked {
+            background-color: #fbbf24 !important;
+            border-color: #fbbf24 !important;
+        }
+        
+        /* Select dropdowns */
+        select option {
+            background-color: #374151 !important;
+            color: #d1d5db !important;
+        }
+        
+        /* Text areas */
+        textarea.form-control {
+            background-color: #374151 !important;
+            border-color: #4b5563 !important;
+            color: #d1d5db !important;
+        }
+        
+        /* Admin panel specific labels */
+        .admin-label, .panel-label, .dashboard-label, .content-label,
+        .widget-label, .component-label, .module-label, .feature-label,
+        .setting-label, .option-label, .config-label, .preference-label {
+            color: #d1d5db !important;
+        }
+        
+        /* Table and list labels */
+        th, .table-header, .list-header, .group-header {
+            color: #d1d5db !important;
+        }
+        
+        /* Navigation labels */
+        .nav-link, .menu-item, .sidebar-link {
+            color: #d1d5db !important;
+        }
+        
+        /* Card and widget labels */
+        .card-title, .widget-title, .panel-title, .section-title {
+            color: #d1d5db !important;
+        }
+        
+        /* Button labels */
+        .btn-text, .button-text, .link-text {
+            color: #d1d5db !important;
+        }
+        
+        /* Catch-all for any remaining labels */
+        [class*="label"], [class*="title"], [class*="header"] {
+            color: #d1d5db !important;
+        }
+        
+        /* Override any white text that should be lighter */
+        .text-white {
+            color: #d1d5db !important;
+        }
+        
+        /* Ensure all form-related text is lighter */
+        .form-text, .form-description, .field-description {
+            color: #9ca3af !important;
+        }
+        
+        .border-gray-200 {
+            border-color: #374151 !important;
+        }
+        
+        .bg-gray-50 {
+            background-color: #374151 !important;
+        }
+        
+        .bg-gray-100 {
+            background-color: #4b5563 !important;
+        }
+        
+        /* Gold accent colors */
+        .text-blue-600, .text-green-600, .text-purple-600, .text-orange-600, .text-red-600, .text-indigo-600, .text-teal-600, .text-yellow-600 {
+            color: #fbbf24 !important;
+        }
+        
+        .border-blue-200, .border-green-200, .border-purple-200, .border-orange-200, .border-red-200, .border-indigo-200, .border-teal-200, .border-yellow-200 {
+            border-color: #fbbf24 !important;
+        }
+        
+        /* Sidebar dark mode */
+        .sidebar-item {
+            color: #9ca3af !important;
+            transition: all 0.3s ease;
+        }
+        
+        .sidebar-item:hover {
+            background-color: #374151 !important;
+            color: #d1d5db !important;
+        }
+        
+        .sidebar-item.active {
+            background-color: #374151 !important;
+            border-left: 2px solid #fbbf24 !important;
+            color: #d1d5db !important;
+        }
+        
+        .sidebar-icon {
+            color: #fbbf24 !important;
+        }
+        
+        .sidebar-text {
+            color: #9ca3af !important;
+        }
+        
+        /* Section headers */
+        .sidebar-text.text-xs {
+            color: #fbbf24 !important;
+        }
+        
+        /* Tables dark mode */
+        table {
+            background-color: #1f2937 !important;
+            color: #d1d5db !important;
+        }
+        
+        th {
+            background-color: #374151 !important;
+            color: #d1d5db !important;
+            border-color: #4b5563 !important;
+        }
+        
+        td {
+            background-color: #1f2937 !important;
+            color: #d1d5db !important;
+            border-color: #4b5563 !important;
+        }
+        
+        tr:hover td {
+            background-color: #374151 !important;
+        }
+        
+        /* Cards dark mode */
+        .card, .bg-white {
+            background-color: #1f2937 !important;
+            border-color: #374151 !important;
+        }
+        
+        /* Standardized button styles */
+        .btn, button, input[type="submit"], input[type="button"], input[type="reset"] {
+            background: linear-gradient(135deg, #374151, #4b5563) !important;
+            border: 1px solid #6b7280 !important;
+            color: #d1d5db !important;
+            padding: 0.5rem 1rem !important;
+            border-radius: 0.375rem !important;
+            font-weight: 500 !important;
+            transition: all 0.3s ease !important;
+            text-decoration: none !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            cursor: pointer !important;
+        }
+        
+        .btn:hover, button:hover, input[type="submit"]:hover, input[type="button"]:hover, input[type="reset"]:hover {
+            background: linear-gradient(135deg, #4b5563, #6b7280) !important;
+            border-color: #fbbf24 !important;
+            color: #f9fafb !important;
+            transform: translateY(-1px) !important;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3) !important;
+        }
+        
+        .btn:active, button:active, input[type="submit"]:active, input[type="button"]:active, input[type="reset"]:active {
+            transform: translateY(0) !important;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2) !important;
+        }
+        
+        /* Primary buttons */
+        .btn-primary, .btn-success, .btn-info {
+            background: linear-gradient(135deg, #1f2937, #374151) !important;
+            border: 1px solid #fbbf24 !important;
+            color: #fbbf24 !important;
+        }
+        
+        .btn-primary:hover, .btn-success:hover, .btn-info:hover {
+            background: linear-gradient(135deg, #fbbf24, #f59e0b) !important;
+            color: #1f2937 !important;
+            border-color: #f59e0b !important;
+        }
+        
+        /* Danger buttons */
+        .btn-danger, .btn-warning {
+            background: linear-gradient(135deg, #7f1d1d, #991b1b) !important;
+            border: 1px solid #ef4444 !important;
+            color: #f9fafb !important;
+        }
+        
+        .btn-danger:hover, .btn-warning:hover {
+            background: linear-gradient(135deg, #ef4444, #dc2626) !important;
+            color: #f9fafb !important;
+            border-color: #dc2626 !important;
+        }
+        
+        /* Secondary buttons */
+        .btn-secondary, .btn-outline {
+            background: linear-gradient(135deg, #374151, #4b5563) !important;
+            border: 1px solid #6b7280 !important;
+            color: #d1d5db !important;
+        }
+        
+        .btn-secondary:hover, .btn-outline:hover {
+            background: linear-gradient(135deg, #4b5563, #6b7280) !important;
+            border-color: #fbbf24 !important;
+            color: #f9fafb !important;
+        }
+        
+        /* Button sizes */
+        .btn-sm, .btn-small {
+            padding: 0.25rem 0.75rem !important;
+            font-size: 0.875rem !important;
+        }
+        
+        .btn-lg, .btn-large {
+            padding: 0.75rem 1.5rem !important;
+            font-size: 1.125rem !important;
+        }
+        
+        .btn-xl, .btn-extra-large {
+            padding: 1rem 2rem !important;
+            font-size: 1.25rem !important;
+        }
+        
+        /* Button states */
+        .btn:disabled, button:disabled, input[type="submit"]:disabled, input[type="button"]:disabled, input[type="reset"]:disabled {
+            background: linear-gradient(135deg, #1f2937, #374151) !important;
+            border-color: #374151 !important;
+            color: #6b7280 !important;
+            cursor: not-allowed !important;
+            opacity: 0.6 !important;
+        }
+        
+        .btn:focus, button:focus, input[type="submit"]:focus, input[type="button"]:focus, input[type="reset"]:focus {
+            outline: none !important;
+            box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.3) !important;
+        }
+        
+        /* Link buttons */
+        .btn-link, a.btn {
+            background: transparent !important;
+            border: none !important;
+            color: #fbbf24 !important;
+            text-decoration: underline !important;
+        }
+        
+        .btn-link:hover, a.btn:hover {
+            background: transparent !important;
+            color: #f59e0b !important;
+            text-decoration: none !important;
+        }
+        
+        /* Icon buttons */
+        .btn-icon, .btn-icon-only {
+            width: 2.5rem !important;
+            height: 2.5rem !important;
+            padding: 0 !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+        }
+        
         /* Ensure Tailwind gradients work */
         .bg-gradient-to-r {
             background-image: linear-gradient(to right, var(--tw-gradient-stops));
@@ -166,15 +545,15 @@
 <body class="font-sans antialiased bg-gray-50">
     <div class="min-h-screen flex">
         <!-- Sidebar -->
-        <div id="sidebar" class="sidebar bg-white shadow-lg w-64 min-h-screen fixed left-0 top-0 z-40">
+        <div id="sidebar" class="sidebar shadow-lg w-64 min-h-screen fixed left-0 top-0 z-40" style="background-color: #1f2937; border-right: 1px solid #374151;">
             <!-- Sidebar Header -->
-            <div class="p-4 border-b border-gray-200">
+            <div class="p-4" style="border-bottom: 1px solid #374151;">
                 <div class="flex items-center justify-between">
                     <div class="flex items-center">
-                        <i class="fas fa-shield-alt text-2xl text-blue-600 sidebar-icon mr-3"></i>
-                        <span class="sidebar-text text-xl font-bold text-gray-800">LET CONNECT</span>
+                        <i class="fas fa-shield-alt text-2xl sidebar-icon mr-3" style="color: #fbbf24;"></i>
+                        <span class="sidebar-text text-xl font-bold" style="color: #d1d5db;">TRUEHOLD</span>
                     </div>
-                    <button id="sidebarToggle" class="text-gray-500 hover:text-gray-700">
+                    <button id="sidebarToggle" class="hover:text-gray-300" style="color: #fbbf24;">
                         <i class="fas fa-bars"></i>
                     </button>
                 </div>
@@ -183,31 +562,38 @@
             <!-- Sidebar Navigation -->
             <nav class="sidebar-nav mt-4">
                 <div class="px-4 mb-4">
-                    <span class="sidebar-text text-xs font-semibold text-gray-500 uppercase tracking-wider">Main</span>
+                    <span class="sidebar-text text-xs font-semibold uppercase tracking-wider" style="color: #fbbf24;">Main</span>
                 </div>
                 
+                @if(auth()->user()->hasAdminPermission('dashboard', 'view'))
                 <a href="{{ route('admin.dashboard') }}" 
-                   class="sidebar-item flex items-center px-4 py-3 text-gray-700 hover:text-blue-600 {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
-                    <i class="fas fa-tachometer-alt sidebar-icon mr-3 text-lg"></i>
+                   class="sidebar-item flex items-center px-4 py-3 hover:bg-gray-700 {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}"
+                   style="color: #d1d5db; {{ request()->routeIs('admin.dashboard') ? 'background-color: #374151; border-left: 3px solid #fbbf24;' : '' }}">
+                    <i class="fas fa-tachometer-alt sidebar-icon mr-3 text-lg" style="color: #fbbf24;"></i>
                     <span class="sidebar-text">Dashboard</span>
                 </a>
+                @endif
 
+                @if(auth()->user()->hasAdminPermission('properties', 'view'))
                 <div class="px-4 mt-6 mb-4">
-                    <span class="sidebar-text text-xs font-semibold text-gray-500 uppercase tracking-wider">Properties</span>
+                    <span class="sidebar-text text-xs font-semibold uppercase tracking-wider" style="color: #fbbf24;">Properties</span>
                 </div>
-                
                 <a href="{{ route('admin.properties') }}" 
                    class="sidebar-item flex items-center px-4 py-3 text-gray-700 hover:text-blue-600 {{ request()->routeIs('admin.properties*') ? 'active' : '' }}">
                     <i class="fas fa-building sidebar-icon mr-3 text-lg"></i>
                     <span class="sidebar-text">All Properties</span>
                 </a>
+                @endif
                 
+                @if(auth()->user()->hasAdminPermission('properties', 'create'))
                 <a href="{{ route('admin.properties.create') }}" 
                    class="sidebar-item flex items-center px-4 py-3 text-gray-700 hover:text-blue-600 {{ request()->routeIs('admin.properties.create') ? 'active' : '' }}">
                     <i class="fas fa-plus sidebar-icon mr-3 text-lg"></i>
                     <span class="sidebar-text">Add Property</span>
                 </a>
+                @endif
 
+                @if(auth()->user()->hasAdminPermission('clients', 'view'))
                 <div class="px-4 mt-6 mb-4">
                     <span class="sidebar-text text-xs font-semibold text-gray-500 uppercase tracking-wider">Clients</span>
                 </div>
@@ -218,12 +604,16 @@
                     <span class="sidebar-text">Manage Clients</span>
                 </a>
                 
+                @if(auth()->user()->hasAdminPermission('clients', 'create'))
                 <a href="{{ route('admin.clients.create') }}" 
                    class="sidebar-item flex items-center px-4 py-3 text-gray-700 hover:text-blue-600 {{ request()->routeIs('admin.clients.create') ? 'active' : '' }}">
                     <i class="fas fa-user-plus sidebar-icon mr-3 text-lg"></i>
                     <span class="sidebar-text">Add Client</span>
                 </a>
+                @endif
+                @endif
 
+                @if(auth()->user()->hasAdminPermission('rental_codes', 'view'))
                 <div class="px-4 mt-6 mb-4">
                     <span class="sidebar-text text-xs font-semibold text-gray-500 uppercase tracking-wider">Rental Codes</span>
                 </div>
@@ -239,7 +629,9 @@
                     <i class="fas fa-bullhorn sidebar-icon mr-3 text-lg"></i>
                     <span class="sidebar-text">Marketing Agents</span>
                 </a>
+                @endif
 
+                @if(auth()->user()->hasAdminPermission('invoices', 'view'))
                 <div class="px-4 mt-6 mb-4">
                     <span class="sidebar-text text-xs font-semibold text-gray-500 uppercase tracking-wider">Invoicing</span>
                 </div>
@@ -250,12 +642,16 @@
                     <span class="sidebar-text">Manage Invoices</span>
                 </a>
                 
+                @if(auth()->user()->hasAdminPermission('invoices', 'create'))
                 <a href="{{ route('admin.invoices.create') }}" 
                    class="sidebar-item flex items-center px-4 py-3 text-gray-700 hover:text-blue-600 {{ request()->routeIs('admin.invoices.create') ? 'active' : '' }}">
                     <i class="fas fa-plus sidebar-icon mr-3 text-lg"></i>
                     <span class="sidebar-text">Create Invoice</span>
                 </a>
+                @endif
+                @endif
 
+                @if(auth()->user()->hasAdminPermission('group_viewings', 'view'))
                 <div class="px-4 mt-6 mb-4">
                     <span class="sidebar-text text-xs font-semibold text-gray-500 uppercase tracking-wider">Viewings</span>
                 </div>
@@ -265,7 +661,9 @@
                     <i class="fas fa-users sidebar-icon mr-3 text-lg"></i>
                     <span class="sidebar-text">Group Viewings</span>
                 </a>
+                @endif
 
+                @if(auth()->user()->hasAdminPermission('call_logs', 'view'))
                 <div class="px-4 mt-6 mb-4">
                     <span class="sidebar-text text-xs font-semibold text-gray-500 uppercase tracking-wider">Call Logs</span>
                 </div>
@@ -276,12 +674,16 @@
                     <span class="sidebar-text">All Call Logs</span>
                 </a>
                 
+                @if(auth()->user()->hasAdminPermission('call_logs', 'create'))
                 <a href="{{ route('admin.call-logs.create') }}" 
                    class="sidebar-item flex items-center px-4 py-3 text-gray-700 hover:text-blue-600 {{ request()->routeIs('admin.call-logs.create') ? 'active' : '' }}">
                     <i class="fas fa-plus sidebar-icon mr-3 text-lg"></i>
                     <span class="sidebar-text">Log New Call</span>
                 </a>
+                @endif
+                @endif
 
+                @if(auth()->user()->hasAdminPermission('users', 'view'))
                 <div class="px-4 mt-6 mb-4">
                     <span class="sidebar-text text-xs font-semibold text-gray-500 uppercase tracking-wider">Users</span>
                 </div>
@@ -291,41 +693,60 @@
                     <i class="fas fa-users sidebar-icon mr-3 text-lg"></i>
                     <span class="sidebar-text">Manage Agents</span>
                 </a>
+                @endif
+
+                @if(auth()->user()->hasAdminPermission('admin_permissions', 'view'))
+                <div class="px-4 mt-6 mb-4">
+                    <span class="sidebar-text text-xs font-semibold text-gray-500 uppercase tracking-wider">System</span>
+                </div>
+                
+                <a href="{{ route('admin.user-permissions.index') }}" 
+                   class="sidebar-item flex items-center px-4 py-3 text-gray-700 hover:text-blue-600 {{ request()->routeIs('admin.user-permissions*') ? 'active' : '' }}">
+                    <i class="fas fa-shield-alt sidebar-icon mr-3 text-lg"></i>
+                    <span class="sidebar-text">User Permissions</span>
+                </a>
+                @endif
 
                 <div class="px-4 mt-6 mb-4">
-                    <span class="sidebar-text text-xs font-semibold text-gray-500 uppercase tracking-wider">Public Access</span>
+                    <span class="sidebar-text text-xs font-semibold uppercase tracking-wider" style="color: #fbbf24;">Public Access</span>
                 </div>
                 
                 <a href="{{ route('properties.index') }}" 
-                   class="sidebar-item flex items-center px-4 py-3 text-gray-700 hover:text-blue-600 bg-blue-50 border-l-4 border-blue-500">
-                    <i class="fas fa-globe sidebar-icon mr-3 text-lg text-blue-600"></i>
+                   class="sidebar-item flex items-center px-4 py-3 transition-colors {{ request()->routeIs('properties.index') ? 'active' : '' }}"
+                   style="color: #9ca3af; {{ request()->routeIs('properties.index') ? 'background-color: #374151; border-left: 2px solid #fbbf24; color: #d1d5db;' : '' }}"
+                   onmouseover="this.style.backgroundColor='#374151'; this.style.color='#d1d5db';"
+                   onmouseout="this.style.backgroundColor='{{ request()->routeIs('properties.index') ? '#374151' : 'transparent' }}'; this.style.color='{{ request()->routeIs('properties.index') ? '#d1d5db' : '#9ca3af' }}';">
+                    <i class="fas fa-globe sidebar-icon mr-3 text-lg" style="color: #fbbf24;"></i>
                     <span class="sidebar-text font-medium">View Public Site</span>
-                    <i class="fas fa-external-link-alt ml-auto text-xs text-blue-500"></i>
                 </a>
                 
                 <a href="{{ route('properties.map') }}" 
-                   class="sidebar-item flex items-center px-4 py-3 text-gray-700 hover:text-blue-600 bg-green-50 border-l-4 border-green-500">
-                    <i class="fas fa-map-marked-alt sidebar-icon mr-3 text-lg text-green-600"></i>
+                   class="sidebar-item flex items-center px-4 py-3 transition-colors {{ request()->routeIs('properties.map') ? 'active' : '' }}"
+                   style="color: #9ca3af; {{ request()->routeIs('properties.map') ? 'background-color: #374151; border-left: 2px solid #fbbf24; color: #d1d5db;' : '' }}"
+                   onmouseover="this.style.backgroundColor='#374151'; this.style.color='#d1d5db';"
+                   onmouseout="this.style.backgroundColor='{{ request()->routeIs('properties.map') ? '#374151' : 'transparent' }}'; this.style.color='{{ request()->routeIs('properties.map') ? '#d1d5db' : '#9ca3af' }}';">
+                    <i class="fas fa-map-marked-alt sidebar-icon mr-3 text-lg" style="color: #fbbf24;"></i>
                     <span class="sidebar-text font-medium">Interactive Map</span>
-                    <i class="fas fa-external-link-alt ml-auto text-xs text-green-500"></i>
                 </a>
             </nav>
 
             <!-- Sidebar Footer -->
-            <div class="w-full p-4 border-t border-gray-200 mt-auto">
+            <div class="w-full p-4 mt-auto" style="border-top: 1px solid #374151;">
                 <div class="flex items-center justify-between">
                     <div class="flex items-center">
-                        <div class="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
-                            <span class="text-white text-sm font-bold">{{ substr(Auth::user()->name, 0, 1) }}</span>
+                        <div class="w-8 h-8 rounded-full flex items-center justify-center" style="background: linear-gradient(135deg, #1f2937, #374151); border: 1px solid #fbbf24;">
+                            <span class="text-sm font-bold" style="color: #fbbf24;">{{ substr(Auth::user()->name, 0, 1) }}</span>
                         </div>
                         <div class="ml-3 sidebar-text">
-                            <p class="text-sm font-medium text-gray-700">{{ Auth::user()->name }}</p>
-                            <p class="text-xs text-gray-500">{{ Auth::user()->email }}</p>
+                            <p class="text-sm font-medium" style="color: #d1d5db;">{{ Auth::user()->name }}</p>
+                            <p class="text-xs" style="color: #9ca3af;">{{ Auth::user()->email }}</p>
                         </div>
                     </div>
                     <form method="POST" action="{{ route('logout') }}">
                         @csrf
-                        <button type="submit" class="text-gray-500 hover:text-red-600">
+                        <button type="submit" class="transition-colors" style="color: #9ca3af;"
+                                onmouseover="this.style.color='#ef4444';"
+                                onmouseout="this.style.color='#9ca3af';">
                             <i class="fas fa-sign-out-alt"></i>
                         </button>
                     </form>
@@ -336,20 +757,20 @@
         <div id="sidebarOverlay" class="hidden fixed inset-0 bg-black bg-opacity-40 z-30 md:hidden"></div>
 
         <!-- Main Content -->
-        <div class="main-content flex-1 ml-64">
+        <div class="main-content flex-1 ml-64" style="background-color: #111827;">
             <!-- Top Navigation -->
-            <header class="bg-white shadow-sm border-b border-gray-200">
+            <header class="shadow-sm" style="background-color: #1f2937; border-bottom: 1px solid #374151;">
                 <div class="flex items-center justify-between px-6 py-4">
                     <div class="flex items-center">
-                        <button id="mobileSidebarToggle" class="mr-3 text-gray-600 md:hidden">
+                        <button id="mobileSidebarToggle" class="mr-3 md:hidden" style="color: #fbbf24;">
                             <i class="fas fa-bars"></i>
                         </button>
-                        <h1 class="text-2xl font-bold text-gray-900">@yield('page-title', 'Dashboard')</h1>
+                        <h1 class="text-2xl font-bold" style="color: #d1d5db;">@yield('page-title', 'Dashboard')</h1>
                     </div>
                     
                     <div class="flex items-center space-x-4">
                         <!-- Notifications -->
-                        <button class="text-gray-500 hover:text-gray-700 relative">
+                        <button class="relative" style="color: #fbbf24;">
                             <i class="fas fa-bell text-lg"></i>
                             <span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">3</span>
                         </button>
@@ -357,8 +778,9 @@
                         <!-- Quick Actions -->
                         <div class="flex items-center space-x-2">
                             <a href="{{ route('admin.properties.create') }}" 
-                               class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium">
-                                <i class="fas fa-plus mr-2"></i>Quick Add
+                               class="text-white px-4 py-2 rounded-lg text-sm font-medium"
+                               style="background: linear-gradient(135deg, #1f2937, #374151); border: 1px solid #4b5563;">
+                                <i class="fas fa-plus mr-2" style="color: #fbbf24;"></i>Quick Add
                             </a>
                         </div>
                     </div>
@@ -366,17 +788,17 @@
             </header>
 
             <!-- Page Content -->
-            <main class="p-6">
+            <main class="p-6" style="background-color: #111827;">
                 @if(session('success'))
-                    <div class="mb-6 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-lg">
-                        <i class="fas fa-check-circle mr-2"></i>
+                    <div class="mb-6 px-4 py-3 rounded-lg" style="background-color: #064e3b; border: 1px solid #10b981; color: #f9fafb;">
+                        <i class="fas fa-check-circle mr-2" style="color: #10b981;"></i>
                         {{ session('success') }}
                     </div>
                 @endif
 
                 @if(session('error'))
-                    <div class="mb-6 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg">
-                        <i class="fas fa-exclamation-circle mr-2"></i>
+                    <div class="mb-6 px-4 py-3 rounded-lg" style="background-color: #7f1d1d; border: 1px solid #ef4444; color: #f9fafb;">
+                        <i class="fas fa-exclamation-circle mr-2" style="color: #ef4444;"></i>
                         {{ session('error') }}
                     </div>
                 @endif

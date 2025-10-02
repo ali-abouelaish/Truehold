@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Agent Login - LET CONNECT</title>
+    <title>Agent Login - TRUEHOLD</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     
@@ -54,7 +54,7 @@
                 <div class="flex justify-between items-center py-6">
                     <div class="flex items-center">
                         <i class="fas fa-building text-3xl text-blue-400 mr-4"></i>
-                        <h1 class="text-3xl font-bold text-white">LET CONNECT</h1>
+                        <h1 class="text-3xl font-bold text-white">TRUEHOLD</h1>
                     </div>
                     <div class="text-sm text-gray-300">
                         <a href="{{ route('properties.index') }}" class="hover:text-white transition-colors">

@@ -43,6 +43,11 @@ class CallLogController extends Controller
             $query->where('property_address', 'like', '%' . $request->property_address . '%');
         }
 
+        // Filter by phone number
+        if ($request->has('landlord_phone') && $request->landlord_phone) {
+            $query->where('landlord_phone', 'like', '%' . $request->landlord_phone . '%');
+        }
+
         // Filter by date range
         if ($request->has('date_from') && $request->date_from) {
             $query->where('call_datetime', '>=', $request->date_from);
@@ -231,5 +236,84 @@ class CallLogController extends Controller
             ->get();
 
         return view('admin.call-logs.recent', compact('recentCalls'));
+    }
+
+    /**
+     * Check if a phone number has been called before
+     */
+    public function checkPhone(Request $request)
+    {
+        $phone = $request->get('phone');
+        $excludeId = $request->get('exclude_id');
+
+        if (empty($phone)) {
+            return response()->json([
+                'has_been_called' => false,
+                'call_history' => null
+            ]);
+        }
+
+        $hasBeenCalled = CallLog::hasBeenCalledBefore($phone, $excludeId);
+        $callHistory = null;
+
+        if ($hasBeenCalled) {
+            $callHistory = CallLog::getCallHistorySummary($phone, $excludeId);
+        }
+
+        return response()->json([
+            'has_been_called' => $hasBeenCalled,
+            'call_history' => $callHistory
+        ]);
+    }
+
+    /**
+     * Get previous calls for a phone number
+     */
+    public function getPreviousCalls(Request $request)
+    {
+        $phone = $request->get('phone');
+        $excludeId = $request->get('exclude_id');
+
+        if (empty($phone)) {
+            return response()->json(['calls' => []]);
+        }
+
+        $previousCalls = CallLog::getPreviousCalls($phone, $excludeId);
+
+        return response()->json([
+            'calls' => $previousCalls->map(function ($call) {
+                return [
+                    'id' => $call->id,
+                    'call_datetime' => $call->call_datetime->format('Y-m-d H:i'),
+                    'call_type' => $call->call_type,
+                    'call_status' => $call->call_status,
+                    'call_outcome' => $call->call_outcome,
+                    'landlord_name' => $call->landlord_name,
+                    'property_address' => $call->property_address,
+                    'agent_notes' => $call->agent_notes,
+                    'agent_name' => $call->agent->name ?? 'Unknown'
+                ];
+            })
+        ]);
+    }
+
+    /**
+     * Update next step status for a call log.
+     */
+    public function updateNextStep(Request $request, CallLog $callLog)
+    {
+        $request->validate([
+            'next_step_status' => 'nullable|in:send_terms,send_compliance_docs,awaiting_response,collect_keys,tenant_reference_started,other'
+        ]);
+
+        $callLog->update([
+            'next_step_status' => $request->next_step_status
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Next step status updated successfully',
+            'next_step_status' => $callLog->next_step_status
+        ]);
     }
 }
