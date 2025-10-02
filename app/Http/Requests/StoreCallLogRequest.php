@@ -25,43 +25,43 @@ class StoreCallLogRequest extends FormRequest
         
         return [
             // Call Metadata
-            'call_type' => ['required', 'in:outbound,inbound,follow_up,voicemail,sms_whatsapp'],
-            'call_status' => ['required', 'in:connected,no_answer,wrong_number,voicemail,callback_requested'],
+            'call_type' => ['nullable', 'in:outbound,inbound,follow_up,voicemail,sms_whatsapp'],
+            'call_status' => ['nullable', 'in:connected,no_answer,wrong_number,voicemail,callback_requested'],
             'call_datetime' => ['nullable', 'date'],
             
             // Landlord Details
-            'landlord_name' => [$isNoAnswer ? 'nullable' : 'required', 'string', 'max:255'],
+            'landlord_name' => ['nullable', 'string', 'max:255'],
             'landlord_phone' => ['nullable', 'string', 'max:20'],
             'landlord_email' => ['nullable', 'email', 'max:255'],
             'landlord_company' => ['nullable', 'string', 'max:255'],
-            'contact_source' => [$isNoAnswer ? 'nullable' : 'required', 'in:gumtree,spareroom,zoopla,rightmove,referral,other'],
+            'contact_source' => ['nullable', 'in:gumtree,spareroom,zoopla,rightmove,referral,other'],
             
             // Property Details
-            'property_address' => [$isNoAnswer ? 'nullable' : 'required', 'string', 'max:500'],
-            'property_type' => [$isNoAnswer ? 'nullable' : 'required', 'in:studio,one_bed,two_bed,hmo,other'],
+            'property_address' => ['nullable', 'string', 'max:500'],
+            'property_type' => ['nullable', 'in:studio,one_bed,two_bed,hmo,other'],
             'number_of_beds' => ['nullable', 'integer', 'min:0', 'max:20'],
             'number_of_bathrooms' => ['nullable', 'integer', 'min:0', 'max:10'],
-            'advertised_rent' => [$isNoAnswer ? 'nullable' : 'required', 'numeric', 'min:0', 'max:99999.99'],
+            'advertised_rent' => ['nullable', 'numeric', 'min:0', 'max:99999.99'],
             'availability_date' => ['nullable', 'date'],
-            'vacant_keys' => ['boolean'],
-            'furnished' => [$isNoAnswer ? 'nullable' : 'required', 'in:furnished,unfurnished,part_furnished,other'],
+            'vacant_keys' => ['nullable', 'boolean'],
+            'furnished' => ['nullable', 'in:furnished,unfurnished,part_furnished,other'],
             
             // Discovery & Compliance
             'room_link' => ['nullable', 'url'],
-            'landlord_priority' => [$isNoAnswer ? 'nullable' : 'required', 'in:speed,best_price,hands_off,other'],
+            'landlord_priority' => ['nullable', 'in:speed,best_price,hands_off,other'],
             'discovery_notes' => ['nullable', 'string'],
             
             // Offer Presentation
             'packages_discussed' => ['nullable', 'array'],
-            'landlord_preference' => [$isNoAnswer ? 'nullable' : 'required', 'in:full_management,top_up,let_only,undecided'],
+            'landlord_preference' => ['nullable', 'in:full_management,top_up,let_only,undecided'],
             
             // Objection Handling
             'objections' => ['nullable', 'array'],
             
             // Outcome & Next Steps
-            'viewing_booked' => ['boolean'],
+            'viewing_booked' => ['nullable', 'boolean'],
             'viewing_datetime' => ['nullable', 'date'],
-            'follow_up_needed' => ['boolean'],
+            'follow_up_needed' => ['nullable', 'boolean'],
             
             // Automation Actions
             'send_sms' => ['nullable', 'boolean'],
@@ -69,14 +69,9 @@ class StoreCallLogRequest extends FormRequest
             'send_whatsapp' => ['nullable', 'boolean'],
             'remove_automation' => ['nullable', 'boolean'],
             'follow_up_datetime' => ['nullable', 'date'],
-            'next_step_status' => [$isNoAnswer ? 'nullable' : 'required', 'in:send_terms,send_compliance_docs,awaiting_response,collect_keys,tenant_reference_started,other'],
-            'call_outcome' => ['required', 'in:instruction_won,pending,lost,not_interested'],
+            'next_step_status' => ['nullable', 'in:send_terms,send_compliance_docs,awaiting_response,collect_keys,tenant_reference_started,other'],
+            'call_outcome' => ['nullable', 'in:instruction_won,pending,lost,not_interested'],
             'agent_notes' => ['nullable', 'string'],
-            
-            // Automation Hooks
-            'send_sms' => ['boolean'],
-            'send_email' => ['boolean'],
-            'send_whatsapp' => ['boolean'],
         ];
     }
 
