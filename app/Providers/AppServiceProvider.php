@@ -21,6 +21,11 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Force HTTPS in production
+        if (config('app.env') === 'production') {
+            \URL::forceScheme('https');
+        }
+        
         // Add custom Blade directive for safe property access
         \Blade::directive('safe', function ($expression) {
             return "<?php echo is_string($expression) ? $expression : 'N/A'; ?>";

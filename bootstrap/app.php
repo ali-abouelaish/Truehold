@@ -14,6 +14,11 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'admin.permission' => \App\Http\Middleware\CheckAdminPermission::class,
         ]);
+        
+        // Add HTTPS middleware globally
+        $middleware->web(append: [
+            \App\Http\Middleware\ForceHttps::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //
