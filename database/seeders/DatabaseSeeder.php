@@ -22,6 +22,7 @@ class DatabaseSeeder extends Seeder
 
         // Run existing seeders
         $this->call([
+            SuperAdminSeeder::class,
             AgentSeeder::class,
             AgentUserSeeder::class,
             ClientSeeder::class,
