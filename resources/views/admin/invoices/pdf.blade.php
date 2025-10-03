@@ -291,7 +291,7 @@
         <!-- Header -->
         <div class="header">
             <div class="company-info">
-                <img src="{{ public_path('images/truehold-logo.png') }}" alt="TRUEHOLD GROUP LTD" class="company-logo">
+                <img src="{{ public_path('images/truehold-logo.jpg') }}" alt="TRUEHOLD GROUP LTD" class="company-logo">
                 <h1>{{ $invoice->company_name }}</h1>
                 <p><strong>Business Banking</strong></p>
                 <p><strong>Account holder name:</strong> {{ $invoice->account_holder_name }}</p>

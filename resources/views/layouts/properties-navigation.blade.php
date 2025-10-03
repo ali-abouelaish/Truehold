@@ -4,8 +4,9 @@
             <div class="flex">
                 <!-- Logo/Brand -->
                 <div class="shrink-0 flex items-center">
-                    <a href="{{ route('properties.index') }}" class="text-2xl font-bold transition-colors" style="color: #fbbf24;">
-                        🏠 TRUEHOLD
+                    <a href="{{ route('properties.index') }}" class="flex items-center space-x-3 transition-colors">
+                        <img src="{{ asset('images/truehold-logo.jpg') }}" alt="TRUEHOLD GROUP LTD" class="h-10 w-auto">
+                        <span class="text-2xl font-bold" style="color: #fbbf24;">TRUEHOLD</span>
                     </a>
                 </div>
 

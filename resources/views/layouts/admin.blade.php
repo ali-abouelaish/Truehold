@@ -550,7 +550,7 @@
             <div class="p-4" style="border-bottom: 1px solid #374151;">
                 <div class="flex items-center justify-between">
                     <div class="flex items-center">
-                        <i class="fas fa-shield-alt text-2xl sidebar-icon mr-3" style="color: #fbbf24;"></i>
+                        <img src="{{ asset('images/truehold-logo.jpg') }}" alt="TRUEHOLD GROUP LTD" class="h-8 w-auto mr-3">
                         <span class="sidebar-text text-xl font-bold" style="color: #d1d5db;">TRUEHOLD</span>
                     </div>
                     <button id="sidebarToggle" class="hover:text-gray-300" style="color: #fbbf24;">
