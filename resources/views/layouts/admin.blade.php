@@ -710,6 +710,12 @@
                     <i class="fas fa-shield-alt sidebar-icon mr-3 text-lg"></i>
                     <span class="sidebar-text">User Permissions</span>
                 </a>
+                
+                <a href="{{ route('admin.scraper.index') }}" 
+                   class="sidebar-item flex items-center px-4 py-3 text-gray-700 hover:text-blue-600 {{ request()->routeIs('admin.scraper*') ? 'active' : '' }}">
+                    <i class="fas fa-spider sidebar-icon mr-3 text-lg"></i>
+                    <span class="sidebar-text">Property Scraper</span>
+                </a>
                 @endif
 
                 <div class="px-4 mt-6 mb-4">
