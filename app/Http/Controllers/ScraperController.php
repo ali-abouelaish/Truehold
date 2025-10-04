@@ -73,26 +73,52 @@ class ScraperController extends Controller
             // Create the Python scraper script
             $pythonScript = $this->createPythonScraper();
             
-            // Try different Python commands
-            $pythonCommands = ['python3', 'python', 'py', 'python.exe'];
-            $result = null;
+            // Try to find Python executable
+            $pythonPath = $this->findPythonExecutable();
             
-            foreach ($pythonCommands as $pythonCmd) {
-                $result = Process::run($pythonCmd . ' ' . $pythonScript);
-                if ($result->successful()) {
-                    break;
-                }
+            if (!$pythonPath) {
+                return redirect()->route('admin.scraper.index')->with('error', 'Python not found. Please install Python and add it to your system PATH, or use the PHP scraper instead.');
             }
             
-            if ($result && $result->successful()) {
-                return redirect()->route('admin.scraper.index')->with('success', 'Scraper completed successfully! Check the results below.');
+            // Run the Python scraper
+            $result = Process::run($pythonPath . ' ' . $pythonScript);
+            
+            if ($result->successful()) {
+                return redirect()->route('admin.scraper.index')->with('success', 'Python scraper completed successfully! Check the results below.');
             } else {
-                $errorMsg = $result ? $result->errorOutput() : 'Python not found';
-                return redirect()->route('admin.scraper.index')->with('error', 'Scraper failed: ' . $errorMsg . '. Please install Python or check the installation guide.');
+                return redirect()->route('admin.scraper.index')->with('error', 'Python scraper failed: ' . $result->errorOutput() . '. Try using the PHP scraper instead.');
             }
         } catch (\Exception $e) {
-            return redirect()->route('admin.scraper.index')->with('error', 'Error running scraper: ' . $e->getMessage());
+            return redirect()->route('admin.scraper.index')->with('error', 'Error running Python scraper: ' . $e->getMessage() . '. Try using the PHP scraper instead.');
         }
+    }
+    
+    private function findPythonExecutable()
+    {
+        // Common Python paths on Windows
+        $possiblePaths = [
+            'C:\\Users\\Ali\\AppData\\Local\\Programs\\Python\\Python311\\python.exe',
+            'C:\\Users\\Ali\\AppData\\Local\\Programs\\Python\\Python312\\python.exe',
+            'C:\\Python311\\python.exe',
+            'C:\\Python312\\python.exe',
+            'python3',
+            'python',
+            'py',
+            'python.exe'
+        ];
+        
+        foreach ($possiblePaths as $path) {
+            try {
+                $result = Process::run($path . ' --version');
+                if ($result->successful()) {
+                    return $path;
+                }
+            } catch (\Exception $e) {
+                // Continue to next path
+            }
+        }
+        
+        return null;
     }
 
     public function importData()
