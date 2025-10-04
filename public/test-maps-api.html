@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Google Maps API Test</title>
+</head>
+<body>
+    <h1>Google Maps API Test</h1>
+    <div id="map" style="height: 400px; width: 100%;"></div>
+    
+    <script>
+        function initMap() {
+            console.log('✅ Google Maps API loaded successfully!');
+            const map = new google.maps.Map(document.getElementById('map'), {
+                center: { lat: 51.5074, lng: -0.1278 },
+                zoom: 12
+            });
+        }
+        
+        function showError() {
+            document.body.innerHTML = '<h1 style="color: red;">❌ API Key Authentication Failed</h1><p>Check your API key configuration.</p>';
+        }
+    </script>
+    
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCjwjwZ4M9mwlwqCXwCx8Yrl1bz_q4fjuQ&callback=initMap&v=weekly"></script>
+    
+    <script>
+        // Handle API errors
+        window.gm_authFailure = showError;
+    </script>
+</body>
+</html>

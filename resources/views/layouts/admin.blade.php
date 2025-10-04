@@ -762,9 +762,6 @@
             <header class="shadow-sm" style="background-color: #1f2937; border-bottom: 1px solid #374151;">
                 <div class="flex items-center justify-between px-6 py-4">
                     <div class="flex items-center">
-                        <button id="mobileSidebarToggle" class="mr-3 md:hidden" style="color: #fbbf24;">
-                            <i class="fas fa-bars"></i>
-                        </button>
                         <h1 class="text-2xl font-bold" style="color: #d1d5db;">@yield('page-title', 'Dashboard')</h1>
                     </div>
                     
@@ -814,7 +811,6 @@
             const sidebar = document.getElementById('sidebar');
             const mainContent = document.querySelector('.main-content');
             const sidebarToggle = document.getElementById('sidebarToggle');
-            const mobileSidebarToggle = document.getElementById('mobileSidebarToggle');
             const sidebarOverlay = document.getElementById('sidebarOverlay');
 
             function isMobile() {
@@ -854,16 +850,6 @@
                 });
             }
 
-            // Mobile hamburger in top bar
-            if (mobileSidebarToggle) {
-                mobileSidebarToggle.addEventListener('click', function() {
-                    if (sidebar.classList.contains('open')) {
-                        closeMobileSidebar();
-                    } else {
-                        openMobileSidebar();
-                    }
-                });
-            }
 
             // Close when clicking overlay (mobile)
             if (sidebarOverlay) {

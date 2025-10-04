@@ -560,6 +560,16 @@
             max-height: 2000px;
         }
         
+        /* Remove bottom margin when collapsed to prevent white space */
+        .filters-collapsed .filters-section {
+            margin-bottom: 0;
+            padding-bottom: 1rem;
+        }
+        
+        .filters-collapsed .filters-content {
+            margin-bottom: 0;
+        }
+        
         /* Mobile-first responsive design */
         @media (max-width: 767px) {
             .action-button, .secondary-button, .search-button {
@@ -593,8 +603,30 @@
         }
         
         #map {
-            height: calc(62.5vh - 125px);
+            height: calc(100vh - 200px);
             width: 100%;
+            min-height: 400px;
+            transition: height 0.3s ease;
+            position: relative;
+        }
+        
+        /* Responsive map height */
+        @media (max-width: 768px) {
+            #map {
+                height: calc(100vh - 150px);
+                min-height: 300px;
+            }
+        }
+        
+        /* When filters are collapsed, expand map */
+        .filters-collapsed #map {
+            height: calc(100vh - 120px);
+        }
+        
+        @media (max-width: 768px) {
+            .filters-collapsed #map {
+                height: calc(100vh - 100px);
+            }
         }
         
         
@@ -965,7 +997,16 @@
     <div id="properties-data" style="display: none;">{!! json_encode($properties) !!}</div>
 
     <!-- Google Maps API -->
-    <script src="https://maps.googleapis.com/maps/api/js?key={{ config('services.google.maps_api_key', 'YOUR_GOOGLE_MAPS_API_KEY') }}&libraries=places&callback=initMap&v=weekly&loading=async"></script>
+    @if(config('services.google.maps_api_key') && config('services.google.maps_api_key') !== 'YOUR_GOOGLE_MAPS_API_KEY')
+        <script src="https://maps.googleapis.com/maps/api/js?key={{ config('services.google.maps_api_key') }}&libraries=places&callback=initMap&v=weekly&loading=async"></script>
+    @else
+        <script>
+            // Show API key error immediately
+            document.addEventListener('DOMContentLoaded', function() {
+                showError('Google Maps API key not configured. Please add GOOGLE_MAPS_API_KEY to your .env file. See GOOGLE_MAPS_SETUP.md for instructions.');
+            });
+        </script>
+    @endif
     
 
     <script>
@@ -1431,7 +1472,7 @@
 
         // Handle Google Maps API errors
         window.gm_authFailure = function() {
-            showError('Google Maps API authentication failed. Please check your API key.');
+            showError('Google Maps API authentication failed. Please check your API key in the .env file.');
         };
 
         // Handle window errors
@@ -1664,12 +1705,23 @@
                 filterToggleText.textContent = 'Show Filters';
                 filterToggleIcon.classList.remove('fa-chevron-up');
                 filterToggleIcon.classList.add('fa-chevron-down');
+                // Add collapsed class to body for responsive map
+                document.body.classList.add('filters-collapsed');
             } else {
                 filtersContent.classList.add('show');
                 filterToggleText.textContent = 'Hide Filters';
                 filterToggleIcon.classList.remove('fa-chevron-down');
                 filterToggleIcon.classList.add('fa-chevron-up');
+                // Remove collapsed class from body
+                document.body.classList.remove('filters-collapsed');
             }
+            
+            // Trigger map resize after transition
+            setTimeout(() => {
+                if (typeof google !== 'undefined' && google.maps) {
+                    google.maps.event.trigger(map, 'resize');
+                }
+            }, 350);
         }
         
 
