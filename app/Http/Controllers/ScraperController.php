@@ -124,16 +124,41 @@ class ScraperController extends Controller
     public function importData()
     {
         try {
-            // Run the Laravel import command
-            $result = Process::run('php artisan properties:import-newscrape');
+            // Try different PHP paths
+            $phpPaths = [
+                'C:\\xampp\\php\\php.exe',
+                'php',
+                'C:\\Program Files\\PHP\\php.exe',
+                'C:\\php\\php.exe'
+            ];
+            
+            $phpPath = null;
+            foreach ($phpPaths as $path) {
+                try {
+                    $result = Process::run($path . ' --version');
+                    if ($result->successful()) {
+                        $phpPath = $path;
+                        break;
+                    }
+                } catch (\Exception $e) {
+                    // Continue to next path
+                }
+            }
+            
+            if (!$phpPath) {
+                return redirect()->route('admin.scraper.index')->with('error', 'PHP not found. Please check your PHP installation.');
+            }
+            
+            // Run the Laravel import command with full PHP path
+            $result = Process::run($phpPath . ' artisan properties:import-newscrape');
             
             if ($result->successful()) {
-                return redirect()->route('admin.scraper.index')->with('success', 'Data imported successfully!');
+                return redirect()->route('admin.scraper.index')->with('success', 'Data imported successfully! ' . $result->output());
             } else {
                 return redirect()->route('admin.scraper.index')->with('error', 'Import failed: ' . $result->errorOutput());
             }
         } catch (\Exception $e) {
-            return redirect()->route('admin.scraper.index')->with('error', 'Error importing data: ' . $e->getMessage());
+            return redirect()->route('admin.scraper.index')->with('error', 'Import failed: ' . $e->getMessage());
         }
     }
 
