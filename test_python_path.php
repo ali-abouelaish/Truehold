@@ -61,3 +61,4 @@ if ($workingPath) {
     echo "<p style='color: orange;'>⚠️ Use the PHP scraper instead - it doesn't require Python.</p>";
 }
 ?>
+

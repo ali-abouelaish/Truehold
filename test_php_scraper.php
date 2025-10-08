@@ -69,3 +69,4 @@ if (isset($profiles[0])) {
 echo "<h3>PHP Scraper Test Complete</h3>";
 echo "<p>If all tests pass, the PHP scraper should work in your Laravel application.</p>";
 ?>
+

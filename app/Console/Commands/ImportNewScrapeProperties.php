@@ -70,7 +70,7 @@ class ImportNewScrapeProperties extends Command
 
         $rowCount = 0;
         $importedCount = 0;
-        $updatedCount = 0;
+        $replacedCount = 0;
         $errorCount = 0;
         $batchSize = 100;
         $batch = [];
@@ -119,13 +119,21 @@ class ImportNewScrapeProperties extends Command
             if ($existingProperty) {
                 // Check if property is updatable
                 if ($existingProperty->updatable) {
-                    // Update existing property
+                    // Delete existing updatable property and add to batch for creation
                     try {
-                        $existingProperty->update($cleanedData);
-                        $updatedCount++;
-                        $this->line("Updated: {$cleanedData['title']}");
+                        $existingProperty->delete();
+                        $this->line("Deleted existing updatable property: {$cleanedData['title']}");
+                        $replacedCount++;
+                        
+                        // Add to batch for creation with new data
+                        $batch[] = $cleanedData;
+                        
+                        if (count($batch) >= $batchSize) {
+                            $this->processBatch($batch, $importedCount);
+                            $batch = [];
+                        }
                     } catch (\Exception $e) {
-                        $this->error("Error updating property: " . $e->getMessage());
+                        $this->error("Error deleting property: " . $e->getMessage());
                         $errorCount++;
                     }
                 } else {
@@ -155,7 +163,7 @@ class ImportNewScrapeProperties extends Command
         $this->info("\nImport completed!");
         $this->info("Total rows processed: $rowCount");
         $this->info("New properties imported: $importedCount");
-        $this->info("Existing properties updated: $updatedCount");
+        $this->info("Existing updatable properties replaced: $replacedCount");
         $this->info("Errors: $errorCount");
 
         return 0;
