@@ -37,9 +37,22 @@ class ImportNewScrapeProperties extends Command
 
         if ($this->option('truncate')) {
             if ($this->confirm('This will delete ALL existing properties. Are you sure?')) {
-                $this->info('Truncating properties table...');
-                Property::truncate();
-                $this->info('Properties table truncated successfully.');
+                $this->info('Deleting all existing properties...');
+                
+                // Disable foreign key checks for truncate operation
+                DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+                
+                try {
+                    // Delete all related records first
+                    DB::table('property_interests')->delete();
+                    
+                    // Delete all properties
+                    Property::query()->delete();
+                    $this->info('All properties and related records deleted successfully.');
+                } finally {
+                    // Re-enable foreign key checks
+                    DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+                }
             } else {
                 $this->info('Import cancelled.');
                 return 0;
@@ -48,9 +61,9 @@ class ImportNewScrapeProperties extends Command
 
         $this->info('Starting import from newscrape.csv...');
         
-        // Disable foreign key checks
+        // Disable foreign key checks for the entire import process
         DB::statement('SET FOREIGN_KEY_CHECKS=0;');
-        $this->info('Foreign key checks disabled');
+        $this->info('Foreign key checks disabled for import process');
         
         try {
             // Read the entire CSV content and parse it properly
@@ -126,7 +139,8 @@ class ImportNewScrapeProperties extends Command
                     if ($existingProperty->updatable) {
                         // Delete existing updatable property and add to batch for creation
                         try {
-                            $existingProperty->delete();
+                            // Delete related records first to avoid foreign key constraints
+                            $this->deletePropertyWithRelatedRecords($existingProperty);
                             $this->line("Deleted existing updatable property: {$cleanedData['title']}");
                             $replacedCount++;
                             
@@ -714,6 +728,21 @@ class ImportNewScrapeProperties extends Command
         $value = preg_replace('/[^\x20-\x7E\x0A\x0D]/', '', $value);
         
         return $value;
+    }
+
+    /**
+     * Delete property and its related records to avoid foreign key constraints
+     */
+    private function deletePropertyWithRelatedRecords($property): void
+    {
+        // Delete related records first
+        DB::table('property_interests')->where('property_id', $property->id)->delete();
+        
+        // Delete any other related records that might exist
+        // Add more related table deletions here if needed
+        
+        // Finally delete the property itself
+        $property->delete();
     }
 
     /**
