@@ -48,123 +48,134 @@ class ImportNewScrapeProperties extends Command
 
         $this->info('Starting import from newscrape.csv...');
         
-        // Read the entire CSV content and parse it properly
-        $csvContent = file_get_contents($csvFile);
-        if ($csvContent === false) {
-            $this->error('Could not read CSV file');
-            return 1;
-        }
-
-        // Parse CSV with proper multi-line support
-        $csvData = $this->parseMultiLineCsv($csvContent);
+        // Disable foreign key checks
+        DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+        $this->info('Foreign key checks disabled');
         
-        if (empty($csvData)) {
-            $this->error('Could not parse CSV data');
-            return 1;
-        }
-
-        $headers = array_keys($csvData[0]);
-        $this->info('CSV Headers: ' . implode(', ', $headers));
-        $this->info('Total columns: ' . count($headers));
-        $this->info('Total rows found: ' . count($csvData));
-
-        $rowCount = 0;
-        $importedCount = 0;
-        $replacedCount = 0;
-        $errorCount = 0;
-        $batchSize = 100;
-        $batch = [];
-
-        // Process each row
-        foreach ($csvData as $rowData) {
-            $rowCount++;
-            
-            // Skip rows with incorrect column count
-            if (count($rowData) !== count($headers)) {
-                $this->warn("Row $rowCount: Column count mismatch. Expected " . count($headers) . ", got " . count($rowData));
-                $errorCount++;
-                continue;
+        try {
+            // Read the entire CSV content and parse it properly
+            $csvContent = file_get_contents($csvFile);
+            if ($csvContent === false) {
+                $this->error('Could not read CSV file');
+                return 1;
             }
 
-            // Create data array from headers and row
-            $data = $rowData;
+            // Parse CSV with proper multi-line support
+            $csvData = $this->parseMultiLineCsv($csvContent);
             
-            // Clean and validate data
-            $cleanedData = $this->cleanData($data);
-            
-            // Ensure we have a 'link' field (map 'url' to 'link' if needed)
-            if (isset($cleanedData['url']) && !isset($cleanedData['link'])) {
-                $cleanedData['link'] = $cleanedData['url'];
-            }
-            
-            // Remove 'url' field if it exists since database only has 'link'
-            unset($cleanedData['url']);
-            
-            // Handle both 'url' and 'link' field names
-            $linkField = $cleanedData['link'] ?? $cleanedData['url'] ?? null;
-            
-            // Skip if essential data is missing
-            if (empty($linkField) || empty($cleanedData['title'])) {
-                $this->warn("Row $rowCount: Missing essential data (url/link or title)");
-                $errorCount++;
-                continue;
-            }
-            
-            // Check if property already exists (by link)
-            $existingProperty = null;
-            if (!empty($linkField)) {
-                $existingProperty = Property::where('link', $linkField)->first();
+            if (empty($csvData)) {
+                $this->error('Could not parse CSV data');
+                return 1;
             }
 
-            if ($existingProperty) {
-                // Check if property is updatable
-                if ($existingProperty->updatable) {
-                    // Delete existing updatable property and add to batch for creation
-                    try {
-                        $existingProperty->delete();
-                        $this->line("Deleted existing updatable property: {$cleanedData['title']}");
-                        $replacedCount++;
-                        
-                        // Add to batch for creation with new data
-                        $batch[] = $cleanedData;
-                        
-                        if (count($batch) >= $batchSize) {
-                            $this->processBatch($batch, $importedCount);
-                            $batch = [];
+            $headers = array_keys($csvData[0]);
+            $this->info('CSV Headers: ' . implode(', ', $headers));
+            $this->info('Total columns: ' . count($headers));
+            $this->info('Total rows found: ' . count($csvData));
+
+            $rowCount = 0;
+            $importedCount = 0;
+            $replacedCount = 0;
+            $errorCount = 0;
+            $batchSize = 100;
+            $batch = [];
+
+            // Process each row
+            foreach ($csvData as $rowData) {
+                $rowCount++;
+                
+                // Skip rows with incorrect column count
+                if (count($rowData) !== count($headers)) {
+                    $this->warn("Row $rowCount: Column count mismatch. Expected " . count($headers) . ", got " . count($rowData));
+                    $errorCount++;
+                    continue;
+                }
+
+                // Create data array from headers and row
+                $data = $rowData;
+                
+                // Clean and validate data
+                $cleanedData = $this->cleanData($data);
+                
+                // Ensure we have a 'link' field (map 'url' to 'link' if needed)
+                if (isset($cleanedData['url']) && !isset($cleanedData['link'])) {
+                    $cleanedData['link'] = $cleanedData['url'];
+                }
+                
+                // Remove 'url' field if it exists since database only has 'link'
+                unset($cleanedData['url']);
+                
+                // Handle both 'url' and 'link' field names
+                $linkField = $cleanedData['link'] ?? $cleanedData['url'] ?? null;
+                
+                // Skip if essential data is missing
+                if (empty($linkField) || empty($cleanedData['title'])) {
+                    $this->warn("Row $rowCount: Missing essential data (url/link or title)");
+                    $errorCount++;
+                    continue;
+                }
+                
+                // Check if property already exists (by link)
+                $existingProperty = null;
+                if (!empty($linkField)) {
+                    $existingProperty = Property::where('link', $linkField)->first();
+                }
+
+                if ($existingProperty) {
+                    // Check if property is updatable
+                    if ($existingProperty->updatable) {
+                        // Delete existing updatable property and add to batch for creation
+                        try {
+                            $existingProperty->delete();
+                            $this->line("Deleted existing updatable property: {$cleanedData['title']}");
+                            $replacedCount++;
+                            
+                            // Add to batch for creation with new data
+                            $batch[] = $cleanedData;
+                            
+                            if (count($batch) >= $batchSize) {
+                                $this->processBatch($batch, $importedCount);
+                                $batch = [];
+                            }
+                        } catch (\Exception $e) {
+                            $this->error("Error deleting property: " . $e->getMessage());
+                            $errorCount++;
                         }
-                    } catch (\Exception $e) {
-                        $this->error("Error deleting property: " . $e->getMessage());
-                        $errorCount++;
+                    } else {
+                        // Skip updating if property is not updatable
+                        $this->line("Skipped (not updatable): {$cleanedData['title']}");
                     }
                 } else {
-                    // Skip updating if property is not updatable
-                    $this->line("Skipped (not updatable): {$cleanedData['title']}");
+                    // Add to batch for creation
+                    $batch[] = $cleanedData;
+                    
+                    if (count($batch) >= $batchSize) {
+                        $this->processBatch($batch, $importedCount);
+                        $batch = [];
+                    }
                 }
-            } else {
-                // Add to batch for creation
-                $batch[] = $cleanedData;
-                
-                if (count($batch) >= $batchSize) {
-                    $this->processBatch($batch, $importedCount);
-                    $batch = [];
+
+                if ($rowCount % 100 === 0) {
+                    $this->info("Processed $rowCount rows...");
                 }
             }
 
-            if ($rowCount % 100 === 0) {
-                $this->info("Processed $rowCount rows...");
+            // Process remaining batch
+            if (!empty($batch)) {
+                $this->processBatch($batch, $importedCount);
             }
-        }
 
-        // Process remaining batch
-        if (!empty($batch)) {
-            $this->processBatch($batch, $importedCount);
-        }
+            $this->info("\nImport completed!");
+            $this->info("Total rows processed: $rowCount");
+            $this->info("New properties imported: $importedCount");
+            $this->info("Existing updatable properties replaced: $replacedCount");
+            $this->info("Errors: $errorCount");
 
-        $this->info("\nImport completed!");
-        $this->info("Total rows processed: $rowCount");
-        $this->info("New properties imported: $importedCount");
-        $this->info("Existing updatable properties replaced: $replacedCount");
-        $this->info("Errors: $errorCount");
+        } finally {
+            // Always re-enable foreign key checks, even if an error occurs
+            DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+            $this->info('Foreign key checks re-enabled');
+        }
 
         return 0;
     }
