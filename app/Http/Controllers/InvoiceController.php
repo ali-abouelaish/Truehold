@@ -84,11 +84,6 @@ class InvoiceController extends Controller
 
     public function update(Request $request, Invoice $invoice)
     {
-        // Add debugging
-        \Log::info('Invoice update attempt for: ' . $invoice->invoice_number);
-        \Log::info('Request data: ' . json_encode($request->all()));
-        \Log::info('Items data: ' . json_encode($request->input('items')));
-        
         $validated = $request->validate([
             'client_name' => 'required|string|max:255',
             'client_address' => 'required|string',
@@ -106,8 +101,6 @@ class InvoiceController extends Controller
             'terms' => 'nullable|string',
         ]);
 
-        \Log::info('Validation passed for invoice: ' . $invoice->invoice_number);
-
         // Get agent name from authenticated user for updates
         $agentName = auth()->user()->name ?? 'Unknown Agent';
 
@@ -118,12 +111,12 @@ class InvoiceController extends Controller
             $invoice->calculateTotals();
             $invoice->save();
 
-            \Log::info('Invoice updated successfully: ' . $invoice->invoice_number);
+            // Send email notification for invoice update
+            $this->sendInvoiceUpdateNotification($invoice);
+            
             DB::commit();
-            return redirect()->route('admin.invoices.show', $invoice)->with('success', 'Invoice updated successfully!');
+            return redirect()->route('admin.invoices.show', $invoice)->with('success', 'Invoice updated successfully and notification sent!');
         } catch (\Exception $e) {
-            \Log::error('Invoice update failed: ' . $e->getMessage());
-            \Log::error('Stack trace: ' . $e->getTraceAsString());
             DB::rollBack();
             return back()->withErrors(['error' => 'Failed to update invoice: ' . $e->getMessage()])->withInput();
         }
@@ -193,6 +186,31 @@ class InvoiceController extends Controller
         } catch (\Exception $e) {
             // Log the error but don't fail the invoice creation
             \Log::error('Failed to send invoice notification: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Send invoice update notification email to board@truehold.co.uk
+     */
+    private function sendInvoiceUpdateNotification(Invoice $invoice)
+    {
+        try {
+            $pdf = Pdf::loadView('admin.invoices.pdf', compact('invoice'));
+            
+            Mail::send('emails.invoice-update-notification', [
+                'invoice' => $invoice,
+                'agentName' => $invoice->agent_name
+            ], function ($message) use ($invoice, $pdf) {
+                $message->from('crm@truehold.co.uk', 'Truehold Group System')
+                        ->to('board@truehold.co.uk')
+                        ->subject('Invoice Updated - ' . $invoice->invoice_number)
+                        ->attachData($pdf->output(), "invoice-{$invoice->invoice_number}.pdf", [
+                            'mime' => 'application/pdf',
+                        ]);
+            });
+        } catch (\Exception $e) {
+            // Log the error but don't fail the invoice update
+            \Log::error('Failed to send invoice update notification: ' . $e->getMessage());
         }
     }
 }

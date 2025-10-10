@@ -200,31 +200,6 @@
 document.addEventListener('DOMContentLoaded', function() {
     let itemIndex = {{ count($invoice->items) }};
     
-    // Add form submission debugging
-    document.getElementById('invoice-form').addEventListener('submit', function(e) {
-        console.log('Form submission started...');
-        console.log('Form action:', this.action);
-        console.log('Form method:', this.method);
-        
-        // Check if all required fields are filled
-        const requiredFields = this.querySelectorAll('[required]');
-        let allValid = true;
-        
-        requiredFields.forEach(field => {
-            if (!field.value.trim()) {
-                console.error('Required field is empty:', field.name);
-                allValid = false;
-            }
-        });
-        
-        if (!allValid) {
-            console.error('Form validation failed - required fields are empty');
-            e.preventDefault();
-            return false;
-        }
-        
-        console.log('Form validation passed, submitting...');
-    });
     
     // Add item functionality
     document.getElementById('add-item').addEventListener('click', function() {
