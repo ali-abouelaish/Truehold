@@ -21,6 +21,23 @@
         </div>
     </div>
 
+    @if (session('success'))
+        <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-6">
+            <strong>Success!</strong> {{ session('success') }}
+        </div>
+    @endif
+
+    @if ($errors->any())
+        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
+            <strong>Please fix the following errors:</strong>
+            <ul class="mt-2">
+                @foreach ($errors->all() as $error)
+                    <li>• {{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+
     <form method="POST" action="{{ route('admin.invoices.update', $invoice) }}" class="space-y-8" id="invoice-form">
         @csrf
         @method('PUT')
@@ -189,7 +206,8 @@
                 Cancel
             </a>
             <button type="submit" 
-                    class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition duration-200">
+                    class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition duration-200"
+                    id="update-button">
                 Update Invoice
             </button>
         </div>
@@ -200,6 +218,61 @@
 document.addEventListener('DOMContentLoaded', function() {
     let itemIndex = {{ count($invoice->items) }};
     
+    // Form submission handling
+    const form = document.getElementById('invoice-form');
+    const updateButton = document.getElementById('update-button');
+    
+    form.addEventListener('submit', function(e) {
+        console.log('Form submission started...');
+        
+        // Show loading state
+        updateButton.disabled = true;
+        updateButton.innerHTML = 'Updating...';
+        updateButton.classList.add('opacity-50', 'cursor-not-allowed');
+        
+        // Validate required fields
+        const requiredFields = form.querySelectorAll('[required]');
+        let isValid = true;
+        let emptyFields = [];
+        
+        requiredFields.forEach(field => {
+            if (!field.value.trim()) {
+                field.classList.add('border-red-500');
+                emptyFields.push(field.name || field.id);
+                isValid = false;
+            } else {
+                field.classList.remove('border-red-500');
+            }
+        });
+        
+        if (!isValid) {
+            e.preventDefault();
+            updateButton.disabled = false;
+            updateButton.innerHTML = 'Update Invoice';
+            updateButton.classList.remove('opacity-50', 'cursor-not-allowed');
+            
+            console.error('Validation failed. Empty fields:', emptyFields);
+            alert('Please fill in all required fields: ' + emptyFields.join(', '));
+            return false;
+        }
+        
+        // If validation passes, allow form submission
+        console.log('Form validation passed, submitting...');
+        console.log('Form action:', form.action);
+        console.log('Form method:', form.method);
+        
+        // Log form data
+        const formData = new FormData(form);
+        console.log('Form data being submitted:');
+        for (let [key, value] of formData.entries()) {
+            console.log(key + ': ' + value);
+        }
+        
+        // Add a small delay to show the loading state
+        setTimeout(() => {
+            // Form will submit naturally
+        }, 100);
+    });
     
     // Add item functionality
     document.getElementById('add-item').addEventListener('click', function() {
