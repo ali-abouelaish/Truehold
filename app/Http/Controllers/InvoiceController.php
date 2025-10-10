@@ -84,6 +84,11 @@ class InvoiceController extends Controller
 
     public function update(Request $request, Invoice $invoice)
     {
+        // Add debugging
+        \Log::info('Invoice update attempt for: ' . $invoice->invoice_number);
+        \Log::info('Request data: ' . json_encode($request->all()));
+        \Log::info('Items data: ' . json_encode($request->input('items')));
+        
         $validated = $request->validate([
             'client_name' => 'required|string|max:255',
             'client_address' => 'required|string',
@@ -101,6 +106,8 @@ class InvoiceController extends Controller
             'terms' => 'nullable|string',
         ]);
 
+        \Log::info('Validation passed for invoice: ' . $invoice->invoice_number);
+
         // Get agent name from authenticated user for updates
         $agentName = auth()->user()->name ?? 'Unknown Agent';
 
@@ -111,9 +118,12 @@ class InvoiceController extends Controller
             $invoice->calculateTotals();
             $invoice->save();
 
+            \Log::info('Invoice updated successfully: ' . $invoice->invoice_number);
             DB::commit();
             return redirect()->route('admin.invoices.show', $invoice)->with('success', 'Invoice updated successfully!');
         } catch (\Exception $e) {
+            \Log::error('Invoice update failed: ' . $e->getMessage());
+            \Log::error('Stack trace: ' . $e->getTraceAsString());
             DB::rollBack();
             return back()->withErrors(['error' => 'Failed to update invoice: ' . $e->getMessage()])->withInput();
         }
