@@ -25,6 +25,7 @@ class Invoice extends Model
         'client_address',
         'client_email',
         'client_phone',
+        'agent_name',
         'items',
         'subtotal',
         'tax_rate',

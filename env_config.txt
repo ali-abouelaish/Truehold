@@ -1,0 +1,9 @@
+# Gmail SMTP Configuration for Invoice Notifications
+MAIL_MAILER=smtp
+MAIL_HOST=smtp.gmail.com
+MAIL_PORT=587
+MAIL_USERNAME=crm@truehold.co.uk
+MAIL_PASSWORD=jwld qrlb ewzu uqf
+MAIL_ENCRYPTION=tls
+MAIL_FROM_ADDRESS=crm@truehold.co.uk
+MAIL_FROM_NAME="Truehold Group System"
