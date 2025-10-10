@@ -8,6 +8,8 @@ use App\Models\User;
 use App\Models\Client;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Mail;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class RentalCodeController extends Controller
 {
@@ -139,15 +141,15 @@ class RentalCodeController extends Controller
             // Use agent company name if available, otherwise use user name
             if ($currentUser->agent && $currentUser->agent->company_name) {
                 $rentalCodeData['rent_by_agent'] = $currentUser->agent->company_name;
-                $rentalCodeData['client_by_agent'] = $currentUser->agent->company_name;
             } else {
                 $rentalCodeData['rent_by_agent'] = $currentUser->name;
-                $rentalCodeData['client_by_agent'] = $currentUser->name;
             }
         } else {
             $rentalCodeData['rent_by_agent'] = 'Unknown Agent';
-            $rentalCodeData['client_by_agent'] = 'Unknown Agent';
         }
+        
+        // Ensure we always use the current user's name for agent display
+        $rentalCodeData['agent_name'] = $currentUser ? $currentUser->name : 'Unknown Agent';
         
         // Remove client fields from rental code data as they're now in the client record
         $clientFields = [
@@ -163,8 +165,11 @@ class RentalCodeController extends Controller
 
         $rentalCode = RentalCode::create($rentalCodeData);
 
+        // Send email notification to board@truehold.co.uk
+        $this->sendRentalCodeNotification($rentalCode);
+
         return redirect()->route('rental-codes.index')
-            ->with('success', 'Rental code created successfully!');
+            ->with('success', 'Rental code created successfully and notification sent!');
     }
 
     /**
@@ -1343,5 +1348,39 @@ public function generateCode()
         
         return redirect()->route('marketing-agents.index')
             ->with('success', 'Marketing agent role has been removed.');
+    }
+
+    /**
+     * Send rental code notification email to board@truehold.co.uk
+     */
+    private function sendRentalCodeNotification(RentalCode $rentalCode)
+    {
+        try {
+            // Get agent name from the rental code data
+            $agentName = $rentalCode->agent_name ?? $rentalCode->rent_by_agent ?? auth()->user()->name ?? 'Unknown Agent';
+            
+            // Generate PDF
+            $pdf = Pdf::loadView('admin.rental-codes.pdf', [
+                'rentalCode' => $rentalCode,
+                'agentName' => $agentName,
+                'client' => $rentalCode->client
+            ]);
+            
+            Mail::send('emails.rental-code-notification', [
+                'rentalCode' => $rentalCode,
+                'agentName' => $agentName,
+                'client' => $rentalCode->client
+            ], function ($message) use ($rentalCode, $agentName, $pdf) {
+                $message->from('crm@truehold.co.uk', 'Truehold Group System')
+                        ->to('board@truehold.co.uk')
+                        ->subject('New Rental Code Generated - ' . $rentalCode->rental_code)
+                        ->attachData($pdf->output(), "rental-code-{$rentalCode->rental_code}.pdf", [
+                            'mime' => 'application/pdf',
+                        ]);
+            });
+        } catch (\Exception $e) {
+            // Log the error but don't fail the rental code creation
+            \Log::error('Failed to send rental code notification: ' . $e->getMessage());
+        }
     }
 }

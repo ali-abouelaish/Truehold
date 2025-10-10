@@ -20,6 +20,7 @@ class RentalCode extends Model
         'client_id',
         'client_count',
         'rent_by_agent',
+        'agent_name',
         'marketing_agent',
         'notes',
         'status',

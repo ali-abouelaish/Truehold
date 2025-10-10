@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Invoice;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 use Barryvdh\DomPDF\Facade\Pdf;
 
 class InvoiceController extends Controller
@@ -39,11 +40,15 @@ class InvoiceController extends Controller
             'terms' => 'nullable|string',
         ]);
 
+        // Get agent name from authenticated user
+        $agentName = auth()->user()->name ?? 'Unknown Agent';
+
         DB::beginTransaction();
         try {
             $invoice = new Invoice();
             $invoice->invoice_number = $invoice->generateInvoiceNumber();
             $invoice->fill($validated);
+            $invoice->agent_name = $agentName;
             
             // Set company details (you can make these configurable)
             $invoice->company_name = 'Truehold Group Limited';
@@ -56,8 +61,11 @@ class InvoiceController extends Controller
             $invoice->calculateTotals();
             $invoice->save();
 
+            // Send email to board@truehold.co.uk
+            $this->sendInvoiceNotification($invoice);
+
             DB::commit();
-            return redirect()->route('admin.invoices.show', $invoice)->with('success', 'Invoice created successfully!');
+            return redirect()->route('admin.invoices.show', $invoice)->with('success', 'Invoice created successfully and notification sent!');
         } catch (\Exception $e) {
             DB::rollBack();
             return back()->withErrors(['error' => 'Failed to create invoice: ' . $e->getMessage()])->withInput();
@@ -93,9 +101,13 @@ class InvoiceController extends Controller
             'terms' => 'nullable|string',
         ]);
 
+        // Get agent name from authenticated user for updates
+        $agentName = auth()->user()->name ?? 'Unknown Agent';
+
         DB::beginTransaction();
         try {
             $invoice->fill($validated);
+            $invoice->agent_name = $agentName;
             $invoice->calculateTotals();
             $invoice->save();
 
@@ -147,5 +159,30 @@ class InvoiceController extends Controller
         $newInvoice->save();
 
         return redirect()->route('admin.invoices.edit', $newInvoice)->with('success', 'Invoice duplicated successfully!');
+    }
+
+    /**
+     * Send invoice notification email to board@truehold.co.uk
+     */
+    private function sendInvoiceNotification(Invoice $invoice)
+    {
+        try {
+            $pdf = Pdf::loadView('admin.invoices.pdf', compact('invoice'));
+            
+            Mail::send('emails.invoice-notification', [
+                'invoice' => $invoice,
+                'agentName' => $invoice->agent_name
+            ], function ($message) use ($invoice, $pdf) {
+                $message->from('crm@truehold.co.uk', 'Truehold Group System')
+                        ->to('board@truehold.co.uk')
+                        ->subject('New Invoice Generated - ' . $invoice->invoice_number)
+                        ->attachData($pdf->output(), "invoice-{$invoice->invoice_number}.pdf", [
+                            'mime' => 'application/pdf',
+                        ]);
+            });
+        } catch (\Exception $e) {
+            // Log the error but don't fail the invoice creation
+            \Log::error('Failed to send invoice notification: ' . $e->getMessage());
+        }
     }
 }
