@@ -2,12 +2,6 @@
 
 @section('title', 'Create Rental Code')
 
-{{-- Debug info --}}
-@if(config('app.debug'))
-    <div class="alert alert-info">
-        <strong>DEBUG:</strong> Agent users count: {{ isset($agentUsers) ? $agentUsers->count() : 'NOT SET' }}
-    </div>
-@endif
 
 @section('content')
 <div class="container-fluid">
