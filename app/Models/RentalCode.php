@@ -26,6 +26,18 @@ class RentalCode extends Model
         'status',
         'paid',
         'paid_at',
+        // Document Upload Fields
+        'client_contract',
+        'payment_proof',
+        'client_id_document',
+        // Reserved: Cash Document Fields
+        'contact_images',
+        'client_id_image',
+        'cash_receipt_image',
+        'cash_document_status',
+        'cash_document_submitted_at',
+        'cash_document_reviewed_at',
+        'cash_document_reviewed_by',
     ];
 
     protected $casts = [
@@ -33,6 +45,10 @@ class RentalCode extends Model
         'consultation_fee' => 'decimal:2',
         'paid' => 'boolean',
         'paid_at' => 'datetime',
+        // Reserved: Cash Document Fields
+        'contact_images' => 'array',
+        'cash_document_submitted_at' => 'datetime',
+        'cash_document_reviewed_at' => 'datetime',
     ];
 
     /**
@@ -136,6 +152,52 @@ class RentalCode extends Model
     public function getFormattedRentalDateAttribute(): string
     {
         return $this->rental_date->format('d/m/Y');
+    }
+
+    /**
+     * Check if cash documents are submitted
+     */
+    public function hasCashDocuments(): bool
+    {
+        return !empty($this->contact_images) || 
+               !empty($this->client_id_image) || 
+               !empty($this->cash_receipt_image);
+    }
+
+    /**
+     * Get cash document status with fallback
+     */
+    public function getCashDocumentStatusAttribute($value): string
+    {
+        return $value ?? 'pending';
+    }
+
+    /**
+     * Get the user who reviewed cash documents
+     */
+    public function cashDocumentReviewer(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'cash_document_reviewed_by');
+    }
+
+    /**
+     * Scope for filtering by cash document status
+     */
+    public function scopeByCashDocumentStatus($query, $status)
+    {
+        return $query->where('cash_document_status', $status);
+    }
+
+    /**
+     * Scope for rental codes with cash documents
+     */
+    public function scopeWithCashDocuments($query)
+    {
+        return $query->where(function($q) {
+            $q->whereNotNull('contact_images')
+              ->orWhereNotNull('client_id_image')
+              ->orWhereNotNull('cash_receipt_image');
+        });
     }
 
 }

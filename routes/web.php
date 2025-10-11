@@ -13,7 +13,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\UserPermissionController;
 use App\Http\Controllers\ScraperController;
 use App\Http\Controllers\PhpScraperController;
-use App\Http\Controllers\CashDocumentController;
+use App\Http\Controllers\RentalCodeCashDocumentController;
 
 Route::get('/', function () {
     return redirect('/properties');
@@ -196,18 +196,21 @@ Route::middleware('auth')->prefix('admin')->group(function () {
         'destroy' => 'admin.call-logs.destroy'
     ]);
     
-    // Cash Document Management Routes
-    Route::resource('cash-documents', CashDocumentController::class)->names([
-        'index' => 'cash-documents.index',
-        'create' => 'cash-documents.create',
-        'store' => 'cash-documents.store',
-        'show' => 'cash-documents.show',
-        'edit' => 'cash-documents.edit',
-        'update' => 'cash-documents.update',
-        'destroy' => 'cash-documents.destroy'
-    ]);
-    Route::post('/cash-documents/{cashDocument}/approve', [CashDocumentController::class, 'approve'])->name('cash-documents.approve');
-    Route::post('/cash-documents/{cashDocument}/reject', [CashDocumentController::class, 'reject'])->name('cash-documents.reject');
+    // Cash Document Management Routes (Merged with Rental Codes)
+    Route::get('/cash-documents', [RentalCodeCashDocumentController::class, 'index'])->name('rental-codes.cash-documents.index');
+    Route::get('/rental-codes/{rentalCode}/cash-documents/create', [RentalCodeCashDocumentController::class, 'create'])->name('rental-codes.cash-documents.create');
+    Route::post('/rental-codes/{rentalCode}/cash-documents', [RentalCodeCashDocumentController::class, 'store'])->name('rental-codes.cash-documents.store');
+    Route::get('/rental-codes/{rentalCode}/cash-documents', [RentalCodeCashDocumentController::class, 'show'])->name('rental-codes.cash-documents.show');
+    Route::get('/rental-codes/{rentalCode}/cash-documents/edit', [RentalCodeCashDocumentController::class, 'edit'])->name('rental-codes.cash-documents.edit');
+    Route::put('/rental-codes/{rentalCode}/cash-documents', [RentalCodeCashDocumentController::class, 'update'])->name('rental-codes.cash-documents.update');
+    Route::delete('/rental-codes/{rentalCode}/cash-documents', [RentalCodeCashDocumentController::class, 'destroy'])->name('rental-codes.cash-documents.destroy');
+    Route::post('/rental-codes/{rentalCode}/cash-documents/approve', [RentalCodeCashDocumentController::class, 'approve'])->name('rental-codes.cash-documents.approve');
+    Route::post('/rental-codes/{rentalCode}/cash-documents/reject', [RentalCodeCashDocumentController::class, 'reject'])->name('rental-codes.cash-documents.reject');
+    
+    // Legacy cash-documents routes (redirect to new structure)
+    Route::get('/cash-documents/create', function () {
+        return redirect()->route('rental-codes.cash-documents.index');
+    })->name('cash-documents.create');
 });
 
 // Profile routes - require authentication

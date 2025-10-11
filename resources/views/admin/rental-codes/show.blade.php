@@ -521,6 +521,72 @@ strong {
     </div>
     @endif
 
+    <!-- Document Uploads -->
+    @if($rentalCode->client_contract || $rentalCode->payment_proof || $rentalCode->client_id_document)
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-header bg-warning text-white">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-file-upload me-2"></i>Uploaded Documents
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        @if($rentalCode->client_contract)
+                        <div class="col-md-4 mb-3">
+                            <div class="document-item">
+                                <div class="d-flex align-items-center mb-2">
+                                    <i class="fas fa-file-contract text-warning me-2"></i>
+                                    <h6 class="mb-0">Client Contract</h6>
+                                </div>
+                                <a href="{{ Storage::url($rentalCode->client_contract) }}" 
+                                   target="_blank" 
+                                   class="btn btn-outline-warning btn-sm">
+                                    <i class="fas fa-download me-1"></i>View Document
+                                </a>
+                            </div>
+                        </div>
+                        @endif
+
+                        @if($rentalCode->payment_proof)
+                        <div class="col-md-4 mb-3">
+                            <div class="document-item">
+                                <div class="d-flex align-items-center mb-2">
+                                    <i class="fas fa-receipt text-success me-2"></i>
+                                    <h6 class="mb-0">Payment Proof</h6>
+                                </div>
+                                <a href="{{ Storage::url($rentalCode->payment_proof) }}" 
+                                   target="_blank" 
+                                   class="btn btn-outline-success btn-sm">
+                                    <i class="fas fa-download me-1"></i>View Document
+                                </a>
+                            </div>
+                        </div>
+                        @endif
+
+                        @if($rentalCode->client_id_document)
+                        <div class="col-md-4 mb-3">
+                            <div class="document-item">
+                                <div class="d-flex align-items-center mb-2">
+                                    <i class="fas fa-id-card text-info me-2"></i>
+                                    <h6 class="mb-0">Client ID Document</h6>
+                                </div>
+                                <a href="{{ Storage::url($rentalCode->client_id_document) }}" 
+                                   target="_blank" 
+                                   class="btn btn-outline-info btn-sm">
+                                    <i class="fas fa-download me-1"></i>View Document
+                                </a>
+                            </div>
+                        </div>
+                        @endif
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    @endif
+
     <!-- Quick Actions -->
     <div class="row mt-4">
         <div class="col-12">
@@ -551,6 +617,11 @@ strong {
                             <button class="btn btn-outline-warning w-100" onclick="duplicateRecord()">
                                 <i class="fas fa-copy me-1"></i> Duplicate
                             </button>
+                        </div>
+                        <div class="col-md-3 mb-2">
+                            <a href="{{ route('rental-codes.edit', $rentalCode) }}" class="btn btn-outline-secondary w-100">
+                                <i class="fas fa-file-upload me-1"></i> Manage Documents
+                            </a>
                         </div>
                     </div>
                 </div>
