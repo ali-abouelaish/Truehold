@@ -13,6 +13,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\UserPermissionController;
 use App\Http\Controllers\ScraperController;
 use App\Http\Controllers\PhpScraperController;
+use App\Http\Controllers\CashDocumentController;
 
 Route::get('/', function () {
     return redirect('/properties');
@@ -194,6 +195,19 @@ Route::middleware('auth')->prefix('admin')->group(function () {
         'update' => 'admin.call-logs.update',
         'destroy' => 'admin.call-logs.destroy'
     ]);
+    
+    // Cash Document Management Routes
+    Route::resource('cash-documents', CashDocumentController::class)->names([
+        'index' => 'cash-documents.index',
+        'create' => 'cash-documents.create',
+        'store' => 'cash-documents.store',
+        'show' => 'cash-documents.show',
+        'edit' => 'cash-documents.edit',
+        'update' => 'cash-documents.update',
+        'destroy' => 'cash-documents.destroy'
+    ]);
+    Route::post('/cash-documents/{cashDocument}/approve', [CashDocumentController::class, 'approve'])->name('cash-documents.approve');
+    Route::post('/cash-documents/{cashDocument}/reject', [CashDocumentController::class, 'reject'])->name('cash-documents.reject');
 });
 
 // Profile routes - require authentication

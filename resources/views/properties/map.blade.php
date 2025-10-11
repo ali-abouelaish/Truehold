@@ -674,28 +674,61 @@
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.12);
             border: 1px solid rgba(229, 231, 235, 0.5);
         }
-        
+
+        /* Remove Google Maps InfoWindow default white background only */
+        .gm-style-iw {
+            background: transparent !important;
+        }
+
+        .gm-style-iw-d {
+            background: transparent !important;
+        }
+
+        .gm-style-iw-c {
+            background: transparent !important;
+        }
+
         .property-card {
-            background: white;
-            border-radius: 14px;
-            box-shadow: 0 7px 28px rgba(0, 0, 0, 0.06);
-            border: 1px solid rgba(229, 231, 235, 0.5);
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), 0 2px 8px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(71, 85, 105, 0.6);
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             overflow: hidden;
+            backdrop-filter: blur(10px);
+            position: relative;
+        }
+        
+        .property-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%);
+            border-radius: inherit;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s ease;
         }
         
         .property-card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 25px 80px rgba(0, 0, 0, 0.15);
-            border-color: #3b82f6;
+            transform: translateY(-4px) scale(1.01);
+            box-shadow: 0 16px 48px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(59, 130, 246, 0.2);
+            border-color: rgba(59, 130, 246, 0.3);
+        }
+        
+        .property-card:hover::before {
+            opacity: 1;
         }
         
         .property-image {
-            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
         
         .property-card:hover .property-image {
-            transform: scale(1.08);
+            transform: scale(1.05);
         }
         
         .line-clamp-2 {
@@ -1247,13 +1280,13 @@
             try {
                 const content = createInfoWindowContent(property);
                 infoWindow.setContent(content);
-                                    infoWindow.open(map, marker);
-                            } catch (error) {
+                infoWindow.open(map, marker);
+            } catch (error) {
                 console.error('❌ Error showing property info:', error);
             }
         }
 
-        // Create info window content with card style matching listing view
+        // Create modern info window content with enhanced design
         function createInfoWindowContent(property) {
             const title = property.title || 'Untitled Property';
             const location = property.location || 'Location not specified';
@@ -1270,84 +1303,130 @@
             // Get first image with fallback
             let imageHtml = '';
             if (property.high_quality_photos_array && property.high_quality_photos_array.length > 0) {
-                imageHtml = `<img src="${property.high_quality_photos_array[0]}" alt="${title}" class="property-image w-full h-24 object-cover group-hover:scale-105 transition-transform duration-300" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />`;
+                imageHtml = `<img src="${property.high_quality_photos_array[0]}" alt="${title}" class="property-image w-full h-32 object-cover group-hover:scale-110 transition-transform duration-500" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />`;
             } else if (property.first_photo_url && property.first_photo_url !== 'N/A') {
-                imageHtml = `<img src="${property.first_photo_url}" alt="${title}" class="property-image w-full h-24 object-cover group-hover:scale-105 transition-transform duration-300" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />`;
+                imageHtml = `<img src="${property.first_photo_url}" alt="${title}" class="property-image w-full h-32 object-cover group-hover:scale-110 transition-transform duration-500" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />`;
             } else if (property.photos && property.photos.length > 0) {
-                imageHtml = `<img src="${property.photos[0]}" alt="${title}" class="property-image w-full h-24 object-cover group-hover:scale-105 transition-transform duration-300" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />`;
+                imageHtml = `<img src="${property.photos[0]}" alt="${title}" class="property-image w-full h-32 object-cover group-hover:scale-110 transition-transform duration-500" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />`;
             }
 
             // Add placeholder if no image
             if (!imageHtml) {
-                imageHtml = `<div class="flex items-center justify-center h-24 bg-gradient-to-br from-gray-100 to-gray-200"><i class="fas fa-home text-3xl text-gray-400"></i></div>`;
-                    } else {
-                imageHtml += `<div class="flex items-center justify-center h-24 bg-gradient-to-br from-gray-100 to-gray-200" style="display: none;"><i class="fas fa-home text-3xl text-gray-400"></i></div>`;
+                imageHtml = `<div class="flex items-center justify-center h-24 bg-gradient-to-br from-slate-800 via-slate-700 to-slate-600"><i class="fas fa-home text-3xl text-slate-500"></i></div>`;
+            } else {
+                imageHtml += `<div class="flex items-center justify-center h-24 bg-gradient-to-br from-slate-800 via-slate-700 to-slate-600" style="display: none;"><i class="fas fa-home text-3xl text-slate-500"></i></div>`;
             }
 
-            // Photo count badge
+            // Photo count badge with dark design
             let photoBadgeHtml = '';
             if ((allPhotos && allPhotos.length > 0) || photoCount > 0) {
                 const count = allPhotos.length > 0 ? allPhotos.length : photoCount;
                 photoBadgeHtml = `
-                    <div class="absolute top-2 right-2 bg-white/90 backdrop-blur-sm border border-white/20 text-gray-800 px-2 py-1 rounded-full font-semibold text-xs shadow-md">
+                    <div class="absolute top-2 right-2 bg-slate-800/90 backdrop-blur-md border border-slate-600/50 text-slate-300 px-2 py-1 rounded-full font-semibold text-xs shadow-lg">
                         <i class="fas fa-camera mr-1"></i>
                         ${count}
                     </div>
                 `;
             }
 
+            // Property type badge
+            const propertyTypeBadge = `
+                <div class="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-semibold bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-700 border border-blue-200">
+                    <i class="fas fa-home mr-1.5"></i>
+                    ${propertyType}
+                </div>
+            `;
+
+            // Bedrooms and bathrooms info
+            const propertyInfo = (bedrooms !== 'N/A' || bathrooms !== 'N/A') ? `
+                <div class="flex items-center space-x-3 text-slate-600">
+                    ${bedrooms !== 'N/A' ? `
+                        <div class="flex items-center">
+                            <i class="fas fa-bed text-blue-500 mr-1.5"></i>
+                            <span class="text-sm font-medium">${bedrooms}</span>
+                        </div>
+                    ` : ''}
+                    ${bathrooms !== 'N/A' ? `
+                        <div class="flex items-center">
+                            <i class="fas fa-bath text-blue-500 mr-1.5"></i>
+                            <span class="text-sm font-medium">${bathrooms}</span>
+                        </div>
+                    ` : ''}
+                </div>
+            ` : '';
+
             return `
-                <div class="property-card w-30 max-w-30 bg-white rounded-xl shadow-lg border-0 overflow-hidden cursor-pointer group hover:shadow-xl hover:-translate-y-1 transition-all duration-300 transform" onclick="window.open('/properties/${propertyId}', '_blank')">
-                    <!-- Property Image with Overlay -->
-                    <div class="relative h-24 bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden">
+                <div class="property-card w-64 max-w-64 bg-slate-900 rounded-xl shadow-2xl border border-slate-700 overflow-hidden cursor-pointer group hover:shadow-3xl hover:-translate-y-1 transition-all duration-300 transform backdrop-blur-sm relative" onclick="window.open('/properties/${propertyId}', '_blank')" style="box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.4);">
+                    <!-- Close Button -->
+                    <button class="absolute top-2 right-2 z-10 bg-slate-800/80 hover:bg-slate-700/90 text-slate-300 hover:text-white rounded-full p-1.5 transition-all duration-200 opacity-0 group-hover:opacity-100" onclick="event.stopPropagation(); infoWindow.close();">
+                        <i class="fas fa-times text-xs"></i>
+                    </button>
+                    
+                    <!-- Property Image with Dark Overlay -->
+                    <div class="relative h-24 bg-gradient-to-br from-slate-800 to-slate-900 overflow-hidden">
                         ${imageHtml}
                         ${photoBadgeHtml}
                         
-                        <!-- Gradient Overlay -->
-                        <div class="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                        <!-- Dark Gradient Overlay -->
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent"></div>
                         
-                        <!-- Price Badge -->
-                        <div class="absolute bottom-1 left-1 right-1">
-                            <div class="bg-gradient-to-r from-green-500 to-green-600 text-white rounded-md px-3 py-2 shadow-lg">
-                                <div class="text-sm font-bold text-center">${price}</div>
+                        <!-- Dark Price Badge -->
+                        <div class="absolute bottom-2 left-2 right-2">
+                            <div class="bg-gradient-to-r from-emerald-600 via-emerald-700 to-green-700 text-white rounded-lg px-3 py-1.5 shadow-lg backdrop-blur-sm">
+                                <div class="text-xs font-bold text-center tracking-wide">${price}</div>
                             </div>
                         </div>
                     </div>
                     
-                    <!-- Property Details -->
-                    <div class="p-3">
+                    <!-- Property Details with Dark Theme -->
+                    <div class="p-3 bg-gradient-to-b from-slate-900 to-slate-800">
                         <!-- Title and Location -->
                         <div class="mb-2">
-                            <h3 class="font-bold text-xs text-gray-900 line-clamp-2 leading-tight group-hover:text-blue-600 transition-colors duration-300 mb-1">
-                                ${title.length > 25 ? title.substring(0, 25) + '...' : title}
+                            <h3 class="font-bold text-xs text-slate-100 line-clamp-2 leading-tight group-hover:text-blue-400 transition-colors duration-300 mb-1">
+                                ${title.length > 30 ? title.substring(0, 30) + '...' : title}
                             </h3>
-                            <div class="flex items-center text-gray-500 text-xs">
-                                <i class="fas fa-map-marker-alt text-red-500 mr-1"></i>
+                            <div class="flex items-center text-slate-400 text-xs">
+                                <i class="fas fa-map-marker-alt text-red-400 mr-1.5"></i>
                                 <span class="truncate">${location.length > 20 ? location.substring(0, 20) + '...' : location}</span>
                             </div>
                         </div>
                         
-                        <!-- Price and Property Type -->
-                        <div class="mb-3 flex items-center justify-between">
-                            <div class="text-lg font-bold text-green-600">
-                                ${price}
-                            </div>
-                            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200">
+                        <!-- Property Type Badge (Dark) -->
+                        <div class="mb-2">
+                            <div class="inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold bg-slate-700 text-slate-300 border border-slate-600">
                                 <i class="fas fa-home mr-1"></i>
                                 ${propertyType}
-                            </span>
+                            </div>
                         </div>
                         
-                        <!-- Action Button -->
-                        <div class="flex flex-col space-y-1">
-                            <button class="w-full bg-gradient-to-r from-blue-600 via-blue-700 to-blue-800 hover:from-blue-700 hover:via-blue-800 hover:to-blue-900 text-white px-3 py-2 rounded-lg font-semibold text-xs transition-all duration-200 transform hover:scale-105 shadow-md hover:shadow-lg flex items-center justify-center">
-                                <i class="fas fa-eye mr-1"></i>
+                        <!-- Property Info (Bedrooms/Bathrooms) - Dark -->
+                        ${propertyInfo ? `
+                            <div class="flex items-center space-x-2 text-slate-400 mb-2">
+                                ${bedrooms !== 'N/A' ? `
+                                    <div class="flex items-center">
+                                        <i class="fas fa-bed text-blue-400 mr-1"></i>
+                                        <span class="text-xs font-medium">${bedrooms}</span>
+                                    </div>
+                                ` : ''}
+                                ${bathrooms !== 'N/A' ? `
+                                    <div class="flex items-center">
+                                        <i class="fas fa-bath text-blue-400 mr-1"></i>
+                                        <span class="text-xs font-medium">${bathrooms}</span>
+                                    </div>
+                                ` : ''}
+                            </div>
+                        ` : ''}
+                        
+                        <!-- Action Button with Dark Design -->
+                        <div class="space-y-1">
+                            <button class="w-full bg-gradient-to-r from-blue-600 via-blue-700 to-indigo-700 hover:from-blue-700 hover:via-blue-800 hover:to-indigo-800 text-white px-3 py-2 rounded-lg font-semibold text-xs transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-xl flex items-center justify-center group">
+                                <i class="fas fa-eye mr-1.5 group-hover:scale-110 transition-transform duration-200"></i>
                                 View Details
                             </button>
                             
                             ${availableDate && availableDate !== 'N/A' ? `
-                                <div class="flex items-center justify-center text-xs text-green-600 bg-green-50 px-2 py-1 rounded-md font-medium border border-green-200">
-                                    <i class="fas fa-calendar mr-1"></i>
+                                <div class="flex items-center justify-center text-xs text-emerald-400 bg-emerald-900/30 px-2 py-1 rounded-md font-medium border border-emerald-700">
+                                    <i class="fas fa-calendar mr-1.5"></i>
                                     ${availableDate}
                                 </div>
                             ` : ''}
