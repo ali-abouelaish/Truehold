@@ -7,14 +7,14 @@
     <!-- Header Section -->
     <div class="row mb-4">
         <div class="col-12">
-            <div class="d-flex justify-content-between align-items-center">
-                <div>
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center">
+                <div class="mb-3 mb-md-0">
                     <h2 class="h3 mb-0 text-gray-800">
                         <i class="fas fa-edit text-warning me-2"></i>Edit Rental Code
                     </h2>
                     <p class="text-muted mb-0">Update rental code: <strong>{{ $rentalCode->rental_code }}</strong></p>
                 </div>
-                <div class="btn-group">
+                <div class="btn-group d-flex flex-column flex-md-row">
                     <a href="{{ route('rental-codes.show', $rentalCode) }}" class="btn transition-colors"
                        style="background: linear-gradient(135deg, #1e40af, #3b82f6); border: 1px solid #3b82f6; color: #ffffff; text-decoration: none;"
                        onmouseover="this.style.background='linear-gradient(135deg, #3b82f6, #2563eb)'; this.style.borderColor='#2563eb';"
@@ -697,6 +697,71 @@
 </div>
 
 <style>
+/* Responsive improvements */
+@media (max-width: 768px) {
+    .container-fluid {
+        padding-left: 15px;
+        padding-right: 15px;
+    }
+    
+    .card {
+        margin-bottom: 1rem;
+    }
+    
+    .input-group-text {
+        font-size: 0.875rem;
+    }
+    
+    .btn {
+        font-size: 0.875rem;
+        padding: 0.5rem 0.75rem;
+    }
+    
+    .form-control, .form-select {
+        font-size: 0.875rem;
+    }
+    
+    .card-header h5 {
+        font-size: 1rem;
+    }
+    
+    .h3 {
+        font-size: 1.25rem;
+    }
+    
+    .btn-group {
+        width: 100%;
+    }
+    
+    .btn-group .btn {
+        margin-bottom: 0.5rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .d-flex.flex-column.flex-md-row {
+        flex-direction: column !important;
+    }
+    
+    .mb-3.mb-md-0 {
+        margin-bottom: 1rem !important;
+    }
+    
+    .input-group-text {
+        padding: 0.375rem 0.5rem;
+        font-size: 0.8rem;
+    }
+    
+    .btn {
+        width: 100%;
+        margin-bottom: 0.5rem;
+    }
+    
+    .btn-group {
+        flex-direction: column;
+    }
+}
+
 .nav-tabs .nav-link {
     border: none;
     border-bottom: 3px solid transparent;

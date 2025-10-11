@@ -8,8 +8,8 @@
     <!-- Header Section -->
     <div class="row mb-4">
         <div class="col-12">
-            <div class="d-flex justify-content-between align-items-center">
-                <div>
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center">
+                <div class="mb-3 mb-md-0">
                     <h2 class="h3 mb-0 text-gray-800">
                         <i class="fas fa-plus-circle text-primary me-2"></i>Create New Rental Code
                     </h2>
@@ -17,7 +17,7 @@
                 </div>
                 <div>
                     <a href="{{ route('rental-codes.index') }}" class="btn btn-outline-secondary">
-                        <i class="fas fa-arrow-left me-1"></i> Back to List
+                        <i class="fas fa-arrow-left me-1"></i> <span class="d-none d-sm-inline">Back to List</span>
                     </a>
                 </div>
             </div>
@@ -51,7 +51,7 @@
                     </div>
                     <div class="card-body">
                         <div class="row">
-                            <div class="col-md-6">
+                            <div class="col-12 col-md-6">
                                 <div class="form-group mb-3">
                                     <label for="rental_code" class="form-label">
                                         Rental Code <span class="text-danger">*</span>
@@ -62,8 +62,8 @@
                                                id="rental_code" name="rental_code" 
                                                value="{{ old('rental_code', \App\Models\RentalCode::generateRentalCode()) }}" 
                                                placeholder="Auto-generated" readonly>
-                                        <span class="input-group-text bg-success text-white">
-                                            <i class="fas fa-check"></i> Auto-generated
+                                        <span class="input-group-text bg-success text-white d-none d-sm-flex">
+                                            <i class="fas fa-check"></i> <span class="d-none d-md-inline">Auto-generated</span>
                                         </span>
                                     </div>
                                     @error('rental_code')
@@ -105,7 +105,7 @@
                                 </div>
                             </div>
                             
-                            <div class="col-md-6">
+                            <div class="col-12 col-md-6">
                                 <div class="form-group mb-3">
                                     <label for="payment_method" class="form-label">
                                         Payment Method <span class="text-danger">*</span>
@@ -241,7 +241,7 @@
                     </div>
                     <div class="card-body">
                         <div class="row">
-                            <div class="col-md-6">
+                            <div class="col-12 col-md-6">
                             <div class="mb-3">
                                 <label for="rent_by_agent" class="form-label">Rent By Agent *</label>
                                 <div class="input-group">
@@ -259,7 +259,7 @@
                                 @enderror
                             </div>
                             </div>
-                            <div class="col-md-6">
+                            <div class="col-12 col-md-6">
                             <div class="mb-3">
                                 <label for="marketing_agent" class="form-label">Marketing Agent</label>
                                         <select class="form-select @error('marketing_agent') is-invalid @enderror" 
@@ -280,7 +280,7 @@
                             </div>
                     </div>
                     <div class="row">
-                            <div class="col-md-6">
+                            <div class="col-12 col-md-6">
                             <div class="mb-3">
                                 <label for="client_count" class="form-label">Number of Clients *</label>
                                         <select class="form-select @error('client_count') is-invalid @enderror" 
@@ -299,7 +299,7 @@
                                     </small>
                                 </div>
                             </div>
-                        <div class="col-md-6">
+                        <div class="col-12 col-md-6">
                             <div class="mb-3">
                                     <label for="notes" class="form-label">Additional Notes</label>
                                         <textarea class="form-control @error('notes') is-invalid @enderror" 
@@ -325,7 +325,7 @@
                     </div>
                     <div class="card-body">
                         <div class="row">
-                            <div class="col-md-4">
+                            <div class="col-12 col-md-4">
                                 <div class="form-group mb-3">
                                     <label for="client_contract" class="form-label">
                                         Client Contract
@@ -343,7 +343,7 @@
                                 </div>
                             </div>
                             
-                            <div class="col-md-4">
+                            <div class="col-12 col-md-4">
                                 <div class="form-group mb-3">
                                     <label for="payment_proof" class="form-label">
                                         Payment Proof
@@ -361,7 +361,7 @@
                                 </div>
                             </div>
                             
-                            <div class="col-md-4">
+                            <div class="col-12 col-md-4">
                                 <div class="form-group mb-3">
                                     <label for="client_id_document" class="form-label">
                                         Client ID Document
@@ -430,6 +430,59 @@
 <style>
 .form-group {
     margin-bottom: 1.5rem;
+}
+
+/* Responsive improvements */
+@media (max-width: 768px) {
+    .container-fluid {
+        padding-left: 15px;
+        padding-right: 15px;
+    }
+    
+    .card {
+        margin-bottom: 1rem;
+    }
+    
+    .input-group-text {
+        font-size: 0.875rem;
+    }
+    
+    .btn {
+        font-size: 0.875rem;
+        padding: 0.5rem 0.75rem;
+    }
+    
+    .form-control, .form-select {
+        font-size: 0.875rem;
+    }
+    
+    .card-header h5 {
+        font-size: 1rem;
+    }
+    
+    .h3 {
+        font-size: 1.25rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .d-flex.flex-column.flex-md-row {
+        flex-direction: column !important;
+    }
+    
+    .mb-3.mb-md-0 {
+        margin-bottom: 1rem !important;
+    }
+    
+    .input-group-text {
+        padding: 0.375rem 0.5rem;
+        font-size: 0.8rem;
+    }
+    
+    .btn {
+        width: 100%;
+        margin-bottom: 0.5rem;
+    }
 }
 
 .input-group-text {
