@@ -1415,25 +1415,79 @@ public function generateCode()
     {
         $updateData = [];
 
-        // Handle client contract upload
+        // Handle client contract uploads (multiple files)
         if ($request->hasFile('client_contract')) {
-            $file = $request->file('client_contract');
-            $path = $file->store('rental-codes/contracts', 'public');
-            $updateData['client_contract'] = $path;
+            $files = $request->file('client_contract');
+            $paths = [];
+            
+            // Handle both single file and multiple files
+            if (is_array($files)) {
+                foreach ($files as $file) {
+                    if ($file->isValid()) {
+                        $path = $file->store('rental-codes/contracts', 'public');
+                        $paths[] = $path;
+                    }
+                }
+            } else {
+                if ($files->isValid()) {
+                    $path = $files->store('rental-codes/contracts', 'public');
+                    $paths[] = $path;
+                }
+            }
+            
+            if (!empty($paths)) {
+                $updateData['client_contract'] = json_encode($paths);
+            }
         }
 
-        // Handle payment proof upload
+        // Handle payment proof uploads (multiple files)
         if ($request->hasFile('payment_proof')) {
-            $file = $request->file('payment_proof');
-            $path = $file->store('rental-codes/payments', 'public');
-            $updateData['payment_proof'] = $path;
+            $files = $request->file('payment_proof');
+            $paths = [];
+            
+            // Handle both single file and multiple files
+            if (is_array($files)) {
+                foreach ($files as $file) {
+                    if ($file->isValid()) {
+                        $path = $file->store('rental-codes/payments', 'public');
+                        $paths[] = $path;
+                    }
+                }
+            } else {
+                if ($files->isValid()) {
+                    $path = $files->store('rental-codes/payments', 'public');
+                    $paths[] = $path;
+                }
+            }
+            
+            if (!empty($paths)) {
+                $updateData['payment_proof'] = json_encode($paths);
+            }
         }
 
-        // Handle client ID document upload
+        // Handle client ID document uploads (multiple files)
         if ($request->hasFile('client_id_document')) {
-            $file = $request->file('client_id_document');
-            $path = $file->store('rental-codes/ids', 'public');
-            $updateData['client_id_document'] = $path;
+            $files = $request->file('client_id_document');
+            $paths = [];
+            
+            // Handle both single file and multiple files
+            if (is_array($files)) {
+                foreach ($files as $file) {
+                    if ($file->isValid()) {
+                        $path = $file->store('rental-codes/ids', 'public');
+                        $paths[] = $path;
+                    }
+                }
+            } else {
+                if ($files->isValid()) {
+                    $path = $files->store('rental-codes/ids', 'public');
+                    $paths[] = $path;
+                }
+            }
+            
+            if (!empty($paths)) {
+                $updateData['client_id_document'] = json_encode($paths);
+            }
         }
 
         // Update rental code with file paths if any files were uploaded

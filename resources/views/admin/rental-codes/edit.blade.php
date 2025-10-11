@@ -594,8 +594,8 @@
                                     <div class="input-group">
                                         <span class="input-group-text"><i class="fas fa-file-contract"></i></span>
                                         <input type="file" class="form-control @error('client_contract') is-invalid @enderror" 
-                                               id="client_contract" name="client_contract" 
-                                               accept=".pdf,.jpg,.jpeg,.png">
+                                               id="client_contract" name="client_contract[]" 
+                                               accept=".pdf,.jpg,.jpeg,.png" multiple>
                                     </div>
                                     @error('client_contract')
                                         <div class="invalid-feedback">{{ $message }}</div>
@@ -604,11 +604,18 @@
                                         <div class="mt-2">
                                             <small class="text-success">
                                                 <i class="fas fa-check-circle me-1"></i>
-                                                Current: <a href="{{ Storage::url($rentalCode->client_contract) }}" target="_blank" class="text-decoration-none">View Current Contract</a>
+                                                Current: 
+                                                @if(is_array($rentalCode->client_contract))
+                                                    @foreach($rentalCode->client_contract as $index => $contract)
+                                                        <a href="{{ Storage::url($contract) }}" target="_blank" class="text-decoration-none">Contract {{ count($rentalCode->client_contract) > 1 ? ($index + 1) : '' }}</a>{{ $index < count($rentalCode->client_contract) - 1 ? ', ' : '' }}
+                                                    @endforeach
+                                                @else
+                                                    <a href="{{ Storage::url($rentalCode->client_contract) }}" target="_blank" class="text-decoration-none">View Current Contract</a>
+                                                @endif
                                             </small>
                                         </div>
                                     @endif
-                                    <small class="form-text text-muted">Upload client contract (PDF, JPG, PNG - Max 10MB)</small>
+                                    <small class="form-text text-muted">Upload client contract(s) (PDF, JPG, PNG - Max 10MB each, multiple files allowed)</small>
                                 </div>
                             </div>
                             
@@ -620,8 +627,8 @@
                                     <div class="input-group">
                                         <span class="input-group-text"><i class="fas fa-receipt"></i></span>
                                         <input type="file" class="form-control @error('payment_proof') is-invalid @enderror" 
-                                               id="payment_proof" name="payment_proof" 
-                                               accept=".pdf,.jpg,.jpeg,.png">
+                                               id="payment_proof" name="payment_proof[]" 
+                                               accept=".pdf,.jpg,.jpeg,.png" multiple>
                                     </div>
                                     @error('payment_proof')
                                         <div class="invalid-feedback">{{ $message }}</div>
@@ -630,11 +637,18 @@
                                         <div class="mt-2">
                                             <small class="text-success">
                                                 <i class="fas fa-check-circle me-1"></i>
-                                                Current: <a href="{{ Storage::url($rentalCode->payment_proof) }}" target="_blank" class="text-decoration-none">View Current Payment Proof</a>
+                                                Current: 
+                                                @if(is_array($rentalCode->payment_proof))
+                                                    @foreach($rentalCode->payment_proof as $index => $proof)
+                                                        <a href="{{ Storage::url($proof) }}" target="_blank" class="text-decoration-none">Proof {{ count($rentalCode->payment_proof) > 1 ? ($index + 1) : '' }}</a>{{ $index < count($rentalCode->payment_proof) - 1 ? ', ' : '' }}
+                                                    @endforeach
+                                                @else
+                                                    <a href="{{ Storage::url($rentalCode->payment_proof) }}" target="_blank" class="text-decoration-none">View Current Payment Proof</a>
+                                                @endif
                                             </small>
                                         </div>
                                     @endif
-                                    <small class="form-text text-muted">Upload payment proof (PDF, JPG, PNG - Max 10MB)</small>
+                                    <small class="form-text text-muted">Upload payment proof(s) (PDF, JPG, PNG - Max 10MB each, multiple files allowed)</small>
                                 </div>
                             </div>
                             
@@ -646,8 +660,8 @@
                                     <div class="input-group">
                                         <span class="input-group-text"><i class="fas fa-id-card"></i></span>
                                         <input type="file" class="form-control @error('client_id_document') is-invalid @enderror" 
-                                               id="client_id_document" name="client_id_document" 
-                                               accept=".pdf,.jpg,.jpeg,.png">
+                                               id="client_id_document" name="client_id_document[]" 
+                                               accept=".pdf,.jpg,.jpeg,.png" multiple>
                                     </div>
                                     @error('client_id_document')
                                         <div class="invalid-feedback">{{ $message }}</div>
@@ -656,11 +670,18 @@
                                         <div class="mt-2">
                                             <small class="text-success">
                                                 <i class="fas fa-check-circle me-1"></i>
-                                                Current: <a href="{{ Storage::url($rentalCode->client_id_document) }}" target="_blank" class="text-decoration-none">View Current ID</a>
+                                                Current: 
+                                                @if(is_array($rentalCode->client_id_document))
+                                                    @foreach($rentalCode->client_id_document as $index => $document)
+                                                        <a href="{{ Storage::url($document) }}" target="_blank" class="text-decoration-none">ID {{ count($rentalCode->client_id_document) > 1 ? ($index + 1) : '' }}</a>{{ $index < count($rentalCode->client_id_document) - 1 ? ', ' : '' }}
+                                                    @endforeach
+                                                @else
+                                                    <a href="{{ Storage::url($rentalCode->client_id_document) }}" target="_blank" class="text-decoration-none">View Current ID</a>
+                                                @endif
                                             </small>
                                         </div>
                                     @endif
-                                    <small class="form-text text-muted">Upload client ID (PDF, JPG, PNG - Max 10MB)</small>
+                                    <small class="form-text text-muted">Upload client ID document(s) (PDF, JPG, PNG - Max 10MB each, multiple files allowed)</small>
                                 </div>
                             </div>
                         </div>

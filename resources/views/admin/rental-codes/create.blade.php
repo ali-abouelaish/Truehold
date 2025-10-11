@@ -10,7 +10,7 @@
         <div class="col-12">
             <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center">
                 <div class="mb-3 mb-md-0">
-                    <h2 class="h3 mb-0 text-gray-800">
+                    <h2 class="h3 mb-0 text-dark fw-bold">
                         <i class="fas fa-plus-circle text-primary me-2"></i>Create New Rental Code
                     </h2>
                     <p class="text-muted mb-0">Add a new rental code application to the system</p>
@@ -333,13 +333,13 @@
                                     <div class="input-group">
                                         <span class="input-group-text"><i class="fas fa-file-contract"></i></span>
                                         <input type="file" class="form-control @error('client_contract') is-invalid @enderror" 
-                                               id="client_contract" name="client_contract" 
-                                               accept=".pdf,.jpg,.jpeg,.png">
+                                               id="client_contract" name="client_contract[]" 
+                                               accept=".pdf,.jpg,.jpeg,.png" multiple>
                                     </div>
                                     @error('client_contract')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
-                                    <small class="form-text text-muted">Upload client contract (PDF, JPG, PNG - Max 10MB)</small>
+                                    <small class="form-text text-muted">Upload client contract(s) (PDF, JPG, PNG - Max 10MB each, multiple files allowed)</small>
                                 </div>
                             </div>
                             
@@ -351,13 +351,13 @@
                                     <div class="input-group">
                                         <span class="input-group-text"><i class="fas fa-receipt"></i></span>
                                         <input type="file" class="form-control @error('payment_proof') is-invalid @enderror" 
-                                               id="payment_proof" name="payment_proof" 
-                                               accept=".pdf,.jpg,.jpeg,.png">
+                                               id="payment_proof" name="payment_proof[]" 
+                                               accept=".pdf,.jpg,.jpeg,.png" multiple>
                                     </div>
                                     @error('payment_proof')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
-                                    <small class="form-text text-muted">Upload payment proof (PDF, JPG, PNG - Max 10MB)</small>
+                                    <small class="form-text text-muted">Upload payment proof(s) (PDF, JPG, PNG - Max 10MB each, multiple files allowed)</small>
                                 </div>
                             </div>
                             
@@ -369,13 +369,13 @@
                                     <div class="input-group">
                                         <span class="input-group-text"><i class="fas fa-id-card"></i></span>
                                         <input type="file" class="form-control @error('client_id_document') is-invalid @enderror" 
-                                               id="client_id_document" name="client_id_document" 
-                                               accept=".pdf,.jpg,.jpeg,.png">
+                                               id="client_id_document" name="client_id_document[]" 
+                                               accept=".pdf,.jpg,.jpeg,.png" multiple>
                                     </div>
                                     @error('client_id_document')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
-                                    <small class="form-text text-muted">Upload client ID (PDF, JPG, PNG - Max 10MB)</small>
+                                    <small class="form-text text-muted">Upload client ID document(s) (PDF, JPG, PNG - Max 10MB each, multiple files allowed)</small>
                                 </div>
                             </div>
                         </div>

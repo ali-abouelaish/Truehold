@@ -45,6 +45,10 @@ class RentalCode extends Model
         'consultation_fee' => 'decimal:2',
         'paid' => 'boolean',
         'paid_at' => 'datetime',
+        // Document Upload Fields
+        'client_contract' => 'array',
+        'payment_proof' => 'array',
+        'client_id_document' => 'array',
         // Reserved: Cash Document Fields
         'contact_images' => 'array',
         'cash_document_submitted_at' => 'datetime',

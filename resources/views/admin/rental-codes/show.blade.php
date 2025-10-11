@@ -538,13 +538,25 @@ strong {
                             <div class="document-item">
                                 <div class="d-flex align-items-center mb-2">
                                     <i class="fas fa-file-contract text-warning me-2"></i>
-                                    <h6 class="mb-0">Client Contract</h6>
+                                    <h6 class="mb-0">Client Contract(s)</h6>
                                 </div>
-                                <a href="{{ Storage::url($rentalCode->client_contract) }}" 
-                                   target="_blank" 
-                                   class="btn btn-outline-warning btn-sm">
-                                    <i class="fas fa-download me-1"></i>View Document
-                                </a>
+                                @if(is_array($rentalCode->client_contract))
+                                    @foreach($rentalCode->client_contract as $index => $contract)
+                                        <div class="mb-2">
+                                            <a href="{{ Storage::url($contract) }}" 
+                                               target="_blank" 
+                                               class="btn btn-outline-warning btn-sm">
+                                                <i class="fas fa-download me-1"></i>View Document {{ count($rentalCode->client_contract) > 1 ? ($index + 1) : '' }}
+                                            </a>
+                                        </div>
+                                    @endforeach
+                                @else
+                                    <a href="{{ Storage::url($rentalCode->client_contract) }}" 
+                                       target="_blank" 
+                                       class="btn btn-outline-warning btn-sm">
+                                        <i class="fas fa-download me-1"></i>View Document
+                                    </a>
+                                @endif
                             </div>
                         </div>
                         @endif
@@ -554,13 +566,25 @@ strong {
                             <div class="document-item">
                                 <div class="d-flex align-items-center mb-2">
                                     <i class="fas fa-receipt text-success me-2"></i>
-                                    <h6 class="mb-0">Payment Proof</h6>
+                                    <h6 class="mb-0">Payment Proof(s)</h6>
                                 </div>
-                                <a href="{{ Storage::url($rentalCode->payment_proof) }}" 
-                                   target="_blank" 
-                                   class="btn btn-outline-success btn-sm">
-                                    <i class="fas fa-download me-1"></i>View Document
-                                </a>
+                                @if(is_array($rentalCode->payment_proof))
+                                    @foreach($rentalCode->payment_proof as $index => $proof)
+                                        <div class="mb-2">
+                                            <a href="{{ Storage::url($proof) }}" 
+                                               target="_blank" 
+                                               class="btn btn-outline-success btn-sm">
+                                                <i class="fas fa-download me-1"></i>View Document {{ count($rentalCode->payment_proof) > 1 ? ($index + 1) : '' }}
+                                            </a>
+                                        </div>
+                                    @endforeach
+                                @else
+                                    <a href="{{ Storage::url($rentalCode->payment_proof) }}" 
+                                       target="_blank" 
+                                       class="btn btn-outline-success btn-sm">
+                                        <i class="fas fa-download me-1"></i>View Document
+                                    </a>
+                                @endif
                             </div>
                         </div>
                         @endif
@@ -570,13 +594,25 @@ strong {
                             <div class="document-item">
                                 <div class="d-flex align-items-center mb-2">
                                     <i class="fas fa-id-card text-info me-2"></i>
-                                    <h6 class="mb-0">Client ID Document</h6>
+                                    <h6 class="mb-0">Client ID Document(s)</h6>
                                 </div>
-                                <a href="{{ Storage::url($rentalCode->client_id_document) }}" 
-                                   target="_blank" 
-                                   class="btn btn-outline-info btn-sm">
-                                    <i class="fas fa-download me-1"></i>View Document
-                                </a>
+                                @if(is_array($rentalCode->client_id_document))
+                                    @foreach($rentalCode->client_id_document as $index => $document)
+                                        <div class="mb-2">
+                                            <a href="{{ Storage::url($document) }}" 
+                                               target="_blank" 
+                                               class="btn btn-outline-info btn-sm">
+                                                <i class="fas fa-download me-1"></i>View Document {{ count($rentalCode->client_id_document) > 1 ? ($index + 1) : '' }}
+                                            </a>
+                                        </div>
+                                    @endforeach
+                                @else
+                                    <a href="{{ Storage::url($rentalCode->client_id_document) }}" 
+                                       target="_blank" 
+                                       class="btn btn-outline-info btn-sm">
+                                        <i class="fas fa-download me-1"></i>View Document
+                                    </a>
+                                @endif
                             </div>
                         </div>
                         @endif
