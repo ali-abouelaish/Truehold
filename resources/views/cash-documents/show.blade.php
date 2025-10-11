@@ -194,7 +194,7 @@
                 <!-- Navigation -->
                 <div class="bg-white rounded-lg shadow p-6">
                     <div class="space-y-3">
-                        <a href="{{ route('cash-documents.index') }}" class="w-full bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-lg transition duration-200 text-center block">
+                        <a href="{{ route('rental-codes.cash-documents.index') }}" class="w-full bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-lg transition duration-200 text-center block">
                             <i class="fas fa-arrow-left mr-2"></i>Back to List
                         </a>
                         @if($cashDocument->status === 'pending' && auth()->user()->id === $cashDocument->agent->user_id)

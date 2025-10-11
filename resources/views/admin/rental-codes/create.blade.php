@@ -36,7 +36,7 @@
         </div>
     @endif
 
-    <form action="{{ route('rental-codes.store') }}" method="POST" id="rentalCodeForm">
+    <form action="{{ route('rental-codes.store') }}" method="POST" enctype="multipart/form-data" id="rentalCodeForm">
         @csrf
         
 
@@ -235,7 +235,7 @@
             <div class="col-12">
                 <div class="card shadow">
                     <div class="card-header">
-                        <h5 class="card-title mb-0">
+                        <h5 class="card-title mb-0" style="color: #1a1a1a; font-weight: 600;">
                             <i class="fas fa-user-tie text-primary me-2"></i>Agent Information
                         </h5>
                     </div>
@@ -307,6 +307,76 @@
                                     @error('notes')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Document Uploads -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card shadow">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-file-upload text-primary me-2"></i>Document Uploads
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="form-group mb-3">
+                                    <label for="client_contract" class="form-label">
+                                        Client Contract
+                                    </label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="fas fa-file-contract"></i></span>
+                                        <input type="file" class="form-control @error('client_contract') is-invalid @enderror" 
+                                               id="client_contract" name="client_contract" 
+                                               accept=".pdf,.jpg,.jpeg,.png">
+                                    </div>
+                                    @error('client_contract')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                    <small class="form-text text-muted">Upload client contract (PDF, JPG, PNG - Max 10MB)</small>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-4">
+                                <div class="form-group mb-3">
+                                    <label for="payment_proof" class="form-label">
+                                        Payment Proof
+                                    </label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="fas fa-receipt"></i></span>
+                                        <input type="file" class="form-control @error('payment_proof') is-invalid @enderror" 
+                                               id="payment_proof" name="payment_proof" 
+                                               accept=".pdf,.jpg,.jpeg,.png">
+                                    </div>
+                                    @error('payment_proof')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                    <small class="form-text text-muted">Upload payment proof (PDF, JPG, PNG - Max 10MB)</small>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-4">
+                                <div class="form-group mb-3">
+                                    <label for="client_id_document" class="form-label">
+                                        Client ID Document
+                                    </label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="fas fa-id-card"></i></span>
+                                        <input type="file" class="form-control @error('client_id_document') is-invalid @enderror" 
+                                               id="client_id_document" name="client_id_document" 
+                                               accept=".pdf,.jpg,.jpeg,.png">
+                                    </div>
+                                    @error('client_id_document')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                    <small class="form-text text-muted">Upload client ID (PDF, JPG, PNG - Max 10MB)</small>
+                                </div>
                             </div>
                         </div>
                     </div>

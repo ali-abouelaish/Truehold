@@ -59,6 +59,10 @@ class RentalCodeController extends Controller
             'client_count' => 'required|integer|min:1|max:10',
             'notes' => 'required|string',
             'status' => 'required|string|in:pending,approved,completed,cancelled',
+            // Document upload fields
+            'client_contract' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:10240',
+            'payment_proof' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:10240',
+            'client_id_document' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:10240',
         ];
         
         // Add dynamic client validation if creating new clients
@@ -131,6 +135,11 @@ class RentalCodeController extends Controller
             $client = $clients->first(); // Use first client as primary
         }
 
+        // Update client status to 'registered' when added to rental code
+        if ($client) {
+            $client->update(['registration_status' => 'registered']);
+        }
+
         // Create rental code with client_id
         $rentalCodeData = $validated;
         $rentalCodeData['client_id'] = $client->id;
@@ -164,6 +173,9 @@ class RentalCodeController extends Controller
         }
 
         $rentalCode = RentalCode::create($rentalCodeData);
+
+        // Handle file uploads
+        $this->handleFileUploads($request, $rentalCode);
 
         // Send email notification to board@truehold.co.uk
         $this->sendRentalCodeNotification($rentalCode);
@@ -234,10 +246,19 @@ class RentalCodeController extends Controller
             'client_count' => 'required|integer|min:1|max:10',
             'notes' => 'nullable|string',
             'status' => 'required|string|in:pending,approved,completed,cancelled',
+            // Document upload fields
+            'client_contract' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:10240',
+            'payment_proof' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:10240',
+            'client_id_document' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:10240',
         ]);
 
         // Handle client creation or retrieval
         $client = $this->handleClient($validated);
+
+        // Update client status to 'registered' when added to rental code
+        if ($client) {
+            $client->update(['registration_status' => 'registered']);
+        }
 
         // Update rental code with client_id
         $rentalCodeData = $validated;
@@ -256,6 +277,9 @@ class RentalCodeController extends Controller
         }
 
         $rentalCode->update($rentalCodeData);
+
+        // Handle file uploads
+        $this->handleFileUploads($request, $rentalCode);
 
         return redirect()->route('rental-codes.index')
             ->with('success', 'Rental code updated successfully!');
@@ -1381,6 +1405,40 @@ public function generateCode()
         } catch (\Exception $e) {
             // Log the error but don't fail the rental code creation
             \Log::error('Failed to send rental code notification: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Handle file uploads for rental code
+     */
+    private function handleFileUploads(Request $request, RentalCode $rentalCode)
+    {
+        $updateData = [];
+
+        // Handle client contract upload
+        if ($request->hasFile('client_contract')) {
+            $file = $request->file('client_contract');
+            $path = $file->store('rental-codes/contracts', 'public');
+            $updateData['client_contract'] = $path;
+        }
+
+        // Handle payment proof upload
+        if ($request->hasFile('payment_proof')) {
+            $file = $request->file('payment_proof');
+            $path = $file->store('rental-codes/payments', 'public');
+            $updateData['payment_proof'] = $path;
+        }
+
+        // Handle client ID document upload
+        if ($request->hasFile('client_id_document')) {
+            $file = $request->file('client_id_document');
+            $path = $file->store('rental-codes/ids', 'public');
+            $updateData['client_id_document'] = $path;
+        }
+
+        // Update rental code with file paths if any files were uploaded
+        if (!empty($updateData)) {
+            $rentalCode->update($updateData);
         }
     }
 }

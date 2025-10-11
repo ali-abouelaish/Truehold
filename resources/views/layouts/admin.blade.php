@@ -620,25 +620,19 @@
 
                 @if(auth()->user()->hasAdminPermission('rental_codes', 'view'))
                 <div class="px-4 mt-6 mb-4">
-                    <span class="sidebar-text text-xs font-semibold text-gray-500 uppercase tracking-wider">Rental Codes</span>
+                    <span class="sidebar-text text-xs font-semibold text-gray-500 uppercase tracking-wider">Reserved</span>
                 </div>
                 
                 <a href="{{ route('rental-codes.index') }}" 
                    class="sidebar-item flex items-center px-4 py-3 text-gray-700 hover:text-blue-600 {{ request()->routeIs('rental-codes*') ? 'active' : '' }}">
                     <i class="fas fa-key sidebar-icon mr-3 text-lg"></i>
-                    <span class="sidebar-text">Manage Rental Codes</span>
+                    <span class="sidebar-text">Rental Codes</span>
                 </a>
 
                 <a href="{{ route('marketing-agents.index') }}" 
                    class="sidebar-item flex items-center px-4 py-3 text-gray-700 hover:text-blue-600 {{ request()->routeIs('marketing-agents*') ? 'active' : '' }}">
                     <i class="fas fa-bullhorn sidebar-icon mr-3 text-lg"></i>
                     <span class="sidebar-text">Marketing Agents</span>
-                </a>
-
-                <a href="{{ route('cash-documents.index') }}" 
-                   class="sidebar-item flex items-center px-4 py-3 text-gray-700 hover:text-blue-600 {{ request()->routeIs('cash-documents*') ? 'active' : '' }}">
-                    <i class="fas fa-money-bill-wave sidebar-icon mr-3 text-lg"></i>
-                    <span class="sidebar-text">Cash Documents</span>
                 </a>
                 @endif
 

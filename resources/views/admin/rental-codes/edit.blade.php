@@ -51,7 +51,7 @@
         </div>
     </div>
 
-    <form action="{{ route('rental-codes.update', $rentalCode) }}" method="POST" id="editRentalCodeForm">
+    <form action="{{ route('rental-codes.update', $rentalCode) }}" method="POST" enctype="multipart/form-data" id="editRentalCodeForm">
         @csrf
         @method('PUT')
         
@@ -567,6 +567,100 @@
                                             @enderror
                                         </div>
                                     </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Document Uploads -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card shadow">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-file-upload text-primary me-2"></i>Document Uploads
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="form-group mb-3">
+                                    <label for="client_contract" class="form-label">
+                                        Client Contract
+                                    </label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="fas fa-file-contract"></i></span>
+                                        <input type="file" class="form-control @error('client_contract') is-invalid @enderror" 
+                                               id="client_contract" name="client_contract" 
+                                               accept=".pdf,.jpg,.jpeg,.png">
+                                    </div>
+                                    @error('client_contract')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                    @if($rentalCode->client_contract)
+                                        <div class="mt-2">
+                                            <small class="text-success">
+                                                <i class="fas fa-check-circle me-1"></i>
+                                                Current: <a href="{{ Storage::url($rentalCode->client_contract) }}" target="_blank" class="text-decoration-none">View Current Contract</a>
+                                            </small>
+                                        </div>
+                                    @endif
+                                    <small class="form-text text-muted">Upload client contract (PDF, JPG, PNG - Max 10MB)</small>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-4">
+                                <div class="form-group mb-3">
+                                    <label for="payment_proof" class="form-label">
+                                        Payment Proof
+                                    </label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="fas fa-receipt"></i></span>
+                                        <input type="file" class="form-control @error('payment_proof') is-invalid @enderror" 
+                                               id="payment_proof" name="payment_proof" 
+                                               accept=".pdf,.jpg,.jpeg,.png">
+                                    </div>
+                                    @error('payment_proof')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                    @if($rentalCode->payment_proof)
+                                        <div class="mt-2">
+                                            <small class="text-success">
+                                                <i class="fas fa-check-circle me-1"></i>
+                                                Current: <a href="{{ Storage::url($rentalCode->payment_proof) }}" target="_blank" class="text-decoration-none">View Current Payment Proof</a>
+                                            </small>
+                                        </div>
+                                    @endif
+                                    <small class="form-text text-muted">Upload payment proof (PDF, JPG, PNG - Max 10MB)</small>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-4">
+                                <div class="form-group mb-3">
+                                    <label for="client_id_document" class="form-label">
+                                        Client ID Document
+                                    </label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="fas fa-id-card"></i></span>
+                                        <input type="file" class="form-control @error('client_id_document') is-invalid @enderror" 
+                                               id="client_id_document" name="client_id_document" 
+                                               accept=".pdf,.jpg,.jpeg,.png">
+                                    </div>
+                                    @error('client_id_document')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                    @if($rentalCode->client_id_document)
+                                        <div class="mt-2">
+                                            <small class="text-success">
+                                                <i class="fas fa-check-circle me-1"></i>
+                                                Current: <a href="{{ Storage::url($rentalCode->client_id_document) }}" target="_blank" class="text-decoration-none">View Current ID</a>
+                                            </small>
+                                        </div>
+                                    @endif
+                                    <small class="form-text text-muted">Upload client ID (PDF, JPG, PNG - Max 10MB)</small>
                                 </div>
                             </div>
                         </div>
