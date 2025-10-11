@@ -30,8 +30,8 @@ class RentalCodeController extends Controller
         // Get users who are agents (either by role or by having an agent profile)
         $agentUsers = User::where('role', 'agent')->with('agent')->get();
         
-        // Get users who are marketing agents
-        $marketingUsers = User::where('role', 'marketing_agent')->get();
+        // Get all users who can be marketing agents (both agents and marketing agents)
+        $marketingUsers = User::whereIn('role', ['agent', 'marketing_agent'])->get();
         
         // Get existing clients for selection
         $existingClients = Client::orderBy('full_name')->get();
