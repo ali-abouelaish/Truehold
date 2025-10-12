@@ -718,15 +718,14 @@ strong {
                                                 </div>
                                             </td>
                                             <td>
-                                                <div class="btn-group" role="group">
-                                                    <button type="button" class="btn btn-sm transition-colors" 
-                                                            onclick="toggleStatus({{ $rentalCode->id }}, '{{ $rentalCode->status }}')" 
-                                                            title="Change Status"
-                                                            style="background: linear-gradient(135deg, #374151, #4b5563); border: 1px solid #6b7280; color: #d1d5db;"
-                                                            onmouseover="this.style.background='linear-gradient(135deg, #4b5563, #6b7280)'; this.style.borderColor='#fbbf24'; this.style.color='#f9fafb';"
-                                                            onmouseout="this.style.background='linear-gradient(135deg, #374151, #4b5563)'; this.style.borderColor='#6b7280'; this.style.color='#d1d5db';">
-                                                        <i class="fas fa-toggle-on"></i>
-                                                    </button>
+                                                <div class="dropdown">
+                                                    <select class="form-select form-select-sm" 
+                                                            onchange="changeStatus({{ $rentalCode->id }}, this.value)"
+                                                            style="background: linear-gradient(135deg, #374151, #4b5563); border: 1px solid #6b7280; color: #d1d5db; min-width: 120px;">
+                                                        <option value="pending" {{ $rentalCode->status === 'pending' ? 'selected' : '' }}>Pending</option>
+                                                        <option value="approved" {{ $rentalCode->status === 'approved' ? 'selected' : '' }}>Approved</option>
+                                                        <option value="paid" {{ $rentalCode->status === 'paid' ? 'selected' : '' }}>Paid</option>
+                                                    </select>
                                                 </div>
                                             </td>
                                             <td>
@@ -996,19 +995,147 @@ function printTable() {
     window.print();
 }
 
-// Status toggle function
-function toggleStatus(rentalCodeId, currentStatus) {
-    const statusOptions = ['pending', 'approved', 'completed', 'cancelled'];
-    const currentIndex = statusOptions.indexOf(currentStatus);
-    const nextIndex = (currentIndex + 1) % statusOptions.length;
-    const newStatus = statusOptions[nextIndex];
+// Bulk actions functionality
+document.addEventListener('DOMContentLoaded', function() {
+    const selectAllCheckbox = document.getElementById('selectAll');
+    const rowCheckboxes = document.querySelectorAll('.row-checkbox');
+    const bulkActions = document.getElementById('bulkActions');
+    const selectedCount = document.getElementById('selectedCount');
+
+    // Select all functionality
+    if (selectAllCheckbox) {
+        selectAllCheckbox.addEventListener('change', function() {
+            rowCheckboxes.forEach(checkbox => {
+                checkbox.checked = this.checked;
+            });
+            updateBulkActions();
+        });
+    }
+
+    // Individual checkbox functionality
+    rowCheckboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', function() {
+            updateBulkActions();
+            updateSelectAllState();
+        });
+    });
+
+    function updateBulkActions() {
+        const checkedBoxes = document.querySelectorAll('.row-checkbox:checked');
+        const count = checkedBoxes.length;
+        
+        if (count > 0) {
+            bulkActions.style.display = 'block';
+            selectedCount.textContent = count;
+        } else {
+            bulkActions.style.display = 'none';
+        }
+    }
+
+    function updateSelectAllState() {
+        const checkedBoxes = document.querySelectorAll('.row-checkbox:checked');
+        const totalBoxes = rowCheckboxes.length;
+        
+        if (checkedBoxes.length === 0) {
+            selectAllCheckbox.indeterminate = false;
+            selectAllCheckbox.checked = false;
+        } else if (checkedBoxes.length === totalBoxes) {
+            selectAllCheckbox.indeterminate = false;
+            selectAllCheckbox.checked = true;
+        } else {
+            selectAllCheckbox.indeterminate = true;
+        }
+    }
+});
+
+// Bulk action function
+function bulkAction(action) {
+    const checkedBoxes = document.querySelectorAll('.row-checkbox:checked');
+    const rentalCodeIds = Array.from(checkedBoxes).map(cb => cb.value);
     
-    if (confirm(`Change status from "${currentStatus}" to "${newStatus}"?`)) {
+    if (rentalCodeIds.length === 0) {
+        alert('Please select at least one rental code.');
+        return;
+    }
+
+    let status;
+    let actionText;
+    
+    switch(action) {
+        case 'approve':
+            status = 'approved';
+            actionText = 'approve';
+            break;
+        case 'complete':
+            status = 'paid';
+            actionText = 'mark as paid';
+            break;
+        case 'cancel':
+            status = 'cancelled';
+            actionText = 'cancel';
+            break;
+        default:
+            alert('Invalid action.');
+            return;
+    }
+
+    if (confirm(`Are you sure you want to ${actionText} ${rentalCodeIds.length} rental code(s)?`)) {
         // Show loading state
-        const button = event.target.closest('button');
-        const originalHTML = button.innerHTML;
-        button.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-        button.disabled = true;
+        const buttons = document.querySelectorAll('#bulkActions button');
+        buttons.forEach(btn => {
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+        });
+
+        // Send bulk update request
+        fetch('/admin/rental-codes/bulk-update-status', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                'Accept': 'application/json',
+            },
+            body: JSON.stringify({
+                rental_code_ids: rentalCodeIds,
+                status: status
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert(`Successfully updated ${data.updated_count} rental code(s).`);
+                location.reload();
+            } else {
+                alert('Error: ' + (data.message || 'Failed to update rental codes'));
+                // Reset buttons
+                resetBulkActionButtons();
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error updating rental codes. Please try again.');
+            resetBulkActionButtons();
+        });
+    }
+}
+
+function resetBulkActionButtons() {
+    const buttons = document.querySelectorAll('#bulkActions button');
+    buttons.forEach((btn, index) => {
+        btn.disabled = false;
+        const icons = ['<i class="fas fa-thumbs-up"></i> Approve', '<i class="fas fa-check"></i> Complete', '<i class="fas fa-times"></i> Cancel'];
+        btn.innerHTML = icons[index];
+    });
+}
+
+// Status change function for dropdown
+function changeStatus(rentalCodeId, newStatus) {
+    if (confirm(`Change status to "${newStatus}"?`)) {
+        // Show loading state
+        const select = event.target;
+        const originalValue = select.value;
+        select.disabled = true;
+        select.style.opacity = '0.6';
         
         fetch(`/admin/rental-codes/${rentalCodeId}/update-status`, {
             method: 'POST',
@@ -1028,16 +1155,21 @@ function toggleStatus(rentalCodeId, currentStatus) {
                 location.reload();
             } else {
                 alert('Error updating status: ' + (data.message || 'Unknown error'));
-                button.innerHTML = originalHTML;
-                button.disabled = false;
+                select.value = originalValue;
+                select.disabled = false;
+                select.style.opacity = '1';
             }
         })
         .catch(error => {
             console.error('Error:', error);
             alert('Error updating status. Please try again.');
-            button.innerHTML = originalHTML;
-            button.disabled = false;
+            select.value = originalValue;
+            select.disabled = false;
+            select.style.opacity = '1';
         });
+    } else {
+        // Reset to original value if user cancels
+        event.target.value = event.target.getAttribute('data-original-value') || 'pending';
     }
 }
 </script>

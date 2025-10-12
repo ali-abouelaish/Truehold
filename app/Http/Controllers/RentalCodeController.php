@@ -57,8 +57,7 @@ class RentalCodeController extends Controller
             'rent_by_agent' => 'required|string|max:255',
             'marketing_agent' => 'required|string|max:255',
             'client_count' => 'required|integer|min:1|max:10',
-            'notes' => 'required|string',
-            'status' => 'required|string|in:pending,approved,completed,cancelled',
+            'notes' => 'nullable|string',
         ];
         
         // Add dynamic client validation if creating new clients
@@ -93,7 +92,6 @@ class RentalCodeController extends Controller
             'rent_by_agent.required' => 'Rent by agent is required.',
             'marketing_agent.required' => 'Marketing agent is required.',
             'client_count.required' => 'Client count is required.',
-            'notes.required' => 'Notes are required.',
             'status.required' => 'Status is required.',
         ];
         
@@ -150,6 +148,9 @@ class RentalCodeController extends Controller
         
         // Ensure we always use the current user's name for agent display
         $rentalCodeData['agent_name'] = $currentUser ? $currentUser->name : 'Unknown Agent';
+        
+        // Set default status to pending for new rental codes
+        $rentalCodeData['status'] = 'pending';
         
         // Remove client fields from rental code data as they're now in the client record
         $clientFields = [
@@ -1419,6 +1420,64 @@ public function generateCode()
         } catch (\Exception $e) {
             // Log the error but don't fail the rental code creation
             \Log::error('Failed to send rental code notification: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Bulk update status for multiple rental codes
+     */
+    public function bulkUpdateStatus(Request $request)
+    {
+        // Only admin users can perform bulk status updates
+        if (auth()->user()->role !== 'admin') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Only administrators can perform bulk status updates.',
+            ], 403);
+        }
+
+        $validated = $request->validate([
+            'rental_code_ids' => 'required|array|min:1',
+            'rental_code_ids.*' => 'integer|exists:rental_codes,id',
+            'status' => 'required|string|in:pending,approved,paid',
+        ]);
+
+        try {
+            $rentalCodeIds = $validated['rental_code_ids'];
+            $newStatus = $validated['status'];
+            
+            // Update rental codes
+            $updatedCount = RentalCode::whereIn('id', $rentalCodeIds)
+                ->update([
+                    'status' => $newStatus,
+                    'updated_at' => now()
+                ]);
+
+            \Log::info('Bulk status update completed', [
+                'rental_code_ids' => $rentalCodeIds,
+                'new_status' => $newStatus,
+                'updated_count' => $updatedCount,
+                'user_id' => auth()->id()
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => "Successfully updated {$updatedCount} rental code(s) to {$newStatus}.",
+                'updated_count' => $updatedCount
+            ]);
+
+        } catch (\Exception $e) {
+            \Log::error('Bulk status update failed', [
+                'error' => $e->getMessage(),
+                'rental_code_ids' => $request->input('rental_code_ids'),
+                'status' => $request->input('status'),
+                'user_id' => auth()->id()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to update rental codes. Please try again.',
+            ], 500);
         }
     }
 }

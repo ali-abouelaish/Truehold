@@ -363,7 +363,7 @@
                             <div class="mb-3">
                                     <label for="notes" class="form-label">Additional Notes</label>
                                         <textarea class="form-control @error('notes') is-invalid @enderror" 
-                                          id="notes" name="notes" rows="3" placeholder="Enter any additional notes" required>{{ old('notes') }}</textarea>
+                                          id="notes" name="notes" rows="3" placeholder="Enter any additional notes">{{ old('notes') }}</textarea>
                                     @error('notes')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
@@ -454,23 +454,6 @@
                         </h5>
                     </div>
                     <div class="card-body">
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-group mb-3">
-                                    <label for="status" class="form-label">Initial Status</label>
-                                    <select class="form-select @error('status') is-invalid @enderror" 
-                                            id="status" name="status" required>
-                                        <option value="pending" {{ old('status') == 'pending' ? 'selected' : '' }}>Pending</option>
-                                        <option value="approved" {{ old('status') == 'approved' ? 'selected' : '' }}>Approved</option>
-                                        <option value="completed" {{ old('status') == 'completed' ? 'selected' : '' }}>Completed</option>
-                                        <option value="cancelled" {{ old('status') == 'cancelled' ? 'selected' : '' }}>Cancelled</option>
-                                    </select>
-                                    @error('status')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
-                                </div>
-                            </div>
-                        </div>
                         
                         <div class="row">
                             <div class="col-12">
