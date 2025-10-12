@@ -794,7 +794,6 @@ document.addEventListener('DOMContentLoaded', function() {
     toggleClientSections();
     
     // Add form submission debugging
-    const form = document.getElementById('rentalCodeForm');
     if (form) {
         form.addEventListener('submit', function(e) {
             console.log('Form submission started');
