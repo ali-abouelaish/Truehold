@@ -3,6 +3,73 @@
 @section('title', 'Rental Codes')
 
 <style>
+/* Mobile responsive improvements for rental codes */
+@media (max-width: 768px) {
+    .card-body {
+        padding: 1rem;
+    }
+    
+    .form-group {
+        margin-bottom: 1rem;
+    }
+    
+    .input-group-text {
+        font-size: 0.875rem;
+    }
+    
+    .btn {
+        width: 100%;
+        margin-bottom: 0.5rem;
+    }
+    
+    .btn-group .btn {
+        width: auto;
+        margin-bottom: 0;
+    }
+    
+    .table-responsive {
+        font-size: 0.875rem;
+    }
+    
+    .nav-tabs .nav-link {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.875rem;
+    }
+    
+    .col-xl-3 {
+        margin-bottom: 1rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .container-fluid {
+        padding: 0.5rem;
+    }
+    
+    .card {
+        margin-bottom: 1rem;
+    }
+    
+    .h3 {
+        font-size: 1.25rem;
+    }
+    
+    .input-group {
+        flex-wrap: wrap;
+    }
+    
+    .input-group-text {
+        min-width: 2.5rem;
+    }
+    
+    .table th, .table td {
+        padding: 0.5rem;
+        font-size: 0.8rem;
+    }
+}
+</style>
+
+<style>
 /* Dark mode styles for rental codes index page */
 .card {
     background-color: #1f2937 !important;

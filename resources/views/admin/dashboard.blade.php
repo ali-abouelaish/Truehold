@@ -175,22 +175,4 @@
 
 
 
-<!-- Floating Action Buttons -->
-<div class="fixed bottom-6 right-6 z-50">
-    <div class="flex flex-col space-y-3">
-        <!-- Map Button -->
-        <a href="{{ route('properties.map') }}" 
-           class="group relative style="color: #d1d5db;" p-4 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105"
-           style="background: linear-gradient(135deg, #1f2937, #374151); border: 1px solid #4b5563;">
-            <i class="fas fa-map-marked-alt text-xl" style="color: #fbbf24;"></i>
-        </a>
-        
-        <!-- Site Button -->
-        <a href="{{ route('properties.index') }}" 
-           class="group relative style="color: #d1d5db;" p-4 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105"
-           style="background: linear-gradient(135deg, #1f2937, #374151); border: 1px solid #4b5563;">
-            <i class="fas fa-globe text-xl" style="color: #fbbf24;"></i>
-        </a>
-    </div>
-</div>
 @endsection

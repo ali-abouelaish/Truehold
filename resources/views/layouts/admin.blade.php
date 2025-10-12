@@ -558,6 +558,7 @@
                         <img src="{{ asset('images/truehold-logo.jpg') }}" alt="TRUEHOLD GROUP LTD" class="h-8 w-auto mr-3">
                         <span class="sidebar-text text-xl font-bold" style="color: #d1d5db;">TRUEHOLD</span>
                     </div>
+                    <!-- Sidebar Toggle Button - Visible on all views -->
                     <button id="sidebarToggle" class="hover:text-gray-300" style="color: #fbbf24;">
                         <i class="fas fa-bars"></i>
                     </button>
@@ -688,6 +689,7 @@
                 @endif
                 @endif
 
+
                 @if(auth()->user()->hasAdminPermission('users', 'view'))
                 <div class="px-4 mt-6 mb-4">
                     <span class="sidebar-text text-xs font-semibold text-gray-500 uppercase tracking-wider">Users</span>
@@ -745,15 +747,27 @@
             <!-- Sidebar Footer -->
             <div class="w-full p-4 mt-auto" style="border-top: 1px solid #374151;">
                 <div class="flex items-center justify-between">
-                    <div class="flex items-center">
-                        <div class="w-8 h-8 rounded-full flex items-center justify-center" style="background: linear-gradient(135deg, #1f2937, #374151); border: 1px solid #fbbf24;">
-                            <span class="text-sm font-bold" style="color: #fbbf24;">{{ substr(Auth::user()->name, 0, 1) }}</span>
+                    @if(Auth::user()->role === 'agent')
+                        <a href="{{ route('agent.profile.dashboard') }}" class="flex items-center flex-1 hover:bg-gray-700 rounded-lg p-2 transition-colors {{ request()->routeIs('agent.profile.*') ? 'bg-gray-700' : '' }}">
+                            <div class="w-8 h-8 rounded-full flex items-center justify-center" style="background: linear-gradient(135deg, #1f2937, #374151); border: 1px solid #fbbf24;">
+                                <span class="text-sm font-bold" style="color: #fbbf24;">{{ substr(Auth::user()->name, 0, 1) }}</span>
+                            </div>
+                            <div class="ml-3 sidebar-text">
+                                <p class="text-sm font-medium" style="color: #d1d5db;">{{ Auth::user()->name }}</p>
+                                <p class="text-xs" style="color: #9ca3af;">{{ Auth::user()->email }}</p>
+                            </div>
+                        </a>
+                    @else
+                        <div class="flex items-center">
+                            <div class="w-8 h-8 rounded-full flex items-center justify-center" style="background: linear-gradient(135deg, #1f2937, #374151); border: 1px solid #fbbf24;">
+                                <span class="text-sm font-bold" style="color: #fbbf24;">{{ substr(Auth::user()->name, 0, 1) }}</span>
+                            </div>
+                            <div class="ml-3 sidebar-text">
+                                <p class="text-sm font-medium" style="color: #d1d5db;">{{ Auth::user()->name }}</p>
+                                <p class="text-xs" style="color: #9ca3af;">{{ Auth::user()->email }}</p>
+                            </div>
                         </div>
-                        <div class="ml-3 sidebar-text">
-                            <p class="text-sm font-medium" style="color: #d1d5db;">{{ Auth::user()->name }}</p>
-                            <p class="text-xs" style="color: #9ca3af;">{{ Auth::user()->email }}</p>
-                        </div>
-                    </div>
+                    @endif
                     <form method="POST" action="{{ route('logout') }}">
                         @csrf
                         <button type="submit" class="transition-colors" style="color: #9ca3af;"
@@ -784,14 +798,6 @@
                             <span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">3</span>
                         </button>
                         
-                        <!-- Quick Actions -->
-                        <div class="flex items-center space-x-2">
-                            <a href="{{ route('admin.properties.create') }}" 
-                               class="text-white px-4 py-2 rounded-lg text-sm font-medium"
-                               style="background: linear-gradient(135deg, #1f2937, #374151); border: 1px solid #4b5563;">
-                                <i class="fas fa-plus mr-2" style="color: #fbbf24;"></i>Quick Add
-                            </a>
-                        </div>
                     </div>
                 </div>
             </header>
@@ -841,7 +847,7 @@
                 document.body.classList.remove('overflow-hidden');
             }
 
-            // Desktop collapse toggle
+            // Sidebar toggle for all views
             if (sidebarToggle) {
                 sidebarToggle.addEventListener('click', function() {
                     if (isMobile()) {
@@ -851,17 +857,17 @@
                         } else {
                             openMobileSidebar();
                         }
-                        return;
-                    }
-                    sidebar.classList.toggle('collapsed');
-                    if (sidebar.classList.contains('collapsed')) {
-                        mainContent.style.marginLeft = '4rem';
                     } else {
-                        mainContent.style.marginLeft = '16rem';
+                        // On desktop, use collapse/expand
+                        sidebar.classList.toggle('collapsed');
+                        if (sidebar.classList.contains('collapsed')) {
+                            mainContent.style.marginLeft = '4rem';
+                        } else {
+                            mainContent.style.marginLeft = '16rem';
+                        }
                     }
                 });
             }
-
 
             // Close when clicking overlay (mobile)
             if (sidebarOverlay) {

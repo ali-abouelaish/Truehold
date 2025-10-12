@@ -14,6 +14,7 @@ use App\Http\Controllers\UserPermissionController;
 use App\Http\Controllers\ScraperController;
 use App\Http\Controllers\PhpScraperController;
 use App\Http\Controllers\RentalCodeCashDocumentController;
+use App\Http\Controllers\AgentProfileController;
 
 Route::get('/', function () {
     return redirect('/properties');
@@ -218,6 +219,14 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    
+    // Agent Profile Routes
+    Route::prefix('agent')->name('agent.profile.')->group(function () {
+        Route::get('/dashboard', [AgentProfileController::class, 'dashboard'])->name('dashboard');
+        Route::get('/rental-codes', [AgentProfileController::class, 'rentalCodes'])->name('rental-codes');
+        Route::get('/earnings', [AgentProfileController::class, 'earnings'])->name('earnings');
+        Route::get('/clients', [AgentProfileController::class, 'clients'])->name('clients');
+    });
     
         // Scraper Routes
         Route::get('/scraper', [ScraperController::class, 'index'])->name('admin.scraper.index');

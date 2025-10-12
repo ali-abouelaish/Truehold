@@ -2,6 +2,64 @@
 
 @section('title', 'Create Rental Code')
 
+<style>
+/* Mobile responsive improvements for rental codes */
+@media (max-width: 768px) {
+    .card-body {
+        padding: 1rem;
+    }
+    
+    .form-group {
+        margin-bottom: 1rem;
+    }
+    
+    .input-group-text {
+        font-size: 0.875rem;
+    }
+    
+    .btn {
+        width: 100%;
+        margin-bottom: 0.5rem;
+    }
+    
+    .btn-group .btn {
+        width: auto;
+        margin-bottom: 0;
+    }
+    
+    .table-responsive {
+        font-size: 0.875rem;
+    }
+    
+    .nav-tabs .nav-link {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.875rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .container-fluid {
+        padding: 0.5rem;
+    }
+    
+    .card {
+        margin-bottom: 1rem;
+    }
+    
+    .h3 {
+        font-size: 1.25rem;
+    }
+    
+    .input-group {
+        flex-wrap: wrap;
+    }
+    
+    .input-group-text {
+        min-width: 2.5rem;
+    }
+}
+</style>
+
 
 @section('content')
 <div class="container-fluid">
@@ -10,10 +68,12 @@
         <div class="col-12">
             <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center">
                 <div class="mb-3 mb-md-0">
-                    <h2 class="h3 mb-0 text-dark fw-bold">
-                        <i class="fas fa-plus-circle text-primary me-2"></i>Create New Rental Code
+                    <h2 class="h3 mb-0 text-primary fw-bold" style="text-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+                        <i class="fas fa-plus-circle text-primary me-2" style="filter: brightness(1.2);"></i>
+                        <span class="d-none d-sm-inline">Create New Rental Code</span>
+                        <span class="d-sm-none">New Rental Code</span>
                     </h2>
-                    <p class="text-muted mb-0">Add a new rental code application to the system</p>
+                    <p class="text-muted mb-0 d-none d-md-block">Add a new rental code application to the system</p>
                 </div>
                 <div>
                     <a href="{{ route('rental-codes.index') }}" class="btn btn-outline-secondary">

@@ -31,7 +31,7 @@ class RentalCodeController extends Controller
         $agentUsers = User::where('role', 'agent')->with('agent')->get();
         
         // Get users who are marketing agents
-        $marketingUsers = User::where('role', 'marketing_agent')->get();
+        $marketingUsers = User::where('role', 'marketing_agent')->orWhereJsonContains('roles', 'marketing_agent')->get();
         
         // Get existing clients for selection
         $existingClients = Client::orderBy('full_name')->get();
@@ -194,7 +194,7 @@ class RentalCodeController extends Controller
         $agentUsers = $usersWithAgentRole->merge($usersWithAgentProfile)->unique('id')->load('agent');
         
         // Get users who are marketing agents
-        $marketingUsers = User::where('role', 'marketing_agent')->get();
+        $marketingUsers = User::where('role', 'marketing_agent')->orWhereJsonContains('roles', 'marketing_agent')->get();
         
         // Get existing clients for selection
         $existingClients = Client::orderBy('full_name')->get();
@@ -207,7 +207,8 @@ class RentalCodeController extends Controller
      */
     public function update(Request $request, RentalCode $rentalCode)
     {
-        $validated = $request->validate([
+        // Build validation rules based on user role
+        $validationRules = [
             'rental_code' => [
                 'required',
                 'string',
@@ -233,8 +234,14 @@ class RentalCodeController extends Controller
             'marketing_agent' => 'nullable|string|max:255',
             'client_count' => 'required|integer|min:1|max:10',
             'notes' => 'nullable|string',
-            'status' => 'required|string|in:pending,approved,completed,cancelled',
-        ]);
+        ];
+
+        // Only admin users can change status
+        if (auth()->user()->role === 'admin') {
+            $validationRules['status'] = 'required|string|in:pending,approved,paid';
+        }
+
+        $validated = $request->validate($validationRules);
 
         // Handle client creation or retrieval
         $client = $this->handleClient($validated);
@@ -581,11 +588,16 @@ public function generateCode()
             $agentId = $code->rent_by_agent;
             $agentName = null;
             
+            // Get client agent name if available
+            $clientAgentName = $code->client && $code->client->agent ? $code->client->agent->company_name : null;
+            $rentAgentName = $code->rent_by_agent_name;
+            
             // Debug logging
             \Log::info('Processing rental code', [
                 'code' => $code->rental_code ?? 'N/A',
                 'rent_by_agent' => $code->rent_by_agent,
-                'rent_by_agent_name' => $code->rent_by_agent_name,
+                'rent_by_agent_name' => $rentAgentName,
+                'client_agent_name' => $clientAgentName,
                 'agent_id' => $agentId,
                 'agent_users_count' => count($agentUsers)
             ]);
@@ -596,7 +608,6 @@ public function generateCode()
                 \Log::info('Found agent by ID', ['agent_id' => $agentId, 'agent_name' => $agentName]);
             } else {
                 // Try to find agent by name from the rental code
-                $rentAgentName = $code->rent_by_agent_name;
                 
                 // Prioritize client agent name
                 if (!empty($clientAgentName) && in_array($clientAgentName, $agentUserNames)) {
@@ -898,12 +909,15 @@ public function generateCode()
             $agentId = $code->rent_by_agent;
             $agentName = null;
             
+            // Get client agent name if available
+            $clientAgentName = $code->client && $code->client->agent ? $code->client->agent->company_name : null;
+            $rentAgentName = $code->rent_by_agent_name;
+            
             // First try to find agent by ID
             if (!empty($agentId) && is_numeric($agentId) && in_array((int)$agentId, $agentUserIds)) {
                 $agentName = $agentUsers[(int)$agentId] ?? null;
             } else {
                 // Try to find agent by name from the rental code
-                $rentAgentName = $code->rent_by_agent_name;
                 
                 // Prioritize client agent name
                 if (!empty($clientAgentName) && in_array($clientAgentName, $agentUserNames)) {
@@ -982,6 +996,14 @@ public function generateCode()
      */
     public function markAsPaid(RentalCode $rentalCode)
     {
+        // Only admin users can mark rental codes as paid
+        if (auth()->user()->role !== 'admin') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Only administrators can mark rental codes as paid.',
+            ], 403);
+        }
+
         try {
             \Log::info('Marking rental code as paid', ['rental_code_id' => $rentalCode->id]);
             
@@ -1015,6 +1037,14 @@ public function generateCode()
      */
     public function markAsUnpaid(RentalCode $rentalCode)
     {
+        // Only admin users can mark rental codes as unpaid
+        if (auth()->user()->role !== 'admin') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Only administrators can mark rental codes as unpaid.',
+            ], 403);
+        }
+
         try {
             \Log::info('Marking rental code as unpaid', ['rental_code_id' => $rentalCode->id]);
             
@@ -1047,9 +1077,17 @@ public function generateCode()
      */
     public function updateStatus(Request $request, RentalCode $rentalCode)
     {
+        // Only admin users can update rental code status
+        if (auth()->user()->role !== 'admin') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Only administrators can update rental code status.',
+            ], 403);
+        }
+
         try {
             $validated = $request->validate([
-                'status' => 'required|string|in:pending,approved,completed,cancelled',
+                'status' => 'required|string|in:pending,approved,paid',
             ]);
 
             \Log::info('Updating rental code status', [

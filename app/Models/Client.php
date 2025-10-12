@@ -69,6 +69,14 @@ class Client extends Model
     }
 
     /**
+     * Get rental codes for this client.
+     */
+    public function rentalCodes(): HasMany
+    {
+        return $this->hasMany(RentalCode::class);
+    }
+
+    /**
      * Get the client's age.
      */
     public function getAgeAttribute(): ?int

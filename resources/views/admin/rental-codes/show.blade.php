@@ -3,6 +3,73 @@
 @section('title', 'Rental Code Details')
 
 <style>
+/* Mobile responsive improvements for rental codes */
+@media (max-width: 768px) {
+    .card-body {
+        padding: 1rem;
+    }
+    
+    .form-group {
+        margin-bottom: 1rem;
+    }
+    
+    .input-group-text {
+        font-size: 0.875rem;
+    }
+    
+    .btn {
+        width: 100%;
+        margin-bottom: 0.5rem;
+    }
+    
+    .btn-group .btn {
+        width: auto;
+        margin-bottom: 0;
+    }
+    
+    .table-responsive {
+        font-size: 0.875rem;
+    }
+    
+    .nav-tabs .nav-link {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.875rem;
+    }
+    
+    .col-lg-4 {
+        margin-bottom: 1rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .container-fluid {
+        padding: 0.5rem;
+    }
+    
+    .card {
+        margin-bottom: 1rem;
+    }
+    
+    .h3 {
+        font-size: 1.25rem;
+    }
+    
+    .input-group {
+        flex-wrap: wrap;
+    }
+    
+    .input-group-text {
+        min-width: 2.5rem;
+    }
+    
+    .table th, .table td {
+        padding: 0.5rem;
+        font-size: 0.8rem;
+    }
+}
+</style>
+
+<style>
 /* Dark mode styles for rental codes show page */
 .card {
     background-color: #1f2937 !important;
@@ -212,9 +279,9 @@ strong {
     <!-- Status Banner -->
     <div class="row mb-4">
         <div class="col-12">
-            <div class="alert alert-{{ $rentalCode->status === 'completed' ? 'success' : ($rentalCode->status === 'approved' ? 'info' : ($rentalCode->status === 'cancelled' ? 'danger' : 'warning')) }} d-flex justify-content-between align-items-center">
+            <div class="alert alert-{{ $rentalCode->status === 'paid' ? 'success' : ($rentalCode->status === 'approved' ? 'info' : 'warning') }} d-flex justify-content-between align-items-center">
                 <div class="d-flex align-items-center">
-                    <i class="fas fa-{{ $rentalCode->status === 'completed' ? 'check-circle' : ($rentalCode->status === 'approved' ? 'thumbs-up' : ($rentalCode->status === 'cancelled' ? 'times-circle' : 'clock')) }} fa-2x me-3"></i>
+                    <i class="fas fa-{{ $rentalCode->status === 'paid' ? 'check-circle' : ($rentalCode->status === 'approved' ? 'thumbs-up' : 'clock') }} fa-2x me-3"></i>
                     <div>
                         <h5 class="mb-0">Status: {{ ucfirst($rentalCode->status) }}</h5>
                         <small>Rental Code: <strong>{{ $rentalCode->rental_code }}</strong></small>
