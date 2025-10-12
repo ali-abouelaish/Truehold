@@ -535,14 +535,28 @@
                 width: 16rem; /* keep full width on mobile when opened */
                 transform: translateX(-100%);
                 will-change: transform;
+                z-index: 50;
+                transition: transform 0.3s ease;
             }
 
             .sidebar.open {
                 transform: translateX(0);
             }
-
+            
             .main-content {
                 margin-left: 0 !important;
+            }
+            
+            /* Mobile toggle button styles */
+            #sidebarToggle, #mobileMenuToggle {
+                display: block !important;
+                cursor: pointer;
+            }
+        }
+        
+        @media (min-width: 768px) {
+            #sidebarToggle, #mobileMenuToggle {
+                display: none !important;
             }
         }
     </style>
@@ -558,9 +572,9 @@
                         <img src="{{ asset('images/truehold-logo.jpg') }}" alt="TRUEHOLD GROUP LTD" class="h-8 w-auto mr-3">
                         <span class="sidebar-text text-xl font-bold" style="color: #d1d5db;">TRUEHOLD</span>
                     </div>
-                    <!-- Sidebar Toggle Button - Visible on all views -->
-                    <button id="sidebarToggle" class="hover:text-gray-300" style="color: #fbbf24;">
-                        <i class="fas fa-bars"></i>
+                    <!-- Mobile Toggle Button - Only visible on smaller screens -->
+                    <button id="sidebarToggle" class="md:hidden hover:text-gray-300 p-2 rounded-lg transition-colors" style="color: #fbbf24; background-color: rgba(251, 191, 36, 0.1);">
+                        <i class="fas fa-bars text-lg"></i>
                     </button>
                 </div>
             </div>
@@ -788,6 +802,10 @@
             <header class="shadow-sm" style="background-color: #1f2937; border-bottom: 1px solid #374151;">
                 <div class="flex items-center justify-between px-6 py-4">
                     <div class="flex items-center">
+                        <!-- Mobile Menu Toggle - Only visible on smaller screens -->
+                        <button id="mobileMenuToggle" class="md:hidden mr-4 hover:text-gray-300 p-2 rounded-lg transition-colors" style="color: #fbbf24; background-color: rgba(251, 191, 36, 0.1);">
+                            <i class="fas fa-bars text-lg"></i>
+                        </button>
                         <h1 class="text-2xl font-bold" style="color: #d1d5db;">@yield('page-title', 'Dashboard')</h1>
                     </div>
                     
@@ -829,19 +847,29 @@
             const sidebar = document.getElementById('sidebar');
             const mainContent = document.querySelector('.main-content');
             const sidebarToggle = document.getElementById('sidebarToggle');
+            const mobileMenuToggle = document.getElementById('mobileMenuToggle');
             const sidebarOverlay = document.getElementById('sidebarOverlay');
+
+            console.log('Toggle buttons found:', {
+                sidebarToggle: !!sidebarToggle,
+                mobileMenuToggle: !!mobileMenuToggle,
+                sidebar: !!sidebar,
+                overlay: !!sidebarOverlay
+            });
 
             function isMobile() {
                 return window.innerWidth < 768;
             }
 
             function openMobileSidebar() {
+                console.log('Opening mobile sidebar');
                 sidebar.classList.add('open');
                 if (sidebarOverlay) sidebarOverlay.classList.remove('hidden');
                 document.body.classList.add('overflow-hidden');
             }
 
             function closeMobileSidebar() {
+                console.log('Closing mobile sidebar');
                 sidebar.classList.remove('open');
                 if (sidebarOverlay) sidebarOverlay.classList.add('hidden');
                 document.body.classList.remove('overflow-hidden');
@@ -849,7 +877,10 @@
 
             // Sidebar toggle for all views
             if (sidebarToggle) {
-                sidebarToggle.addEventListener('click', function() {
+                console.log('Adding event listener to sidebarToggle');
+                sidebarToggle.addEventListener('click', function(e) {
+                    console.log('Sidebar toggle clicked', { isMobile: isMobile() });
+                    e.preventDefault();
                     if (isMobile()) {
                         // On mobile, use slide-in/out
                         if (sidebar.classList.contains('open')) {
@@ -867,6 +898,27 @@
                         }
                     }
                 });
+            } else {
+                console.log('Sidebar toggle button not found');
+            }
+
+            // Mobile menu toggle (header button)
+            if (mobileMenuToggle) {
+                console.log('Adding event listener to mobileMenuToggle');
+                mobileMenuToggle.addEventListener('click', function(e) {
+                    console.log('Mobile menu toggle clicked', { isMobile: isMobile() });
+                    e.preventDefault();
+                    if (isMobile()) {
+                        // On mobile, use slide-in/out
+                        if (sidebar.classList.contains('open')) {
+                            closeMobileSidebar();
+                        } else {
+                            openMobileSidebar();
+                        }
+                    }
+                });
+            } else {
+                console.log('Mobile menu toggle button not found');
             }
 
             // Close when clicking overlay (mobile)
@@ -887,6 +939,19 @@
                     mainContent.style.marginLeft = sidebar.classList.contains('collapsed') ? '4rem' : '16rem';
                 }
             }
+
+            // Force mobile behavior for testing
+            function forceMobileToggle() {
+                console.log('Force mobile toggle called');
+                if (sidebar.classList.contains('open')) {
+                    closeMobileSidebar();
+                } else {
+                    openMobileSidebar();
+                }
+            }
+
+            // Add global function for testing
+            window.toggleSidebar = forceMobileToggle;
 
             window.addEventListener('resize', applyResponsiveLayout);
             applyResponsiveLayout();
