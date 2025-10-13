@@ -481,7 +481,7 @@ class AdminController extends Controller
                 $agent = \App\Models\Agent::firstOrCreate(
                     ['user_id' => $currentUser->id],
                     [
-                        'company_name' => $currentUser->name . ' Agency',
+                        'company_name' => $currentUser->name,
                         'is_verified' => false,
                         'is_featured' => false,
                     ]
@@ -502,7 +502,7 @@ class AdminController extends Controller
                 $agent = \App\Models\Agent::firstOrCreate(
                     ['user_id' => $currentUser->id],
                     [
-                        'company_name' => $currentUser->name . ' Agency',
+                        'company_name' => $currentUser->name,
                         'is_verified' => false,
                         'is_featured' => false,
                     ]

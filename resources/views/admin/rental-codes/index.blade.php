@@ -672,7 +672,9 @@ strong {
                                         <th>Consultation Fee</th>
                                         <th>Status</th>
                                         <th>Agent</th>
+                                        @if(auth()->user()->role === 'admin')
                                         <th>Quick Actions</th>
+                                        @endif
                                         <th>Actions</th>
                                     </tr>
                                 </thead>
@@ -704,8 +706,8 @@ strong {
                                                 <span class="fw-bold text-success">£{{ number_format($rentalCode->consultation_fee, 2) }}</span>
                                             </td>
                                             <td>
-                                                <span class="badge bg-{{ $rentalCode->status === 'completed' ? 'success' : ($rentalCode->status === 'approved' ? 'info' : ($rentalCode->status === 'cancelled' ? 'danger' : 'warning')) }} px-3 py-2">
-                                                    <i class="fas fa-{{ $rentalCode->status === 'completed' ? 'check' : ($rentalCode->status === 'approved' ? 'thumbs-up' : ($rentalCode->status === 'cancelled' ? 'times' : 'clock')) }} me-1"></i>
+                                                <span class="badge bg-{{ $rentalCode->status === 'paid' ? 'success' : ($rentalCode->status === 'approved' ? 'info' : ($rentalCode->status === 'cancelled' ? 'danger' : 'warning')) }} px-3 py-2">
+                                                    <i class="fas fa-{{ $rentalCode->status === 'paid' ? 'check-circle' : ($rentalCode->status === 'approved' ? 'thumbs-up' : ($rentalCode->status === 'cancelled' ? 'times' : 'clock')) }} me-1"></i>
                                                     {{ ucfirst($rentalCode->status) }}
                                                 </span>
                                             </td>
@@ -717,6 +719,7 @@ strong {
                                                     <span>{{ $rentalCode->rent_by_agent_name }}</span>
                                                 </div>
                                             </td>
+                                            @if(auth()->user()->role === 'admin')
                                             <td>
                                                 <div class="dropdown">
                                                     <select class="form-select form-select-sm" 
@@ -728,6 +731,7 @@ strong {
                                                     </select>
                                                 </div>
                                             </td>
+                                            @endif
                                             <td>
                                                 <div class="btn-group" role="group">
                                                     <a href="{{ route('rental-codes.show', $rentalCode) }}" class="btn btn-sm transition-colors" title="View Details"
