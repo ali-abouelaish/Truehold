@@ -26,6 +26,18 @@ class RentalCode extends Model
         'status',
         'paid',
         'paid_at',
+        // Document upload fields
+        'client_contract',
+        'payment_proof',
+        'client_id_document',
+        // Cash document fields (merged from cash_documents table)
+        'contact_images',
+        'client_id_image',
+        'cash_receipt_image',
+        'cash_document_status',
+        'cash_document_submitted_at',
+        'cash_document_reviewed_at',
+        'cash_document_reviewed_by',
     ];
 
     protected $casts = [
@@ -33,6 +45,9 @@ class RentalCode extends Model
         'consultation_fee' => 'decimal:2',
         'paid' => 'boolean',
         'paid_at' => 'datetime',
+        'contact_images' => 'array',
+        'cash_document_submitted_at' => 'datetime',
+        'cash_document_reviewed_at' => 'datetime',
     ];
 
     /**
@@ -123,11 +138,29 @@ class RentalCode extends Model
     }
 
     /**
+     * Scope for filtering rental codes that have cash documents
+     */
+    public function scopeWithCashDocuments($query)
+    {
+        return $query->whereNotNull('contact_images')
+            ->orWhereNotNull('client_id_image')
+            ->orWhereNotNull('cash_receipt_image');
+    }
+
+    /**
      * Get the client that owns the rental code
      */
     public function client(): BelongsTo
     {
         return $this->belongsTo(Client::class);
+    }
+
+    /**
+     * Get the user who reviewed the cash documents
+     */
+    public function cashDocumentReviewer(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'cash_document_reviewed_by');
     }
 
     /**
