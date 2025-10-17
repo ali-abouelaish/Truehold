@@ -39,7 +39,10 @@
                             <i class="fas fa-receipt me-2"></i>My Rental Codes
                         </a>
                         <a class="nav-link" href="{{ route('agent.profile.earnings') }}">
-                            <i class="fas fa-chart-line me-2"></i>Earnings & Deductions
+                            <i class="fas fa-chart-line me-2"></i>Earnings
+                        </a>
+                        <a class="nav-link" href="{{ route('agent.profile.deductions') }}">
+                            <i class="fas fa-minus-circle me-2"></i>Deductions
                         </a>
                         <a class="nav-link" href="{{ route('agent.profile.clients') }}">
                             <i class="fas fa-users me-2"></i>My Clients

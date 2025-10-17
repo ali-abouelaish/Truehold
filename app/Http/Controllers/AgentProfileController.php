@@ -116,6 +116,12 @@ class AgentProfileController extends Controller
         
         // Get payment history
         $paymentHistory = $this->getPaymentHistory($user, $agent, $startDate, $endDate);
+        
+        // Get bonuses for the agent
+        $bonuses = $agent->bonuses()
+            ->whereBetween('date', [$startDate, $endDate])
+            ->orderBy('date', 'desc')
+            ->paginate(10);
 
         return view('agent.profile.earnings', compact(
             'user', 
@@ -123,8 +129,35 @@ class AgentProfileController extends Controller
             'earningsData', 
             'monthlyBreakdown',
             'paymentHistory',
+            'bonuses',
             'startDate',
             'endDate'
+        ));
+    }
+
+    /**
+     * Display agent's deductions
+     */
+    public function deductions()
+    {
+        $user = Auth::user();
+        $agent = Agent::where('user_id', $user->id)->first();
+        
+        if (!$agent) {
+            return redirect()->route('dashboard')->with('error', 'Agent profile not found.');
+        }
+
+        // Calculate deductions data
+        $deductionsData = $this->calculateDeductions($user, $agent);
+        
+        // Get detailed deductions history
+        $deductionsHistory = $this->getDeductionsHistory($user, $agent);
+
+        return view('agent.profile.deductions', compact(
+            'user', 
+            'agent', 
+            'deductionsData',
+            'deductionsHistory'
         ));
     }
 
@@ -423,5 +456,126 @@ class AgentProfileController extends Controller
             ->where('paid', true)
             ->orderBy('paid_at', 'desc')
             ->get();
+    }
+
+    /**
+     * Calculate deductions data
+     */
+    private function calculateDeductions($user, $agent)
+    {
+        $rentalCodes = RentalCode::where(function($q) use ($agent, $user) {
+            $q->where('rent_by_agent', $agent->company_name ?? $user->name)
+              ->orWhere('marketing_agent', $user->name);
+        })->get();
+
+        $deductions = [
+            'total_vat_deductions' => 0,
+            'total_marketing_deductions' => 0,
+            'total_agency_cut' => 0,
+            'total_deductions' => 0,
+        ];
+
+        foreach ($rentalCodes as $code) {
+            $totalFee = (float) ($code->consultation_fee ?? 0);
+            $paymentMethod = $code->payment_method ?? 'Cash';
+            $clientCount = $code->client_count ?? 1;
+            
+            // Calculate VAT deductions (20% on transfers)
+            if ($paymentMethod === 'Transfer') {
+                $vatDeduction = $totalFee * 0.2;
+                $deductions['total_vat_deductions'] += $vatDeduction;
+            }
+
+            // Calculate agency cut (45% of base commission)
+            $baseCommission = $paymentMethod === 'Transfer' ? $totalFee * 0.8 : $totalFee;
+            $agencyCut = $baseCommission * 0.45;
+            $deductions['total_agency_cut'] += $agencyCut;
+
+            // Calculate marketing deductions
+            $rentAgentName = $code->rent_by_agent_name;
+            $marketingAgentName = $code->marketing_agent_name;
+            
+            if ($rentAgentName === ($agent->company_name ?? $user->name) && 
+                !empty($marketingAgentName) && 
+                $marketingAgentName !== ($agent->company_name ?? $user->name)) {
+                $marketingDeduction = $clientCount > 1 ? 40.0 : 30.0;
+                $deductions['total_marketing_deductions'] += $marketingDeduction;
+            }
+        }
+
+        $deductions['total_deductions'] = $deductions['total_vat_deductions'] + 
+                                        $deductions['total_marketing_deductions'] + 
+                                        $deductions['total_agency_cut'];
+
+        return $deductions;
+    }
+
+    /**
+     * Get detailed deductions history
+     */
+    private function getDeductionsHistory($user, $agent)
+    {
+        $rentalCodes = RentalCode::with('client')
+            ->where(function($q) use ($agent, $user) {
+                $q->where('rent_by_agent', $agent->company_name ?? $user->name)
+                  ->orWhere('marketing_agent', $user->name);
+            })
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        $deductionsHistory = collect();
+
+        foreach ($rentalCodes as $code) {
+            $totalFee = (float) ($code->consultation_fee ?? 0);
+            $paymentMethod = $code->payment_method ?? 'Cash';
+            $clientCount = $code->client_count ?? 1;
+            $rentAgentName = $code->rent_by_agent_name;
+            $marketingAgentName = $code->marketing_agent_name;
+            
+            // VAT deduction
+            if ($paymentMethod === 'Transfer') {
+                $vatDeduction = $totalFee * 0.2;
+                $deductionsHistory->push([
+                    'date' => $code->created_at,
+                    'rental_code' => $code->rental_code,
+                    'rental_code_id' => $code->id,
+                    'client_name' => $code->client->full_name ?? 'Unknown',
+                    'type' => 'vat',
+                    'amount' => $vatDeduction,
+                    'reason' => '20% VAT on bank transfer payment'
+                ]);
+            }
+
+            // Agency cut
+            $baseCommission = $paymentMethod === 'Transfer' ? $totalFee * 0.8 : $totalFee;
+            $agencyCut = $baseCommission * 0.45;
+            $deductionsHistory->push([
+                'date' => $code->created_at,
+                'rental_code' => $code->rental_code,
+                'rental_code_id' => $code->id,
+                'client_name' => $code->client->full_name ?? 'Unknown',
+                'type' => 'agency',
+                'amount' => $agencyCut,
+                'reason' => '45% agency commission'
+            ]);
+
+            // Marketing deduction
+            if ($rentAgentName === ($agent->company_name ?? $user->name) && 
+                !empty($marketingAgentName) && 
+                $marketingAgentName !== ($agent->company_name ?? $user->name)) {
+                $marketingDeduction = $clientCount > 1 ? 40.0 : 30.0;
+                $deductionsHistory->push([
+                    'date' => $code->created_at,
+                    'rental_code' => $code->rental_code,
+                    'rental_code_id' => $code->id,
+                    'client_name' => $code->client->full_name ?? 'Unknown',
+                    'type' => 'marketing',
+                    'amount' => $marketingDeduction,
+                    'reason' => 'Marketing agent fee (' . ($clientCount > 1 ? '£40' : '£30') . ')'
+                ]);
+            }
+        }
+
+        return $deductionsHistory->sortByDesc('date');
     }
 }

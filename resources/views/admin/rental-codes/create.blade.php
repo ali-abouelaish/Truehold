@@ -308,10 +308,10 @@
                                     <span class="input-group-text"><i class="fas fa-user-tie"></i></span>
                                     <input type="text" class="form-control" 
                                            id="rent_by_agent_display" 
-                                           value="{{ auth()->user()->agent && auth()->user()->agent->company_name ? auth()->user()->agent->company_name : auth()->user()->name }}" 
+                                           value="{{ auth()->user()->agent ? auth()->user()->agent->clean_display_name : auth()->user()->name }}" 
                                            readonly>
                                     <input type="hidden" name="rent_by_agent" 
-                                           value="{{ auth()->user()->agent && auth()->user()->agent->company_name ? auth()->user()->agent->company_name : auth()->user()->name }}">
+                                           value="{{ auth()->user()->agent ? auth()->user()->agent->clean_display_name : auth()->user()->name }}">
                                 </div>
                                 <small class="form-text text-muted">Automatically assigned from your session</small>
                                 @error('rent_by_agent')

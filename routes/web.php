@@ -15,6 +15,7 @@ use App\Http\Controllers\ScraperController;
 use App\Http\Controllers\PhpScraperController;
 use App\Http\Controllers\RentalCodeCashDocumentController;
 use App\Http\Controllers\AgentProfileController;
+use Twilio\Rest\Client;
 
 Route::get('/', function () {
     return redirect('/properties');
@@ -71,6 +72,56 @@ Route::get('/test-rental-code', function () {
         return response()->json(['code' => $newCode]);
     } catch (\Exception $e) {
         return response()->json(['error' => 'Failed to generate rental code: ' . $e->getMessage()], 500);
+    }
+});
+
+// WhatsApp test route
+Route::get('/test-whatsapp', function () {
+    $sid    = env('TWILIO_ACCOUNT_SID');
+    $token  = env('TWILIO_AUTH_TOKEN');
+    $testNumber = env('TEST_WHATSAPP_NUMBER');
+    $whatsappNumber = env('TWILIO_WHATSAPP_NUMBER');
+    
+    // Check if test number is configured
+    if (!$testNumber || $testNumber === 'whatsapp:+1234567890') {
+        return response()->json([
+            'error' => 'Test WhatsApp number not configured',
+            'message' => 'Please update TEST_WHATSAPP_NUMBER in your .env file with a real WhatsApp number',
+            'format' => 'Use format: whatsapp:+1234567890 (include country code)',
+            'example' => 'whatsapp:+447123456789 for UK number'
+        ], 400);
+    }
+    
+    try {
+        $twilio = new Client($sid, $token);
+
+        $message = $twilio->messages
+            ->create(
+                $testNumber, // to
+                [
+                    "from" => $whatsappNumber,
+                    "body" => "✅ Hello from Laravel CRM! Your Twilio WhatsApp setup is working perfectly."
+                ]
+            );
+
+        return response()->json([
+            'success' => true,
+            'message' => 'WhatsApp message sent successfully!',
+            'sid' => $message->sid,
+            'to' => $testNumber,
+            'from' => $whatsappNumber
+        ]);
+        
+    } catch (Exception $e) {
+        return response()->json([
+            'error' => 'Failed to send WhatsApp message',
+            'message' => $e->getMessage(),
+            'details' => [
+                'to' => $testNumber,
+                'from' => $whatsappNumber,
+                'account_sid' => $sid ? 'Configured' : 'Missing'
+            ]
+        ], 500);
     }
 });
 
@@ -213,6 +264,21 @@ Route::middleware('auth')->prefix('admin')->group(function () {
     Route::get('/cash-documents/create', function () {
         return redirect()->route('rental-codes.cash-documents.index');
     })->name('cash-documents.create');
+    
+    // Bonus Management Routes
+    Route::get('/bonuses', [\App\Http\Controllers\BonusController::class, 'adminIndex'])->name('admin.bonuses.index');
+    Route::get('/bonuses/{bonus}/edit', [\App\Http\Controllers\BonusController::class, 'adminEdit'])->name('admin.bonuses.edit');
+    Route::put('/bonuses/{bonus}', [\App\Http\Controllers\BonusController::class, 'adminUpdate'])->name('admin.bonuses.update');
+    Route::delete('/bonuses/{bonus}', [\App\Http\Controllers\BonusController::class, 'adminDestroy'])->name('admin.bonuses.destroy');
+    
+    // Payment Management Routes
+    Route::get('/payments', [\App\Http\Controllers\PaymentController::class, 'adminIndex'])->name('admin.payments.index');
+    Route::get('/payments/monthly-summary', [\App\Http\Controllers\PaymentController::class, 'adminMonthlySummary'])->name('admin.payments.monthly-summary');
+    Route::get('/payments/{payment}/edit', [\App\Http\Controllers\PaymentController::class, 'adminEdit'])->name('admin.payments.edit');
+    Route::put('/payments/{payment}', [\App\Http\Controllers\PaymentController::class, 'adminUpdate'])->name('admin.payments.update');
+    Route::post('/payments/{payment}/mark-paid', [\App\Http\Controllers\PaymentController::class, 'adminMarkPaid'])->name('admin.payments.mark-paid');
+    Route::post('/payments/{payment}/mark-rolled', [\App\Http\Controllers\PaymentController::class, 'adminMarkRolled'])->name('admin.payments.mark-rolled');
+    Route::delete('/payments/{payment}', [\App\Http\Controllers\PaymentController::class, 'adminDestroy'])->name('admin.payments.destroy');
 });
 
 // Profile routes - require authentication
@@ -226,7 +292,14 @@ Route::middleware('auth')->group(function () {
         Route::get('/dashboard', [AgentProfileController::class, 'dashboard'])->name('dashboard');
         Route::get('/rental-codes', [AgentProfileController::class, 'rentalCodes'])->name('rental-codes');
         Route::get('/earnings', [AgentProfileController::class, 'earnings'])->name('earnings');
+        Route::get('/deductions', [AgentProfileController::class, 'deductions'])->name('deductions');
         Route::get('/clients', [AgentProfileController::class, 'clients'])->name('clients');
+        
+        // Bonus Routes
+        Route::resource('bonuses', \App\Http\Controllers\BonusController::class);
+        
+        // Payment Routes
+        Route::resource('payments', \App\Http\Controllers\PaymentController::class);
     });
     
         // Scraper Routes

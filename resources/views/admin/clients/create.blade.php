@@ -220,7 +220,7 @@
                                         <span class="input-group-text"><i class="fas fa-user-tie"></i></span>
                                         <input type="text" class="form-control" 
                                                id="agent_display" 
-                                               value="{{ auth()->user()->agent && auth()->user()->agent->company_name ? auth()->user()->agent->company_name : auth()->user()->name }}" 
+                                               value="{{ auth()->user()->agent ? auth()->user()->agent->clean_display_name : auth()->user()->name }}" 
                                                readonly>
                                         <input type="hidden" name="agent_user_id" 
                                                value="{{ auth()->user()->id }}">

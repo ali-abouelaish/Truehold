@@ -210,7 +210,7 @@
                             @if($client->agent)
                                 <div class="flex items-center">
                                     <i class="fas fa-user-tie mr-2 text-blue-600"></i>
-                                    {{ $client->agent->display_name }}
+                                    {{ $client->agent->clean_display_name }}
                                 </div>
                                 <div class="text-xs text-gray-500">
                                     {{ $client->agent->company_name }}
@@ -297,7 +297,7 @@
                                 </h6>
                                 <div class="space-y-2 text-sm">
                                     @if($client->agent)
-                                        <div><strong>Agent Name:</strong> {{ $client->agent->display_name }}</div>
+                                        <div><strong>Agent Name:</strong> {{ $client->agent->clean_display_name }}</div>
                                         @if($client->agent->company_name)
                                             <div><strong>Company:</strong> {{ $client->agent->company_name }}</div>
                                         @endif

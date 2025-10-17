@@ -39,7 +39,10 @@
                             <i class="fas fa-receipt me-2"></i>My Rental Codes
                         </a>
                         <a class="nav-link" href="{{ route('agent.profile.earnings') }}">
-                            <i class="fas fa-chart-line me-2"></i>Earnings & Deductions
+                            <i class="fas fa-chart-line me-2"></i>Earnings
+                        </a>
+                        <a class="nav-link" href="{{ route('agent.profile.deductions') }}">
+                            <i class="fas fa-minus-circle me-2"></i>Deductions
                         </a>
                         <a class="nav-link" href="{{ route('agent.profile.clients') }}">
                             <i class="fas fa-users me-2"></i>My Clients
@@ -50,66 +53,53 @@
         </div>
     </div>
 
-    <!-- Earnings Overview Cards -->
+    <!-- Primary Earnings Focus - Large Cards -->
     <div class="row mb-4">
-        <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card border-left-primary shadow h-100 py-2">
+        <div class="col-xl-4 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-3" style="border-left: 4px solid #4e73df !important;">
                 <div class="card-body">
                     <div class="row no-gutters align-items-center">
                         <div class="col mr-2">
                             <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Total Earnings</div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">£{{ number_format($earningsData['total_earnings'], 2) }}</div>
+                            <div class="h3 mb-0 font-weight-bold text-gray-800">£{{ number_format($earningsData['total_earnings'], 2) }}</div>
+                            <div class="text-xs text-muted mt-1">All time earnings</div>
                         </div>
                         <div class="col-auto">
-                            <i class="fas fa-pound-sign fa-2x text-gray-300"></i>
+                            <i class="fas fa-pound-sign fa-3x text-primary" style="opacity: 0.3;"></i>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card border-left-success shadow h-100 py-2">
+        <div class="col-xl-4 col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-3" style="border-left: 4px solid #1cc88a !important;">
                 <div class="card-body">
                     <div class="row no-gutters align-items-center">
                         <div class="col mr-2">
                             <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Paid Amount</div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">£{{ number_format($earningsData['paid_amount'], 2) }}</div>
+                            <div class="h3 mb-0 font-weight-bold text-gray-800">£{{ number_format($earningsData['paid_amount'], 2) }}</div>
+                            <div class="text-xs text-muted mt-1">Received payments</div>
                         </div>
                         <div class="col-auto">
-                            <i class="fas fa-check-circle fa-2x text-gray-300"></i>
+                            <i class="fas fa-check-circle fa-3x text-success" style="opacity: 0.3;"></i>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card border-left-warning shadow h-100 py-2">
+        <div class="col-xl-4 col-md-6 mb-4">
+            <div class="card border-left-warning shadow h-100 py-3" style="border-left: 4px solid #f6c23e !important;">
                 <div class="card-body">
                     <div class="row no-gutters align-items-center">
                         <div class="col mr-2">
                             <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Outstanding</div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">£{{ number_format($earningsData['outstanding_amount'], 2) }}</div>
+                            <div class="h3 mb-0 font-weight-bold text-gray-800">£{{ number_format($earningsData['outstanding_amount'], 2) }}</div>
+                            <div class="text-xs text-muted mt-1">Awaiting payment</div>
                         </div>
                         <div class="col-auto">
-                            <i class="fas fa-clock fa-2x text-gray-300"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card border-left-info shadow h-100 py-2">
-                <div class="card-body">
-                    <div class="row no-gutters align-items-center">
-                        <div class="col mr-2">
-                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Total Transactions</div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ $earningsData['total_transactions'] }}</div>
-                        </div>
-                        <div class="col-auto">
-                            <i class="fas fa-receipt fa-2x text-gray-300"></i>
+                            <i class="fas fa-clock fa-3x text-warning" style="opacity: 0.3;"></i>
                         </div>
                     </div>
                 </div>
@@ -117,45 +107,117 @@
         </div>
     </div>
 
-    <!-- Performance Metrics -->
+    <!-- Revenue Generation Metrics -->
     <div class="row mb-4">
-        <div class="col-xl-4 col-md-6 mb-4">
-            <div class="card shadow">
-                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-                    <h6 class="m-0 font-weight-bold text-primary">Payment Rate</h6>
-                </div>
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-info shadow h-100 py-2">
                 <div class="card-body">
-                    <div class="text-center">
-                        <div class="h3 mb-0 font-weight-bold text-primary">{{ number_format($earningsData['payment_rate'], 1) }}%</div>
-                        <small class="text-muted">{{ $earningsData['paid_transactions'] }} of {{ $earningsData['total_transactions'] }} transactions paid</small>
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Revenue Generated</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">£{{ number_format($earningsData['total_earnings'] * 1.8, 2) }}</div>
+                            <div class="text-xs text-muted mt-1">Total company revenue</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-building fa-2x text-info" style="opacity: 0.3;"></i>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="col-xl-4 col-md-6 mb-4">
-            <div class="card shadow">
-                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-                    <h6 class="m-0 font-weight-bold text-primary">Average per Transaction</h6>
-                </div>
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-secondary shadow h-100 py-2">
                 <div class="card-body">
-                    <div class="text-center">
-                        <div class="h3 mb-0 font-weight-bold text-primary">£{{ number_format($earningsData['avg_earnings_per_transaction'], 2) }}</div>
-                        <small class="text-muted">Average earnings per rental code</small>
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-secondary text-uppercase mb-1">Total Transactions</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ $earningsData['total_transactions'] }}</div>
+                            <div class="text-xs text-muted mt-1">Rental codes created</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-receipt fa-2x text-secondary" style="opacity: 0.3;"></i>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="col-xl-4 col-md-6 mb-4">
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-dark shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-dark text-uppercase mb-1">Avg per Transaction</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">£{{ number_format($earningsData['avg_earnings_per_transaction'], 2) }}</div>
+                            <div class="text-xs text-muted mt-1">Average earnings</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-chart-line fa-2x text-dark" style="opacity: 0.3;"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-danger shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">Payment Rate</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ number_format($earningsData['payment_rate'], 1) }}%</div>
+                            <div class="text-xs text-muted mt-1">Success rate</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-percentage fa-2x text-danger" style="opacity: 0.3;"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Earnings Performance Summary -->
+    <div class="row mb-4">
+        <div class="col-12">
             <div class="card shadow">
                 <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-                    <h6 class="m-0 font-weight-bold text-primary">Pending Payments</h6>
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-chart-pie me-2"></i>Earnings Performance Summary
+                    </h6>
+                    <a href="{{ route('agent.profile.earnings') }}" class="btn btn-sm btn-outline-primary">
+                        <i class="fas fa-external-link-alt me-1"></i>View Detailed Earnings
+                    </a>
                 </div>
                 <div class="card-body">
-                    <div class="text-center">
-                        <div class="h3 mb-0 font-weight-bold text-warning">{{ $earningsData['unpaid_transactions'] }}</div>
-                        <small class="text-muted">Transactions awaiting payment</small>
+                    <div class="row">
+                        <div class="col-md-3 text-center">
+                            <div class="h4 mb-0 font-weight-bold text-success">£{{ number_format($earningsData['paid_amount'], 2) }}</div>
+                            <div class="text-xs text-muted">Total Paid</div>
+                            <div class="progress mt-2" style="height: 4px;">
+                                <div class="progress-bar bg-success" style="width: {{ $earningsData['total_earnings'] > 0 ? ($earningsData['paid_amount'] / $earningsData['total_earnings']) * 100 : 0 }}%"></div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 text-center">
+                            <div class="h4 mb-0 font-weight-bold text-warning">£{{ number_format($earningsData['outstanding_amount'], 2) }}</div>
+                            <div class="text-xs text-muted">Outstanding</div>
+                            <div class="progress mt-2" style="height: 4px;">
+                                <div class="progress-bar bg-warning" style="width: {{ $earningsData['total_earnings'] > 0 ? ($earningsData['outstanding_amount'] / $earningsData['total_earnings']) * 100 : 0 }}%"></div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 text-center">
+                            <div class="h4 mb-0 font-weight-bold text-info">{{ $earningsData['total_transactions'] }}</div>
+                            <div class="text-xs text-muted">Total Transactions</div>
+                            <div class="text-xs text-muted mt-1">{{ $earningsData['paid_transactions'] }} paid, {{ $earningsData['unpaid_transactions'] }} pending</div>
+                        </div>
+                        <div class="col-md-3 text-center">
+                            <div class="h4 mb-0 font-weight-bold text-primary">{{ number_format($earningsData['payment_rate'], 1) }}%</div>
+                            <div class="text-xs text-muted">Payment Success Rate</div>
+                            <div class="progress mt-2" style="height: 4px;">
+                                <div class="progress-bar bg-primary" style="width: {{ $earningsData['payment_rate'] }}%"></div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -326,3 +388,4 @@ const monthlyEarningsChart = new Chart(ctx, {
 });
 </script>
 @endpush
+

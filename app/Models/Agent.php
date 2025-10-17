@@ -75,6 +75,22 @@ class Agent extends Model
     }
 
     /**
+     * Get the bonuses for this agent.
+     */
+    public function bonuses(): HasMany
+    {
+        return $this->hasMany(Bonus::class);
+    }
+
+    /**
+     * Get the payments for this agent.
+     */
+    public function payments(): HasMany
+    {
+        return $this->hasMany(Payment::class);
+    }
+
+    /**
      * Get the full office address.
      */
     public function getFullOfficeAddressAttribute(): string
@@ -94,6 +110,17 @@ class Agent extends Model
     public function getDisplayNameAttribute(): string
     {
         return $this->company_name ?: $this->user->name;
+    }
+
+    /**
+     * Get the clean display name (company name without "Agency" suffix or user name).
+     */
+    public function getCleanDisplayNameAttribute(): string
+    {
+        if ($this->company_name) {
+            return rtrim($this->company_name, ' Agency');
+        }
+        return $this->user->name;
     }
 
     /**
