@@ -716,6 +716,37 @@
                 </a>
                 @endif
 
+                <!-- Payments & Bonuses Section -->
+                <div class="px-4 mt-6 mb-4">
+                    <span class="sidebar-text text-xs font-semibold uppercase tracking-wider" style="color: #fbbf24;">Payments</span>
+                </div>
+                
+                <a href="{{ route('admin.payments.index') }}" 
+                   class="sidebar-item flex items-center px-4 py-3 transition-colors {{ request()->routeIs('admin.payments.index') ? 'active' : '' }}"
+                   style="color: #9ca3af; {{ request()->routeIs('admin.payments.index') ? 'background-color: #374151; border-left: 2px solid #fbbf24; color: #d1d5db;' : '' }}"
+                   onmouseover="this.style.backgroundColor='#374151'; this.style.color='#d1d5db';"
+                   onmouseout="this.style.backgroundColor='{{ request()->routeIs('admin.payments.index') ? '#374151' : 'transparent' }}'; this.style.color='{{ request()->routeIs('admin.payments.index') ? '#d1d5db' : '#9ca3af' }}';">
+                    <i class="fas fa-credit-card sidebar-icon mr-3 text-lg" style="color: #fbbf24;"></i>
+                    <span class="sidebar-text font-medium">All Payments</span>
+                </a>
+                
+                <a href="{{ route('admin.payments.monthly-summary') }}" 
+                   class="sidebar-item flex items-center px-4 py-3 transition-colors {{ request()->routeIs('admin.payments.monthly-summary') ? 'active' : '' }}"
+                   style="color: #9ca3af; {{ request()->routeIs('admin.payments.monthly-summary') ? 'background-color: #374151; border-left: 2px solid #fbbf24; color: #d1d5db;' : '' }}"
+                   onmouseover="this.style.backgroundColor='#374151'; this.style.color='#d1d5db';"
+                   onmouseout="this.style.backgroundColor='{{ request()->routeIs('admin.payments.monthly-summary') ? '#374151' : 'transparent' }}'; this.style.color='{{ request()->routeIs('admin.payments.monthly-summary') ? '#d1d5db' : '#9ca3af' }}';">
+                    <i class="fas fa-chart-line sidebar-icon mr-3 text-lg" style="color: #fbbf24;"></i>
+                    <span class="sidebar-text font-medium">Monthly Summary</span>
+                </a>
+                
+                <a href="{{ route('admin.bonuses.index') }}" 
+                   class="sidebar-item flex items-center px-4 py-3 transition-colors {{ request()->routeIs('admin.bonuses.index') ? 'active' : '' }}"
+                   style="color: #9ca3af; {{ request()->routeIs('admin.bonuses.index') ? 'background-color: #374151; border-left: 2px solid #fbbf24; color: #d1d5db;' : '' }}"
+                   onmouseover="this.style.backgroundColor='#374151'; this.style.color='#d1d5db';"
+                   onmouseout="this.style.backgroundColor='{{ request()->routeIs('admin.bonuses.index') ? '#374151' : 'transparent' }}'; this.style.color='{{ request()->routeIs('admin.bonuses.index') ? '#d1d5db' : '#9ca3af' }}';">
+                    <i class="fas fa-gift sidebar-icon mr-3 text-lg" style="color: #fbbf24;"></i>
+                    <span class="sidebar-text font-medium">Bonuses</span>
+                </a>
 
                 @if(auth()->user()->hasAdminPermission('admin_permissions', 'view'))
                 <div class="px-4 mt-6 mb-4">
