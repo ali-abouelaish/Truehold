@@ -2,7 +2,6 @@
 
 namespace App\Services;
 
-use Twilio\Rest\Client;
 use Illuminate\Support\Facades\Log;
 
 class WhatsAppService
@@ -13,13 +12,10 @@ class WhatsAppService
 
     public function __construct()
     {
-        $this->whatsappNumber = config('services.twilio.whatsapp_number');
-        $this->messagingServiceSid = 'MG340cc66c893c882257ad8f3085823822';
-        
-        $this->client = new Client(
-            config('services.twilio.account_sid'),
-            config('services.twilio.auth_token')
-        );
+        // Temporarily disable Twilio client initialization to avoid missing class errors
+        $this->whatsappNumber = null;
+        $this->messagingServiceSid = null;
+        $this->client = null;
     }
 
     /**
@@ -27,47 +23,14 @@ class WhatsAppService
      */
     public function sendMessage($to, $message)
     {
-        try {
-            // Clean and format phone number
-            $to = $this->formatPhoneNumber($to);
-            
-            // Ensure phone number has WhatsApp prefix
-            if (!str_starts_with($to, 'whatsapp:')) {
-                $to = 'whatsapp:' . $to;
-            }
-
-            // Use messaging service instead of direct WhatsApp number
-            $messageObj = $this->client->messages->create(
-                $to,
-                [
-                    "messagingServiceSid" => $this->messagingServiceSid,
-                    "body" => $message
-                ]
-            );
-
-            Log::info('WhatsApp message sent successfully', [
-                'to' => $to,
-                'sid' => $messageObj->sid,
-                'status' => $messageObj->status
-            ]);
-
-            return [
-                'success' => true,
-                'sid' => $messageObj->sid,
-                'status' => $messageObj->status
-            ];
-
-        } catch (\Exception $e) {
-            Log::error('Failed to send WhatsApp message', [
-                'to' => $to,
-                'error' => $e->getMessage()
-            ]);
-
-            return [
-                'success' => false,
-                'error' => $e->getMessage()
-            ];
-        }
+        // Temporarily short-circuit sending
+        Log::info('WhatsApp send skipped (temporarily disabled)', [
+            'to' => $to,
+        ]);
+        return [
+            'success' => false,
+            'error' => 'WhatsApp temporarily disabled'
+        ];
     }
 
     /**
@@ -223,10 +186,12 @@ class WhatsAppService
         $message .= "\n📋 *Please review in the admin panel.*\n";
         $message .= "_This is an automated message sent from the CRM. Please contact agent to change any details._";
 
-        // Send to admin WhatsApp (you can configure this)
-        $adminNumber = config('services.twilio.admin_whatsapp_number', '+447947768707');
-        
-        return $this->sendMessage($adminNumber, $message);
+        // Temporarily disabled
+        Log::info('Admin WhatsApp notification skipped (temporarily disabled)');
+        return [
+            'success' => false,
+            'error' => 'WhatsApp temporarily disabled'
+        ];
     }
     
     /**

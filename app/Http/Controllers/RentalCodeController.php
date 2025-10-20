@@ -1445,28 +1445,11 @@ public function generateCode()
      */
     private function sendWhatsAppNotifications(RentalCode $rentalCode, $client)
     {
-        try {
-            $whatsappService = new WhatsAppService();
-            
-            // Send notification to admin only
-            $adminResult = $whatsappService->sendRentalCodeAdminNotification($rentalCode, $client);
-            
-            if ($adminResult['success']) {
-                \Log::info('WhatsApp notification sent to admin', [
-                    'rental_code' => $rentalCode->rental_code,
-                    'message_sid' => $adminResult['sid']
-                ]);
-            } else {
-                \Log::warning('Failed to send WhatsApp to admin', [
-                    'rental_code' => $rentalCode->rental_code,
-                    'error' => $adminResult['error']
-                ]);
-            }
-            
-        } catch (\Exception $e) {
-            // Log the error but don't fail the rental code creation
-            \Log::error('Failed to send WhatsApp notifications: ' . $e->getMessage());
-        }
+        // Temporarily disabled Twilio/WhatsApp notifications per request
+        \Log::info('WhatsApp notifications are temporarily disabled; skipping send', [
+            'rental_code' => $rentalCode->rental_code ?? null,
+        ]);
+        return;
     }
 
     /**
