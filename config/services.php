@@ -45,6 +45,7 @@ return [
         'phone_number' => env('TWILIO_PHONE_NUMBER'),
         'whatsapp_number' => env('TWILIO_WHATSAPP_NUMBER'),
         'test_whatsapp_number' => env('TEST_WHATSAPP_NUMBER'),
+        'admin_whatsapp_number' => env('ADMIN_WHATSAPP_NUMBER', '+447947768707'),
     ],
 
 ];

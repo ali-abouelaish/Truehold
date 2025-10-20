@@ -12,8 +12,8 @@ $dotenv->load();
 $sid = $_ENV['TWILIO_ACCOUNT_SID'];
 $token = $_ENV['TWILIO_AUTH_TOKEN'];
 
-// Latest message SID from the test
-$messageSid = 'SM1777f136ae139cdb15c8a17b13496737';
+// New message SID from the test
+$messageSid = 'SM1b42609894ce0e5ecefdb19683fef3b3';
 
 try {
     $client = new Client($sid, $token);
@@ -21,7 +21,7 @@ try {
     // Fetch the message details
     $message = $client->messages($messageSid)->fetch();
     
-    echo "=== Latest WhatsApp Message Status ===\n";
+    echo "=== New WhatsApp Message Status ===\n";
     echo "Message SID: " . $message->sid . "\n";
     echo "Status: " . $message->status . "\n";
     echo "To: " . $message->to . "\n";
@@ -57,8 +57,12 @@ try {
             echo "Error: " . ($message->errorMessage ?? 'Unknown error') . "\n";
             break;
         case 'undelivered':
-            echo "Message was sent but not delivered\n";
-            echo "Error Code: " . ($message->errorCode ?? 'None') . "\n";
+            echo "Message was not delivered\n";
+            echo "This could be due to:\n";
+            echo "- Recipient hasn't opted in to receive messages\n";
+            echo "- Message sent outside 24-hour window without template\n";
+            echo "- Recipient has blocked the number\n";
+            echo "- Invalid phone number or no WhatsApp account\n";
             break;
         default:
             echo "Unknown status: " . $message->status . "\n";
@@ -69,20 +73,20 @@ try {
         echo "\n=== Error Code Analysis ===\n";
         switch ($message->errorCode) {
             case '63016':
-                echo "Error 63016: Message undelivered - likely due to:\n";
+                echo "Error 63016: Message undelivered\n";
+                echo "Common causes:\n";
                 echo "- Recipient hasn't opted in to receive messages\n";
-                echo "- Message sent outside 24-hour window without template\n";
+                echo "- Message sent outside 24-hour window without approved template\n";
                 echo "- Recipient has blocked your number\n";
-                echo "- Invalid or inactive WhatsApp number\n";
                 break;
             case '63007':
-                echo "Error 63007: Message undelivered - recipient not on WhatsApp\n";
+                echo "Error 63007: Invalid phone number\n";
                 break;
             case '63017':
-                echo "Error 63017: Message undelivered - recipient has opted out\n";
+                echo "Error 63017: Message template required\n";
                 break;
             default:
-                echo "Error " . $message->errorCode . ": Check Twilio documentation\n";
+                echo "Error " . $message->errorCode . ": " . ($message->errorMessage ?? 'Unknown error') . "\n";
         }
     }
     
@@ -90,8 +94,9 @@ try {
     echo "Error: " . $e->getMessage() . "\n";
 }
 
-echo "\n=== WhatsApp Business API Requirements ===\n";
-echo "1. For first messages to new contacts, you need approved message templates\n";
-echo "2. After recipient responds, you can send free-form messages for 24 hours\n";
-echo "3. Recipients must opt-in to receive messages from your business\n";
-echo "4. Check your Twilio Console for approved message templates\n";
+echo "\n=== Solutions ===\n";
+echo "1. **Opt-in Required**: The recipient must first send a message to your WhatsApp Business number\n";
+echo "2. **Use Templates**: For first messages, use approved message templates\n";
+echo "3. **24-hour Window**: After recipient responds, you have 24 hours to send free-form messages\n";
+echo "4. **Check Number**: Verify the phone number is correct and has WhatsApp\n";
+

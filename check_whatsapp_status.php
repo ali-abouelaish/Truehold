@@ -77,3 +77,4 @@ echo "   - Check account balance\n";
 echo "\n3. To join sandbox:\n";
 echo "   - Send 'join <sandbox-code>' to +1 415 523 8886\n";
 echo "   - Get sandbox code from Twilio Console\n";
+

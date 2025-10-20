@@ -116,12 +116,6 @@ class AgentProfileController extends Controller
         
         // Get payment history
         $paymentHistory = $this->getPaymentHistory($user, $agent, $startDate, $endDate);
-        
-        // Get bonuses for the agent
-        $bonuses = $agent->bonuses()
-            ->whereBetween('date', [$startDate, $endDate])
-            ->orderBy('date', 'desc')
-            ->paginate(10);
 
         return view('agent.profile.earnings', compact(
             'user', 
@@ -129,7 +123,6 @@ class AgentProfileController extends Controller
             'earningsData', 
             'monthlyBreakdown',
             'paymentHistory',
-            'bonuses',
             'startDate',
             'endDate'
         ));

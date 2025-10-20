@@ -264,21 +264,6 @@ Route::middleware('auth')->prefix('admin')->group(function () {
     Route::get('/cash-documents/create', function () {
         return redirect()->route('rental-codes.cash-documents.index');
     })->name('cash-documents.create');
-    
-    // Bonus Management Routes
-    Route::get('/bonuses', [\App\Http\Controllers\BonusController::class, 'adminIndex'])->name('admin.bonuses.index');
-    Route::get('/bonuses/{bonus}/edit', [\App\Http\Controllers\BonusController::class, 'adminEdit'])->name('admin.bonuses.edit');
-    Route::put('/bonuses/{bonus}', [\App\Http\Controllers\BonusController::class, 'adminUpdate'])->name('admin.bonuses.update');
-    Route::delete('/bonuses/{bonus}', [\App\Http\Controllers\BonusController::class, 'adminDestroy'])->name('admin.bonuses.destroy');
-    
-    // Payment Management Routes
-    Route::get('/payments', [\App\Http\Controllers\PaymentController::class, 'adminIndex'])->name('admin.payments.index');
-    Route::get('/payments/monthly-summary', [\App\Http\Controllers\PaymentController::class, 'adminMonthlySummary'])->name('admin.payments.monthly-summary');
-    Route::get('/payments/{payment}/edit', [\App\Http\Controllers\PaymentController::class, 'adminEdit'])->name('admin.payments.edit');
-    Route::put('/payments/{payment}', [\App\Http\Controllers\PaymentController::class, 'adminUpdate'])->name('admin.payments.update');
-    Route::post('/payments/{payment}/mark-paid', [\App\Http\Controllers\PaymentController::class, 'adminMarkPaid'])->name('admin.payments.mark-paid');
-    Route::post('/payments/{payment}/mark-rolled', [\App\Http\Controllers\PaymentController::class, 'adminMarkRolled'])->name('admin.payments.mark-rolled');
-    Route::delete('/payments/{payment}', [\App\Http\Controllers\PaymentController::class, 'adminDestroy'])->name('admin.payments.destroy');
 });
 
 // Profile routes - require authentication
@@ -294,12 +279,6 @@ Route::middleware('auth')->group(function () {
         Route::get('/earnings', [AgentProfileController::class, 'earnings'])->name('earnings');
         Route::get('/deductions', [AgentProfileController::class, 'deductions'])->name('deductions');
         Route::get('/clients', [AgentProfileController::class, 'clients'])->name('clients');
-        
-        // Bonus Routes
-        Route::resource('bonuses', \App\Http\Controllers\BonusController::class);
-        
-        // Payment Routes
-        Route::resource('payments', \App\Http\Controllers\PaymentController::class);
     });
     
         // Scraper Routes

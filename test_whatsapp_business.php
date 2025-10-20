@@ -54,3 +54,4 @@ try {
         echo "Check your Twilio Console for approved message templates.\n";
     }
 }
+

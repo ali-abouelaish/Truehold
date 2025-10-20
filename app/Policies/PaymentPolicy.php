@@ -13,7 +13,7 @@ class PaymentPolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->hasRole('admin') || $user->agent !== null;
+        return false;
     }
 
     /**
@@ -21,8 +21,7 @@ class PaymentPolicy
      */
     public function view(User $user, Payment $payment): bool
     {
-        return $user->hasRole('admin') || 
-               ($user->agent && $user->agent->id === $payment->agent_id);
+        return false;
     }
 
     /**
@@ -30,7 +29,7 @@ class PaymentPolicy
      */
     public function create(User $user): bool
     {
-        return $user->agent !== null;
+        return false;
     }
 
     /**
@@ -38,8 +37,7 @@ class PaymentPolicy
      */
     public function update(User $user, Payment $payment): bool
     {
-        return $user->hasRole('admin') || 
-               ($user->agent && $user->agent->id === $payment->agent_id);
+        return false;
     }
 
     /**
@@ -47,8 +45,7 @@ class PaymentPolicy
      */
     public function delete(User $user, Payment $payment): bool
     {
-        return $user->hasRole('admin') || 
-               ($user->agent && $user->agent->id === $payment->agent_id);
+        return false;
     }
 
     /**
@@ -56,7 +53,7 @@ class PaymentPolicy
      */
     public function restore(User $user, Payment $payment): bool
     {
-        return $user->hasRole('admin');
+        return false;
     }
 
     /**
@@ -64,22 +61,6 @@ class PaymentPolicy
      */
     public function forceDelete(User $user, Payment $payment): bool
     {
-        return $user->hasRole('admin');
-    }
-
-    /**
-     * Determine whether the user can mark payment as paid.
-     */
-    public function markPaid(User $user, Payment $payment): bool
-    {
-        return $user->hasRole('admin');
-    }
-
-    /**
-     * Determine whether the user can mark payment as rolled.
-     */
-    public function markRolled(User $user, Payment $payment): bool
-    {
-        return $user->hasRole('admin');
+        return false;
     }
 }

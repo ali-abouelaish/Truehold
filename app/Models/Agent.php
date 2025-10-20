@@ -75,22 +75,6 @@ class Agent extends Model
     }
 
     /**
-     * Get the bonuses for this agent.
-     */
-    public function bonuses(): HasMany
-    {
-        return $this->hasMany(Bonus::class);
-    }
-
-    /**
-     * Get the payments for this agent.
-     */
-    public function payments(): HasMany
-    {
-        return $this->hasMany(Payment::class);
-    }
-
-    /**
      * Get the full office address.
      */
     public function getFullOfficeAddressAttribute(): string

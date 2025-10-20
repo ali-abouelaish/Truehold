@@ -41,12 +41,6 @@
                         <a class="nav-link" href="{{ route('agent.profile.deductions') }}">
                             <i class="fas fa-minus-circle me-2"></i>Deductions
                         </a>
-                        <a class="nav-link" href="{{ route('agent.profile.bonuses.index') }}">
-                            <i class="fas fa-gift me-2"></i>Bonuses
-                        </a>
-                        <a class="nav-link" href="{{ route('agent.profile.payments.index') }}">
-                            <i class="fas fa-credit-card me-2"></i>Payments
-                        </a>
                         <a class="nav-link" href="{{ route('agent.profile.clients') }}">
                             <i class="fas fa-users me-2"></i>My Clients
                         </a>
@@ -153,80 +147,6 @@
                             <i class="fas fa-calculator fa-2x text-gray-300"></i>
                         </div>
                     </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Bonuses Section -->
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="card shadow">
-                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-                    <h6 class="m-0 font-weight-bold text-primary">
-                        <i class="fas fa-gift me-2"></i>Bonus Records
-                    </h6>
-                    <a href="{{ route('agent.profile.bonuses.create') }}" class="btn btn-primary btn-sm">
-                        <i class="fas fa-plus me-1"></i>Add Bonus
-                    </a>
-                </div>
-                <div class="card-body">
-                    @if(isset($bonuses) && $bonuses->count() > 0)
-                        <div class="table-responsive">
-                            <table class="table table-bordered" width="100%" cellspacing="0">
-                                <thead>
-                                    <tr>
-                                        <th>Date</th>
-                                        <th>Landlord</th>
-                                        <th>Property</th>
-                                        <th>Client</th>
-                                        <th>Full Commission</th>
-                                        <th>Agent Commission</th>
-                                        <th>Invoice Sent</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach($bonuses as $bonus)
-                                        <tr>
-                                            <td>{{ $bonus->date->format('M d, Y') }}</td>
-                                            <td>{{ $bonus->landlord ?? 'N/A' }}</td>
-                                            <td>{{ $bonus->property ?? 'N/A' }}</td>
-                                            <td>{{ $bonus->client ?? 'N/A' }}</td>
-                                            <td>£{{ number_format($bonus->full_commission, 2) }}</td>
-                                            <td class="font-weight-bold text-success">£{{ number_format($bonus->agent_commission, 2) }}</td>
-                                            <td>
-                                                @if($bonus->invoice_sent_to_management)
-                                                    <span class="badge badge-success">Yes</span>
-                                                @else
-                                                    <span class="badge badge-warning">No</span>
-                                                @endif
-                                            </td>
-                                            <td>
-                                                <div class="btn-group" role="group">
-                                                    <a href="{{ route('agent.profile.bonuses.show', $bonus) }}" 
-                                                       class="btn btn-sm btn-outline-primary">View</a>
-                                                    <a href="{{ route('agent.profile.bonuses.edit', $bonus) }}" 
-                                                       class="btn btn-sm btn-outline-secondary">Edit</a>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
-                        </div>
-                        <div class="mt-3">
-                            {{ $bonuses->links() }}
-                        </div>
-                    @else
-                        <div class="text-center text-muted py-4">
-                            <i class="fas fa-gift fa-3x mb-3"></i>
-                            <p>No bonus records found</p>
-                            <a href="{{ route('agent.profile.bonuses.create') }}" class="btn btn-primary">
-                                <i class="fas fa-plus me-1"></i>Add Your First Bonus
-                            </a>
-                        </div>
-                    @endif
                 </div>
             </div>
         </div>

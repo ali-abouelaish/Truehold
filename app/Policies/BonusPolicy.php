@@ -13,7 +13,7 @@ class BonusPolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->hasRole('admin') || $user->agent !== null;
+        return false;
     }
 
     /**
@@ -21,8 +21,7 @@ class BonusPolicy
      */
     public function view(User $user, Bonus $bonus): bool
     {
-        return $user->hasRole('admin') || 
-               ($user->agent && $user->agent->id === $bonus->agent_id);
+        return false;
     }
 
     /**
@@ -30,7 +29,7 @@ class BonusPolicy
      */
     public function create(User $user): bool
     {
-        return $user->agent !== null;
+        return false;
     }
 
     /**
@@ -38,8 +37,7 @@ class BonusPolicy
      */
     public function update(User $user, Bonus $bonus): bool
     {
-        return $user->hasRole('admin') || 
-               ($user->agent && $user->agent->id === $bonus->agent_id);
+        return false;
     }
 
     /**
@@ -47,8 +45,7 @@ class BonusPolicy
      */
     public function delete(User $user, Bonus $bonus): bool
     {
-        return $user->hasRole('admin') || 
-               ($user->agent && $user->agent->id === $bonus->agent_id);
+        return false;
     }
 
     /**
@@ -56,7 +53,7 @@ class BonusPolicy
      */
     public function restore(User $user, Bonus $bonus): bool
     {
-        return $user->hasRole('admin');
+        return false;
     }
 
     /**
@@ -64,6 +61,6 @@ class BonusPolicy
      */
     public function forceDelete(User $user, Bonus $bonus): bool
     {
-        return $user->hasRole('admin');
+        return false;
     }
 }

@@ -6,6 +6,7 @@ use App\Models\RentalCode;
 use App\Models\Agent;
 use App\Models\User;
 use App\Models\Client;
+use App\Services\WhatsAppService;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Mail;
@@ -169,8 +170,11 @@ class RentalCodeController extends Controller
         // Send email notification to board@truehold.co.uk
         $this->sendRentalCodeNotification($rentalCode);
 
+        // Send WhatsApp notifications
+        $this->sendWhatsAppNotifications($rentalCode, $client);
+
         return redirect()->route('rental-codes.index')
-            ->with('success', 'Rental code created successfully and notification sent!');
+            ->with('success', 'Rental code created successfully and notifications sent!');
     }
 
     /**
@@ -1405,21 +1409,63 @@ public function generateCode()
                 'client' => $rentalCode->client
             ]);
             
-            Mail::send('emails.rental-code-notification', [
-                'rentalCode' => $rentalCode,
-                'agentName' => $agentName,
-                'client' => $rentalCode->client
-            ], function ($message) use ($rentalCode, $agentName, $pdf) {
-                $message->from('crm@truehold.co.uk', 'Truehold Group System')
-                        ->to('board@truehold.co.uk')
-                        ->subject('New Rental Code Generated - ' . $rentalCode->rental_code)
-                        ->attachData($pdf->output(), "rental-code-{$rentalCode->rental_code}.pdf", [
-                            'mime' => 'application/pdf',
-                        ]);
-            });
+            // Try to send email, but don't fail if email service is not configured
+            try {
+                Mail::send('emails.rental-code-notification', [
+                    'rentalCode' => $rentalCode,
+                    'agentName' => $agentName,
+                    'client' => $rentalCode->client
+                ], function ($message) use ($rentalCode, $agentName, $pdf) {
+                    $message->from('crm@truehold.co.uk', 'Truehold Group System')
+                            ->to('board@truehold.co.uk')
+                            ->subject('New Rental Code Generated - ' . $rentalCode->rental_code)
+                            ->attachData($pdf->output(), "rental-code-{$rentalCode->rental_code}.pdf", [
+                                'mime' => 'application/pdf',
+                            ]);
+                });
+                
+                \Log::info('Rental code email notification sent successfully', [
+                    'rental_code' => $rentalCode->rental_code
+                ]);
+            } catch (\Exception $emailException) {
+                // Log email error but continue with WhatsApp notifications
+                \Log::warning('Email notification failed, but continuing with WhatsApp notifications', [
+                    'rental_code' => $rentalCode->rental_code,
+                    'email_error' => $emailException->getMessage()
+                ]);
+            }
         } catch (\Exception $e) {
             // Log the error but don't fail the rental code creation
             \Log::error('Failed to send rental code notification: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Send WhatsApp notifications for rental code (Admin only)
+     */
+    private function sendWhatsAppNotifications(RentalCode $rentalCode, $client)
+    {
+        try {
+            $whatsappService = new WhatsAppService();
+            
+            // Send notification to admin only
+            $adminResult = $whatsappService->sendRentalCodeAdminNotification($rentalCode, $client);
+            
+            if ($adminResult['success']) {
+                \Log::info('WhatsApp notification sent to admin', [
+                    'rental_code' => $rentalCode->rental_code,
+                    'message_sid' => $adminResult['sid']
+                ]);
+            } else {
+                \Log::warning('Failed to send WhatsApp to admin', [
+                    'rental_code' => $rentalCode->rental_code,
+                    'error' => $adminResult['error']
+                ]);
+            }
+            
+        } catch (\Exception $e) {
+            // Log the error but don't fail the rental code creation
+            \Log::error('Failed to send WhatsApp notifications: ' . $e->getMessage());
         }
     }
 
