@@ -6,6 +6,7 @@ use Illuminate\Console\Command;
 use App\Models\RentalCode;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 class MigrateAgentNamesToForeignKeys extends Command
 {
@@ -41,10 +42,25 @@ class MigrateAgentNamesToForeignKeys extends Command
         $agentUsersById = User::where('role', 'agent')->get()->keyBy('id');
         $this->info("📊 Found {$agentUsers->count()} agent users");
 
+        // Check if old columns still exist
+        if (!Schema::hasColumn('rental_codes', 'agent_name') && !Schema::hasColumn('rental_codes', 'marketing_agent')) {
+            $this->info('✅ Migration already completed - old columns (agent_name, marketing_agent) have been removed');
+            $this->info('💡 Use "php artisan check:foreign-keys-status" to verify the current state');
+            return;
+        }
+
         // Get all rental codes that need migration
-        $rentalCodes = RentalCode::whereNotNull('agent_name')
-            ->orWhereNotNull('marketing_agent')
-            ->get();
+        $query = RentalCode::query();
+        
+        if (Schema::hasColumn('rental_codes', 'agent_name')) {
+            $query->whereNotNull('agent_name');
+        }
+        
+        if (Schema::hasColumn('rental_codes', 'marketing_agent')) {
+            $query->orWhereNotNull('marketing_agent');
+        }
+        
+        $rentalCodes = $query->get();
 
         $this->info("📋 Found {$rentalCodes->count()} rental codes to process");
 
@@ -68,8 +84,8 @@ class MigrateAgentNamesToForeignKeys extends Command
             foreach ($rentalCodes as $code) {
                 $updated = false;
 
-                // Migrate rental agent
-                if (!empty($code->agent_name)) {
+                // Migrate rental agent (only if column exists)
+                if (Schema::hasColumn('rental_codes', 'agent_name') && !empty($code->agent_name)) {
                     $agentName = trim($code->agent_name);
                     
                     // Try exact match first
@@ -101,8 +117,8 @@ class MigrateAgentNamesToForeignKeys extends Command
                     }
                 }
 
-                // Migrate marketing agent
-                if (!empty($code->marketing_agent)) {
+                // Migrate marketing agent (only if column exists)
+                if (Schema::hasColumn('rental_codes', 'marketing_agent') && !empty($code->marketing_agent)) {
                     $marketingAgentValue = trim($code->marketing_agent);
                     
                     // Check if it's already an ID

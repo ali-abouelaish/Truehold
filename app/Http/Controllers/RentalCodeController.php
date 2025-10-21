@@ -50,15 +50,19 @@ class RentalCodeController extends Controller
             'rental_code' => 'nullable|string|unique:rental_codes,rental_code',
             'rental_date' => 'required|date',
             'consultation_fee' => 'required|numeric|min:0',
-            'payment_method' => 'required|string|in:Cash,Transfer',
+            'payment_method' => 'required|string|in:Cash,Transfer,Card machine',
             'property' => 'required|string',
             'licensor' => 'required|string',
             'client_selection_type' => 'required|in:existing,new',
             'existing_client_id' => 'required_if:client_selection_type,existing|exists:clients,id',
-            'rent_by_agent' => 'required|string|max:255',
-            'marketing_agent' => 'required|string|max:255',
+            'rental_agent_id' => 'required|exists:users,id',
+            'marketing_agent_id' => 'nullable|exists:users,id',
             'client_count' => 'required|integer|min:1|max:10',
             'notes' => 'nullable|string',
+            // Document upload validation
+            'client_contract.*' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:10240',
+            'payment_proof.*' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:10240',
+            'client_id_document.*' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:10240',
         ];
         
         // Add dynamic client validation if creating new clients
@@ -90,8 +94,9 @@ class RentalCodeController extends Controller
             'licensor.required' => 'Licensor is required.',
             'client_selection_type.required' => 'Please select whether to use an existing client or create a new one.',
             'existing_client_id.required_if' => 'Please select an existing client.',
-            'rent_by_agent.required' => 'Rent by agent is required.',
-            'marketing_agent.required' => 'Marketing agent is required.',
+            'rental_agent_id.required' => 'Rental agent is required.',
+            'rental_agent_id.exists' => 'Selected rental agent is invalid.',
+            'marketing_agent_id.exists' => 'Selected marketing agent is invalid.',
             'client_count.required' => 'Client count is required.',
             'status.required' => 'Status is required.',
         ];
@@ -134,21 +139,25 @@ class RentalCodeController extends Controller
         $rentalCodeData = $validated;
         $rentalCodeData['client_id'] = $client->id;
         
-        // Set the assigned agent from the current session user
-        $currentUser = auth()->user();
-        if ($currentUser) {
-            // Use agent company name if available, otherwise use user name
-            if ($currentUser->agent && $currentUser->agent->company_name) {
-                $rentalCodeData['rent_by_agent'] = $currentUser->agent->company_name;
+        // Set the rental agent ID (use current user if not specified)
+        if (empty($rentalCodeData['rental_agent_id'])) {
+            $currentUser = auth()->user();
+            if ($currentUser) {
+                $rentalCodeData['rental_agent_id'] = $currentUser->id;
+            }
+        }
+        
+        // Set the rent_by_agent display name for backward compatibility
+        $rentalAgent = User::find($rentalCodeData['rental_agent_id']);
+        if ($rentalAgent) {
+            if ($rentalAgent->agent && $rentalAgent->agent->company_name) {
+                $rentalCodeData['rent_by_agent'] = $rentalAgent->agent->company_name;
             } else {
-                $rentalCodeData['rent_by_agent'] = $currentUser->name;
+                $rentalCodeData['rent_by_agent'] = $rentalAgent->name;
             }
         } else {
             $rentalCodeData['rent_by_agent'] = 'Unknown Agent';
         }
-        
-        // Ensure we always use the current user's name for agent display
-        $rentalCodeData['agent_name'] = $currentUser ? $currentUser->name : 'Unknown Agent';
         
         // Set default status to pending for new rental codes
         $rentalCodeData['status'] = 'pending';
@@ -166,6 +175,9 @@ class RentalCodeController extends Controller
         }
 
         $rentalCode = RentalCode::create($rentalCodeData);
+
+        // Handle file uploads
+        $this->handleFileUploads($request, $rentalCode);
 
         // Send email notification to board@truehold.co.uk
         $this->sendRentalCodeNotification($rentalCode);
@@ -221,7 +233,7 @@ class RentalCodeController extends Controller
             ],
             'rental_date' => 'required|date',
             'consultation_fee' => 'required|numeric|min:0',
-            'payment_method' => 'required|string|in:Cash,Transfer',
+            'payment_method' => 'required|string|in:Cash,Transfer,Card machine',
             'property' => 'nullable|string',
             'licensor' => 'nullable|string',
             'client_selection_type' => 'required|in:existing,new',
@@ -1556,6 +1568,51 @@ public function generateCode()
                 'success' => false,
                 'message' => 'Failed to update rental codes. Please try again.',
             ], 500);
+        }
+    }
+
+    /**
+     * Handle file uploads for rental codes
+     */
+    private function handleFileUploads(Request $request, RentalCode $rentalCode)
+    {
+        try {
+            // Handle client contract uploads
+            if ($request->hasFile('client_contract')) {
+                $contractPaths = [];
+                foreach ($request->file('client_contract') as $file) {
+                    $path = $file->store('rental-codes/documents', 'public');
+                    $contractPaths[] = $path;
+                }
+                $rentalCode->update(['client_contract' => json_encode($contractPaths)]);
+            }
+
+            // Handle payment proof uploads
+            if ($request->hasFile('payment_proof')) {
+                $proofPaths = [];
+                foreach ($request->file('payment_proof') as $file) {
+                    $path = $file->store('rental-codes/documents', 'public');
+                    $proofPaths[] = $path;
+                }
+                $rentalCode->update(['payment_proof' => json_encode($proofPaths)]);
+            }
+
+            // Handle client ID document uploads
+            if ($request->hasFile('client_id_document')) {
+                $idPaths = [];
+                foreach ($request->file('client_id_document') as $file) {
+                    $path = $file->store('rental-codes/documents', 'public');
+                    $idPaths[] = $path;
+                }
+                $rentalCode->update(['client_id_document' => json_encode($idPaths)]);
+            }
+
+            \Log::info('File uploads processed for rental code', ['rental_code_id' => $rentalCode->id]);
+        } catch (\Exception $e) {
+            \Log::error('Error handling file uploads', [
+                'rental_code_id' => $rentalCode->id,
+                'error' => $e->getMessage()
+            ]);
         }
     }
 }

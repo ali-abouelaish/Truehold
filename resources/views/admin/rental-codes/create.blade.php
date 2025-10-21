@@ -304,40 +304,46 @@
                         <div class="row">
                             <div class="col-12 col-md-6">
                             <div class="mb-3">
-                                <label for="rent_by_agent" class="form-label">Rent By Agent *</label>
+                                <label for="rental_agent_id" class="form-label">Rental Agent *</label>
                                 <div class="input-group">
                                     <span class="input-group-text"><i class="fas fa-user-tie"></i></span>
-                                    <input type="text" class="form-control" 
-                                           id="rent_by_agent_display" 
-                                           value="{{ auth()->user()->agent ? auth()->user()->agent->clean_display_name : auth()->user()->name }}" 
-                                           readonly>
-                                    <input type="hidden" name="rent_by_agent" 
-                                           value="{{ auth()->user()->agent ? auth()->user()->agent->clean_display_name : auth()->user()->name }}">
+                                    <select class="form-select @error('rental_agent_id') is-invalid @enderror" 
+                                            id="rental_agent_id" name="rental_agent_id" required>
+                                        <option value="">Select rental agent</option>
+                                        @foreach($agentUsers as $user)
+                                            <option value="{{ $user->id }}" {{ old('rental_agent_id', auth()->user()->id) == $user->id ? 'selected' : '' }}>
+                                                {{ $user->name }}
+                                                @if($user->agent && $user->agent->company_name) - {{ $user->agent->company_name }}@endif
+                                            </option>
+                                        @endforeach
+                                    </select>
                                 </div>
-                                <small class="form-text text-muted">Automatically assigned from your session</small>
-                                @error('rent_by_agent')
+                                @error('rental_agent_id')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
                             </div>
                             <div class="col-12 col-md-6">
                             <div class="mb-3">
-                                <label for="marketing_agent" class="form-label">Marketing Agent</label>
-                                        <select class="form-select @error('marketing_agent') is-invalid @enderror" 
-                                                id="marketing_agent" name="marketing_agent" required>
-                                            <option value="">Select marketing agent</option>
-                                            @forelse($marketingUsers as $user)
-                                        <option value="{{ $user->id }}" {{ old('marketing_agent') == $user->id ? 'selected' : '' }}>
-                                                    {{ $user->name }}
-                                                </option>
-                                            @empty
-                                                <option value="" disabled>No marketing users found</option>
-                                            @endforelse
-                                        </select>
-                                    @error('marketing_agent')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
+                                <label for="marketing_agent_id" class="form-label">Marketing Agent</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-bullhorn"></i></span>
+                                    <select class="form-select @error('marketing_agent_id') is-invalid @enderror" 
+                                            id="marketing_agent_id" name="marketing_agent_id">
+                                        <option value="">Select marketing agent (optional)</option>
+                                        @forelse($marketingUsers as $user)
+                                            <option value="{{ $user->id }}" {{ old('marketing_agent_id') == $user->id ? 'selected' : '' }}>
+                                                {{ $user->name }}
+                                            </option>
+                                        @empty
+                                            <option value="" disabled>No marketing users found</option>
+                                        @endforelse
+                                    </select>
                                 </div>
+                                @error('marketing_agent_id')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
                             </div>
                     </div>
                     <div class="row">
