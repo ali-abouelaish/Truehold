@@ -45,6 +45,13 @@ class RentalCodeController extends Controller
      */
     public function store(Request $request)
     {
+        \Log::info('Rental code store method called', [
+            'has_files' => $request->hasFile('client_contract') || $request->hasFile('payment_proof') || $request->hasFile('client_id_document'),
+            'client_contract_files' => $request->hasFile('client_contract') ? count($request->file('client_contract')) : 0,
+            'payment_proof_files' => $request->hasFile('payment_proof') ? count($request->file('payment_proof')) : 0,
+            'client_id_document_files' => $request->hasFile('client_id_document') ? count($request->file('client_id_document')) : 0
+        ]);
+        
         // Build validation rules dynamically
         $validationRules = [
             'rental_code' => 'nullable|string|unique:rental_codes,rental_code',
@@ -181,9 +188,18 @@ class RentalCodeController extends Controller
         }
 
         $rentalCode = RentalCode::create($rentalCodeData);
+        
+        \Log::info('Rental code created, about to handle file uploads', [
+            'rental_code_id' => $rentalCode->id,
+            'rental_code' => $rentalCode->rental_code
+        ]);
 
         // Handle file uploads
         $this->handleFileUploads($request, $rentalCode);
+        
+        \Log::info('File upload handling completed', [
+            'rental_code_id' => $rentalCode->id
+        ]);
 
         // Send email notification to board@truehold.co.uk
         $this->sendRentalCodeNotification($rentalCode);
@@ -1582,35 +1598,51 @@ public function generateCode()
      */
     private function handleFileUploads(Request $request, RentalCode $rentalCode)
     {
+        \Log::info('handleFileUploads called', [
+            'rental_code_id' => $rentalCode->id,
+            'has_client_contract' => $request->hasFile('client_contract'),
+            'has_payment_proof' => $request->hasFile('payment_proof'),
+            'has_client_id_document' => $request->hasFile('client_id_document')
+        ]);
+        
         try {
             // Handle client contract uploads
             if ($request->hasFile('client_contract')) {
+                \Log::info('Processing client contract uploads', ['count' => count($request->file('client_contract'))]);
                 $contractPaths = [];
                 foreach ($request->file('client_contract') as $file) {
                     $path = $file->store('rental-codes/documents', 'public');
                     $contractPaths[] = $path;
+                    \Log::info('Stored client contract file', ['path' => $path]);
                 }
                 $rentalCode->update(['client_contract' => json_encode($contractPaths)]);
+                \Log::info('Updated client_contract field', ['paths' => $contractPaths]);
             }
 
             // Handle payment proof uploads
             if ($request->hasFile('payment_proof')) {
+                \Log::info('Processing payment proof uploads', ['count' => count($request->file('payment_proof'))]);
                 $proofPaths = [];
                 foreach ($request->file('payment_proof') as $file) {
                     $path = $file->store('rental-codes/documents', 'public');
                     $proofPaths[] = $path;
+                    \Log::info('Stored payment proof file', ['path' => $path]);
                 }
                 $rentalCode->update(['payment_proof' => json_encode($proofPaths)]);
+                \Log::info('Updated payment_proof field', ['paths' => $proofPaths]);
             }
 
             // Handle client ID document uploads
             if ($request->hasFile('client_id_document')) {
+                \Log::info('Processing client ID document uploads', ['count' => count($request->file('client_id_document'))]);
                 $idPaths = [];
                 foreach ($request->file('client_id_document') as $file) {
                     $path = $file->store('rental-codes/documents', 'public');
                     $idPaths[] = $path;
+                    \Log::info('Stored client ID document file', ['path' => $path]);
                 }
                 $rentalCode->update(['client_id_document' => json_encode($idPaths)]);
+                \Log::info('Updated client_id_document field', ['paths' => $idPaths]);
             }
 
             \Log::info('File uploads processed for rental code', ['rental_code_id' => $rentalCode->id]);
