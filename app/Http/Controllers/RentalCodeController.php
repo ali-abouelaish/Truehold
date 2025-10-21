@@ -173,6 +173,12 @@ class RentalCodeController extends Controller
         foreach ($clientFields as $field) {
             unset($rentalCodeData[$field]);
         }
+        
+        // Remove file upload fields from rental code data as they're handled separately
+        $fileFields = ['client_contract', 'payment_proof', 'client_id_document'];
+        foreach ($fileFields as $field) {
+            unset($rentalCodeData[$field]);
+        }
 
         $rentalCode = RentalCode::create($rentalCodeData);
 
