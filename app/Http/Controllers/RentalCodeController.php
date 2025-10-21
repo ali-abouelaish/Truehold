@@ -195,11 +195,18 @@ class RentalCodeController extends Controller
         ]);
 
         // Handle file uploads
-        $this->handleFileUploads($request, $rentalCode);
-        
-        \Log::info('File upload handling completed', [
-            'rental_code_id' => $rentalCode->id
-        ]);
+        try {
+            $this->handleFileUploads($request, $rentalCode);
+            \Log::info('File upload handling completed successfully', [
+                'rental_code_id' => $rentalCode->id
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('File upload handling failed', [
+                'rental_code_id' => $rentalCode->id,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+        }
 
         // Send email notification to board@truehold.co.uk
         $this->sendRentalCodeNotification($rentalCode);

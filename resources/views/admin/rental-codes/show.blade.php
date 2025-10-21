@@ -635,11 +635,18 @@ strong {
                                     </div>
                                 </div>
                                 <div class="mt-2">
-                                    <a href="{{ Storage::url($rentalCode->client_contract) }}" 
-                                       target="_blank" 
-                                       class="btn btn-outline-primary btn-sm">
-                                        <i class="fas fa-download me-1"></i>View Document
-                                    </a>
+                                    @php
+                                        $contractFiles = json_decode($rentalCode->client_contract, true);
+                                    @endphp
+                                    @if($contractFiles && is_array($contractFiles))
+                                        @foreach($contractFiles as $index => $filePath)
+                                            <a href="{{ Storage::url($filePath) }}" 
+                                               target="_blank" 
+                                               class="btn btn-outline-primary btn-sm me-2">
+                                                <i class="fas fa-download me-1"></i>View Document {{ count($contractFiles) > 1 ? ($index + 1) : '' }}
+                                            </a>
+                                        @endforeach
+                                    @endif
                                 </div>
                             </div>
                         </div>
@@ -657,11 +664,18 @@ strong {
                                     </div>
                                 </div>
                                 <div class="mt-2">
-                                    <a href="{{ Storage::url($rentalCode->payment_proof) }}" 
-                                       target="_blank" 
-                                       class="btn btn-outline-success btn-sm">
-                                        <i class="fas fa-download me-1"></i>View Document
-                                    </a>
+                                    @php
+                                        $proofFiles = json_decode($rentalCode->payment_proof, true);
+                                    @endphp
+                                    @if($proofFiles && is_array($proofFiles))
+                                        @foreach($proofFiles as $index => $filePath)
+                                            <a href="{{ Storage::url($filePath) }}" 
+                                               target="_blank" 
+                                               class="btn btn-outline-success btn-sm me-2">
+                                                <i class="fas fa-download me-1"></i>View Document {{ count($proofFiles) > 1 ? ($index + 1) : '' }}
+                                            </a>
+                                        @endforeach
+                                    @endif
                                 </div>
                             </div>
                         </div>
@@ -679,11 +693,18 @@ strong {
                                     </div>
                                 </div>
                                 <div class="mt-2">
-                                    <a href="{{ Storage::url($rentalCode->client_id_document) }}" 
-                                       target="_blank" 
-                                       class="btn btn-outline-info btn-sm">
-                                        <i class="fas fa-download me-1"></i>View Document
-                                    </a>
+                                    @php
+                                        $idFiles = json_decode($rentalCode->client_id_document, true);
+                                    @endphp
+                                    @if($idFiles && is_array($idFiles))
+                                        @foreach($idFiles as $index => $filePath)
+                                            <a href="{{ Storage::url($filePath) }}" 
+                                               target="_blank" 
+                                               class="btn btn-outline-info btn-sm me-2">
+                                                <i class="fas fa-download me-1"></i>View Document {{ count($idFiles) > 1 ? ($index + 1) : '' }}
+                                            </a>
+                                        @endforeach
+                                    @endif
                                 </div>
                             </div>
                         </div>
@@ -792,107 +813,6 @@ strong {
     </div>
     @endif
 
-    <!-- Document Uploads -->
-    @if($rentalCode->client_contract || $rentalCode->payment_proof || $rentalCode->client_id_document)
-    <div class="row">
-        <div class="col-12">
-            <div class="card shadow">
-                <div class="card-header bg-warning text-white">
-                    <h5 class="card-title mb-0">
-                        <i class="fas fa-file-upload me-2"></i>Uploaded Documents
-                    </h5>
-                </div>
-                <div class="card-body">
-                    <div class="row">
-                        @if($rentalCode->client_contract)
-                        <div class="col-md-4 mb-3">
-                            <div class="document-item">
-                                <div class="d-flex align-items-center mb-2">
-                                    <i class="fas fa-file-contract text-warning me-2"></i>
-                                    <h6 class="mb-0">Client Contract(s)</h6>
-                                </div>
-                                @if(is_array($rentalCode->client_contract))
-                                    @foreach($rentalCode->client_contract as $index => $contract)
-                                        <div class="mb-2">
-                                            <a href="{{ Storage::url($contract) }}" 
-                                               target="_blank" 
-                                               class="btn btn-outline-warning btn-sm">
-                                                <i class="fas fa-download me-1"></i>View Document {{ count($rentalCode->client_contract) > 1 ? ($index + 1) : '' }}
-                                            </a>
-                                        </div>
-                                    @endforeach
-                                @else
-                                    <a href="{{ Storage::url($rentalCode->client_contract) }}" 
-                                       target="_blank" 
-                                       class="btn btn-outline-warning btn-sm">
-                                        <i class="fas fa-download me-1"></i>View Document
-                                    </a>
-                                @endif
-                            </div>
-                        </div>
-                        @endif
-
-                        @if($rentalCode->payment_proof)
-                        <div class="col-md-4 mb-3">
-                            <div class="document-item">
-                                <div class="d-flex align-items-center mb-2">
-                                    <i class="fas fa-receipt text-success me-2"></i>
-                                    <h6 class="mb-0">Payment Proof(s)</h6>
-                                </div>
-                                @if(is_array($rentalCode->payment_proof))
-                                    @foreach($rentalCode->payment_proof as $index => $proof)
-                                        <div class="mb-2">
-                                            <a href="{{ Storage::url($proof) }}" 
-                                               target="_blank" 
-                                               class="btn btn-outline-success btn-sm">
-                                                <i class="fas fa-download me-1"></i>View Document {{ count($rentalCode->payment_proof) > 1 ? ($index + 1) : '' }}
-                                            </a>
-                                        </div>
-                                    @endforeach
-                                @else
-                                    <a href="{{ Storage::url($rentalCode->payment_proof) }}" 
-                                       target="_blank" 
-                                       class="btn btn-outline-success btn-sm">
-                                        <i class="fas fa-download me-1"></i>View Document
-                                    </a>
-                                @endif
-                            </div>
-                        </div>
-                        @endif
-
-                        @if($rentalCode->client_id_document)
-                        <div class="col-md-4 mb-3">
-                            <div class="document-item">
-                                <div class="d-flex align-items-center mb-2">
-                                    <i class="fas fa-id-card text-info me-2"></i>
-                                    <h6 class="mb-0">Client ID Document(s)</h6>
-                                </div>
-                                @if(is_array($rentalCode->client_id_document))
-                                    @foreach($rentalCode->client_id_document as $index => $document)
-                                        <div class="mb-2">
-                                            <a href="{{ Storage::url($document) }}" 
-                                               target="_blank" 
-                                               class="btn btn-outline-info btn-sm">
-                                                <i class="fas fa-download me-1"></i>View Document {{ count($rentalCode->client_id_document) > 1 ? ($index + 1) : '' }}
-                                            </a>
-                                        </div>
-                                    @endforeach
-                                @else
-                                    <a href="{{ Storage::url($rentalCode->client_id_document) }}" 
-                                       target="_blank" 
-                                       class="btn btn-outline-info btn-sm">
-                                        <i class="fas fa-download me-1"></i>View Document
-                                    </a>
-                                @endif
-                            </div>
-                        </div>
-                        @endif
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    @endif
 
     <!-- Quick Actions -->
     <div class="row mt-4">
