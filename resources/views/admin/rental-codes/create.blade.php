@@ -177,6 +177,7 @@
                                              <option value="">Select payment method</option>
                                              <option value="Cash" {{ old('payment_method') == 'Cash' ? 'selected' : '' }}>Cash</option>
                                              <option value="Transfer" {{ old('payment_method') == 'Transfer' ? 'selected' : '' }}>Transfer</option>
+                                             <option value="Card machine" {{ old('payment_method') == 'Card machine' ? 'selected' : '' }}>Card machine</option>
                                          </select>
                                     </div>
                                     @error('payment_method')

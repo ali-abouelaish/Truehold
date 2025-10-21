@@ -76,3 +76,6 @@ echo "2. Use the opt-in method for immediate testing\n";
 echo "3. Send a message from +447947768707 to +15558664742 first\n";
 echo "4. Then try sending messages normally\n";
 
+
+
+

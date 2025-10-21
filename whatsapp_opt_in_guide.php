@@ -50,3 +50,6 @@ echo "🎯 EXPECTED RESULT:\n";
 echo "After successful opt-in, your rental code creation will automatically send WhatsApp messages!\n";
 echo "Both you (as admin) and clients will receive detailed rental code information.\n";
 
+
+
+

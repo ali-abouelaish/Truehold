@@ -106,3 +106,6 @@ echo "2. When you create a rental code, both client and admin will receive Whats
 echo "3. Make sure to update your .env file with the new configuration\n";
 echo "4. Test by creating a real rental code in your application\n";
 
+
+
+

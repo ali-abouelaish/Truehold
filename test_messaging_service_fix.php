@@ -96,3 +96,6 @@ echo "2. Try creating a rental code in your application\n";
 echo "3. If still not working, send opt-in message from +447947768707 to +15558664742\n";
 echo "4. The messaging service approach should be more reliable\n";
 
+
+
+

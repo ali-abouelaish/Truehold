@@ -11,7 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-      return;
+        Schema::table('rental_codes', function (Blueprint $table) {
+            //
+        });
     }
 
     /**
@@ -19,6 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('payments');
+        Schema::table('rental_codes', function (Blueprint $table) {
+            //
+        });
     }
 };

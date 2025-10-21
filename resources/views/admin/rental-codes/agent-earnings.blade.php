@@ -13,15 +13,50 @@
                         <i class="fas fa-chart-line text-white text-2xl"></i>
                     </div>
     <div>
-                        <h1 class="text-3xl font-bold text-gray-900">Agent Earnings Analytics</h1>
-                        <p class="text-gray-600 mt-1">Comprehensive earnings analysis and performance insights</p>
+                        <h1 class="text-3xl font-bold text-gray-900">
+                            @if($isPayrollView)
+                                @if(auth()->user()->role === 'admin')
+                                    Agent Payroll - {{ $agentSearch }}
+                                @else
+                                    My Payroll
+                                @endif
+                            @else
+                                @if(auth()->user()->role === 'admin')
+                                    Agent Earnings Analytics
+                                @else
+                                    My Earnings
+                                @endif
+                            @endif
+                        </h1>
+                        <p class="text-gray-600 mt-1">
+                            @if($isPayrollView)
+                                @if(auth()->user()->role === 'admin')
+                                    Approved rentals up to 10th of each month - Payroll view
+                                @else
+                                    Your approved rentals up to 10th of each month
+                                @endif
+                            @else
+                                @if(auth()->user()->role === 'admin')
+                                    Comprehensive earnings analysis and performance insights
+                                @else
+                                    Your earnings overview and performance insights
+                                @endif
+                            @endif
+                        </p>
                     </div>
     </div>
                 <div class="flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-3">
+                    @if($isPayrollView)
+                        <a href="{{ route('rental-codes.agent-earnings') }}" 
+                           class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg font-medium transition-colors duration-200">
+                            <i class="fas fa-arrow-left mr-2"></i>Back to All Agents
+                        </a>
+                    @else
         <a href="{{ route('rental-codes.index') }}" 
                        class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg font-medium transition-colors duration-200">
             <i class="fas fa-arrow-left mr-2"></i>Back to Rental Codes
         </a>
+                    @endif
                     @if(count($agentEarnings) > 0)
                     <button onclick="exportToExcel()" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200">
                         <i class="fas fa-file-excel mr-2"></i>Export Excel
@@ -39,14 +74,31 @@
                 <div class="flex items-center justify-between">
                     <h3 class="text-lg font-semibold text-gray-900 flex items-center">
                         <i class="fas fa-filter text-blue-600 mr-2"></i>
+                        @if($isPayrollView)
+                            Payroll Filters
+                        @else
                         Advanced Filters
+                        @endif
                     </h3>
                     <button onclick="toggleFilters()" class="text-gray-500 hover:text-gray-700">
                         <i class="fas fa-chevron-down" id="filterToggleIcon"></i>
                     </button>
                 </div>
     </div>
-            <div class="p-6" id="filtersContent">
+            <div class="p-6" id="filtersContent" style="display: none;">
+                @if($isPayrollView)
+                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+                        <div class="flex items-start">
+                            <i class="fas fa-info-circle text-blue-600 mt-1 mr-3"></i>
+                            <div>
+                                <h4 class="text-sm font-medium text-blue-900">Payroll View</h4>
+                                <p class="text-sm text-blue-700 mt-1">
+                                    This view shows only <strong>approved</strong> rentals that this agent participated in (as rental agent or marketing agent). Outstanding amounts show what the agent is owed from unpaid rentals.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                @endif
                 <form method="GET" action="{{ route('rental-codes.agent-earnings') }}" class="space-y-6">
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             <div>
@@ -67,6 +119,16 @@
                             <label class="block text-sm font-medium text-gray-700 mb-2">
                                 <i class="fas fa-user mr-1"></i>Agent Filter
                             </label>
+                            @if($isPayrollView)
+                                <div class="w-full border-gray-300 rounded-lg shadow-sm bg-gray-50 p-3">
+                                    <div class="flex items-center">
+                                        <i class="fas fa-user-check text-green-600 mr-2"></i>
+                                        <span class="font-medium text-gray-900">{{ $agentSearch }}</span>
+                                        <span class="ml-2 text-sm text-gray-500">(Payroll View)</span>
+                                    </div>
+                                </div>
+                                <input type="hidden" name="agent_search" value="{{ $agentSearch }}">
+                            @elseif(auth()->user()->role === 'admin')
                             <select name="agent_search" class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200">
                                 <option value="">All Agents</option>
                                 @foreach($agentEarnings as $agent)
@@ -75,6 +137,16 @@
                                     </option>
                                 @endforeach
                             </select>
+                            @else
+                                <div class="w-full border-gray-300 rounded-lg shadow-sm bg-blue-50 p-3">
+                                    <div class="flex items-center">
+                                        <i class="fas fa-user-shield text-blue-600 mr-2"></i>
+                                        <span class="font-medium text-gray-900">{{ auth()->user()->name }}</span>
+                                        <span class="ml-2 text-sm text-gray-500">(Your Payroll Only)</span>
+                                    </div>
+                                </div>
+                                <input type="hidden" name="agent_search" value="{{ auth()->user()->name }}">
+                            @endif
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">
@@ -205,8 +277,29 @@
     <div class="px-6 py-4 border-b border-gray-200">
                 <div class="flex items-center justify-between">
                     <div>
-                        <h3 class="text-lg font-semibold text-gray-900">Agent Earnings Breakdown</h3>
+                        <h3 class="text-lg font-semibold text-gray-900">
+                            @if($isPayrollView)
+                                @if(auth()->user()->role === 'admin')
+                                    Payroll Breakdown - {{ $agentSearch }}
+                                @else
+                                    My Payroll Breakdown
+                                @endif
+                            @else
+                                @if(auth()->user()->role === 'admin')
+                                    Agent Earnings Breakdown
+                                @else
+                                    My Earnings Breakdown
+                                @endif
+                            @endif
+                        </h3>
         <p class="text-sm text-gray-500 mt-1">
+                            @if($isPayrollView)
+                                Approved rentals for this agent only
+                                @if($startDate || $endDate)
+                                    • Period: {{ $startDate ? \Carbon\Carbon::parse($startDate)->format('d M Y') : 'Beginning' }}
+                                    — {{ \Carbon\Carbon::parse($endDate)->format('d M Y') }}
+                                @endif
+                            @else
                             @if($startDate || $endDate)
                                 Period: {{ $startDate ? \Carbon\Carbon::parse($startDate)->format('d M Y') : 'Beginning' }}
                                 — {{ \Carbon\Carbon::parse($endDate)->format('d M Y') }}
@@ -215,10 +308,25 @@
                             @endif
             @if($status) • Status: {{ ucfirst($status) }} @endif
             @if($paymentMethod) • Payment: {{ $paymentMethod }} @endif
+                            @endif
         </p>
                     </div>
                     <div class="flex items-center space-x-2">
-                        <span class="text-sm text-gray-500">{{ count($agentEarnings) }} agents</span>
+                        <span class="text-sm text-gray-500">
+                            @if($isPayrollView)
+                                @if(auth()->user()->role === 'admin')
+                                    {{ count($agentEarnings) }} payroll record{{ count($agentEarnings) !== 1 ? 's' : '' }}
+                                @else
+                                    My payroll record{{ count($agentEarnings) !== 1 ? 's' : '' }}
+                                @endif
+                            @else
+                                @if(auth()->user()->role === 'admin')
+                                    {{ count($agentEarnings) }} agents
+                                @else
+                                    My earnings data
+                                @endif
+                            @endif
+                        </span>
                         <div class="flex items-center space-x-1">
                             <button onclick="toggleView('table')" id="tableViewBtn" class="p-2 bg-blue-100 text-blue-600 rounded-lg">
                                 <i class="fas fa-table"></i>
@@ -261,14 +369,65 @@
             </thead>
             <tbody class="bg-white divide-y divide-gray-200">
                         @forelse($agentEarnings as $index => $agent)
-                        <tr class="hover:bg-gray-50 transition-colors duration-200 {{ $loop->first ? 'bg-gradient-to-r from-yellow-50 to-orange-50 border-l-4 border-yellow-400' : '' }}">
+                        @php
+                            $isAdmin = auth()->user()->role === 'admin';
+                            $showUserRanking = !$isAdmin && $loop->index === 3;
+                            $rankingClass = '';
+                            $rankingIcon = '';
+                            $rankingText = '';
+                            
+                            if ($loop->index === 0) {
+                                $rankingClass = 'ranking-row-gold';
+                                $rankingIcon = 'fas fa-crown';
+                                $rankingText = 'Gold - #1';
+                            } elseif ($loop->index === 1) {
+                                $rankingClass = 'ranking-row-silver';
+                                $rankingIcon = 'fas fa-medal';
+                                $rankingText = 'Silver - #2';
+                            } elseif ($loop->index === 2) {
+                                $rankingClass = 'ranking-row-bronze';
+                                $rankingIcon = 'fas fa-award';
+                                $rankingText = 'Bronze - #3';
+                            } elseif ($showUserRanking) {
+                                $rankingClass = 'bg-gradient-to-r from-blue-50 to-indigo-50 border-l-4 border-blue-400';
+                                $rankingIcon = 'fas fa-user';
+                                $rankingText = 'Your Ranking - #' . ($loop->index + 1);
+                            }
+                        @endphp
+                        <tr class="transition-colors duration-200 {{ $rankingClass }}">
                     <td class="px-6 py-4 whitespace-nowrap">
                         <div class="flex items-center">
-                                    <div class="w-12 h-12 {{ $loop->first ? 'bg-gradient-to-r from-yellow-400 to-yellow-600' : 'bg-gradient-to-r from-blue-500 to-purple-600' }} rounded-full flex items-center justify-center mr-4 relative overflow-visible">
-                                        @if($loop->first)
-                                            <div class="crown-container">
-                                                <i class="fas fa-crown" id="crown-icon-{{ $index }}"></i>
-                                                <span class="crown-fallback" id="crown-fallback-{{ $index }}" style="display: none;">👑</span>
+                                    @php
+                                        $avatarClass = '';
+                                        $showRankingIcon = false;
+                                        
+                                        if ($loop->index === 0) {
+                                            $avatarClass = 'bg-gradient-to-r from-yellow-500 to-yellow-700 shadow-xl';
+                                            $showRankingIcon = true;
+                                        } elseif ($loop->index === 1) {
+                                            $avatarClass = 'bg-gradient-to-r from-gray-400 to-gray-600 shadow-xl';
+                                            $showRankingIcon = true;
+                                        } elseif ($loop->index === 2) {
+                                            $avatarClass = 'bg-gradient-to-r from-orange-500 to-orange-700 shadow-xl';
+                                            $showRankingIcon = true;
+                                        } elseif ($showUserRanking) {
+                                            $avatarClass = 'bg-gradient-to-r from-blue-500 to-indigo-600';
+                                            $showRankingIcon = true;
+                                        } else {
+                                            $avatarClass = 'bg-gradient-to-r from-blue-500 to-purple-600';
+                                        }
+                                    @endphp
+                                    <div class="w-12 h-12 {{ $avatarClass }} rounded-full flex items-center justify-center mr-4 relative overflow-visible">
+                                        @if($showRankingIcon)
+                                            <div class="ranking-container">
+                                                <i class="{{ $rankingIcon }}" id="ranking-icon-{{ $index }}"></i>
+                                                <span class="ranking-fallback" id="ranking-fallback-{{ $index }}" style="display: none;">
+                                                    @if($loop->index === 0) 👑
+                                                    @elseif($loop->index === 1) 🥈
+                                                    @elseif($loop->index === 2) 🥉
+                                                    @elseif($showUserRanking) 👤
+                                                    @endif
+                                                </span>
                                             </div>
                                         @endif
                                         <span class="text-white font-bold text-xl relative z-10 drop-shadow-lg">
@@ -278,9 +437,9 @@
                                     <div>
                                         <div class="text-sm font-semibold text-gray-900 flex items-center">
                                             {{ $agent['name'] }}
-                                            @if($loop->first)
-                                                <span class="ml-2 bg-yellow-100 text-yellow-800 text-xs font-medium px-2 py-1 rounded-full flex items-center">
-                                                    <i class="fas fa-crown mr-1"></i>Top Earner
+                                            @if($rankingText)
+                                                <span class="ml-2 {{ $loop->index === 0 ? 'bg-yellow-100 text-yellow-800' : ($loop->index === 1 ? 'bg-gray-100 text-gray-800' : ($loop->index === 2 ? 'bg-orange-100 text-orange-800' : 'bg-blue-100 text-blue-800')) }} text-xs font-medium px-2 py-1 rounded-full flex items-center">
+                                                    <i class="{{ $rankingIcon }} mr-1"></i>{{ $rankingText }}
                                                 </span>
                                             @endif
                                         </div>
@@ -308,13 +467,33 @@
                     </td>
                     
                     <td class="px-6 py-4 whitespace-nowrap">
-                        <div class="text-lg font-bold {{ $loop->first ? 'text-yellow-600' : 'text-gray-900' }} flex items-center">
-                            @if($loop->first)
-                                <i class="fas fa-crown mr-2 text-yellow-500"></i>
+                        @php
+                            $totalEarningsClass = '';
+                            $totalEarningsIcon = '';
+                            
+                            if ($loop->index === 0) {
+                                $totalEarningsClass = 'text-yellow-600';
+                                $totalEarningsIcon = 'fas fa-crown mr-2 text-yellow-500';
+                            } elseif ($loop->index === 1) {
+                                $totalEarningsClass = 'text-gray-600';
+                                $totalEarningsIcon = 'fas fa-medal mr-2 text-gray-500';
+                            } elseif ($loop->index === 2) {
+                                $totalEarningsClass = 'text-orange-600';
+                                $totalEarningsIcon = 'fas fa-award mr-2 text-orange-500';
+                            } elseif ($showUserRanking) {
+                                $totalEarningsClass = 'text-blue-600';
+                                $totalEarningsIcon = 'fas fa-user mr-2 text-blue-500';
+                            } else {
+                                $totalEarningsClass = 'text-gray-900';
+                            }
+                        @endphp
+                        <div class="text-lg font-bold {{ $totalEarningsClass }} flex items-center">
+                            @if($totalEarningsIcon)
+                                <i class="{{ $totalEarningsIcon }}"></i>
                             @endif
                             £{{ number_format($agent['total_earnings'], 2) }}
                         </div>
-                        <div class="text-xs {{ $loop->first ? 'text-yellow-600' : 'text-gray-500' }}">
+                        <div class="text-xs {{ $totalEarningsClass }}">
                                     {{ $agent['transaction_count'] }} total
                         </div>
                     </td>
@@ -333,14 +512,21 @@
                             
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="flex space-x-2">
-                                    <a href="{{ route('rental-codes.agent-details', $agent['name']) }}" 
-                                       class="text-blue-600 hover:text-blue-800 font-medium">
-                                        <i class="fas fa-user-tie mr-1"></i>Agent Details
-                                    </a>
+                                    @if($isPayrollView)
                                     <button onclick="showAgentDetails('{{ $agent['name'] }}')" 
+                                                class="text-blue-600 hover:text-blue-800 font-medium">
+                                            <i class="fas fa-eye mr-1"></i>View Payroll Details
+                                        </button>
+                                        <button onclick="printPayroll('{{ $agent['name'] }}')" 
                                             class="text-green-600 hover:text-green-800 font-medium">
-                                        <i class="fas fa-eye mr-1"></i>Quick View
+                                            <i class="fas fa-print mr-1"></i>Print Payroll
                                     </button>
+                                    @else
+                                        <a href="{{ route('rental-codes.agent-earnings', ['agent_search' => $agent['name']]) }}" 
+                                           class="text-purple-600 hover:text-purple-800 font-medium">
+                                            <i class="fas fa-money-bill-wave mr-1"></i>View Payroll
+                                        </a>
+                                    @endif
                         </div>
                     </td>
                 </tr>
@@ -363,14 +549,72 @@
             <div id="cardsView" class="hidden p-6">
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     @foreach($agentEarnings as $index => $agent)
-                    <div class="bg-gradient-to-br from-white to-gray-50 rounded-xl border border-gray-200 p-6 hover:shadow-lg transition-shadow duration-200 {{ $loop->first ? 'ring-2 ring-yellow-400 bg-gradient-to-br from-yellow-50 to-orange-50' : '' }}">
+                    @php
+                        $isAdmin = auth()->user()->role === 'admin';
+                        $showUserRanking = !$isAdmin && $loop->index === 3;
+                        $cardClass = '';
+                        $cardRing = '';
+                        
+                        if ($loop->index === 0) {
+                            $cardClass = 'ranking-row-gold shadow-xl';
+                            $cardRing = 'ring-4 ring-yellow-500';
+                        } elseif ($loop->index === 1) {
+                            $cardClass = 'ranking-row-silver shadow-xl';
+                            $cardRing = 'ring-4 ring-gray-500';
+                        } elseif ($loop->index === 2) {
+                            $cardClass = 'ranking-row-bronze shadow-xl';
+                            $cardRing = 'ring-4 ring-orange-600';
+                        } elseif ($showUserRanking) {
+                            $cardClass = 'bg-gradient-to-br from-blue-50 to-indigo-50';
+                            $cardRing = 'ring-2 ring-blue-400';
+                        } else {
+                            $cardClass = 'bg-gradient-to-br from-white to-gray-50';
+                        }
+                    @endphp
+                    <div class="{{ $cardClass }} rounded-xl border border-gray-200 p-6 hover:shadow-lg transition-shadow duration-200 {{ $cardRing }}">
                         <div class="flex items-center justify-between mb-4">
                             <div class="flex items-center">
-                                <div class="w-12 h-12 {{ $loop->first ? 'bg-gradient-to-r from-yellow-400 to-yellow-600' : 'bg-gradient-to-r from-blue-500 to-purple-600' }} rounded-full flex items-center justify-center mr-3 relative overflow-visible">
-                                    @if($loop->first)
-                                        <div class="crown-container">
-                                            <i class="fas fa-crown" id="crown-icon-card-{{ $index }}"></i>
-                                            <span class="crown-fallback" id="crown-fallback-card-{{ $index }}" style="display: none;">👑</span>
+                                @php
+                                    $cardAvatarClass = '';
+                                    $showCardRankingIcon = false;
+                                    $cardRankingIcon = '';
+                                    $cardRankingText = '';
+                                    
+                                    if ($loop->index === 0) {
+                                        $cardAvatarClass = 'bg-gradient-to-r from-yellow-400 to-yellow-600 shadow-lg';
+                                        $showCardRankingIcon = true;
+                                        $cardRankingIcon = 'fas fa-crown';
+                                        $cardRankingText = 'Gold - #1';
+                                    } elseif ($loop->index === 1) {
+                                        $cardAvatarClass = 'bg-gradient-to-r from-gray-300 to-gray-500 shadow-lg';
+                                        $showCardRankingIcon = true;
+                                        $cardRankingIcon = 'fas fa-medal';
+                                        $cardRankingText = 'Silver - #2';
+                                    } elseif ($loop->index === 2) {
+                                        $cardAvatarClass = 'bg-gradient-to-r from-orange-400 to-orange-600 shadow-lg';
+                                        $showCardRankingIcon = true;
+                                        $cardRankingIcon = 'fas fa-award';
+                                        $cardRankingText = 'Bronze - #3';
+                                    } elseif ($showUserRanking) {
+                                        $cardAvatarClass = 'bg-gradient-to-r from-blue-500 to-indigo-600';
+                                        $showCardRankingIcon = true;
+                                        $cardRankingIcon = 'fas fa-user';
+                                        $cardRankingText = 'Your Ranking - #' . ($loop->index + 1);
+                                    } else {
+                                        $cardAvatarClass = 'bg-gradient-to-r from-blue-500 to-purple-600';
+                                    }
+                                @endphp
+                                <div class="w-12 h-12 {{ $cardAvatarClass }} rounded-full flex items-center justify-center mr-3 relative overflow-visible">
+                                    @if($showCardRankingIcon)
+                                        <div class="ranking-container">
+                                            <i class="{{ $cardRankingIcon }}" id="ranking-icon-card-{{ $index }}"></i>
+                                            <span class="ranking-fallback" id="ranking-fallback-card-{{ $index }}" style="display: none;">
+                                                @if($loop->index === 0) 👑
+                                                @elseif($loop->index === 1) 🥈
+                                                @elseif($loop->index === 2) 🥉
+                                                @elseif($showUserRanking) 👤
+                                                @endif
+                                            </span>
                                         </div>
                                     @endif
                                     <span class="text-white font-bold text-xl relative z-10 drop-shadow-lg">
@@ -380,9 +624,9 @@
                                     <div>
                                         <h4 class="font-semibold text-gray-900 flex items-center">
                                             {{ $agent['name'] }}
-                                            @if($loop->first)
-                                                <span class="ml-2 bg-yellow-100 text-yellow-800 text-xs font-medium px-2 py-1 rounded-full flex items-center">
-                                                    <i class="fas fa-crown mr-1"></i>Top
+                                            @if($cardRankingText)
+                                                <span class="ml-2 {{ $loop->index === 0 ? 'bg-yellow-100 text-yellow-800' : ($loop->index === 1 ? 'bg-gray-100 text-gray-800' : ($loop->index === 2 ? 'bg-orange-100 text-orange-800' : 'bg-blue-100 text-blue-800')) }} text-xs font-medium px-2 py-1 rounded-full flex items-center">
+                                                    <i class="{{ $cardRankingIcon }} mr-1"></i>{{ $cardRankingText }}
                                                 </span>
                                             @endif
                                         </h4>
@@ -390,23 +634,39 @@
     </div>
 </div>
                             <div class="flex space-x-2">
-                                <a href="{{ route('rental-codes.agent-details', $agent['name']) }}" 
-                                   class="text-blue-600 hover:text-blue-800">
-                                    <i class="fas fa-user-tie"></i>
+                                <a href="{{ route('rental-codes.agent-earnings', ['agent_search' => $agent['name']]) }}" 
+                                   class="text-purple-600 hover:text-purple-800">
+                                    <i class="fas fa-money-bill-wave"></i>
                                 </a>
-                                <button onclick="showAgentDetails('{{ $agent['name'] }}')" 
-                                        class="text-gray-400 hover:text-gray-600">
-                                    <i class="fas fa-ellipsis-v"></i>
-        </button>
                             </div>
                         </div>
                         
                         <div class="space-y-3">
                             <div class="flex justify-between items-center">
-                                <span class="text-sm {{ $loop->first ? 'text-yellow-600' : 'text-gray-600' }}">Total Earnings</span>
-                                <span class="text-lg font-bold {{ $loop->first ? 'text-yellow-600' : 'text-gray-900' }} flex items-center">
-                                    @if($loop->first)
-                                        <i class="fas fa-crown mr-1 text-yellow-500"></i>
+                                @php
+                                    $cardTotalClass = '';
+                                    $cardTotalIcon = '';
+                                    
+                                    if ($loop->index === 0) {
+                                        $cardTotalClass = 'text-yellow-600';
+                                        $cardTotalIcon = 'fas fa-crown mr-1 text-yellow-500';
+                                    } elseif ($loop->index === 1) {
+                                        $cardTotalClass = 'text-gray-600';
+                                        $cardTotalIcon = 'fas fa-medal mr-1 text-gray-500';
+                                    } elseif ($loop->index === 2) {
+                                        $cardTotalClass = 'text-orange-600';
+                                        $cardTotalIcon = 'fas fa-award mr-1 text-orange-500';
+                                    } elseif ($showUserRanking) {
+                                        $cardTotalClass = 'text-blue-600';
+                                        $cardTotalIcon = 'fas fa-user mr-1 text-blue-500';
+                                    } else {
+                                        $cardTotalClass = 'text-gray-600';
+                                    }
+                                @endphp
+                                <span class="text-sm {{ $cardTotalClass }}">Total Earnings</span>
+                                <span class="text-lg font-bold {{ $cardTotalClass }} flex items-center">
+                                    @if($cardTotalIcon)
+                                        <i class="{{ $cardTotalIcon }}"></i>
                                     @endif
                                     £{{ number_format($agent['total_earnings'], 2) }}
                                 </span>
@@ -658,6 +918,107 @@ function closeModal() {
     document.getElementById('agentModal').classList.add('hidden');
 }
 
+// Print payroll function
+function printPayroll(agentName) {
+    const agentData = {!! json_encode($agentEarnings) !!}[agentName];
+    if (!agentData) return;
+    
+    // Create a new window for printing
+    const printWindow = window.open('', '_blank');
+    
+    const printContent = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>Payroll - ${agentName}</title>
+            <style>
+                body { font-family: Arial, sans-serif; margin: 20px; }
+                .header { text-align: center; margin-bottom: 30px; }
+                .header h1 { color: #333; margin-bottom: 10px; }
+                .header p { color: #666; }
+                .summary { display: flex; justify-content: space-around; margin-bottom: 30px; }
+                .summary-item { text-align: center; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+                .summary-item h3 { margin: 0; color: #333; }
+                .summary-item p { margin: 5px 0 0 0; color: #666; }
+                table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+                th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+                th { background-color: #f5f5f5; }
+                .total-row { font-weight: bold; background-color: #f9f9f9; }
+                .footer { margin-top: 30px; text-align: center; color: #666; font-size: 12px; }
+            </style>
+        </head>
+        <body>
+            <div class="header">
+                <h1>Agent Payroll Report</h1>
+                <p><strong>Agent:</strong> ${agentName}</p>
+                <p><strong>Period:</strong> Approved rentals up to 10th of each month</p>
+                <p><strong>Generated:</strong> ${new Date().toLocaleDateString()}</p>
+            </div>
+            
+            <div class="summary">
+                <div class="summary-item">
+                    <h3>£${parseFloat(agentData.total_earnings).toFixed(2)}</h3>
+                    <p>Total Commission</p>
+                </div>
+                <div class="summary-item">
+                    <h3>£${parseFloat(agentData.agent_earnings).toFixed(2)}</h3>
+                    <p>Agent Earnings (55%)</p>
+                </div>
+                <div class="summary-item">
+                    <h3>£${parseFloat(agentData.agency_earnings).toFixed(2)}</h3>
+                    <p>Agency Earnings (45%)</p>
+                </div>
+                <div class="summary-item">
+                    <h3>${agentData.transaction_count}</h3>
+                    <p>Transactions</p>
+                </div>
+            </div>
+            
+            <table>
+                <thead>
+                    <tr>
+                        <th>Rental Code</th>
+                        <th>Date</th>
+                        <th>Total Fee</th>
+                        <th>Agent Cut</th>
+                        <th>Agency Cut</th>
+                        <th>Status</th>
+                        <th>Payment Method</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${agentData.transactions.map(transaction => `
+                        <tr>
+                            <td>${transaction.code}</td>
+                            <td>${new Date(transaction.date).toLocaleDateString()}</td>
+                            <td>£${parseFloat(transaction.total_fee).toFixed(2)}</td>
+                            <td>£${parseFloat(transaction.agent_cut).toFixed(2)}</td>
+                            <td>£${parseFloat(transaction.agency_cut).toFixed(2)}</td>
+                            <td>${transaction.status}</td>
+                            <td>${transaction.payment_method}</td>
+                        </tr>
+                    `).join('')}
+                    <tr class="total-row">
+                        <td colspan="3"><strong>Total</strong></td>
+                        <td><strong>£${parseFloat(agentData.agent_earnings).toFixed(2)}</strong></td>
+                        <td><strong>£${parseFloat(agentData.agency_earnings).toFixed(2)}</strong></td>
+                        <td colspan="2"></td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <div class="footer">
+                <p>This report shows approved rentals up to the 10th of each month for payroll purposes.</p>
+            </div>
+        </body>
+        </html>
+    `;
+    
+    printWindow.document.write(printContent);
+    printWindow.document.close();
+    printWindow.print();
+}
+
 // Export functionality
 function exportToExcel() {
     const table = document.querySelector('table');
@@ -691,7 +1052,17 @@ function exportToExcel() {
 // Initialize filters state
 document.addEventListener('DOMContentLoaded', function() {
     const filtersContent = document.getElementById('filtersContent');
-    filtersContent.style.display = 'block';
+    const filterToggleIcon = document.getElementById('filterToggleIcon');
+    
+    // Ensure filters start collapsed
+    if (filtersContent) {
+        filtersContent.style.display = 'none';
+    }
+    
+    // Ensure icon starts as chevron-down
+    if (filterToggleIcon) {
+        filterToggleIcon.className = 'fas fa-chevron-down';
+    }
     
     // Immediate crown fallback check
     function checkCrownFallback() {
@@ -719,11 +1090,11 @@ document.addEventListener('DOMContentLoaded', function() {
     // Run immediately
     checkCrownFallback();
     
-    // Debug: Check if crown containers exist
+    // Debug: Check if ranking containers exist
     setTimeout(() => {
-        console.log('Debug: Checking for crown containers...');
-        const allCrownContainers = document.querySelectorAll('.crown-container');
-        console.log('All crown containers found:', allCrownContainers.length);
+        console.log('Debug: Checking for ranking containers...');
+        const allRankingContainers = document.querySelectorAll('.ranking-container');
+        console.log('All ranking containers found:', allRankingContainers.length);
         
         // Also check for any elements with crown-related classes
         const crownElements = document.querySelectorAll('[class*="crown"]');
@@ -739,7 +1110,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const agentNames = document.querySelectorAll('[class*="agent"], [class*="Agent"]');
         console.log('Elements with "agent" in class:', agentNames.length);
         
-        allCrownContainers.forEach((container, index) => {
+        allRankingContainers.forEach((container, index) => {
             console.log(`Container ${index}:`, {
                 element: container,
                 parent: container.parentElement,
@@ -750,17 +1121,17 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }, 500);
     
-    // Check crown visibility after FontAwesome detection
+    // Check ranking icon visibility after FontAwesome detection
     setTimeout(() => {
-        console.log('Checking crown visibility...');
-        const crownContainers = document.querySelectorAll('.crown-container');
-        console.log('Found crown containers:', crownContainers.length);
+        console.log('Checking ranking icon visibility...');
+        const rankingContainers = document.querySelectorAll('.ranking-container');
+        console.log('Found ranking containers:', rankingContainers.length);
         
-        crownContainers.forEach((container, index) => {
-            const icon = container.querySelector('i.fas.fa-crown');
-            const fallback = container.querySelector('.crown-fallback');
+        rankingContainers.forEach((container, index) => {
+            const icon = container.querySelector('i');
+            const fallback = container.querySelector('.ranking-fallback');
             
-            console.log(`Crown container ${index}:`, {
+            console.log(`Ranking container ${index}:`, {
                 container: container,
                 icon: icon,
                 fallback: fallback,
@@ -808,6 +1179,45 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 }
 
+/* Ranking container styles */
+.ranking-container {
+    z-index: 5;
+    position: absolute;
+    top: -10px;
+    right: -10px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* Gold ranking (1st place) */
+.ranking-container:has(.fa-crown) {
+    background: #FCD34D;
+    border: 2px solid #F59E0B;
+}
+
+/* Silver ranking (2nd place) */
+.ranking-container:has(.fa-medal) {
+    background: #E5E7EB;
+    border: 2px solid #9CA3AF;
+}
+
+/* Bronze ranking (3rd place) */
+.ranking-container:has(.fa-award) {
+    background: #FED7AA;
+    border: 2px solid #EA580C;
+}
+
+/* User ranking (4th place for non-admin) */
+.ranking-container:has(.fa-user) {
+    background: #DBEAFE;
+    border: 2px solid #3B82F6;
+}
+
 /* Crown visibility fixes */
 .crown-container {
     z-index: 5;
@@ -830,16 +1240,44 @@ document.addEventListener('DOMContentLoaded', function() {
     font-size: 12px;
 }
 
+/* Ranking icon styles */
+.ranking-container i {
+    font-size: 12px;
+}
+
+.ranking-container .fa-crown {
+    color: #92400E;
+}
+
+.ranking-container .fa-medal {
+    color: #6B7280;
+}
+
+.ranking-container .fa-award {
+    color: #EA580C;
+}
+
+.ranking-container .fa-user {
+    color: #1E40AF;
+}
+
 /* Ensure crown is visible */
 .relative {
     overflow: visible !important;
 }
 
-/* Fallback crown emoji - show by default, hide if FontAwesome loads */
-.crown-fallback {
+/* Fallback emoji styles - show by default, hide if FontAwesome loads */
+.crown-fallback, .ranking-fallback {
     font-size: 14px;
-    color: #92400E;
     display: block !important;
+}
+
+.crown-fallback {
+    color: #92400E;
+}
+
+.ranking-fallback {
+    color: #6B7280;
 }
 
 .crown-container i {
@@ -847,16 +1285,19 @@ document.addEventListener('DOMContentLoaded', function() {
 }
 
 /* Show FontAwesome icon only if FontAwesome is loaded */
-.fontawesome-loaded .crown-container i {
+.fontawesome-loaded .crown-container i,
+.fontawesome-loaded .ranking-container i {
     display: block !important;
 }
 
-.fontawesome-loaded .crown-fallback {
+.fontawesome-loaded .crown-fallback,
+.fontawesome-loaded .ranking-fallback {
     display: none !important;
 }
 
-/* Ensure crown containers are visible */
-.crown-container {
+/* Ensure ranking containers are visible */
+.crown-container,
+.ranking-container {
     display: flex !important;
     visibility: visible !important;
 }
@@ -867,6 +1308,92 @@ document.addEventListener('DOMContentLoaded', function() {
     position: relative !important;
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5) !important;
     font-weight: 900 !important;
+}
+
+/* Enhanced ranking colors - darker gradients */
+.ranking-row-gold {
+    background: linear-gradient(to right, #f59e0b, #d97706, #b45309) !important;
+    border-left: 4px solid #92400e !important;
+    box-shadow: 0 10px 25px rgba(217, 119, 6, 0.4) !important;
+}
+
+.ranking-row-gold td {
+    background: transparent !important;
+    border-color: rgba(146, 64, 14, 0.3) !important;
+    color: #000000 !important;
+}
+
+.ranking-row-silver {
+    background: linear-gradient(to right, #9ca3af, #6b7280, #4b5563) !important;
+    border-left: 4px solid #374151 !important;
+    box-shadow: 0 10px 25px rgba(107, 114, 128, 0.4) !important;
+}
+
+.ranking-row-silver td {
+    background: transparent !important;
+    border-color: rgba(31, 41, 55, 0.3) !important;
+    color: #000000 !important;
+}
+
+.ranking-row-silver .total-earnings {
+    color: #1a0e03 !important;
+    font-weight: 900 !important;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.9) !important;
+}
+
+.ranking-row-silver .ranking-container i {
+    color: #1a0e03 !important;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.9) !important;
+    font-weight: 900 !important;
+}
+
+.ranking-row-silver .ranking-fallback {
+    color: #1a0e03 !important;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.9) !important;
+    font-weight: 900 !important;
+}
+
+.ranking-row-silver td .text-lg {
+    color: #1a0e03 !important;
+    font-weight: 900 !important;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.9) !important;
+}
+
+.ranking-row-silver td .font-bold {
+    color: #1a0e03 !important;
+    font-weight: 900 !important;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.9) !important;
+}
+
+.ranking-row-bronze {
+    background: linear-gradient(to right, #8b4513, #654321, #4a2c2a) !important;
+    border-left: 4px solid #2d1810 !important;
+    box-shadow: 0 10px 25px rgba(139, 69, 19, 0.5) !important;
+}
+
+.ranking-row-bronze td {
+    background: transparent !important;
+    border-color: rgba(153, 27, 27, 0.3) !important;
+    color: #000000 !important;
+}
+
+/* Card gradient backgrounds - darker */
+.ranking-row-gold.shadow-xl {
+    background: linear-gradient(135deg, #f59e0b, #d97706, #b45309) !important;
+    border: 2px solid #92400e !important;
+    color: #000000 !important;
+}
+
+.ranking-row-silver.shadow-xl {
+    background: linear-gradient(135deg, #9ca3af, #6b7280, #4b5563) !important;
+    border: 2px solid #374151 !important;
+    color: #000000 !important;
+}
+
+.ranking-row-bronze.shadow-xl {
+    background: linear-gradient(135deg, #8b4513, #654321, #4a2c2a) !important;
+    border: 2px solid #2d1810 !important;
+    color: #000000 !important;
 }
 
 /* Golden gradient for top earner */

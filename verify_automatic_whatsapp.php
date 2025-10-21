@@ -30,3 +30,6 @@ echo "✅ READY TO USE:\n";
 echo "Your rental code creation will now automatically send WhatsApp messages!\n";
 echo "No additional setup required - it's already integrated.\n";
 
+
+
+

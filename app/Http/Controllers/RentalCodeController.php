@@ -182,7 +182,7 @@ class RentalCodeController extends Controller
      */
     public function show(RentalCode $rentalCode)
     {
-        $rentalCode->load('client');
+        $rentalCode->load(['client', 'marketingAgentUser']);
         return view('admin.rental-codes.show', compact('rentalCode'));
     }
 
@@ -476,6 +476,27 @@ public function generateCode()
         $agentSearch = $validated['agent_search'] ?? null;
         $marketingAgentFilter = $validated['marketing_agent_filter'] ?? null;
 
+        // Authorization: Check if user can view payroll
+        $user = auth()->user();
+        $isAdmin = $user->role === 'admin';
+        
+        // If user is not admin and trying to view specific agent payroll
+        if (!empty($agentSearch) && !$isAdmin) {
+            // Check if the agent name matches the current user's name
+            if ($agentSearch !== $user->name) {
+                return redirect()->route('rental-codes.agent-earnings')
+                    ->with('error', 'You can only view your own payroll.');
+            }
+        }
+        
+        // If user is not admin and no specific agent selected, show only their own data
+        if (empty($agentSearch) && !$isAdmin) {
+            $agentSearch = $user->name;
+        }
+
+        // Check if we're viewing a specific agent's payroll
+        $isPayrollView = !empty($agentSearch);
+        
         // Build query with filters
         $query = RentalCode::with('client');
 
@@ -485,11 +506,33 @@ public function generateCode()
         if ($endDate) {
             $query->where('rental_date', '<=', $endDate);
         }
-        if ($status) {
-            $query->where('status', $status);
+        
+        // For payroll view, only show approved rentals for the specific agent
+        if ($isPayrollView) {
+            $query->where('status', 'approved');
+            
+            // Get the agent user ID for filtering
+            $agentUser = User::where('role', 'agent')->where('name', $agentSearch)->first();
+            
+            if ($agentUser) {
+                // Filter by foreign key fields
+                $query->where(function($q) use ($agentUser) {
+                    $q->where('rental_agent_id', $agentUser->id)
+                      ->orWhere('marketing_agent_id', $agentUser->id);
+                });
+            } else {
+                // If agent not found, return empty result
+                $query->whereRaw('1 = 0'); // This will return no results
+            }
         } else {
-            $query->where('status', '!=', 'cancelled');
+            // For general earnings view, exclude cancelled
+            if ($status) {
+                $query->where('status', $status);
+            } else {
+                $query->where('status', '!=', 'cancelled');
+            }
         }
+        
         if ($paymentMethod) {
             $query->where('payment_method', $paymentMethod);
         }
@@ -560,7 +603,7 @@ public function generateCode()
             $clientCount = $code->client_count ?? 1;
             
             // If marketing agent exists and is different from the rental agent
-            if (!empty($marketingAgent) && $marketingAgent != $agentId) {
+            if (!empty($marketingAgent) && $marketingAgent != $code->rent_by_agent) {
                 // £30 for single client, £40 for multiple clients
                 $marketingDeduction = $clientCount > 1 ? 40.0 : 30.0;
                 $agentCut -= $marketingDeduction; // Deduct from agent
@@ -828,8 +871,13 @@ public function generateCode()
         // Calculate averages and apply agent search filter
         $filteredAgents = [];
         foreach ($byAgent as $agentName => $agentData) {
-            // Apply agent search filter
-            if ($agentSearch && stripos($agentName, $agentSearch) === false) {
+            // For payroll view, only show the selected agent (exact match)
+            if ($isPayrollView && $agentSearch && $agentName !== $agentSearch) {
+                continue;
+            }
+            
+            // For general earnings view, apply agent search filter (substring match)
+            if (!$isPayrollView && $agentSearch && stripos($agentName, $agentSearch) === false) {
                 continue;
             }
             
@@ -993,6 +1041,7 @@ public function generateCode()
             'marketingAgentFilter' => $marketingAgentFilter,
             'totalRentalCodes' => $rentalCodes->count(),
             'totalEarnings' => $summary['total_earnings'],
+            'isPayrollView' => $isPayrollView,
         ]);
     }
 

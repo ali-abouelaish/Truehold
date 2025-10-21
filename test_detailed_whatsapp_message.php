@@ -94,3 +94,6 @@ echo "\n=== Integration Complete ===\n";
 echo "Your rental code WhatsApp messages will now include all the detailed information!\n";
 echo "The format matches exactly what you requested.\n";
 
+
+
+

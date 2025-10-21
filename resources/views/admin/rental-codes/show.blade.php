@@ -244,6 +244,42 @@ strong {
 .table-hover tbody tr:hover td {
     background-color: #4b5563 !important;
 }
+
+/* Document items styling */
+.document-item {
+    background-color: #374151 !important;
+    border: 1px solid #4b5563 !important;
+    border-radius: 8px;
+    padding: 1rem;
+    transition: all 0.3s ease;
+}
+
+.document-item:hover {
+    background-color: #4b5563 !important;
+    border-color: #6b7280 !important;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.document-item h6 {
+    color: #d1d5db !important;
+    font-weight: 600;
+}
+
+.document-item small {
+    color: #9ca3af !important;
+}
+
+.document-item .btn {
+    border-radius: 6px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.document-item .btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
 </style>
 
 @section('content')
@@ -536,6 +572,15 @@ strong {
                         </div>
                     </div>
                     
+                    @if($rentalCode->marketingAgentUser)
+                    <div class="info-item">
+                        <div class="info-label">Marketing Agent</div>
+                        <div class="info-value">
+                            <i class="fas fa-bullhorn text-muted me-2"></i>
+                            <strong>{{ $rentalCode->marketingAgentUser->name }}</strong>
+                        </div>
+                    </div>
+                    @endif
                     
                     <div class="info-item">
                         <div class="info-label">Created</div>
@@ -560,6 +605,165 @@ strong {
                             <i class="fas fa-sticky-note text-muted me-2"></i>
                             <div class="notes-text">{{ $rentalCode->notes }}</div>
                         </div>
+                    </div>
+                    @endif
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Documents Section -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-header bg-success text-white">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-file-alt me-2"></i>Available Documents
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <!-- Client Contract -->
+                        @if($rentalCode->client_contract)
+                        <div class="col-md-4 mb-3">
+                            <div class="document-item">
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-file-contract text-primary me-3 fs-4"></i>
+                                    <div>
+                                        <h6 class="mb-1">Client Contract</h6>
+                                        <small class="text-muted">Contract document</small>
+                                    </div>
+                                </div>
+                                <div class="mt-2">
+                                    <a href="{{ Storage::url($rentalCode->client_contract) }}" 
+                                       target="_blank" 
+                                       class="btn btn-outline-primary btn-sm">
+                                        <i class="fas fa-download me-1"></i>View Document
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        @endif
+
+                        <!-- Payment Proof -->
+                        @if($rentalCode->payment_proof)
+                        <div class="col-md-4 mb-3">
+                            <div class="document-item">
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-receipt text-success me-3 fs-4"></i>
+                                    <div>
+                                        <h6 class="mb-1">Payment Proof</h6>
+                                        <small class="text-muted">Payment receipt</small>
+                                    </div>
+                                </div>
+                                <div class="mt-2">
+                                    <a href="{{ Storage::url($rentalCode->payment_proof) }}" 
+                                       target="_blank" 
+                                       class="btn btn-outline-success btn-sm">
+                                        <i class="fas fa-download me-1"></i>View Document
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        @endif
+
+                        <!-- Client ID Document -->
+                        @if($rentalCode->client_id_document)
+                        <div class="col-md-4 mb-3">
+                            <div class="document-item">
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-id-card text-info me-3 fs-4"></i>
+                                    <div>
+                                        <h6 class="mb-1">Client ID Document</h6>
+                                        <small class="text-muted">Identity verification</small>
+                                    </div>
+                                </div>
+                                <div class="mt-2">
+                                    <a href="{{ Storage::url($rentalCode->client_id_document) }}" 
+                                       target="_blank" 
+                                       class="btn btn-outline-info btn-sm">
+                                        <i class="fas fa-download me-1"></i>View Document
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        @endif
+
+                        <!-- Client ID Image -->
+                        @if($rentalCode->client_id_image)
+                        <div class="col-md-4 mb-3">
+                            <div class="document-item">
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-image text-warning me-3 fs-4"></i>
+                                    <div>
+                                        <h6 class="mb-1">Client ID Image</h6>
+                                        <small class="text-muted">ID photo</small>
+                                    </div>
+                                </div>
+                                <div class="mt-2">
+                                    <a href="{{ Storage::url($rentalCode->client_id_image) }}" 
+                                       target="_blank" 
+                                       class="btn btn-outline-warning btn-sm">
+                                        <i class="fas fa-download me-1"></i>View Image
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        @endif
+
+                        <!-- Cash Receipt Image -->
+                        @if($rentalCode->cash_receipt_image)
+                        <div class="col-md-4 mb-3">
+                            <div class="document-item">
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-money-bill-wave text-success me-3 fs-4"></i>
+                                    <div>
+                                        <h6 class="mb-1">Cash Receipt</h6>
+                                        <small class="text-muted">Cash payment receipt</small>
+                                    </div>
+                                </div>
+                                <div class="mt-2">
+                                    <a href="{{ Storage::url($rentalCode->cash_receipt_image) }}" 
+                                       target="_blank" 
+                                       class="btn btn-outline-success btn-sm">
+                                        <i class="fas fa-download me-1"></i>View Receipt
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        @endif
+
+                        <!-- Contact Images -->
+                        @if($rentalCode->contact_images && count($rentalCode->contact_images) > 0)
+                        <div class="col-md-4 mb-3">
+                            <div class="document-item">
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-images text-secondary me-3 fs-4"></i>
+                                    <div>
+                                        <h6 class="mb-1">Contact Images</h6>
+                                        <small class="text-muted">{{ count($rentalCode->contact_images) }} image(s)</small>
+                                    </div>
+                                </div>
+                                <div class="mt-2">
+                                    @foreach($rentalCode->contact_images as $index => $image)
+                                    <a href="{{ Storage::url($image) }}" 
+                                       target="_blank" 
+                                       class="btn btn-outline-secondary btn-sm me-1 mb-1">
+                                        <i class="fas fa-download me-1"></i>Image {{ $index + 1 }}
+                                    </a>
+                                    @endforeach
+                                </div>
+                            </div>
+                        </div>
+                        @endif
+                    </div>
+
+                    <!-- No Documents Message -->
+                    @if(!$rentalCode->client_contract && !$rentalCode->payment_proof && !$rentalCode->client_id_document && !$rentalCode->client_id_image && !$rentalCode->cash_receipt_image && (!$rentalCode->contact_images || count($rentalCode->contact_images) == 0))
+                    <div class="text-center py-4">
+                        <i class="fas fa-file-alt text-muted fs-1 mb-3"></i>
+                        <h5 class="text-muted">No Documents Available</h5>
+                        <p class="text-muted">No documents have been uploaded for this rental code.</p>
                     </div>
                     @endif
                 </div>

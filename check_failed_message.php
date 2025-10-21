@@ -105,3 +105,6 @@ echo "2. **Use Templates**: For first messages, use approved message templates\n
 echo "3. **Check Number**: Verify the phone number is correct and has WhatsApp\n";
 echo "4. **Template Approval**: Ensure your message templates are approved\n";
 
+
+
+

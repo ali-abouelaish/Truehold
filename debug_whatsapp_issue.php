@@ -129,3 +129,6 @@ echo "6. **WhatsApp Permissions**: Verify your account has WhatsApp Business API
 echo "📱 **IMMEDIATE ACTION**: Send a WhatsApp message from +447947768707 to +15558664742\n";
 echo "This is the most common solution for WhatsApp Business API issues.\n";
 
+
+
+

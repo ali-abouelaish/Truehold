@@ -20,8 +20,8 @@ class RentalCode extends Model
         'client_id',
         'client_count',
         'rent_by_agent',
-        'agent_name',
-        'marketing_agent',
+        'rental_agent_id',
+        'marketing_agent_id',
         'notes',
         'status',
         'paid',
@@ -169,6 +169,22 @@ class RentalCode extends Model
     public function getFormattedRentalDateAttribute(): string
     {
         return $this->rental_date->format('d/m/Y');
+    }
+
+    /**
+     * Get the rental agent user
+     */
+    public function rentalAgent()
+    {
+        return $this->belongsTo(User::class, 'rental_agent_id');
+    }
+
+    /**
+     * Get the marketing agent user
+     */
+    public function marketingAgentUser()
+    {
+        return $this->belongsTo(User::class, 'marketing_agent_id');
     }
 
 }

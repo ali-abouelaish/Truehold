@@ -121,3 +121,6 @@ echo "\n=== Integration Complete ===\n";
 echo "Your rental code generation will now send WhatsApp notifications!\n";
 echo "When you create a rental code, both client and admin will receive WhatsApp messages.\n";
 
+
+
+
