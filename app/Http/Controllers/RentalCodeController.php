@@ -1666,12 +1666,16 @@ public function generateCode()
                 \Log::info('Processing client contract uploads', ['count' => count($request->file('client_contract'))]);
                 $contractPaths = [];
                 foreach ($request->file('client_contract') as $file) {
-                    $path = $file->store('rental-codes/documents', 'public');
-                    $contractPaths[] = $path;
-                    \Log::info('Stored client contract file', ['path' => $path]);
+                    if ($file->isValid()) {
+                        $path = $file->store('rental-codes/documents', 'public');
+                        $contractPaths[] = $path;
+                        \Log::info('Stored client contract file', ['path' => $path]);
+                    }
                 }
-                $rentalCode->update(['client_contract' => json_encode($contractPaths)]);
-                \Log::info('Updated client_contract field', ['paths' => $contractPaths]);
+                if (!empty($contractPaths)) {
+                    $rentalCode->update(['client_contract' => json_encode($contractPaths)]);
+                    \Log::info('Updated client_contract field', ['paths' => $contractPaths]);
+                }
             }
 
             // Handle payment proof uploads
@@ -1679,12 +1683,16 @@ public function generateCode()
                 \Log::info('Processing payment proof uploads', ['count' => count($request->file('payment_proof'))]);
                 $proofPaths = [];
                 foreach ($request->file('payment_proof') as $file) {
-                    $path = $file->store('rental-codes/documents', 'public');
-                    $proofPaths[] = $path;
-                    \Log::info('Stored payment proof file', ['path' => $path]);
+                    if ($file->isValid()) {
+                        $path = $file->store('rental-codes/documents', 'public');
+                        $proofPaths[] = $path;
+                        \Log::info('Stored payment proof file', ['path' => $path]);
+                    }
                 }
-                $rentalCode->update(['payment_proof' => json_encode($proofPaths)]);
-                \Log::info('Updated payment_proof field', ['paths' => $proofPaths]);
+                if (!empty($proofPaths)) {
+                    $rentalCode->update(['payment_proof' => json_encode($proofPaths)]);
+                    \Log::info('Updated payment_proof field', ['paths' => $proofPaths]);
+                }
             }
 
             // Handle client ID document uploads
@@ -1692,12 +1700,16 @@ public function generateCode()
                 \Log::info('Processing client ID document uploads', ['count' => count($request->file('client_id_document'))]);
                 $idPaths = [];
                 foreach ($request->file('client_id_document') as $file) {
-                    $path = $file->store('rental-codes/documents', 'public');
-                    $idPaths[] = $path;
-                    \Log::info('Stored client ID document file', ['path' => $path]);
+                    if ($file->isValid()) {
+                        $path = $file->store('rental-codes/documents', 'public');
+                        $idPaths[] = $path;
+                        \Log::info('Stored client ID document file', ['path' => $path]);
+                    }
                 }
-                $rentalCode->update(['client_id_document' => json_encode($idPaths)]);
-                \Log::info('Updated client_id_document field', ['paths' => $idPaths]);
+                if (!empty($idPaths)) {
+                    $rentalCode->update(['client_id_document' => json_encode($idPaths)]);
+                    \Log::info('Updated client_id_document field', ['paths' => $idPaths]);
+                }
             }
 
             // Handle cash document uploads
@@ -1705,28 +1717,38 @@ public function generateCode()
                 \Log::info('Processing contact image uploads', ['count' => count($request->file('contact_images'))]);
                 $contactPaths = [];
                 foreach ($request->file('contact_images') as $file) {
-                    $path = $file->store('cash-documents/contact-images', 'public');
-                    $contactPaths[] = $path;
-                    \Log::info('Stored contact image file', ['path' => $path]);
+                    if ($file->isValid()) {
+                        $path = $file->store('cash-documents/contact-images', 'public');
+                        $contactPaths[] = $path;
+                        \Log::info('Stored contact image file', ['path' => $path]);
+                    }
                 }
-                $rentalCode->update(['contact_images' => json_encode($contactPaths)]);
-                \Log::info('Updated contact_images field', ['paths' => $contactPaths]);
+                if (!empty($contactPaths)) {
+                    $rentalCode->update(['contact_images' => json_encode($contactPaths)]);
+                    \Log::info('Updated contact_images field', ['paths' => $contactPaths]);
+                }
             }
 
             // Handle client ID image upload
             if ($request->hasFile('client_id_image')) {
                 \Log::info('Processing client ID image upload');
-                $path = $request->file('client_id_image')->store('cash-documents/client-ids', 'public');
-                $rentalCode->update(['client_id_image' => $path]);
-                \Log::info('Updated client_id_image field', ['path' => $path]);
+                $file = $request->file('client_id_image');
+                if ($file->isValid()) {
+                    $path = $file->store('cash-documents/client-ids', 'public');
+                    $rentalCode->update(['client_id_image' => $path]);
+                    \Log::info('Updated client_id_image field', ['path' => $path]);
+                }
             }
 
             // Handle cash receipt image upload
             if ($request->hasFile('cash_receipt_image')) {
                 \Log::info('Processing cash receipt image upload');
-                $path = $request->file('cash_receipt_image')->store('cash-documents/cash-receipts', 'public');
-                $rentalCode->update(['cash_receipt_image' => $path]);
-                \Log::info('Updated cash_receipt_image field', ['path' => $path]);
+                $file = $request->file('cash_receipt_image');
+                if ($file->isValid()) {
+                    $path = $file->store('cash-documents/cash-receipts', 'public');
+                    $rentalCode->update(['cash_receipt_image' => $path]);
+                    \Log::info('Updated cash_receipt_image field', ['path' => $path]);
+                }
             }
 
             \Log::info('File uploads processed for rental code', ['rental_code_id' => $rentalCode->id]);
