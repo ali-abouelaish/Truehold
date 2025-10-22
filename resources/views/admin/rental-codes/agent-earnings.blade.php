@@ -983,7 +983,6 @@ function printPayroll(agentName) {
                         <th>Agent Cut</th>
                         <th>Agency Cut</th>
                         <th>Status</th>
-                        <th>Payment Method</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -991,18 +990,17 @@ function printPayroll(agentName) {
                         <tr>
                             <td>${transaction.code}</td>
                             <td>${new Date(transaction.date).toLocaleDateString()}</td>
-                            <td>£${parseFloat(transaction.total_fee).toFixed(2)}</td>
+                            <td>${(transaction.payment_method === 'Transfer' || transaction.payment_method === 'Card Machine') ? '⚡ ' : (transaction.payment_method === 'Cash' ? '💰 ' : '')}£${parseFloat(transaction.total_fee).toFixed(2)}</td>
                             <td>£${parseFloat(transaction.agent_cut).toFixed(2)}</td>
                             <td>£${parseFloat(transaction.agency_cut).toFixed(2)}</td>
                             <td>${transaction.status}</td>
-                            <td>${(transaction.payment_method === 'Transfer' || transaction.payment_method === 'Card Machine') ? '⚡ ' : (transaction.payment_method === 'Cash' ? '💰 ' : '')}${transaction.payment_method}</td>
                         </tr>
                     `).join('')}
                     <tr class="total-row">
                         <td colspan="3"><strong>Total</strong></td>
                         <td><strong>£${parseFloat(agentData.agent_earnings).toFixed(2)}</strong></td>
                         <td><strong>£${parseFloat(agentData.agency_earnings).toFixed(2)}</strong></td>
-                        <td colspan="2"></td>
+                        <td></td>
                     </tr>
                 </tbody>
             </table>

@@ -127,7 +127,6 @@
                                         <th>Fee</th>
                                         <th>Your Role</th>
                                         <th>Status</th>
-                                        <th>Payment</th>
                                         <th>Actions</th>
                                     </tr>
                                 </thead>
@@ -146,7 +145,21 @@
                                                 </div>
                                             </td>
                                             <td>{{ $code->rental_date->format('M d, Y') }}</td>
-                                            <td class="fw-bold">£{{ number_format($code->consultation_fee, 2) }}</td>
+                                            <td class="fw-bold">
+                                                @php
+                                                    $paymentMethod = $code->payment_method ?? 'N/A';
+                                                    $emoji = '';
+                                                    if (strtolower($paymentMethod) === 'transfer' || strtolower($paymentMethod) === 'card machine') {
+                                                        $emoji = '⚡';
+                                                    } elseif (strtolower($paymentMethod) === 'cash') {
+                                                        $emoji = '💰';
+                                                    }
+                                                @endphp
+                                                @if($emoji)
+                                                    <span class="me-1">{{ $emoji }}</span>
+                                                @endif
+                                                £{{ number_format($code->consultation_fee, 2) }}
+                                            </td>
                                             <td>
                                                 @php
                                                     $isRentalAgent = $code->rent_by_agent_name === ($agent->company_name ?? $user->name);
@@ -166,37 +179,6 @@
                                                 <span class="badge badge-{{ $code->status === 'completed' ? 'success' : ($code->status === 'approved' ? 'primary' : ($code->status === 'pending' ? 'warning' : 'danger')) }}">
                                                     {{ ucfirst($code->status) }}
                                                 </span>
-                                            </td>
-                                            <td>
-                                                @php
-                                                    $paymentMethod = $code->payment_method ?? 'N/A';
-                                                    $emoji = '';
-                                                    if (strtolower($paymentMethod) === 'transfer' || strtolower($paymentMethod) === 'card machine') {
-                                                        $emoji = '⚡';
-                                                    } elseif (strtolower($paymentMethod) === 'cash') {
-                                                        $emoji = '💰';
-                                                    }
-                                                @endphp
-                                                <div class="d-flex flex-column">
-                                                    <span class="badge badge-{{ strtolower($paymentMethod) === 'transfer' || strtolower($paymentMethod) === 'card machine' ? 'info' : (strtolower($paymentMethod) === 'cash' ? 'success' : 'secondary') }}">
-                                                        @if($emoji)
-                                                            <span class="me-1">{{ $emoji }}</span>
-                                                        @endif
-                                                        {{ $paymentMethod }}
-                                                    </span>
-                                                    @if($code->paid)
-                                                        <small class="text-success mt-1">
-                                                            <i class="fas fa-check me-1"></i>Paid
-                                                        </small>
-                                                        @if($code->paid_at)
-                                                            <small class="text-muted">{{ $code->paid_at->format('M d, Y') }}</small>
-                                                        @endif
-                                                    @else
-                                                        <small class="text-warning mt-1">
-                                                            <i class="fas fa-clock me-1"></i>Pending
-                                                        </small>
-                                                    @endif
-                                                </div>
                                             </td>
                                             <td>
                                                 <div class="btn-group" role="group">

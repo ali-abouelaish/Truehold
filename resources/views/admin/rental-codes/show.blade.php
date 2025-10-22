@@ -636,13 +636,7 @@ strong {
                 <div class="card-body">
                     <div class="row">
                         <!-- Client Contract -->
-                        @php
-                            $contractFiles = null;
-                            if ($rentalCode->client_contract) {
-                                $contractFiles = is_string($rentalCode->client_contract) ? json_decode($rentalCode->client_contract, true) : $rentalCode->client_contract;
-                            }
-                        @endphp
-                        @if($contractFiles && is_array($contractFiles) && count($contractFiles) > 0)
+                        @if($rentalCode->client_contract && !empty($rentalCode->client_contract))
                         <div class="col-md-4 mb-3">
                             <div class="document-item">
                                 <div class="d-flex align-items-center">
@@ -653,32 +647,22 @@ strong {
                                     </div>
                                 </div>
                                 <div class="mt-2">
-                                    @foreach($contractFiles as $index => $filePath)
-                                        @if($filePath && is_string($filePath))
-                                            <a href="{{ route('rental-codes.view-file', ['rentalCode' => $rentalCode->id, 'field' => 'client_contract', 'index' => $index]) }}" 
-                                               target="_blank" 
-                                               class="btn btn-outline-primary btn-sm me-2">
-                                                <i class="fas fa-eye me-1"></i>View Document {{ count($contractFiles) > 1 ? ($index + 1) : '' }}
-                                            </a>
-                                            <a href="{{ route('rental-codes.download-file', ['rentalCode' => $rentalCode->id, 'field' => 'client_contract', 'index' => $index]) }}" 
-                                               class="btn btn-outline-secondary btn-sm me-2">
-                                                <i class="fas fa-download me-1"></i>Download {{ count($contractFiles) > 1 ? ($index + 1) : '' }}
-                                            </a>
-                                        @endif
-                                    @endforeach
+                                    <a href="{{ route('rental-codes.view-file', ['rentalCode' => $rentalCode->id, 'field' => 'client_contract']) }}" 
+                                       target="_blank" 
+                                       class="btn btn-outline-primary btn-sm me-2">
+                                        <i class="fas fa-eye me-1"></i>View Document
+                                    </a>
+                                    <a href="{{ route('rental-codes.download-file', ['rentalCode' => $rentalCode->id, 'field' => 'client_contract']) }}" 
+                                       class="btn btn-outline-secondary btn-sm me-2">
+                                        <i class="fas fa-download me-1"></i>Download
+                                    </a>
                                 </div>
                             </div>
                         </div>
                         @endif
 
                         <!-- Payment Proof -->
-                        @php
-                            $proofFiles = null;
-                            if ($rentalCode->payment_proof) {
-                                $proofFiles = is_string($rentalCode->payment_proof) ? json_decode($rentalCode->payment_proof, true) : $rentalCode->payment_proof;
-                            }
-                        @endphp
-                        @if($proofFiles && is_array($proofFiles) && count($proofFiles) > 0)
+                        @if($rentalCode->payment_proof && !empty($rentalCode->payment_proof))
                         <div class="col-md-4 mb-3">
                             <div class="document-item">
                                 <div class="d-flex align-items-center">
@@ -689,32 +673,22 @@ strong {
                                     </div>
                                 </div>
                                 <div class="mt-2">
-                                    @foreach($proofFiles as $index => $filePath)
-                                        @if($filePath && is_string($filePath))
-                                            <a href="{{ route('rental-codes.view-file', ['rentalCode' => $rentalCode->id, 'field' => 'payment_proof', 'index' => $index]) }}" 
-                                               target="_blank" 
-                                               class="btn btn-outline-success btn-sm me-2">
-                                                <i class="fas fa-eye me-1"></i>View Document {{ count($proofFiles) > 1 ? ($index + 1) : '' }}
-                                            </a>
-                                            <a href="{{ route('rental-codes.download-file', ['rentalCode' => $rentalCode->id, 'field' => 'payment_proof', 'index' => $index]) }}" 
-                                               class="btn btn-outline-secondary btn-sm me-2">
-                                                <i class="fas fa-download me-1"></i>Download {{ count($proofFiles) > 1 ? ($index + 1) : '' }}
-                                            </a>
-                                        @endif
-                                    @endforeach
+                                    <a href="{{ route('rental-codes.view-file', ['rentalCode' => $rentalCode->id, 'field' => 'payment_proof']) }}" 
+                                       target="_blank" 
+                                       class="btn btn-outline-success btn-sm me-2">
+                                        <i class="fas fa-eye me-1"></i>View Document
+                                    </a>
+                                    <a href="{{ route('rental-codes.download-file', ['rentalCode' => $rentalCode->id, 'field' => 'payment_proof']) }}" 
+                                       class="btn btn-outline-secondary btn-sm me-2">
+                                        <i class="fas fa-download me-1"></i>Download
+                                    </a>
                                 </div>
                             </div>
                         </div>
                         @endif
 
                         <!-- Client ID Document -->
-                        @php
-                            $idFiles = null;
-                            if ($rentalCode->client_id_document) {
-                                $idFiles = is_string($rentalCode->client_id_document) ? json_decode($rentalCode->client_id_document, true) : $rentalCode->client_id_document;
-                            }
-                        @endphp
-                        @if($idFiles && is_array($idFiles) && count($idFiles) > 0)
+                        @if($rentalCode->client_id_document && !empty($rentalCode->client_id_document))
                         <div class="col-md-4 mb-3">
                             <div class="document-item">
                                 <div class="d-flex align-items-center">
@@ -725,19 +699,15 @@ strong {
                                     </div>
                                 </div>
                                 <div class="mt-2">
-                                    @foreach($idFiles as $index => $filePath)
-                                        @if($filePath && is_string($filePath))
-                                            <a href="{{ route('rental-codes.view-file', ['rentalCode' => $rentalCode->id, 'field' => 'client_id_document', 'index' => $index]) }}" 
-                                               target="_blank" 
-                                               class="btn btn-outline-info btn-sm me-2">
-                                                <i class="fas fa-eye me-1"></i>View Document {{ count($idFiles) > 1 ? ($index + 1) : '' }}
-                                            </a>
-                                            <a href="{{ route('rental-codes.download-file', ['rentalCode' => $rentalCode->id, 'field' => 'client_id_document', 'index' => $index]) }}" 
-                                               class="btn btn-outline-secondary btn-sm me-2">
-                                                <i class="fas fa-download me-1"></i>Download {{ count($idFiles) > 1 ? ($index + 1) : '' }}
-                                            </a>
-                                        @endif
-                                    @endforeach
+                                    <a href="{{ route('rental-codes.view-file', ['rentalCode' => $rentalCode->id, 'field' => 'client_id_document']) }}" 
+                                       target="_blank" 
+                                       class="btn btn-outline-info btn-sm me-2">
+                                        <i class="fas fa-eye me-1"></i>View Document
+                                    </a>
+                                    <a href="{{ route('rental-codes.download-file', ['rentalCode' => $rentalCode->id, 'field' => 'client_id_document']) }}" 
+                                       class="btn btn-outline-secondary btn-sm me-2">
+                                        <i class="fas fa-download me-1"></i>Download
+                                    </a>
                                 </div>
                             </div>
                         </div>

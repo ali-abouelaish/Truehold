@@ -1667,7 +1667,12 @@ public function generateCode()
     {
         \Log::info('Starting file upload processing', [
             'rental_code_id' => $rentalCode->id,
-            'has_files' => $request->hasFile('client_contract') || $request->hasFile('payment_proof') || $request->hasFile('client_id_document')
+            'has_client_contract' => $request->hasFile('client_contract'),
+            'has_payment_proof' => $request->hasFile('payment_proof'),
+            'has_client_id_document' => $request->hasFile('client_id_document'),
+            'client_contract_count' => $request->hasFile('client_contract') ? count($request->file('client_contract')) : 0,
+            'payment_proof_count' => $request->hasFile('payment_proof') ? count($request->file('payment_proof')) : 0,
+            'client_id_document_count' => $request->hasFile('client_id_document') ? count($request->file('client_id_document')) : 0
         ]);
         
         try {
@@ -1680,7 +1685,14 @@ public function generateCode()
             // Process client ID documents
             $this->processFileUploads($request, 'client_id_document', 'rental-codes/documents', $rentalCode);
             
-            \Log::info('File upload processing completed', ['rental_code_id' => $rentalCode->id]);
+            // Log final state
+            $rentalCode->refresh();
+            \Log::info('File upload processing completed', [
+                'rental_code_id' => $rentalCode->id,
+                'client_contract' => $rentalCode->client_contract,
+                'payment_proof' => $rentalCode->payment_proof,
+                'client_id_document' => $rentalCode->client_id_document
+            ]);
         } catch (\Exception $e) {
             \Log::error('File upload processing failed', [
                 'rental_code_id' => $rentalCode->id,
@@ -1693,7 +1705,7 @@ public function generateCode()
     /**
      * Process file uploads for a specific field
      */
-private function processFileUploads(Request $request, $fieldName, $storagePath, RentalCode $rentalCode)
+    private function processFileUploads(Request $request, $fieldName, $storagePath, RentalCode $rentalCode)
     {
         if (!$request->hasFile($fieldName)) {
             \Log::info("No files found for field: {$fieldName}");
@@ -1706,26 +1718,31 @@ private function processFileUploads(Request $request, $fieldName, $storagePath, 
             'field' => $fieldName
         ]);
         
-        $validPaths = [];
+        // For simplicity, just store the first valid file as a text path
+        $storedPath = null;
         
-        foreach ($files as $file) {
+        foreach ($files as $index => $file) {
             if ($file && $file->isValid() && $file->getSize() > 0) {
                 try {
                     $path = $file->store($storagePath, 'public');
-                    $validPaths[] = $path;
+                    $storedPath = $path;
                     \Log::info("Stored file for {$fieldName}", [
+                        'index' => $index,
                         'path' => $path,
                         'size' => $file->getSize(),
                         'name' => $file->getClientOriginalName()
                     ]);
+                    break; // Only store the first valid file
                 } catch (\Exception $e) {
                     \Log::error("Failed to store file for {$fieldName}", [
+                        'index' => $index,
                         'error' => $e->getMessage(),
                         'file' => $file->getClientOriginalName()
                     ]);
                 }
             } else {
                 \Log::warning("Invalid file skipped for {$fieldName}", [
+                    'index' => $index,
                     'valid' => $file ? $file->isValid() : false,
                     'size' => $file ? $file->getSize() : 0,
                     'error' => $file ? $file->getError() : 'No file'
@@ -1733,16 +1750,22 @@ private function processFileUploads(Request $request, $fieldName, $storagePath, 
             }
         }
         
-        if (!empty($validPaths)) {
-            $rentalCode->update([$fieldName => json_encode($validPaths)]);
+        // Update the field with simple text path
+        try {
+            $rentalCode->update([$fieldName => $storedPath]);
             \Log::info("Updated {$fieldName} field", [
-                'paths' => $validPaths,
-                'count' => count($validPaths)
+                'path' => $storedPath,
+                'success' => $storedPath !== null
             ]);
-        } else {
-            \Log::info("No valid files to store for {$fieldName}");
+        } catch (\Exception $e) {
+            \Log::error("Failed to update {$fieldName} field in database", [
+                'error' => $e->getMessage(),
+                'path' => $storedPath,
+                'rental_code_id' => $rentalCode->id
+            ]);
         }
     }
+
 
     /**
      * Download a file from storage
@@ -1750,45 +1773,34 @@ private function processFileUploads(Request $request, $fieldName, $storagePath, 
     public function downloadFile(RentalCode $rentalCode, $field, $index = 0)
     {
         try {
-            // Get the file paths for the specified field
-            $filePaths = null;
+            // Get the file path for the specified field
+            $filePath = null;
             switch ($field) {
                 case 'client_contract':
-                    $filePaths = $rentalCode->client_contract;
+                    $filePath = $rentalCode->client_contract;
                     break;
                 case 'payment_proof':
-                    $filePaths = $rentalCode->payment_proof;
+                    $filePath = $rentalCode->payment_proof;
                     break;
                 case 'client_id_document':
-                    $filePaths = $rentalCode->client_id_document;
+                    $filePath = $rentalCode->client_id_document;
                     break;
                 case 'client_id_image':
-                    $filePaths = [$rentalCode->client_id_image];
+                    $filePath = $rentalCode->client_id_image;
                     break;
                 case 'cash_receipt_image':
-                    $filePaths = [$rentalCode->cash_receipt_image];
+                    $filePath = $rentalCode->cash_receipt_image;
                     break;
                 case 'contact_images':
-                    $filePaths = $rentalCode->contact_images;
+                    $filePath = $rentalCode->contact_images;
                     break;
                 default:
                     abort(404, 'File type not found');
             }
 
-            if (!$filePaths) {
-                abort(404, 'No files found for this field');
+            if (!$filePath || empty($filePath)) {
+                abort(404, 'No file found for this field');
             }
-
-            // Decode JSON if it's a string
-            if (is_string($filePaths)) {
-                $filePaths = json_decode($filePaths, true);
-            }
-
-            if (!is_array($filePaths) || !isset($filePaths[$index])) {
-                abort(404, 'File not found');
-            }
-
-            $filePath = $filePaths[$index];
             $fullPath = storage_path('app/public/' . $filePath);
 
             if (!file_exists($fullPath)) {
@@ -1820,45 +1832,34 @@ private function processFileUploads(Request $request, $fieldName, $storagePath, 
     public function viewFile(RentalCode $rentalCode, $field, $index = 0)
     {
         try {
-            // Get the file paths for the specified field
-            $filePaths = null;
+            // Get the file path for the specified field
+            $filePath = null;
             switch ($field) {
                 case 'client_contract':
-                    $filePaths = $rentalCode->client_contract;
+                    $filePath = $rentalCode->client_contract;
                     break;
                 case 'payment_proof':
-                    $filePaths = $rentalCode->payment_proof;
+                    $filePath = $rentalCode->payment_proof;
                     break;
                 case 'client_id_document':
-                    $filePaths = $rentalCode->client_id_document;
+                    $filePath = $rentalCode->client_id_document;
                     break;
                 case 'client_id_image':
-                    $filePaths = [$rentalCode->client_id_image];
+                    $filePath = $rentalCode->client_id_image;
                     break;
                 case 'cash_receipt_image':
-                    $filePaths = [$rentalCode->cash_receipt_image];
+                    $filePath = $rentalCode->cash_receipt_image;
                     break;
                 case 'contact_images':
-                    $filePaths = $rentalCode->contact_images;
+                    $filePath = $rentalCode->contact_images;
                     break;
                 default:
                     abort(404, 'File type not found');
             }
 
-            if (!$filePaths) {
-                abort(404, 'No files found for this field');
+            if (!$filePath || empty($filePath)) {
+                abort(404, 'No file found for this field');
             }
-
-            // Decode JSON if it's a string
-            if (is_string($filePaths)) {
-                $filePaths = json_decode($filePaths, true);
-            }
-
-            if (!is_array($filePaths) || !isset($filePaths[$index])) {
-                abort(404, 'File not found');
-            }
-
-            $filePath = $filePaths[$index];
             $fullPath = storage_path('app/public/' . $filePath);
 
             if (!file_exists($fullPath)) {
