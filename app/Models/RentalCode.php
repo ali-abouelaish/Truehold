@@ -74,22 +74,18 @@ class RentalCode extends Model
 
 
     /**
-     * Get display name for marketing_agent (handles ID or name string)
+     * Get display name for marketing_agent (uses marketing_agent_id foreign key)
      */
     public function getMarketingAgentNameAttribute(): string
     {
         try {
-            $value = $this->marketing_agent;
-            if (empty($value)) {
+            if (empty($this->marketing_agent_id)) {
                 return 'N/A';
             }
-            if (is_numeric($value)) {
-                $user = \App\Models\User::find((int) $value);
-                return $user?->name ?? (string) $value;
-            }
-            return (string) $value;
+            $user = \App\Models\User::find($this->marketing_agent_id);
+            return $user?->name ?? 'N/A';
         } catch (\Throwable $e) {
-            return (string) ($this->marketing_agent ?? 'N/A');
+            return 'N/A';
         }
     }
 

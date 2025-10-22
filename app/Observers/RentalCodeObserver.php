@@ -17,7 +17,7 @@ class RentalCodeObserver
             'rental_code' => $rentalCode->rental_code,
             'consultation_fee' => $rentalCode->consultation_fee,
             'rent_by_agent' => $rentalCode->rent_by_agent,
-            'marketing_agent' => $rentalCode->marketing_agent,
+            'marketing_agent_id' => $rentalCode->marketing_agent_id,
             'payment_method' => $rentalCode->payment_method
         ]);
         
@@ -36,7 +36,7 @@ class RentalCodeObserver
             'rental_code' => $rentalCode->rental_code,
             'consultation_fee' => $rentalCode->consultation_fee,
             'rent_by_agent' => $rentalCode->rent_by_agent,
-            'marketing_agent' => $rentalCode->marketing_agent,
+            'marketing_agent_id' => $rentalCode->marketing_agent_id,
             'payment_method' => $rentalCode->payment_method,
             'paid' => $rentalCode->paid
         ]);

@@ -277,15 +277,18 @@ class RentalCodeController extends Controller
             'client_company_university_address' => 'nullable|string',
             'client_position_role' => 'nullable|string|max:255',
             'rent_by_agent' => 'required|string|max:255',
-            'marketing_agent' => 'nullable|string|max:255',
+            'rental_agent_id' => 'nullable|exists:users,id',
+            'marketing_agent_id' => 'nullable|exists:users,id',
             'client_count' => 'required|integer|min:1|max:10',
             'notes' => 'nullable|string',
+            'contact_images.*' => 'nullable|file|mimes:jpg,jpeg,png|max:10240',
+            'client_id_image' => 'nullable|file|mimes:jpg,jpeg,png|max:10240',
+            'cash_receipt_image' => 'nullable|file|mimes:jpg,jpeg,png|max:10240',
+            // Regular document upload validation
+            'client_contract.*' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:10240',
+            'payment_proof.*' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:10240',
+            'client_id_document.*' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:10240',
         ];
-
-        // Only admin users can change status
-        if (auth()->user()->role === 'admin') {
-            $validationRules['status'] = 'required|string|in:pending,approved,paid';
-        }
 
         $validated = $request->validate($validationRules);
 
@@ -309,6 +312,22 @@ class RentalCodeController extends Controller
         }
 
         $rentalCode->update($rentalCodeData);
+
+        // Handle file uploads for updates
+        try {
+            $this->handleFileUploads($request, $rentalCode);
+            \Log::info('File upload handling completed for update', [
+                'rental_code_id' => $rentalCode->id
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('File upload handling failed during update', [
+                'rental_code_id' => $rentalCode->id,
+                'error' => $e->getMessage()
+            ]);
+        }
+
+        // Send WhatsApp notification for rental code update
+        $this->sendWhatsAppUpdateNotification($rentalCode, $client);
 
         return redirect()->route('rental-codes.index')
             ->with('success', 'Rental code updated successfully!');
@@ -1535,11 +1554,59 @@ public function generateCode()
      */
     private function sendWhatsAppNotifications(RentalCode $rentalCode, $client)
     {
-        // Temporarily disabled Twilio/WhatsApp notifications per request
-        \Log::info('WhatsApp notifications are temporarily disabled; skipping send', [
-            'rental_code' => $rentalCode->rental_code ?? null,
-        ]);
-        return;
+        try {
+            $whatsappService = new WhatsAppService();
+            
+            // Send admin notification for new rental code
+            $result = $whatsappService->sendRentalCodeAdminNotification($rentalCode, $client);
+            
+            if ($result['success']) {
+                \Log::info('WhatsApp admin notification sent successfully', [
+                    'rental_code' => $rentalCode->rental_code,
+                    'sid' => $result['sid'] ?? null
+                ]);
+            } else {
+                \Log::warning('WhatsApp admin notification failed', [
+                    'rental_code' => $rentalCode->rental_code,
+                    'error' => $result['error'] ?? 'Unknown error'
+                ]);
+            }
+        } catch (\Exception $e) {
+            \Log::error('Failed to send WhatsApp notifications', [
+                'rental_code' => $rentalCode->rental_code,
+                'error' => $e->getMessage()
+            ]);
+        }
+    }
+
+    /**
+     * Send WhatsApp update notification for rental code
+     */
+    private function sendWhatsAppUpdateNotification(RentalCode $rentalCode, $client)
+    {
+        try {
+            $whatsappService = new WhatsAppService();
+            
+            // Send admin notification for rental code update
+            $result = $whatsappService->sendRentalCodeUpdateNotification($rentalCode, $client, 'updated');
+            
+            if ($result['success']) {
+                \Log::info('WhatsApp update notification sent successfully', [
+                    'rental_code' => $rentalCode->rental_code,
+                    'sid' => $result['sid'] ?? null
+                ]);
+            } else {
+                \Log::warning('WhatsApp update notification failed', [
+                    'rental_code' => $rentalCode->rental_code,
+                    'error' => $result['error'] ?? 'Unknown error'
+                ]);
+            }
+        } catch (\Exception $e) {
+            \Log::error('Failed to send WhatsApp update notification', [
+                'rental_code' => $rentalCode->rental_code,
+                'error' => $e->getMessage()
+            ]);
+        }
     }
 
     /**
@@ -1650,6 +1717,35 @@ public function generateCode()
                 }
                 $rentalCode->update(['client_id_document' => json_encode($idPaths)]);
                 \Log::info('Updated client_id_document field', ['paths' => $idPaths]);
+            }
+
+            // Handle cash document uploads
+            if ($request->hasFile('contact_images')) {
+                \Log::info('Processing contact image uploads', ['count' => count($request->file('contact_images'))]);
+                $contactPaths = [];
+                foreach ($request->file('contact_images') as $file) {
+                    $path = $file->store('cash-documents/contact-images', 'public');
+                    $contactPaths[] = $path;
+                    \Log::info('Stored contact image file', ['path' => $path]);
+                }
+                $rentalCode->update(['contact_images' => json_encode($contactPaths)]);
+                \Log::info('Updated contact_images field', ['paths' => $contactPaths]);
+            }
+
+            // Handle client ID image upload
+            if ($request->hasFile('client_id_image')) {
+                \Log::info('Processing client ID image upload');
+                $path = $request->file('client_id_image')->store('cash-documents/client-ids', 'public');
+                $rentalCode->update(['client_id_image' => $path]);
+                \Log::info('Updated client_id_image field', ['path' => $path]);
+            }
+
+            // Handle cash receipt image upload
+            if ($request->hasFile('cash_receipt_image')) {
+                \Log::info('Processing cash receipt image upload');
+                $path = $request->file('cash_receipt_image')->store('cash-documents/cash-receipts', 'public');
+                $rentalCode->update(['cash_receipt_image' => $path]);
+                \Log::info('Updated cash_receipt_image field', ['path' => $path]);
             }
 
             \Log::info('File uploads processed for rental code', ['rental_code_id' => $rentalCode->id]);

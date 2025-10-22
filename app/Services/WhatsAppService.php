@@ -3,19 +3,34 @@
 namespace App\Services;
 
 use Illuminate\Support\Facades\Log;
+use Twilio\Rest\Client;
 
 class WhatsAppService
 {
     protected $client;
     protected $whatsappNumber;
     protected $messagingServiceSid;
+    protected $adminNumber;
 
     public function __construct()
     {
-        // Temporarily disable Twilio client initialization to avoid missing class errors
-        $this->whatsappNumber = null;
-        $this->messagingServiceSid = null;
-        $this->client = null;
+        try {
+            $this->whatsappNumber = config('services.twilio.whatsapp_number');
+            $this->adminNumber = config('services.twilio.admin_whatsapp_number');
+            
+            if (config('services.twilio.account_sid') && config('services.twilio.auth_token')) {
+                $this->client = new Client(
+                    config('services.twilio.account_sid'),
+                    config('services.twilio.auth_token')
+                );
+            } else {
+                $this->client = null;
+                Log::warning('Twilio credentials not configured');
+            }
+        } catch (\Exception $e) {
+            Log::error('Failed to initialize Twilio client', ['error' => $e->getMessage()]);
+            $this->client = null;
+        }
     }
 
     /**
@@ -23,14 +38,68 @@ class WhatsAppService
      */
     public function sendMessage($to, $message)
     {
-        // Temporarily short-circuit sending
-        Log::info('WhatsApp send skipped (temporarily disabled)', [
-            'to' => $to,
-        ]);
-        return [
-            'success' => false,
-            'error' => 'WhatsApp temporarily disabled'
-        ];
+        if (!$this->client) {
+            Log::error('Twilio client not initialized');
+            return [
+                'success' => false,
+                'error' => 'Twilio client not initialized'
+            ];
+        }
+
+        if (!$this->whatsappNumber) {
+            Log::error('WhatsApp number not configured');
+            return [
+                'success' => false,
+                'error' => 'WhatsApp number not configured'
+            ];
+        }
+
+        try {
+            // Format the phone number
+            $formattedTo = $this->formatPhoneNumber($to);
+            
+            // Ensure the number has whatsapp: prefix
+            if (!str_starts_with($formattedTo, 'whatsapp:')) {
+                $formattedTo = 'whatsapp:' . $formattedTo;
+            }
+
+            Log::info('Sending WhatsApp message', [
+                'to' => $formattedTo,
+                'from' => $this->whatsappNumber,
+                'message_length' => strlen($message)
+            ]);
+
+            $messageObj = $this->client->messages->create(
+                $formattedTo,
+                [
+                    'from' => $this->whatsappNumber,
+                    'body' => $message
+                ]
+            );
+
+            Log::info('WhatsApp message sent successfully', [
+                'sid' => $messageObj->sid,
+                'to' => $formattedTo
+            ]);
+
+            return [
+                'success' => true,
+                'sid' => $messageObj->sid,
+                'to' => $formattedTo
+            ];
+
+        } catch (\Exception $e) {
+            Log::error('Failed to send WhatsApp message', [
+                'error' => $e->getMessage(),
+                'to' => $to,
+                'formatted_to' => $formattedTo ?? 'not_formatted'
+            ]);
+
+            return [
+                'success' => false,
+                'error' => $e->getMessage()
+            ];
+        }
     }
 
     /**
@@ -102,8 +171,8 @@ class WhatsAppService
         }
         
         $message .= "*Agent:* {$agentName}\n";
-        if ($rentalCode->marketing_agent) {
-            $message .= "*Marketing Agent:* {$rentalCode->marketing_agent}\n";
+        if ($rentalCode->marketingAgentUser) {
+            $message .= "*Marketing Agent:* {$rentalCode->marketingAgentUser->name}\n";
         }
         
         $message .= "\n_This is an automated message sent from the CRM. Please contact agent to change any details._";
@@ -179,18 +248,94 @@ class WhatsAppService
         }
         
         $message .= "*Agent:* {$agentName}\n";
-        if ($rentalCode->marketing_agent) {
-            $message .= "*Marketing Agent:* {$rentalCode->marketing_agent}\n";
+        if ($rentalCode->marketingAgentUser) {
+            $message .= "*Marketing Agent:* {$rentalCode->marketingAgentUser->name}\n";
         }
         
         $message .= "\n📋 *Please review in the admin panel.*\n";
         $message .= "_This is an automated message sent from the CRM. Please contact agent to change any details._";
 
-        // Temporarily disabled
-        Log::info('Admin WhatsApp notification skipped (temporarily disabled)');
+        // Send to admin number
+        if ($this->adminNumber) {
+            return $this->sendMessage($this->adminNumber, $message);
+        }
+
+        Log::error('Admin WhatsApp number not configured');
         return [
             'success' => false,
-            'error' => 'WhatsApp temporarily disabled'
+            'error' => 'Admin WhatsApp number not configured'
+        ];
+    }
+
+    /**
+     * Send rental code update notification to admin
+     */
+    public function sendRentalCodeUpdateNotification($rentalCode, $client, $action = 'updated')
+    {
+        $clientName = $client ? $client->full_name : 'Unknown Client';
+        $rentalCodeValue = $rentalCode->rental_code;
+        $agentName = $rentalCode->rent_by_agent ?? 'Unknown Agent';
+        $updatedDate = $rentalCode->updated_at->format('d/m/Y H:i');
+        
+        // Format rental date
+        $rentalDate = $rentalCode->rental_date ? 
+            \Carbon\Carbon::parse($rentalCode->rental_date)->format('d/m/Y') : 
+            $updatedDate;
+        
+        // Format payment method
+        $paymentMethod = $this->formatPaymentMethod($rentalCode->payment_method ?? '');
+        
+        // Get property address
+        $propertyAddress = $rentalCode->property ?? 'Not specified';
+        
+        // Get licensor
+        $licensor = $rentalCode->licensor ?? 'Not specified';
+        
+        // Get consultation fee
+        $consultationFee = $rentalCode->consultation_fee ?? 'Not specified';
+        if (is_numeric($consultationFee)) {
+            $consultationFee = '£' . number_format($consultationFee, 0);
+        }
+        
+        $actionText = ucfirst($action);
+        $message = "🔄 *RENTAL CODE " . strtoupper($actionText) . "*\n\n";
+        $message .= "🏠 *RENTAL CODE: {$rentalCodeValue}*\n";
+        $message .= "_\n";
+        $message .= "Rental Date: {$rentalDate}\n";
+        $message .= "Consultation fee: {$consultationFee}\n";
+        $message .= "Method of Payment: {$paymentMethod}\n";
+        $message .= "Property: {$propertyAddress}\n";
+        $message .= "Licensor: {$licensor}\n\n";
+        
+        if ($client) {
+            $message .= "*Full Name:* {$client->full_name}\n";
+            $message .= "*Date of Birth:* " . ($client->date_of_birth ? 
+                \Carbon\Carbon::parse($client->date_of_birth)->format('jS F Y') : 'Not provided') . "\n";
+            $message .= "*Phone Number:* {$client->phone_number}\n";
+            $message .= "*Email:* {$client->email}\n";
+            $message .= "*Nationality:* " . ucfirst($client->nationality ?? 'Not provided') . "\n";
+            $message .= "*Current Address:* {$client->current_address}\n";
+            $message .= "*Company/University:* {$client->company_university_name}\n";
+            $message .= "*Position/Role:* {$client->position_role}\n\n";
+        }
+        
+        $message .= "*Agent:* {$agentName}\n";
+        if ($rentalCode->marketingAgentUser) {
+            $message .= "*Marketing Agent:* {$rentalCode->marketingAgentUser->name}\n";
+        }
+        
+        $message .= "\n📋 *Please review the changes in the admin panel.*\n";
+        $message .= "_This is an automated message sent from the CRM. Please contact agent to change any details._";
+
+        // Send to admin number
+        if ($this->adminNumber) {
+            return $this->sendMessage($this->adminNumber, $message);
+        }
+
+        Log::error('Admin WhatsApp number not configured');
+        return [
+            'success' => false,
+            'error' => 'Admin WhatsApp number not configured'
         ];
     }
     
