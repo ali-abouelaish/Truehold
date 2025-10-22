@@ -1649,178 +1649,86 @@ public function generateCode()
     }
 
     /**
-     * Handle file uploads for rental codes
+     * Handle file uploads for rental codes - Simplified and reliable
      */
     private function handleFileUploads(Request $request, RentalCode $rentalCode)
     {
-        \Log::info('handleFileUploads called', [
+        \Log::info('Starting file upload processing', [
             'rental_code_id' => $rentalCode->id,
-            'has_client_contract' => $request->hasFile('client_contract'),
-            'has_payment_proof' => $request->hasFile('payment_proof'),
-            'has_client_id_document' => $request->hasFile('client_id_document'),
-            'all_files' => $request->allFiles(),
-            'request_data' => $request->except(['_token', '_method'])
+            'has_files' => $request->hasFile('client_contract') || $request->hasFile('payment_proof') || $request->hasFile('client_id_document')
         ]);
         
         try {
-            // Handle client contract uploads
-            if ($request->hasFile('client_contract')) {
-                $files = $request->file('client_contract');
-                \Log::info('Processing client contract uploads', [
-                    'count' => count($files),
-                    'files' => array_map(function($file) {
-                        return $file ? [
-                            'name' => $file->getClientOriginalName(),
-                            'size' => $file->getSize(),
-                            'valid' => $file->isValid(),
-                            'error' => $file->getError()
-                        ] : null;
-                    }, $files)
-                ]);
-                
-                // Filter out any null or invalid files
-                $validFiles = array_filter($files, function($file) {
-                    return $file && $file->isValid() && $file->getSize() > 0;
-                });
-                
-                \Log::info('Valid client contract files', ['count' => count($validFiles)]);
-                
-                if (!empty($validFiles)) {
-                    $contractPaths = [];
-                    foreach ($validFiles as $file) {
-                        $path = $file->store('rental-codes/documents', 'public');
-                        $contractPaths[] = $path;
-                        \Log::info('Stored client contract file', ['path' => $path]);
-                    }
-                    $rentalCode->update(['client_contract' => json_encode($contractPaths)]);
-                    \Log::info('Updated client_contract field', ['paths' => $contractPaths]);
-                } else {
-                    \Log::info('No valid client contract files found');
-                }
-            } else {
-                \Log::info('No client contract files in request');
-            }
-
-            // Handle payment proof uploads
-            if ($request->hasFile('payment_proof')) {
-                $files = $request->file('payment_proof');
-                \Log::info('Processing payment proof uploads', [
-                    'count' => count($files),
-                    'files' => array_map(function($file) {
-                        return $file ? [
-                            'name' => $file->getClientOriginalName(),
-                            'size' => $file->getSize(),
-                            'valid' => $file->isValid(),
-                            'error' => $file->getError()
-                        ] : null;
-                    }, $files)
-                ]);
-                
-                // Filter out any null or invalid files
-                $validFiles = array_filter($files, function($file) {
-                    return $file && $file->isValid() && $file->getSize() > 0;
-                });
-                
-                \Log::info('Valid payment proof files', ['count' => count($validFiles)]);
-                
-                if (!empty($validFiles)) {
-                    $proofPaths = [];
-                    foreach ($validFiles as $file) {
-                        $path = $file->store('rental-codes/documents', 'public');
-                        $proofPaths[] = $path;
-                        \Log::info('Stored payment proof file', ['path' => $path]);
-                    }
-                    $rentalCode->update(['payment_proof' => json_encode($proofPaths)]);
-                    \Log::info('Updated payment_proof field', ['paths' => $proofPaths]);
-                } else {
-                    \Log::info('No valid payment proof files found');
-                }
-            } else {
-                \Log::info('No payment proof files in request');
-            }
-
-            // Handle client ID document uploads
-            if ($request->hasFile('client_id_document')) {
-                $files = $request->file('client_id_document');
-                \Log::info('Processing client ID document uploads', ['count' => count($files)]);
-                
-                // Filter out any null or invalid files
-                $validFiles = array_filter($files, function($file) {
-                    return $file && $file->isValid() && $file->getSize() > 0;
-                });
-                
-                if (!empty($validFiles)) {
-                    $idPaths = [];
-                    foreach ($validFiles as $file) {
-                        $path = $file->store('rental-codes/documents', 'public');
-                        $idPaths[] = $path;
-                        \Log::info('Stored client ID document file', ['path' => $path]);
-                    }
-                    $rentalCode->update(['client_id_document' => json_encode($idPaths)]);
-                    \Log::info('Updated client_id_document field', ['paths' => $idPaths]);
-                } else {
-                    \Log::info('No valid client ID document files found');
-                }
-            }
-
-            // Handle cash document uploads
-            if ($request->hasFile('contact_images')) {
-                $files = $request->file('contact_images');
-                \Log::info('Processing contact image uploads', ['count' => count($files)]);
-                
-                // Filter out any null or invalid files
-                $validFiles = array_filter($files, function($file) {
-                    return $file && $file->isValid() && $file->getSize() > 0;
-                });
-                
-                if (!empty($validFiles)) {
-                    $contactPaths = [];
-                    foreach ($validFiles as $file) {
-                        $path = $file->store('cash-documents/contact-images', 'public');
-                        $contactPaths[] = $path;
-                        \Log::info('Stored contact image file', ['path' => $path]);
-                    }
-                    $rentalCode->update(['contact_images' => json_encode($contactPaths)]);
-                    \Log::info('Updated contact_images field', ['paths' => $contactPaths]);
-                } else {
-                    \Log::info('No valid contact image files found');
-                }
-            }
-
-            // Handle client ID image upload
-            if ($request->hasFile('client_id_image')) {
-                $file = $request->file('client_id_image');
-                \Log::info('Processing client ID image upload');
-                
-                if ($file && $file->isValid() && $file->getSize() > 0) {
-                    $path = $file->store('cash-documents/client-ids', 'public');
-                    $rentalCode->update(['client_id_image' => $path]);
-                    \Log::info('Updated client_id_image field', ['path' => $path]);
-                } else {
-                    \Log::info('No valid client ID image found');
-                }
-            }
-
-            // Handle cash receipt image upload
-            if ($request->hasFile('cash_receipt_image')) {
-                $file = $request->file('cash_receipt_image');
-                \Log::info('Processing cash receipt image upload');
-                
-                if ($file && $file->isValid() && $file->getSize() > 0) {
-                    $path = $file->store('cash-documents/cash-receipts', 'public');
-                    $rentalCode->update(['cash_receipt_image' => $path]);
-                    \Log::info('Updated cash_receipt_image field', ['path' => $path]);
-                } else {
-                    \Log::info('No valid cash receipt image found');
-                }
-            }
-
-            \Log::info('File uploads processed for rental code', ['rental_code_id' => $rentalCode->id]);
+            // Process client contracts
+            $this->processFileUploads($request, 'client_contract', 'rental-codes/documents', $rentalCode);
+            
+            // Process payment proofs
+            $this->processFileUploads($request, 'payment_proof', 'rental-codes/documents', $rentalCode);
+            
+            // Process client ID documents
+            $this->processFileUploads($request, 'client_id_document', 'rental-codes/documents', $rentalCode);
+            
+            \Log::info('File upload processing completed', ['rental_code_id' => $rentalCode->id]);
         } catch (\Exception $e) {
-            \Log::error('Error handling file uploads', [
+            \Log::error('File upload processing failed', [
                 'rental_code_id' => $rentalCode->id,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
             ]);
+        }
+    }
+    
+    /**
+     * Process file uploads for a specific field
+     */
+    private function processFileUploads(Request $request, $fieldName, $storagePath, RentalCode $rentalCode)
+    {
+        if (!$request->hasFile($fieldName)) {
+            \Log::info("No files found for field: {$fieldName}");
+            return;
+        }
+        
+        $files = $request->file($fieldName);
+        \Log::info("Processing {$fieldName} uploads", [
+            'count' => count($files),
+            'field' => $fieldName
+        ]);
+        
+        $validPaths = [];
+        
+        foreach ($files as $file) {
+            if ($file && $file->isValid() && $file->getSize() > 0) {
+                try {
+                    $path = $file->store($storagePath, 'public');
+                    $validPaths[] = $path;
+                    \Log::info("Stored file for {$fieldName}", [
+                        'path' => $path,
+                        'size' => $file->getSize(),
+                        'name' => $file->getClientOriginalName()
+                    ]);
+                } catch (\Exception $e) {
+                    \Log::error("Failed to store file for {$fieldName}", [
+                        'error' => $e->getMessage(),
+                        'file' => $file->getClientOriginalName()
+                    ]);
+                }
+            } else {
+                \Log::warning("Invalid file skipped for {$fieldName}", [
+                    'valid' => $file ? $file->isValid() : false,
+                    'size' => $file ? $file->getSize() : 0,
+                    'error' => $file ? $file->getError() : 'No file'
+                ]);
+            }
+        }
+        
+        if (!empty($validPaths)) {
+            $rentalCode->update([$fieldName => json_encode($validPaths)]);
+            \Log::info("Updated {$fieldName} field", [
+                'paths' => $validPaths,
+                'count' => count($validPaths)
+            ]);
+        } else {
+            \Log::info("No valid files to store for {$fieldName}");
         }
     }
 }

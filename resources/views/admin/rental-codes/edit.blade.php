@@ -247,20 +247,22 @@
 
                 <!-- Document Uploads -->
                 <div class="card shadow mb-4">
-                    <div class="card-header bg-secondary text-white">
+                    <div class="card-header bg-primary text-white">
                         <h5 class="card-title mb-0">
-                            <i class="fas fa-file-upload me-2"></i>Document Uploads
+                            <i class="fas fa-file-upload me-2"></i>Document Uploads (Optional)
                         </h5>
                     </div>
                     <div class="card-body">
                         <div class="row">
                             <div class="col-md-4">
                                 <div class="mb-3">
-                                    <label for="client_contract" class="form-label">Client Contracts</label>
+                                    <label for="client_contract" class="form-label">
+                                        <i class="fas fa-file-contract text-primary me-1"></i>Client Contracts
+                                    </label>
                                     <input type="file" class="form-control @error('client_contract.*') is-invalid @enderror" 
                                            id="client_contract" name="client_contract[]" multiple 
                                            accept=".pdf,.jpg,.jpeg,.png">
-                                    <small class="form-text text-muted">PDF, JPG, PNG files only (max 10MB each)</small>
+                                    <small class="form-text text-muted">PDF, JPG, PNG files (max 10MB each)</small>
                                     @error('client_contract.*')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
@@ -268,11 +270,13 @@
                             </div>
                             <div class="col-md-4">
                                 <div class="mb-3">
-                                    <label for="payment_proof" class="form-label">Payment Proof</label>
+                                    <label for="payment_proof" class="form-label">
+                                        <i class="fas fa-receipt text-success me-1"></i>Payment Proof
+                                    </label>
                                     <input type="file" class="form-control @error('payment_proof.*') is-invalid @enderror" 
                                            id="payment_proof" name="payment_proof[]" multiple 
                                            accept=".pdf,.jpg,.jpeg,.png">
-                                    <small class="form-text text-muted">PDF, JPG, PNG files only (max 10MB each)</small>
+                                    <small class="form-text text-muted">PDF, JPG, PNG files (max 10MB each)</small>
                                     @error('payment_proof.*')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
@@ -280,16 +284,29 @@
                             </div>
                             <div class="col-md-4">
                                 <div class="mb-3">
-                                    <label for="client_id_document" class="form-label">Client ID Documents</label>
+                                    <label for="client_id_document" class="form-label">
+                                        <i class="fas fa-id-card text-info me-1"></i>Client ID Documents
+                                    </label>
                                     <input type="file" class="form-control @error('client_id_document.*') is-invalid @enderror" 
                                            id="client_id_document" name="client_id_document[]" multiple 
                                            accept=".pdf,.jpg,.jpeg,.png">
-                                    <small class="form-text text-muted">PDF, JPG, PNG files only (max 10MB each)</small>
+                                    <small class="form-text text-muted">PDF, JPG, PNG files (max 10MB each)</small>
                                     @error('client_id_document.*')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
                                 </div>
                             </div>
+                        </div>
+                        
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i>
+                            <strong>File Upload Tips:</strong>
+                            <ul class="mb-0 mt-2">
+                                <li>You can upload multiple files for each document type</li>
+                                <li>Supported formats: PDF, JPG, JPEG, PNG</li>
+                                <li>Maximum file size: 10MB per file</li>
+                                <li>New files will be added to existing documents</li>
+                            </ul>
                         </div>
                     </div>
                 </div>
