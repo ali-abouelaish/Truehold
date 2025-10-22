@@ -624,7 +624,13 @@ strong {
                 <div class="card-body">
                     <div class="row">
                         <!-- Client Contract -->
-                        @if($rentalCode->client_contract)
+                        @php
+                            $contractFiles = null;
+                            if ($rentalCode->client_contract) {
+                                $contractFiles = is_string($rentalCode->client_contract) ? json_decode($rentalCode->client_contract, true) : $rentalCode->client_contract;
+                            }
+                        @endphp
+                        @if($contractFiles && is_array($contractFiles) && count($contractFiles) > 0)
                         <div class="col-md-4 mb-3">
                             <div class="document-item">
                                 <div class="d-flex align-items-center">
@@ -635,25 +641,28 @@ strong {
                                     </div>
                                 </div>
                                 <div class="mt-2">
-                                    @php
-                                        $contractFiles = json_decode($rentalCode->client_contract, true);
-                                    @endphp
-                                    @if($contractFiles && is_array($contractFiles))
-                                        @foreach($contractFiles as $index => $filePath)
+                                    @foreach($contractFiles as $index => $filePath)
+                                        @if($filePath && is_string($filePath))
                                             <a href="{{ Storage::url($filePath) }}" 
                                                target="_blank" 
                                                class="btn btn-outline-primary btn-sm me-2">
                                                 <i class="fas fa-download me-1"></i>View Document {{ count($contractFiles) > 1 ? ($index + 1) : '' }}
                                             </a>
-                                        @endforeach
-                                    @endif
+                                        @endif
+                                    @endforeach
                                 </div>
                             </div>
                         </div>
                         @endif
 
                         <!-- Payment Proof -->
-                        @if($rentalCode->payment_proof)
+                        @php
+                            $proofFiles = null;
+                            if ($rentalCode->payment_proof) {
+                                $proofFiles = is_string($rentalCode->payment_proof) ? json_decode($rentalCode->payment_proof, true) : $rentalCode->payment_proof;
+                            }
+                        @endphp
+                        @if($proofFiles && is_array($proofFiles) && count($proofFiles) > 0)
                         <div class="col-md-4 mb-3">
                             <div class="document-item">
                                 <div class="d-flex align-items-center">
@@ -664,25 +673,28 @@ strong {
                                     </div>
                                 </div>
                                 <div class="mt-2">
-                                    @php
-                                        $proofFiles = json_decode($rentalCode->payment_proof, true);
-                                    @endphp
-                                    @if($proofFiles && is_array($proofFiles))
-                                        @foreach($proofFiles as $index => $filePath)
+                                    @foreach($proofFiles as $index => $filePath)
+                                        @if($filePath && is_string($filePath))
                                             <a href="{{ Storage::url($filePath) }}" 
                                                target="_blank" 
                                                class="btn btn-outline-success btn-sm me-2">
                                                 <i class="fas fa-download me-1"></i>View Document {{ count($proofFiles) > 1 ? ($index + 1) : '' }}
                                             </a>
-                                        @endforeach
-                                    @endif
+                                        @endif
+                                    @endforeach
                                 </div>
                             </div>
                         </div>
                         @endif
 
                         <!-- Client ID Document -->
-                        @if($rentalCode->client_id_document)
+                        @php
+                            $idFiles = null;
+                            if ($rentalCode->client_id_document) {
+                                $idFiles = is_string($rentalCode->client_id_document) ? json_decode($rentalCode->client_id_document, true) : $rentalCode->client_id_document;
+                            }
+                        @endphp
+                        @if($idFiles && is_array($idFiles) && count($idFiles) > 0)
                         <div class="col-md-4 mb-3">
                             <div class="document-item">
                                 <div class="d-flex align-items-center">
@@ -693,18 +705,15 @@ strong {
                                     </div>
                                 </div>
                                 <div class="mt-2">
-                                    @php
-                                        $idFiles = json_decode($rentalCode->client_id_document, true);
-                                    @endphp
-                                    @if($idFiles && is_array($idFiles))
-                                        @foreach($idFiles as $index => $filePath)
+                                    @foreach($idFiles as $index => $filePath)
+                                        @if($filePath && is_string($filePath))
                                             <a href="{{ Storage::url($filePath) }}" 
                                                target="_blank" 
                                                class="btn btn-outline-info btn-sm me-2">
                                                 <i class="fas fa-download me-1"></i>View Document {{ count($idFiles) > 1 ? ($index + 1) : '' }}
                                             </a>
-                                        @endforeach
-                                    @endif
+                                        @endif
+                                    @endforeach
                                 </div>
                             </div>
                         </div>
@@ -755,23 +764,31 @@ strong {
                         @endif
 
                         <!-- Contact Images -->
-                        @if($rentalCode->contact_images && count($rentalCode->contact_images) > 0)
+                        @php
+                            $contactImages = null;
+                            if ($rentalCode->contact_images) {
+                                $contactImages = is_string($rentalCode->contact_images) ? json_decode($rentalCode->contact_images, true) : $rentalCode->contact_images;
+                            }
+                        @endphp
+                        @if($contactImages && is_array($contactImages) && count($contactImages) > 0)
                         <div class="col-md-4 mb-3">
                             <div class="document-item">
                                 <div class="d-flex align-items-center">
                                     <i class="fas fa-images text-secondary me-3 fs-4"></i>
                                     <div>
                                         <h6 class="mb-1">Contact Images</h6>
-                                        <small class="text-muted">{{ count($rentalCode->contact_images) }} image(s)</small>
+                                        <small class="text-muted">{{ count($contactImages) }} image(s)</small>
                                     </div>
                                 </div>
                                 <div class="mt-2">
-                                    @foreach($rentalCode->contact_images as $index => $image)
-                                    <a href="{{ Storage::url($image) }}" 
-                                       target="_blank" 
-                                       class="btn btn-outline-secondary btn-sm me-1 mb-1">
-                                        <i class="fas fa-download me-1"></i>Image {{ $index + 1 }}
-                                    </a>
+                                    @foreach($contactImages as $index => $image)
+                                        @if($image && is_string($image))
+                                            <a href="{{ Storage::url($image) }}" 
+                                               target="_blank" 
+                                               class="btn btn-outline-secondary btn-sm me-1 mb-1">
+                                                <i class="fas fa-download me-1"></i>Image {{ $index + 1 }}
+                                            </a>
+                                        @endif
                                     @endforeach
                                 </div>
                             </div>
@@ -780,7 +797,20 @@ strong {
                     </div>
 
                     <!-- No Documents Message -->
-                    @if(!$rentalCode->client_contract && !$rentalCode->payment_proof && !$rentalCode->client_id_document && !$rentalCode->client_id_image && !$rentalCode->cash_receipt_image && (!$rentalCode->contact_images || count($rentalCode->contact_images) == 0))
+                    @php
+                        $hasDocuments = false;
+                        if ($rentalCode->client_contract || $rentalCode->payment_proof || $rentalCode->client_id_document || 
+                            $rentalCode->client_id_image || $rentalCode->cash_receipt_image) {
+                            $hasDocuments = true;
+                        }
+                        if ($rentalCode->contact_images) {
+                            $contactImages = is_string($rentalCode->contact_images) ? json_decode($rentalCode->contact_images, true) : $rentalCode->contact_images;
+                            if ($contactImages && is_array($contactImages) && count($contactImages) > 0) {
+                                $hasDocuments = true;
+                            }
+                        }
+                    @endphp
+                    @if(!$hasDocuments)
                     <div class="text-center py-4">
                         <i class="fas fa-file-alt text-muted fs-1 mb-3"></i>
                         <h5 class="text-muted">No Documents Available</h5>
