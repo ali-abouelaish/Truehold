@@ -1,0 +1,51 @@
+# Quick Fix Commands for Laravel Permissions
+# Run these commands on your server via SSH
+
+# Navigate to your project directory
+cd /var/www/truehold
+
+# Create all required directories
+mkdir -p storage/app/public/rental-codes
+mkdir -p storage/logs
+mkdir -p storage/framework/cache
+mkdir -p storage/framework/sessions
+mkdir -p storage/framework/views
+mkdir -p bootstrap/cache
+
+# Set permissions
+chmod -R 755 storage/
+chmod -R 755 bootstrap/cache/
+
+# Create log file
+touch storage/logs/laravel.log
+chmod 644 storage/logs/laravel.log
+
+# Set ownership (run as root or with sudo)
+sudo chown -R www-data:www-data storage/
+sudo chown -R www-data:www-data bootstrap/cache/
+
+# Create symbolic link
+php artisan storage:link
+
+# Clear all Laravel caches
+php artisan config:clear
+php artisan cache:clear
+php artisan route:clear
+php artisan view:clear
+php artisan optimize:clear
+
+# Test the fix
+echo "Test log entry" >> storage/logs/laravel.log
+echo "Test cache entry" > storage/framework/cache/test.cache
+echo "Test view entry" > storage/framework/views/test.view
+
+# Clean up test files
+rm storage/logs/laravel.log
+rm storage/framework/cache/test.cache
+rm storage/framework/views/test.view
+
+# Recreate log file
+touch storage/logs/laravel.log
+chmod 644 storage/logs/laravel.log
+
+echo "✅ Laravel permissions fixed!"
