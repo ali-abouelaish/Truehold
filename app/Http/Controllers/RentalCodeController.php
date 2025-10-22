@@ -1657,19 +1657,33 @@ public function generateCode()
             'rental_code_id' => $rentalCode->id,
             'has_client_contract' => $request->hasFile('client_contract'),
             'has_payment_proof' => $request->hasFile('payment_proof'),
-            'has_client_id_document' => $request->hasFile('client_id_document')
+            'has_client_id_document' => $request->hasFile('client_id_document'),
+            'all_files' => $request->allFiles(),
+            'request_data' => $request->except(['_token', '_method'])
         ]);
         
         try {
             // Handle client contract uploads
             if ($request->hasFile('client_contract')) {
                 $files = $request->file('client_contract');
-                \Log::info('Processing client contract uploads', ['count' => count($files)]);
+                \Log::info('Processing client contract uploads', [
+                    'count' => count($files),
+                    'files' => array_map(function($file) {
+                        return $file ? [
+                            'name' => $file->getClientOriginalName(),
+                            'size' => $file->getSize(),
+                            'valid' => $file->isValid(),
+                            'error' => $file->getError()
+                        ] : null;
+                    }, $files)
+                ]);
                 
                 // Filter out any null or invalid files
                 $validFiles = array_filter($files, function($file) {
                     return $file && $file->isValid() && $file->getSize() > 0;
                 });
+                
+                \Log::info('Valid client contract files', ['count' => count($validFiles)]);
                 
                 if (!empty($validFiles)) {
                     $contractPaths = [];
@@ -1683,17 +1697,31 @@ public function generateCode()
                 } else {
                     \Log::info('No valid client contract files found');
                 }
+            } else {
+                \Log::info('No client contract files in request');
             }
 
             // Handle payment proof uploads
             if ($request->hasFile('payment_proof')) {
                 $files = $request->file('payment_proof');
-                \Log::info('Processing payment proof uploads', ['count' => count($files)]);
+                \Log::info('Processing payment proof uploads', [
+                    'count' => count($files),
+                    'files' => array_map(function($file) {
+                        return $file ? [
+                            'name' => $file->getClientOriginalName(),
+                            'size' => $file->getSize(),
+                            'valid' => $file->isValid(),
+                            'error' => $file->getError()
+                        ] : null;
+                    }, $files)
+                ]);
                 
                 // Filter out any null or invalid files
                 $validFiles = array_filter($files, function($file) {
                     return $file && $file->isValid() && $file->getSize() > 0;
                 });
+                
+                \Log::info('Valid payment proof files', ['count' => count($validFiles)]);
                 
                 if (!empty($validFiles)) {
                     $proofPaths = [];
@@ -1707,6 +1735,8 @@ public function generateCode()
                 } else {
                     \Log::info('No valid payment proof files found');
                 }
+            } else {
+                \Log::info('No payment proof files in request');
             }
 
             // Handle client ID document uploads
