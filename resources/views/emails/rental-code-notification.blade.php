@@ -142,7 +142,21 @@
                     </div>
                     <div class="info-item">
                         <span class="label">Payment Method</span>
-                        <span class="value">{{ $rentalCode->payment_method ?? 'N/A' }}</span>
+                        <span class="value">
+                            @php
+                                $paymentMethod = $rentalCode->payment_method ?? 'N/A';
+                                $emoji = '';
+                                if (strtolower($paymentMethod) === 'transfer' || strtolower($paymentMethod) === 'card machine') {
+                                    $emoji = '⚡';
+                                } elseif (strtolower($paymentMethod) === 'cash') {
+                                    $emoji = '💰';
+                                }
+                            @endphp
+                            @if($emoji)
+                                {{ $emoji }} 
+                            @endif
+                            {{ $paymentMethod }}
+                        </span>
                     </div>
                     <div class="info-item">
                         <span class="label">Property</span>

@@ -168,18 +168,35 @@
                                                 </span>
                                             </td>
                                             <td>
-                                                @if($code->paid)
-                                                    <span class="badge badge-success">
-                                                        <i class="fas fa-check me-1"></i>Paid
+                                                @php
+                                                    $paymentMethod = $code->payment_method ?? 'N/A';
+                                                    $emoji = '';
+                                                    if (strtolower($paymentMethod) === 'transfer' || strtolower($paymentMethod) === 'card machine') {
+                                                        $emoji = '⚡';
+                                                    } elseif (strtolower($paymentMethod) === 'cash') {
+                                                        $emoji = '💰';
+                                                    }
+                                                @endphp
+                                                <div class="d-flex flex-column">
+                                                    <span class="badge badge-{{ strtolower($paymentMethod) === 'transfer' || strtolower($paymentMethod) === 'card machine' ? 'info' : (strtolower($paymentMethod) === 'cash' ? 'success' : 'secondary') }}">
+                                                        @if($emoji)
+                                                            <span class="me-1">{{ $emoji }}</span>
+                                                        @endif
+                                                        {{ $paymentMethod }}
                                                     </span>
-                                                    @if($code->paid_at)
-                                                        <br><small class="text-muted">{{ $code->paid_at->format('M d, Y') }}</small>
+                                                    @if($code->paid)
+                                                        <small class="text-success mt-1">
+                                                            <i class="fas fa-check me-1"></i>Paid
+                                                        </small>
+                                                        @if($code->paid_at)
+                                                            <small class="text-muted">{{ $code->paid_at->format('M d, Y') }}</small>
+                                                        @endif
+                                                    @else
+                                                        <small class="text-warning mt-1">
+                                                            <i class="fas fa-clock me-1"></i>Pending
+                                                        </small>
                                                     @endif
-                                                @else
-                                                    <span class="badge badge-warning">
-                                                        <i class="fas fa-clock me-1"></i>Pending
-                                                    </span>
-                                                @endif
+                                                </div>
                                             </td>
                                             <td>
                                                 <div class="btn-group" role="group">

@@ -869,8 +869,8 @@ function showAgentDetails(agentName) {
          transactionsHtml += `
              <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg mb-2">
                  <div class="flex items-center">
-                     <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${transaction.payment_method === 'Transfer' ? 'bg-purple-100 text-purple-800' : 'bg-green-100 text-green-800'}">
-                         ${transaction.payment_method}
+                     <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${transaction.payment_method === 'Transfer' || transaction.payment_method === 'Card Machine' ? 'bg-purple-100 text-purple-800' : (transaction.payment_method === 'Cash' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800')}">
+                         ${(transaction.payment_method === 'Transfer' || transaction.payment_method === 'Card Machine') ? '⚡ ' : (transaction.payment_method === 'Cash' ? '💰 ' : '')}${transaction.payment_method}
                      </span>
                      <span class="ml-3 text-sm font-medium text-gray-900">${transaction.code}</span>
                  </div>
@@ -995,7 +995,7 @@ function printPayroll(agentName) {
                             <td>£${parseFloat(transaction.agent_cut).toFixed(2)}</td>
                             <td>£${parseFloat(transaction.agency_cut).toFixed(2)}</td>
                             <td>${transaction.status}</td>
-                            <td>${transaction.payment_method}</td>
+                            <td>${(transaction.payment_method === 'Transfer' || transaction.payment_method === 'Card Machine') ? '⚡ ' : (transaction.payment_method === 'Cash' ? '💰 ' : '')}${transaction.payment_method}</td>
                         </tr>
                     `).join('')}
                     <tr class="total-row">

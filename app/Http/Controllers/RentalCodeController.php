@@ -66,9 +66,9 @@ class RentalCodeController extends Controller
             'marketing_agent_id' => 'nullable|exists:users,id',
             'client_count' => 'required|integer|min:1|max:10',
             'notes' => 'nullable|string',
-            // Document upload validation
-            'client_contract.*' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:10240',
-            'payment_proof.*' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:10240',
+            // Document upload validation - contract and payment proof required, ID documents optional
+            'client_contract.*' => 'required|file|mimes:pdf,jpg,jpeg,png|max:10240',
+            'payment_proof.*' => 'required|file|mimes:pdf,jpg,jpeg,png|max:10240',
             'client_id_document.*' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:10240',
         ];
         
@@ -106,6 +106,18 @@ class RentalCodeController extends Controller
             'marketing_agent_id.exists' => 'Selected marketing agent is invalid.',
             'client_count.required' => 'Client count is required.',
             'status.required' => 'Status is required.',
+            // File upload error messages
+            'client_contract.*.required' => 'Client contract document is required.',
+            'payment_proof.*.required' => 'Payment proof document is required.',
+            'client_contract.*.file' => 'Client contract must be a valid file.',
+            'payment_proof.*.file' => 'Payment proof must be a valid file.',
+            'client_id_document.*.file' => 'Client ID document must be a valid file.',
+            'client_contract.*.mimes' => 'Client contract must be a PDF, JPG, JPEG, or PNG file.',
+            'payment_proof.*.mimes' => 'Payment proof must be a PDF, JPG, JPEG, or PNG file.',
+            'client_id_document.*.mimes' => 'Client ID document must be a PDF, JPG, JPEG, or PNG file.',
+            'client_contract.*.max' => 'Client contract file size must not exceed 10MB.',
+            'payment_proof.*.max' => 'Payment proof file size must not exceed 10MB.',
+            'client_id_document.*.max' => 'Client ID document file size must not exceed 10MB.',
         ];
         
         // Add dynamic client error messages
@@ -1681,7 +1693,7 @@ public function generateCode()
     /**
      * Process file uploads for a specific field
      */
-    private function processFileUploads(Request $request, $fieldName, $storagePath, RentalCode $rentalCode)
+private function processFileUploads(Request $request, $fieldName, $storagePath, RentalCode $rentalCode)
     {
         if (!$request->hasFile($fieldName)) {
             \Log::info("No files found for field: {$fieldName}");
@@ -1729,6 +1741,147 @@ public function generateCode()
             ]);
         } else {
             \Log::info("No valid files to store for {$fieldName}");
+        }
+    }
+
+    /**
+     * Download a file from storage
+     */
+    public function downloadFile(RentalCode $rentalCode, $field, $index = 0)
+    {
+        try {
+            // Get the file paths for the specified field
+            $filePaths = null;
+            switch ($field) {
+                case 'client_contract':
+                    $filePaths = $rentalCode->client_contract;
+                    break;
+                case 'payment_proof':
+                    $filePaths = $rentalCode->payment_proof;
+                    break;
+                case 'client_id_document':
+                    $filePaths = $rentalCode->client_id_document;
+                    break;
+                case 'client_id_image':
+                    $filePaths = [$rentalCode->client_id_image];
+                    break;
+                case 'cash_receipt_image':
+                    $filePaths = [$rentalCode->cash_receipt_image];
+                    break;
+                case 'contact_images':
+                    $filePaths = $rentalCode->contact_images;
+                    break;
+                default:
+                    abort(404, 'File type not found');
+            }
+
+            if (!$filePaths) {
+                abort(404, 'No files found for this field');
+            }
+
+            // Decode JSON if it's a string
+            if (is_string($filePaths)) {
+                $filePaths = json_decode($filePaths, true);
+            }
+
+            if (!is_array($filePaths) || !isset($filePaths[$index])) {
+                abort(404, 'File not found');
+            }
+
+            $filePath = $filePaths[$index];
+            $fullPath = storage_path('app/public/' . $filePath);
+
+            if (!file_exists($fullPath)) {
+                abort(404, 'File does not exist on server');
+            }
+
+            $originalName = basename($filePath);
+            $mimeType = mime_content_type($fullPath);
+
+            return response()->download($fullPath, $originalName, [
+                'Content-Type' => $mimeType,
+            ]);
+
+        } catch (\Exception $e) {
+            \Log::error('File download failed', [
+                'rental_code_id' => $rentalCode->id,
+                'field' => $field,
+                'index' => $index,
+                'error' => $e->getMessage()
+            ]);
+            
+            abort(500, 'Failed to download file');
+        }
+    }
+
+    /**
+     * View a file in browser
+     */
+    public function viewFile(RentalCode $rentalCode, $field, $index = 0)
+    {
+        try {
+            // Get the file paths for the specified field
+            $filePaths = null;
+            switch ($field) {
+                case 'client_contract':
+                    $filePaths = $rentalCode->client_contract;
+                    break;
+                case 'payment_proof':
+                    $filePaths = $rentalCode->payment_proof;
+                    break;
+                case 'client_id_document':
+                    $filePaths = $rentalCode->client_id_document;
+                    break;
+                case 'client_id_image':
+                    $filePaths = [$rentalCode->client_id_image];
+                    break;
+                case 'cash_receipt_image':
+                    $filePaths = [$rentalCode->cash_receipt_image];
+                    break;
+                case 'contact_images':
+                    $filePaths = $rentalCode->contact_images;
+                    break;
+                default:
+                    abort(404, 'File type not found');
+            }
+
+            if (!$filePaths) {
+                abort(404, 'No files found for this field');
+            }
+
+            // Decode JSON if it's a string
+            if (is_string($filePaths)) {
+                $filePaths = json_decode($filePaths, true);
+            }
+
+            if (!is_array($filePaths) || !isset($filePaths[$index])) {
+                abort(404, 'File not found');
+            }
+
+            $filePath = $filePaths[$index];
+            $fullPath = storage_path('app/public/' . $filePath);
+
+            if (!file_exists($fullPath)) {
+                abort(404, 'File does not exist on server');
+            }
+
+            $mimeType = mime_content_type($fullPath);
+            $fileSize = filesize($fullPath);
+
+            return response()->file($fullPath, [
+                'Content-Type' => $mimeType,
+                'Content-Length' => $fileSize,
+            ]);
+
+        } catch (\Exception $e) {
+            \Log::error('File view failed', [
+                'rental_code_id' => $rentalCode->id,
+                'field' => $field,
+                'index' => $index,
+                'error' => $e->getMessage()
+            ]);
+            
+            abort(500, 'Failed to view file');
         }
     }
 }

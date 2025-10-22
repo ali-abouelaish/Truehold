@@ -197,6 +197,10 @@ Route::middleware('auth')->prefix('admin')->group(function () {
     Route::get('/rental-codes/agent/{agentName}', [RentalCodeController::class, 'agentDetails'])->name('rental-codes.agent-details');
     Route::get('/rental-codes/{rentalCode}/details', [RentalCodeController::class, 'getRentalDetails'])->name('rental-codes.details');
     
+    // File download and view routes
+    Route::get('/rental-codes/{rentalCode}/download/{field}/{index?}', [RentalCodeController::class, 'downloadFile'])->name('rental-codes.download-file');
+    Route::get('/rental-codes/{rentalCode}/view/{field}/{index?}', [RentalCodeController::class, 'viewFile'])->name('rental-codes.view-file');
+    
     // Marketing Agent Management Routes
     Route::get('/marketing-agents', [RentalCodeController::class, 'marketingAgents'])->name('marketing-agents.index');
     Route::post('/marketing-agents', [RentalCodeController::class, 'storeMarketingAgent'])->name('marketing-agents.store');

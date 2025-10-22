@@ -387,7 +387,7 @@
                 <div class="card shadow">
                     <div class="card-header bg-primary text-white">
                         <h5 class="card-title mb-0">
-                            <i class="fas fa-file-upload me-2"></i>Document Uploads (Optional)
+                            <i class="fas fa-file-upload me-2"></i>Document Uploads
                         </h5>
                     </div>
                     <div class="card-body">
@@ -395,11 +395,12 @@
                             <div class="col-md-4">
                                 <div class="mb-3">
                                     <label for="client_contract" class="form-label">
-                                        <i class="fas fa-file-contract text-primary me-1"></i>Client Contracts
+                                        <i class="fas fa-file-contract text-primary me-1"></i>Client Contracts <span class="text-danger">*</span>
+                                        <small class="text-danger d-block">Required</small>
                                     </label>
                                     <input type="file" class="form-control @error('client_contract.*') is-invalid @enderror" 
                                            id="client_contract" name="client_contract[]" 
-                                           accept=".pdf,.jpg,.jpeg,.png" multiple>
+                                           accept=".pdf,.jpg,.jpeg,.png" multiple required>
                                     <small class="form-text text-muted">PDF, JPG, PNG files (max 10MB each)</small>
                                     @error('client_contract.*')
                                         <div class="invalid-feedback">{{ $message }}</div>
@@ -410,11 +411,12 @@
                             <div class="col-md-4">
                                 <div class="mb-3">
                                     <label for="payment_proof" class="form-label">
-                                        <i class="fas fa-receipt text-success me-1"></i>Payment Proof
+                                        <i class="fas fa-receipt text-success me-1"></i>Payment Proof <span class="text-danger">*</span>
+                                        <small class="text-danger d-block">Required</small>
                                     </label>
                                     <input type="file" class="form-control @error('payment_proof.*') is-invalid @enderror" 
                                            id="payment_proof" name="payment_proof[]" 
-                                           accept=".pdf,.jpg,.jpeg,.png" multiple>
+                                           accept=".pdf,.jpg,.jpeg,.png" multiple required>
                                     <small class="form-text text-muted">PDF, JPG, PNG files (max 10MB each)</small>
                                     @error('payment_proof.*')
                                         <div class="invalid-feedback">{{ $message }}</div>
@@ -426,6 +428,7 @@
                                 <div class="mb-3">
                                     <label for="client_id_document" class="form-label">
                                         <i class="fas fa-id-card text-info me-1"></i>Client ID Documents
+                                        <small class="text-muted d-block">Optional</small>
                                     </label>
                                     <input type="file" class="form-control @error('client_id_document.*') is-invalid @enderror" 
                                            id="client_id_document" name="client_id_document[]" 
@@ -438,14 +441,31 @@
                             </div>
                         </div>
                         
-                        <div class="alert alert-info">
-                            <i class="fas fa-info-circle me-2"></i>
-                            <strong>File Upload Tips:</strong>
+                        <!-- Upload Progress Indicator -->
+                        <div id="upload-progress" class="alert alert-info" style="display: none;">
+                            <i class="fas fa-spinner fa-spin me-2"></i>
+                            <strong>Processing files...</strong>
+                            <div class="progress mt-2">
+                                <div id="upload-progress-bar" class="progress-bar progress-bar-striped progress-bar-animated" 
+                                     role="progressbar" style="width: 0%"></div>
+                            </div>
+                            <small class="text-muted">Please wait while files are being processed. Submission will proceed automatically once complete.</small>
+                            <div id="upload-status" class="mt-2">
+                                <small class="text-muted">Checking file uploads...</small>
+                            </div>
+                        </div>
+                        
+                        <div class="alert alert-warning">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            <strong>File Upload Requirements:</strong>
                             <ul class="mb-0 mt-2">
+                                <li><strong>Client Contracts and Payment Proof are required</strong> - marked with red asterisks (*)</li>
+                                <li>Client ID Documents are optional but recommended for record keeping</li>
+                                <li>If you upload files, the system will wait for all uploads to complete before submission</li>
                                 <li>You can upload multiple files for each document type</li>
                                 <li>Supported formats: PDF, JPG, JPEG, PNG</li>
                                 <li>Maximum file size: 10MB per file</li>
-                                <li>Files are optional but recommended for record keeping</li>
+                                <li>Submission will be delayed if files are being uploaded</li>
                             </ul>
                         </div>
                     </div>
@@ -1105,6 +1125,39 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
         
+        // Check if files are being uploaded and wait for completion
+        const requiredFileInputs = ['client_contract', 'payment_proof'];
+        const optionalFileInputs = ['client_id_document'];
+        const allFileInputs = [...requiredFileInputs, ...optionalFileInputs];
+        let hasFiles = false;
+        let uploadInProgress = false;
+        
+        allFileInputs.forEach(fieldName => {
+            const fileInput = form.querySelector(`[name="${fieldName}[]"]`);
+            if (fileInput && fileInput.files && fileInput.files.length > 0) {
+                hasFiles = true;
+                // Check if any files are still being processed or are very small (indicating incomplete upload)
+                for (let i = 0; i < fileInput.files.length; i++) {
+                    const file = fileInput.files[i];
+                    if (file.size === 0 || file.size < 1024) { // Less than 1KB might indicate incomplete upload
+                        uploadInProgress = true;
+                        break;
+                    }
+                }
+            }
+        });
+        
+        if (hasFiles) {
+            e.preventDefault();
+            uploadCheckCount = 0; // Reset counter
+            showUploadProgress();
+            // Wait for uploads to complete
+            setTimeout(() => {
+                checkUploadStatus();
+            }, 2000); // Give more time for uploads to complete
+            return;
+        }
+
         if (!isValid) {
             e.preventDefault();
             // Scroll to first error
@@ -1113,6 +1166,122 @@ document.addEventListener('DOMContentLoaded', function() {
                 firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 firstError.focus();
             }
+        }
+    });
+    
+    // Upload progress functions
+    function showUploadProgress() {
+        const progressDiv = document.getElementById('upload-progress');
+        const progressBar = document.getElementById('upload-progress-bar');
+        
+        progressDiv.style.display = 'block';
+        progressBar.style.width = '0%';
+        
+        // Animate progress bar
+        let progress = 0;
+        const interval = setInterval(() => {
+            progress += Math.random() * 15;
+            if (progress > 90) progress = 90;
+            progressBar.style.width = progress + '%';
+        }, 200);
+        
+        // Store interval for cleanup
+        progressDiv.dataset.interval = interval;
+    }
+    
+    function hideUploadProgress() {
+        const progressDiv = document.getElementById('upload-progress');
+        const progressBar = document.getElementById('upload-progress-bar');
+        
+        progressBar.style.width = '100%';
+        setTimeout(() => {
+            progressDiv.style.display = 'none';
+            if (progressDiv.dataset.interval) {
+                clearInterval(progressDiv.dataset.interval);
+            }
+        }, 500);
+    }
+    
+    let uploadCheckCount = 0;
+    const maxUploadChecks = 20; // Maximum 30 seconds of waiting (20 * 1.5s)
+    
+    function checkUploadStatus() {
+        uploadCheckCount++;
+        
+        const statusDiv = document.getElementById('upload-status');
+        statusDiv.innerHTML = `<small class="text-muted">Checking file uploads... (${uploadCheckCount}/${maxUploadChecks})</small>`;
+        
+        const requiredFileInputs = ['client_contract', 'payment_proof'];
+        const optionalFileInputs = ['client_id_document'];
+        const allFileInputs = [...requiredFileInputs, ...optionalFileInputs];
+        let allUploadsComplete = true;
+        
+        allFileInputs.forEach(fieldName => {
+            const fileInput = document.querySelector(`[name="${fieldName}[]"]`);
+            if (fileInput && fileInput.files && fileInput.files.length > 0) {
+                for (let i = 0; i < fileInput.files.length; i++) {
+                    const file = fileInput.files[i];
+                    if (file.size === 0 || file.size < 1024) { // Less than 1KB might indicate incomplete upload
+                        allUploadsComplete = false;
+                        break;
+                    }
+                }
+            }
+        });
+        
+        if (allUploadsComplete || uploadCheckCount >= maxUploadChecks) {
+            if (uploadCheckCount >= maxUploadChecks) {
+                statusDiv.innerHTML = `<small class="text-warning">Timeout reached, proceeding with submission...</small>`;
+            } else {
+                statusDiv.innerHTML = `<small class="text-success">All files processed successfully!</small>`;
+            }
+            hideUploadProgress();
+            // Submit the form
+            document.getElementById('rental-code-form').submit();
+        } else {
+            // Continue waiting
+            setTimeout(() => {
+                checkUploadStatus();
+            }, 1500); // Check every 1.5 seconds
+        }
+    }
+    
+    // Monitor file inputs for changes
+    const allFileInputs = ['client_contract', 'payment_proof', 'client_id_document'];
+    allFileInputs.forEach(fieldName => {
+        const fileInput = document.querySelector(`[name="${fieldName}[]"]`);
+        if (fileInput) {
+            fileInput.addEventListener('change', function() {
+                // Reset any previous validation states
+                this.classList.remove('is-invalid');
+                const errorDiv = this.parentNode.querySelector('.invalid-feedback');
+                if (errorDiv) {
+                    errorDiv.remove();
+                }
+            });
+        }
+    });
+    
+    // Add specific validation for required fields
+    const requiredFileInputs = ['client_contract', 'payment_proof'];
+    requiredFileInputs.forEach(fieldName => {
+        const fileInput = document.querySelector(`[name="${fieldName}[]"]`);
+        if (fileInput) {
+            fileInput.addEventListener('blur', function() {
+                if (!this.files || this.files.length === 0) {
+                    this.classList.add('is-invalid');
+                    const errorDiv = this.parentNode.querySelector('.invalid-feedback') || 
+                        this.parentNode.appendChild(document.createElement('div'));
+                    errorDiv.className = 'invalid-feedback';
+                    errorDiv.textContent = `${fieldName.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())} is required.`;
+                } else {
+                    this.classList.remove('is-invalid');
+                    const errorDiv = this.parentNode.querySelector('.invalid-feedback');
+                    if (errorDiv) {
+                        errorDiv.remove();
+                    }
+                }
+            });
         }
     });
 });

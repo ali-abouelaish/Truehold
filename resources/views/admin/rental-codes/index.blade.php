@@ -670,6 +670,7 @@ strong {
                                         <th>Client Name</th>
                                         <th>Rental Date</th>
                                         <th>Consultation Fee</th>
+                                        <th>Payment Method</th>
                                         <th>Status</th>
                                         <th>Agent</th>
                                         @if(auth()->user()->role === 'admin')
@@ -704,6 +705,23 @@ strong {
                                             </td>
                                             <td>
                                                 <span class="fw-bold text-success">£{{ number_format($rentalCode->consultation_fee, 2) }}</span>
+                                            </td>
+                                            <td>
+                                                @php
+                                                    $paymentMethod = $rentalCode->payment_method ?? 'N/A';
+                                                    $emoji = '';
+                                                    if (strtolower($paymentMethod) === 'transfer' || strtolower($paymentMethod) === 'card machine') {
+                                                        $emoji = '⚡';
+                                                    } elseif (strtolower($paymentMethod) === 'cash') {
+                                                        $emoji = '💰';
+                                                    }
+                                                @endphp
+                                                <span class="badge bg-{{ strtolower($paymentMethod) === 'transfer' || strtolower($paymentMethod) === 'card machine' ? 'info' : (strtolower($paymentMethod) === 'cash' ? 'success' : 'secondary') }} px-3 py-2">
+                                                    @if($emoji)
+                                                        <span class="me-1">{{ $emoji }}</span>
+                                                    @endif
+                                                    {{ $paymentMethod }}
+                                                </span>
                                             </td>
                                             <td>
                                                 <span class="badge bg-{{ $rentalCode->status === 'paid' ? 'success' : ($rentalCode->status === 'approved' ? 'info' : ($rentalCode->status === 'cancelled' ? 'danger' : 'warning')) }} px-3 py-2">

@@ -367,8 +367,20 @@ strong {
                     <div class="info-item">
                         <div class="info-label">Payment Method</div>
                         <div class="info-value">
+                            @php
+                                $paymentMethod = $rentalCode->payment_method ?? 'N/A';
+                                $emoji = '';
+                                if (strtolower($paymentMethod) === 'transfer' || strtolower($paymentMethod) === 'card machine') {
+                                    $emoji = '⚡';
+                                } elseif (strtolower($paymentMethod) === 'cash') {
+                                    $emoji = '💰';
+                                }
+                            @endphp
                             <i class="fas fa-credit-card text-muted me-2"></i>
-                            {{ $rentalCode->payment_method }}
+                            @if($emoji)
+                                <span class="me-1">{{ $emoji }}</span>
+                            @endif
+                            {{ $paymentMethod }}
                         </div>
                     </div>
                     
@@ -643,10 +655,14 @@ strong {
                                 <div class="mt-2">
                                     @foreach($contractFiles as $index => $filePath)
                                         @if($filePath && is_string($filePath))
-                                            <a href="{{ Storage::url($filePath) }}" 
+                                            <a href="{{ route('rental-codes.view-file', ['rentalCode' => $rentalCode->id, 'field' => 'client_contract', 'index' => $index]) }}" 
                                                target="_blank" 
                                                class="btn btn-outline-primary btn-sm me-2">
-                                                <i class="fas fa-download me-1"></i>View Document {{ count($contractFiles) > 1 ? ($index + 1) : '' }}
+                                                <i class="fas fa-eye me-1"></i>View Document {{ count($contractFiles) > 1 ? ($index + 1) : '' }}
+                                            </a>
+                                            <a href="{{ route('rental-codes.download-file', ['rentalCode' => $rentalCode->id, 'field' => 'client_contract', 'index' => $index]) }}" 
+                                               class="btn btn-outline-secondary btn-sm me-2">
+                                                <i class="fas fa-download me-1"></i>Download {{ count($contractFiles) > 1 ? ($index + 1) : '' }}
                                             </a>
                                         @endif
                                     @endforeach
@@ -675,10 +691,14 @@ strong {
                                 <div class="mt-2">
                                     @foreach($proofFiles as $index => $filePath)
                                         @if($filePath && is_string($filePath))
-                                            <a href="{{ Storage::url($filePath) }}" 
+                                            <a href="{{ route('rental-codes.view-file', ['rentalCode' => $rentalCode->id, 'field' => 'payment_proof', 'index' => $index]) }}" 
                                                target="_blank" 
                                                class="btn btn-outline-success btn-sm me-2">
-                                                <i class="fas fa-download me-1"></i>View Document {{ count($proofFiles) > 1 ? ($index + 1) : '' }}
+                                                <i class="fas fa-eye me-1"></i>View Document {{ count($proofFiles) > 1 ? ($index + 1) : '' }}
+                                            </a>
+                                            <a href="{{ route('rental-codes.download-file', ['rentalCode' => $rentalCode->id, 'field' => 'payment_proof', 'index' => $index]) }}" 
+                                               class="btn btn-outline-secondary btn-sm me-2">
+                                                <i class="fas fa-download me-1"></i>Download {{ count($proofFiles) > 1 ? ($index + 1) : '' }}
                                             </a>
                                         @endif
                                     @endforeach
@@ -707,10 +727,14 @@ strong {
                                 <div class="mt-2">
                                     @foreach($idFiles as $index => $filePath)
                                         @if($filePath && is_string($filePath))
-                                            <a href="{{ Storage::url($filePath) }}" 
+                                            <a href="{{ route('rental-codes.view-file', ['rentalCode' => $rentalCode->id, 'field' => 'client_id_document', 'index' => $index]) }}" 
                                                target="_blank" 
                                                class="btn btn-outline-info btn-sm me-2">
-                                                <i class="fas fa-download me-1"></i>View Document {{ count($idFiles) > 1 ? ($index + 1) : '' }}
+                                                <i class="fas fa-eye me-1"></i>View Document {{ count($idFiles) > 1 ? ($index + 1) : '' }}
+                                            </a>
+                                            <a href="{{ route('rental-codes.download-file', ['rentalCode' => $rentalCode->id, 'field' => 'client_id_document', 'index' => $index]) }}" 
+                                               class="btn btn-outline-secondary btn-sm me-2">
+                                                <i class="fas fa-download me-1"></i>Download {{ count($idFiles) > 1 ? ($index + 1) : '' }}
                                             </a>
                                         @endif
                                     @endforeach
@@ -731,10 +755,14 @@ strong {
                                     </div>
                                 </div>
                                 <div class="mt-2">
-                                    <a href="{{ Storage::url($rentalCode->client_id_image) }}" 
+                                    <a href="{{ route('rental-codes.view-file', ['rentalCode' => $rentalCode->id, 'field' => 'client_id_image']) }}" 
                                        target="_blank" 
-                                       class="btn btn-outline-warning btn-sm">
-                                        <i class="fas fa-download me-1"></i>View Image
+                                       class="btn btn-outline-warning btn-sm me-2">
+                                        <i class="fas fa-eye me-1"></i>View Image
+                                    </a>
+                                    <a href="{{ route('rental-codes.download-file', ['rentalCode' => $rentalCode->id, 'field' => 'client_id_image']) }}" 
+                                       class="btn btn-outline-secondary btn-sm">
+                                        <i class="fas fa-download me-1"></i>Download
                                     </a>
                                 </div>
                             </div>
@@ -753,10 +781,14 @@ strong {
                                     </div>
                                 </div>
                                 <div class="mt-2">
-                                    <a href="{{ Storage::url($rentalCode->cash_receipt_image) }}" 
+                                    <a href="{{ route('rental-codes.view-file', ['rentalCode' => $rentalCode->id, 'field' => 'cash_receipt_image']) }}" 
                                        target="_blank" 
-                                       class="btn btn-outline-success btn-sm">
-                                        <i class="fas fa-download me-1"></i>View Receipt
+                                       class="btn btn-outline-success btn-sm me-2">
+                                        <i class="fas fa-eye me-1"></i>View Receipt
+                                    </a>
+                                    <a href="{{ route('rental-codes.download-file', ['rentalCode' => $rentalCode->id, 'field' => 'cash_receipt_image']) }}" 
+                                       class="btn btn-outline-secondary btn-sm">
+                                        <i class="fas fa-download me-1"></i>Download
                                     </a>
                                 </div>
                             </div>
@@ -783,10 +815,14 @@ strong {
                                 <div class="mt-2">
                                     @foreach($contactImages as $index => $image)
                                         @if($image && is_string($image))
-                                            <a href="{{ Storage::url($image) }}" 
+                                            <a href="{{ route('rental-codes.view-file', ['rentalCode' => $rentalCode->id, 'field' => 'contact_images', 'index' => $index]) }}" 
                                                target="_blank" 
                                                class="btn btn-outline-secondary btn-sm me-1 mb-1">
-                                                <i class="fas fa-download me-1"></i>Image {{ $index + 1 }}
+                                                <i class="fas fa-eye me-1"></i>View {{ $index + 1 }}
+                                            </a>
+                                            <a href="{{ route('rental-codes.download-file', ['rentalCode' => $rentalCode->id, 'field' => 'contact_images', 'index' => $index]) }}" 
+                                               class="btn btn-outline-dark btn-sm me-1 mb-1">
+                                                <i class="fas fa-download me-1"></i>Download {{ $index + 1 }}
                                             </a>
                                         @endif
                                     @endforeach

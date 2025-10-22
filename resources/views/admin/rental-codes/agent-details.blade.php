@@ -222,7 +222,21 @@
                                     <td>
                                         <strong>£{{ number_format($rental->consultation_fee, 2) }}</strong>
                                         <br>
-                                        <small class="text-muted">{{ $rental->payment_method }}</small>
+                                        @php
+                                            $paymentMethod = $rental->payment_method ?? 'N/A';
+                                            $emoji = '';
+                                            if (strtolower($paymentMethod) === 'transfer' || strtolower($paymentMethod) === 'card machine') {
+                                                $emoji = '⚡';
+                                            } elseif (strtolower($paymentMethod) === 'cash') {
+                                                $emoji = '💰';
+                                            }
+                                        @endphp
+                                        <small class="text-muted">
+                                            @if($emoji)
+                                                <span class="me-1">{{ $emoji }}</span>
+                                            @endif
+                                            {{ $paymentMethod }}
+                                        </small>
                                     </td>
                                     <td>
                                         @php
@@ -606,8 +620,8 @@ function showRentalDetails(rentalId) {
                     </div>
                     <div class="mb-3">
                         <strong>Payment Method:</strong> 
-                        <span class="badge bg-${data.payment_method === 'Transfer' ? 'info' : 'secondary'}">
-                            ${data.payment_method || 'N/A'}
+                        <span class="badge bg-${data.payment_method === 'Transfer' || data.payment_method === 'Card Machine' ? 'info' : (data.payment_method === 'Cash' ? 'success' : 'secondary')}">
+                            ${(data.payment_method === 'Transfer' || data.payment_method === 'Card Machine') ? '⚡ ' : (data.payment_method === 'Cash' ? '💰 ' : '')}${data.payment_method || 'N/A'}
                         </span>
                     </div>
                     <div class="mb-3">
