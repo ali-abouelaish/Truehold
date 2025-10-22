@@ -134,89 +134,20 @@
                     </div>
                     <div class="card-body">
                         <div class="mb-3">
-                            <label class="form-label">Client Selection <span class="text-danger">*</span></label>
-                            <div class="form-check">
-                                <input class="form-check-input" type="radio" name="client_selection_type" id="existing_client" 
-                                       value="existing" {{ old('client_selection_type', 'existing') == 'existing' ? 'checked' : '' }} required>
-                                <label class="form-check-label" for="existing_client">Existing Client</label>
-                            </div>
-                            <div class="form-check">
-                                <input class="form-check-input" type="radio" name="client_selection_type" id="new_client" 
-                                       value="new" {{ old('client_selection_type') == 'new' ? 'checked' : '' }}>
-                                <label class="form-check-label" for="new_client">New Client</label>
-                            </div>
-                        </div>
-
-                        <!-- Existing Client Selection -->
-                        <div id="existing_client_section">
-                            <div class="mb-3">
-                                <label for="existing_client_id" class="form-label">Select Client <span class="text-danger">*</span></label>
-                                <select class="form-select @error('existing_client_id') is-invalid @enderror" 
-                                        id="existing_client_id" name="existing_client_id">
-                                    <option value="">Choose a client...</option>
-                                    @foreach($existingClients as $client)
-                                        <option value="{{ $client->id }}" {{ old('existing_client_id', $rentalCode->client_id) == $client->id ? 'selected' : '' }}>
-                                            {{ $client->full_name }} 
-                                            @if($client->phone_number) - {{ $client->phone_number }}@endif
-                                        </option>
-                                    @endforeach
-                                </select>
-                                @error('existing_client_id')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-                            </div>
-                        </div>
-
-                        <!-- New Client Form -->
-                        <div id="new_client_section" style="display: none;">
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="mb-3">
-                                        <label for="client_full_name" class="form-label">Full Name <span class="text-danger">*</span></label>
-                                        <input type="text" class="form-control @error('client_full_name') is-invalid @enderror" 
-                                               id="client_full_name" name="client_full_name" 
-                                               value="{{ old('client_full_name') }}">
-                                        @error('client_full_name')
-                                            <div class="invalid-feedback">{{ $message }}</div>
-                                        @enderror
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="mb-3">
-                                        <label for="client_phone_number" class="form-label">Phone Number <span class="text-danger">*</span></label>
-                                        <input type="tel" class="form-control @error('client_phone_number') is-invalid @enderror" 
-                                               id="client_phone_number" name="client_phone_number" 
-                                               value="{{ old('client_phone_number') }}">
-                                        @error('client_phone_number')
-                                            <div class="invalid-feedback">{{ $message }}</div>
-                                        @enderror
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="mb-3">
-                                        <label for="client_email" class="form-label">Email <span class="text-danger">*</span></label>
-                                        <input type="email" class="form-control @error('client_email') is-invalid @enderror" 
-                                               id="client_email" name="client_email" 
-                                               value="{{ old('client_email') }}">
-                                        @error('client_email')
-                                            <div class="invalid-feedback">{{ $message }}</div>
-                                        @enderror
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="mb-3">
-                                        <label for="client_date_of_birth" class="form-label">Date of Birth <span class="text-danger">*</span></label>
-                                        <input type="date" class="form-control @error('client_date_of_birth') is-invalid @enderror" 
-                                               id="client_date_of_birth" name="client_date_of_birth" 
-                                               value="{{ old('client_date_of_birth') }}">
-                                        @error('client_date_of_birth')
-                                            <div class="invalid-feedback">{{ $message }}</div>
-                                        @enderror
-                                    </div>
-                                </div>
-                            </div>
+                            <label for="existing_client_id" class="form-label">Select Client <span class="text-danger">*</span></label>
+                            <select class="form-select @error('existing_client_id') is-invalid @enderror" 
+                                    id="existing_client_id" name="existing_client_id" required>
+                                <option value="">Choose a client...</option>
+                                @foreach($existingClients as $client)
+                                    <option value="{{ $client->id }}" {{ old('existing_client_id', $rentalCode->client_id) == $client->id ? 'selected' : '' }}>
+                                        {{ $client->full_name }} 
+                                        @if($client->phone_number) - {{ $client->phone_number }}@endif
+                                    </option>
+                                @endforeach
+                            </select>
+                            @error('existing_client_id')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
                         </div>
                     </div>
                 </div>
@@ -387,42 +318,6 @@
 </div>
 
 <script>
-// Client selection toggle
-document.addEventListener('DOMContentLoaded', function() {
-    const existingClientRadio = document.getElementById('existing_client');
-    const newClientRadio = document.getElementById('new_client');
-    const existingSection = document.getElementById('existing_client_section');
-    const newSection = document.getElementById('new_client_section');
-
-    function toggleClientSections() {
-        if (existingClientRadio.checked) {
-            existingSection.style.display = 'block';
-            newSection.style.display = 'none';
-            // Make existing client required
-            document.getElementById('existing_client_id').required = true;
-            // Make new client fields not required
-            document.querySelectorAll('#new_client_section input[required]').forEach(input => {
-                input.required = false;
-            });
-        } else if (newClientRadio.checked) {
-            existingSection.style.display = 'none';
-            newSection.style.display = 'block';
-            // Make existing client not required
-            document.getElementById('existing_client_id').required = false;
-            // Make new client fields required
-            document.querySelectorAll('#new_client_section input[required]').forEach(input => {
-                input.required = true;
-            });
-        }
-    }
-
-    existingClientRadio.addEventListener('change', toggleClientSections);
-    newClientRadio.addEventListener('change', toggleClientSections);
-    
-    // Initialize
-    toggleClientSections();
-});
-
 // Form reset function
 function resetForm() {
     if (confirm('Are you sure you want to reset all changes?')) {

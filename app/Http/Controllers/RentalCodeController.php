@@ -265,17 +265,7 @@ class RentalCodeController extends Controller
             'payment_method' => 'required|string|in:Cash,Transfer,Card machine',
             'property' => 'nullable|string',
             'licensor' => 'nullable|string',
-            'client_selection_type' => 'required|in:existing,new',
-            'existing_client_id' => 'required_if:client_selection_type,existing|exists:clients,id',
-            'client_full_name' => 'required_if:client_selection_type,new|string|max:255',
-            'client_date_of_birth' => 'required_if:client_selection_type,new|date',
-            'client_phone_number' => 'required_if:client_selection_type,new|string|max:20',
-            'client_email' => 'required_if:client_selection_type,new|email|max:255',
-            'client_nationality' => 'required_if:client_selection_type,new|string|max:100',
-            'client_current_address' => 'required_if:client_selection_type,new|string',
-            'client_company_university_name' => 'nullable|string|max:255',
-            'client_company_university_address' => 'nullable|string',
-            'client_position_role' => 'nullable|string|max:255',
+            'existing_client_id' => 'required|exists:clients,id',
             'rent_by_agent' => 'required|string|max:255',
             'rental_agent_id' => 'nullable|exists:users,id',
             'marketing_agent_id' => 'nullable|exists:users,id',
@@ -292,24 +282,15 @@ class RentalCodeController extends Controller
 
         $validated = $request->validate($validationRules);
 
-        // Handle client creation or retrieval
-        $client = $this->handleClient($validated);
+        // Get the selected client
+        $client = \App\Models\Client::findOrFail($validated['existing_client_id']);
 
-        // Update rental code with client_id
+        // Update rental code data
         $rentalCodeData = $validated;
         $rentalCodeData['client_id'] = $client->id;
         
-        // Remove client fields from rental code data as they're now in the client record
-        $clientFields = [
-            'client_full_name', 'client_date_of_birth', 'client_phone_number',
-            'client_email', 'client_nationality', 'client_current_address',
-            'client_company_university_name', 'client_company_university_address',
-            'client_position_role'
-        ];
-        
-        foreach ($clientFields as $field) {
-            unset($rentalCodeData[$field]);
-        }
+        // Remove client selection field from rental code data
+        unset($rentalCodeData['existing_client_id']);
 
         $rentalCode->update($rentalCodeData);
 
