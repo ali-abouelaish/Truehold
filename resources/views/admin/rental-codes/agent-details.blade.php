@@ -254,8 +254,8 @@
                                             $marketingDeduction = 0;
                                             
                                             // Check if agent is the rental agent
-                                            $rentAgentName = $rental->rent_by_agent_name;
-                                            $marketingAgentName = $rental->marketing_agent_name;
+                                            $rentAgentName = $rental->rentalAgent->name ?? 'N/A';
+                                            $marketingAgentName = $rental->marketingAgentUser->name ?? 'N/A';
                                             
                                             if ($rentAgentName === $agentName) {
                                                 // Agent is the rental agent - calculate rental earnings
@@ -642,7 +642,7 @@ function showRentalDetails(rentalId) {
                 <div class="col-md-6">
                     <h6><i class="fas fa-user text-info me-2"></i>Agent Information</h6>
                     <div class="mb-3">
-                        <strong>Rent Agent:</strong> ${data.rent_by_agent_name || 'N/A'}
+                        <strong>Rent Agent:</strong> ${data.rental_agent_name || 'N/A'}
                     </div>
                     ${data.marketing_agent_name ? `
                     <div class="mb-3">

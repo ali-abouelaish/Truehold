@@ -670,9 +670,9 @@ strong {
                                         <th>Client Name</th>
                                         <th>Rental Date</th>
                                         <th>Consultation Fee</th>
-                                        <th>Payment Method</th>
                                         <th>Status</th>
                                         <th>Agent</th>
+                                        <th>Marketing Agent</th>
                                         @if(auth()->user()->role === 'admin')
                                         <th>Quick Actions</th>
                                         @endif
@@ -704,9 +704,6 @@ strong {
                                                 <span class="text-muted">{{ $rentalCode->formatted_rental_date }}</span>
                                             </td>
                                             <td>
-                                                <span class="fw-bold text-success">£{{ number_format($rentalCode->consultation_fee, 2) }}</span>
-                                            </td>
-                                            <td>
                                                 @php
                                                     $paymentMethod = $rentalCode->payment_method ?? 'N/A';
                                                     $emoji = '';
@@ -716,11 +713,11 @@ strong {
                                                         $emoji = '💰';
                                                     }
                                                 @endphp
-                                                <span class="badge bg-{{ strtolower($paymentMethod) === 'transfer' || strtolower($paymentMethod) === 'card machine' ? 'info' : (strtolower($paymentMethod) === 'cash' ? 'success' : 'secondary') }} px-3 py-2">
+                                                <span class="fw-bold text-success">
                                                     @if($emoji)
                                                         <span class="me-1">{{ $emoji }}</span>
                                                     @endif
-                                                    {{ $paymentMethod }}
+                                                    £{{ number_format($rentalCode->consultation_fee, 2) }}
                                                 </span>
                                             </td>
                                             <td>
@@ -734,7 +731,15 @@ strong {
                                                     <div class="avatar-sm bg-light rounded-circle d-flex align-items-center justify-content-center me-2">
                                                         <i class="fas fa-user-tie text-muted"></i>
                                                     </div>
-                                                    <span>{{ $rentalCode->rent_by_agent_name }}</span>
+                                                    <span>{{ $rentalCode->rentalAgent->name ?? 'N/A' }}</span>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <div class="avatar-sm bg-light rounded-circle d-flex align-items-center justify-content-center me-2">
+                                                        <i class="fas fa-user-friends text-muted"></i>
+                                                    </div>
+                                                    <span>{{ $rentalCode->marketingAgentUser->name ?? 'N/A' }}</span>
                                                 </div>
                                             </td>
                                             @if(auth()->user()->role === 'admin')
@@ -758,12 +763,14 @@ strong {
                                                        onmouseout="this.style.background='linear-gradient(135deg, #1e40af, #3b82f6)'; this.style.borderColor='#3b82f6';">
                                                         <i class="fas fa-eye"></i>
                                                     </a>
+                                                    @if(auth()->user()->canEditRentalCode($rentalCode))
                                                     <a href="{{ route('rental-codes.edit', $rentalCode) }}" class="btn btn-sm transition-colors" title="Edit"
                                                        style="background: linear-gradient(135deg, #d97706, #f59e0b); border: 1px solid #f59e0b; color: #ffffff; text-decoration: none;"
                                                        onmouseover="this.style.background='linear-gradient(135deg, #f59e0b, #d97706)'; this.style.borderColor='#d97706';"
                                                        onmouseout="this.style.background='linear-gradient(135deg, #d97706, #f59e0b)'; this.style.borderColor='#f59e0b';">
                                                         <i class="fas fa-edit"></i>
                                                     </a>
+                                                    @endif
                                                     <button type="button" class="btn btn-sm transition-colors" title="Delete" onclick="confirmDelete({{ $rentalCode->id }})"
                                                             style="background: linear-gradient(135deg, #dc2626, #ef4444); border: 1px solid #ef4444; color: #ffffff;"
                                                             onmouseover="this.style.background='linear-gradient(135deg, #ef4444, #dc2626)'; this.style.borderColor='#dc2626';"

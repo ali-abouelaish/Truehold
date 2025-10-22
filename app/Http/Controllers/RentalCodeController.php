@@ -19,7 +19,7 @@ class RentalCodeController extends Controller
      */
     public function index()
     {
-        $rentalCodes = RentalCode::with('client')->orderBy('created_at', 'desc')->paginate(20);
+        $rentalCodes = RentalCode::with(['client', 'rentalAgent', 'marketingAgentUser'])->orderBy('created_at', 'desc')->paginate(20);
         return view('admin.rental-codes.index', compact('rentalCodes'));
     }
 
@@ -244,6 +244,11 @@ class RentalCodeController extends Controller
      */
     public function edit(RentalCode $rentalCode)
     {
+        // Check if user can edit this rental code
+        if (!auth()->user()->canEditRentalCode($rentalCode)) {
+            abort(403, 'You are not authorized to edit this rental code.');
+        }
+        
         // Get users who are agents (either by role or by having an agent profile)
         $usersWithAgentRole = User::where('role', 'agent')->get();
         $usersWithAgentProfile = User::whereHas('agent')->get();
@@ -265,6 +270,11 @@ class RentalCodeController extends Controller
      */
     public function update(Request $request, RentalCode $rentalCode)
     {
+        // Check if user can edit this rental code
+        if (!auth()->user()->canEditRentalCode($rentalCode)) {
+            abort(403, 'You are not authorized to edit this rental code.');
+        }
+        
         // Build validation rules based on user role
         $validationRules = [
             'rental_code' => [
@@ -1417,6 +1427,9 @@ public function generateCode()
     {
         \Log::info('Getting rental details', ['rental_code_id' => $rentalCode->id]);
         
+        // Load the relationships
+        $rentalCode->load(['rentalAgent', 'marketingAgentUser', 'client']);
+        
         try {
             $data = [
             'id' => $rentalCode->id,
@@ -1430,8 +1443,8 @@ public function generateCode()
             'paid' => $rentalCode->paid,
             'paid_at' => $rentalCode->paid_at,
             'notes' => $rentalCode->notes,
-            'rent_by_agent_name' => $rentalCode->rent_by_agent_name,
-            'marketing_agent_name' => $rentalCode->marketing_agent_name,
+            'rental_agent_name' => $rentalCode->rentalAgent->name ?? 'N/A',
+            'marketing_agent_name' => $rentalCode->marketingAgentUser->name ?? 'N/A',
             'client_count' => $rentalCode->client_count,
             'client' => $rentalCode->client ? [
                 'id' => $rentalCode->client->id,

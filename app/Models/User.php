@@ -227,4 +227,22 @@ class User extends Authenticatable
             default => false
         };
     }
+
+    /**
+     * Check if the user can edit a rental code
+     */
+    public function canEditRentalCode($rentalCode): bool
+    {
+        // Admin can edit any rental code
+        if ($this->isAdmin()) {
+            return true;
+        }
+        
+        // User can edit rental codes they created (rent_by_agent_id matches their agent user_id)
+        if ($this->agent && $rentalCode->rental_agent_id == $this->agent->user_id) {
+            return true;
+        }
+        
+        return false;
+    }
 }
