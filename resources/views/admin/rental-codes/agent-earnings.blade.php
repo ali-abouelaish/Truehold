@@ -16,9 +16,9 @@
                         <h1 class="text-3xl font-bold text-gray-900">
                             @if($isPayrollView)
                                 @if(auth()->user()->role === 'admin')
-                                    Agent Payroll - {{ $agentSearch }}
+                                    Agent Commission File - {{ $agentSearch }}
                                 @else
-                                    My Payroll
+                                    My Commission File
                                 @endif
                             @else
                                 @if(auth()->user()->role === 'admin')
@@ -31,7 +31,7 @@
                         <p class="text-gray-600 mt-1">
                             @if($isPayrollView)
                                 @if(auth()->user()->role === 'admin')
-                                    Approved rentals up to 10th of each month - Payroll view
+                                    Approved rentals up to 10th of each month - Commission view
                                 @else
                                     Your approved rentals up to 10th of each month
                                 @endif
@@ -281,18 +281,18 @@
                     <div>
                         <h3 class="text-lg font-semibold text-gray-900">
                             @if($agentSearch)
-                                {{ $agentSearch }} - Payroll Details
+                                {{ $agentSearch }} - Commission File
                             @elseif($isPayrollView)
                                 @if(auth()->user()->role === 'admin')
-                                    Payroll Breakdown - {{ $agentSearch }}
+                                    Commission File - {{ $agentSearch }}
                                 @else
-                                    My Payroll Breakdown
+                                    My Commission File
                                 @endif
                             @else
                                 @if(auth()->user()->role === 'admin')
                                     Agent Earnings Breakdown
                                 @else
-                                    Top 3 Agents Leaderboard
+                                    Agent Leaderboard
                                 @endif
                             @endif
                         </h3>
@@ -325,15 +325,15 @@
                         <span class="text-sm text-gray-500">
                             @if($isPayrollView)
                                 @if(auth()->user()->role === 'admin')
-                                    {{ count($agentEarnings) }} payroll record{{ count($agentEarnings) !== 1 ? 's' : '' }}
+                                    {{ count($agentEarnings) }} commission record{{ count($agentEarnings) !== 1 ? 's' : '' }}
                                 @else
-                                    My payroll record{{ count($agentEarnings) !== 1 ? 's' : '' }}
+                                    My commission record{{ count($agentEarnings) !== 1 ? 's' : '' }}
                                 @endif
                             @else
                                 @if(auth()->user()->role === 'admin')
                                     {{ count($agentEarnings) }} agents
                                 @else
-                                    Top 3 agents
+                                    Leaderboard
                                 @endif
                             @endif
                         </span>
@@ -385,9 +385,20 @@
                             $isCurrentUser = $agent['name'] === $currentUser;
                             $showUserRanking = !$isAdmin && $isCurrentUser && $loop->index > 2;
                             
-                            // For normal users, only show top 3 agents
-                            if (!$isAdmin && $loop->index >= 3) {
-                                continue;
+                            // For normal users, show top 3 agents + their own ranking if not in top 3
+                            if (!$isAdmin) {
+                                // If user is in top 3, show only top 3
+                                if ($isCurrentUser && $loop->index < 3) {
+                                    // User is in top 3, show them
+                                } elseif (!$isCurrentUser && $loop->index >= 3) {
+                                    // Not the current user and beyond top 3, skip
+                                    continue;
+                                } elseif ($isCurrentUser && $loop->index >= 3) {
+                                    // User is beyond top 3, show them as 4th
+                                } elseif (!$isCurrentUser && $loop->index >= 3) {
+                                    // Not the current user and beyond top 3, skip
+                                    continue;
+                                }
                             }
                             
                             $rankingClass = '';
@@ -532,7 +543,7 @@
                                 <div class="flex space-x-2">
                                     <a href="{{ route('rental-codes.agent-payroll', ['agentName' => $agent['name']]) }}" 
                                        class="text-blue-600 hover:text-blue-800 font-medium">
-                                        <i class="fas fa-eye mr-1"></i>View Payroll Details
+                                        <i class="fas fa-eye mr-1"></i>View Commission File
                                     </a>
                         </div>
                     </td>
@@ -562,9 +573,20 @@
                         $isCurrentUser = $agent['name'] === $currentUser;
                         $showUserRanking = !$isAdmin && $isCurrentUser && $loop->index > 2;
                         
-                        // For normal users, only show top 3 agents
-                        if (!$isAdmin && $loop->index >= 3) {
-                            continue;
+                        // For normal users, show top 3 agents + their own ranking if not in top 3
+                        if (!$isAdmin) {
+                            // If user is in top 3, show only top 3
+                            if ($isCurrentUser && $loop->index < 3) {
+                                // User is in top 3, show them
+                            } elseif (!$isCurrentUser && $loop->index >= 3) {
+                                // Not the current user and beyond top 3, skip
+                                continue;
+                            } elseif ($isCurrentUser && $loop->index >= 3) {
+                                // User is beyond top 3, show them as 4th
+                            } elseif (!$isCurrentUser && $loop->index >= 3) {
+                                // Not the current user and beyond top 3, skip
+                                continue;
+                            }
                         }
                         
                         $cardClass = '';
@@ -1203,7 +1225,7 @@ document.addEventListener('DOMContentLoaded', function() {
     function checkCrownFallback() {
         // Check if FontAwesome is loaded by testing a simple icon
         const testDiv = document.createElement('div');
-        testDiv.innerHTML = '<i class="fas fa-crown"></i>';
+       
         document.body.appendChild(testDiv);
         const testIcon = testDiv.querySelector('i');
         const isFontAwesomeLoaded = window.getComputedStyle(testIcon).fontFamily.includes('Font Awesome') || 

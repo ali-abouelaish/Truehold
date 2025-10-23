@@ -563,7 +563,7 @@ public function generateCode()
             $agentSearch = $user->name;
         }
 
-        // Check if we're viewing a specific agent's payroll
+        // Check if we're viewing a specific agent's commission file
         $isPayrollView = !empty($agentSearch);
         
         // Build query with filters
@@ -1421,14 +1421,14 @@ public function generateCode()
     }
 
     /**
-     * Show individual agent payroll details - NEW VERSION
+     * Show individual agent commission file - NEW VERSION
      */
     public function agentPayrollNew($requestedAgentName)
     {
         // Check if user is authenticated
         $user = auth()->user();
         if (!$user) {
-            return redirect()->route('login')->with('error', 'Please log in to view payroll data.');
+            return redirect()->route('login')->with('error', 'Please log in to view commission data.');
         }
         
         $startDate = request('start_date');
@@ -1436,9 +1436,10 @@ public function generateCode()
         $status = request('status');
         $paymentMethod = request('payment_method');
 
-        // Get rental codes for this agent
+        // Get rental codes for this agent - ONLY APPROVED RENTALS
         $query = RentalCode::with(['client', 'client.agent', 'rentalAgent', 'marketingAgentUser'])
-            ->where('rental_date', '<=', $endDate);
+            ->where('rental_date', '<=', $endDate)
+            ->where('status', 'approved'); // Only show approved rentals
 
         if ($startDate) {
             $query->where('rental_date', '>=', $startDate);
@@ -1542,6 +1543,9 @@ public function generateCode()
                     $marketingDeduction = $clientCount >= 2 ? 40 : 30;
                     $agentCut -= $marketingDeduction;
                     $agentData['marketing_deductions'] += $marketingDeduction;
+                    
+                    // The marketing agent gets this amount (tracked separately)
+                    $agentData['marketing_agent_earnings'] += $marketingDeduction;
                 }
             }
 

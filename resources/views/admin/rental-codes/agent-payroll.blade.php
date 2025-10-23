@@ -1,18 +1,18 @@
 @extends('layouts.admin')
 
-@section('title', $agentName . ' - Payroll Details')
+@section('title', $agentName . ' - Commission File')
 
 @section('content')
 <div class="container-fluid">
     <!-- Header -->
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
-            <h1 class="h3 mb-0 text-gray-800">{{ $agentName }} - Payroll Details</h1>
-            <p class="text-muted">Complete financial breakdown for {{ $agentName }}</p>
+            <h1 class="h3 mb-0 text-gray-800">{{ $agentName }} - Commission File</h1>
+            <p class="text-muted">Complete commission breakdown for {{ $agentName }}</p>
         </div>
         <div>
             <a href="{{ route('rental-codes.agent-earnings') }}" class="btn btn-secondary">
-                <i class="fas fa-arrow-left mr-2"></i>Back to Earnings Report
+                <i class="fas fa-arrow-left mr-2"></i>Back to Commission Report
             </a>
         </div>
     </div>
