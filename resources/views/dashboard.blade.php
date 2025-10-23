@@ -89,6 +89,9 @@
                     <a href="{{ route('properties.manage') }}" class="nav-link block">
                         <i class="fas fa-edit mr-3"></i>Manage Properties
                     </a>
+                    <a href="{{ route('landlord-bonuses.index') }}" class="nav-link block">
+                        <i class="fas fa-gift mr-3"></i>Landlord Bonuses
+                    </a>
                 </nav>
             </aside>
 

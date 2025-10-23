@@ -349,7 +349,7 @@ strong {
                     </div>
                     
                     <div class="info-item">
-                        <div class="info-label">Rental Date</div>
+                        <div class="info-label">Date</div>
                         <div class="info-value">
                             <i class="fas fa-calendar text-muted me-2"></i>
                             {{ $rentalCode->formatted_rental_date }}
@@ -577,7 +577,7 @@ strong {
                 </div>
                 <div class="card-body">
                     <div class="info-item">
-                        <div class="info-label">Rent By Agent</div>
+                        <div class="info-label">Client Code</div>
                         <div class="info-value">
                             <i class="fas fa-user-tie text-muted me-2"></i>
                             <strong>{{ $rentalCode->rent_by_agent_name }}</strong>

@@ -154,7 +154,7 @@
                         <span class="value">{{ $rentalCode->rental_code }}</span>
                     </div>
                     <div class="info-item">
-                        <span class="label">Rental Date</span>
+                        <span class="label">Date</span>
                         <span class="value">{{ $rentalCode->rental_date ? $rentalCode->rental_date->format('d/m/Y') : 'N/A' }}</span>
                     </div>
                     <div class="info-item">
@@ -220,7 +220,7 @@
                 <h3>👨‍💼 Agent Information</h3>
                 <div class="info-grid">
                     <div class="info-item">
-                        <span class="label">Rent By Agent</span>
+                        <span class="label">Client Code</span>
                         <span class="value">{{ $rentalCode->rent_by_agent ?? 'N/A' }}</span>
                     </div>
                     <div class="info-item">

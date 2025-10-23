@@ -669,7 +669,7 @@ public function generateCode()
             if (!empty($marketingAgent) && $marketingAgent != $code->rent_by_agent) {
                 // £30 for single client, £40 for multiple clients
                 $marketingDeduction = $clientCount > 1 ? 40.0 : 30.0;
-                $agentCut -= $marketingDeduction; // Deduct from agent
+                $agentCut -= $marketingDeduction; // Deduct from rental agent
                 
                 // Get marketing agent name
                 if (is_numeric($marketingAgent) && in_array((int)$marketingAgent, $agentUserIds)) {
@@ -934,13 +934,8 @@ public function generateCode()
         // Calculate averages and apply agent search filter
         $filteredAgents = [];
         foreach ($byAgent as $agentName => $agentData) {
-            // For payroll view, only show the selected agent (exact match)
-            if ($isPayrollView && $agentSearch && $agentName !== $agentSearch) {
-                continue;
-            }
-            
-            // For general earnings view, apply agent search filter (substring match)
-            if (!$isPayrollView && $agentSearch && stripos($agentName, $agentSearch) === false) {
+            // If searching for a specific agent, only show that agent (exact match)
+            if ($agentSearch && $agentName !== $agentSearch) {
                 continue;
             }
             
@@ -1092,6 +1087,91 @@ public function generateCode()
             'monthly_totals' => $monthlyTotals
         ]);
 
+        // Add landlord bonuses to agent earnings
+        $landlordBonuses = \App\Models\LandlordBonus::with(['agent.user'])
+            ->whereBetween('date', [$startDate ?? '1900-01-01', $endDate])
+            ->get();
+
+        foreach ($landlordBonuses as $bonus) {
+            $agentName = $bonus->agent->user->name;
+            
+            if (!isset($filteredAgents[$agentName])) {
+                $filteredAgents[$agentName] = [
+                    'name' => $agentName,
+                    'total_earnings' => 0,
+                    'paid_amount' => 0,
+                    'entitled_amount' => 0,
+                    'outstanding_amount' => 0,
+                    'transaction_count' => 0,
+                    'paid_transactions' => 0,
+                    'unpaid_transactions' => 0,
+                    'marketing_deductions' => 0,
+                    'agent_earnings' => 0,
+                    'agency_earnings' => 0,
+                    'avg_transaction_value' => 0,
+                    'last_transaction_date' => null,
+                    'transactions' => [],
+                    'landlord_bonuses' => []
+                ];
+            }
+            
+            $bonusAmount = $bonus->agent_commission; // Use agent's portion, not full commission
+            $filteredAgents[$agentName]['total_earnings'] += $bonusAmount;
+            $filteredAgents[$agentName]['agent_earnings'] = ($filteredAgents[$agentName]['agent_earnings'] ?? 0) + $bonusAmount;
+            $filteredAgents[$agentName]['transaction_count'] += 1;
+            
+            // Ensure landlord_bonuses array exists
+            if (!isset($filteredAgents[$agentName]['landlord_bonuses'])) {
+                $filteredAgents[$agentName]['landlord_bonuses'] = [];
+            }
+            
+            if ($bonus->status === 'paid') {
+                $filteredAgents[$agentName]['paid_amount'] += $bonusAmount;
+                $filteredAgents[$agentName]['paid_transactions'] = ($filteredAgents[$agentName]['paid_transactions'] ?? 0) + 1;
+            } else {
+                $filteredAgents[$agentName]['entitled_amount'] += $bonusAmount;
+                $filteredAgents[$agentName]['unpaid_transactions'] = ($filteredAgents[$agentName]['unpaid_transactions'] ?? 0) + 1;
+            }
+            
+            $filteredAgents[$agentName]['outstanding_amount'] = max(0, 
+                $filteredAgents[$agentName]['entitled_amount'] - $filteredAgents[$agentName]['paid_amount']
+            );
+            
+            $filteredAgents[$agentName]['landlord_bonuses'][] = [
+                'bonus_code' => $bonus->bonus_code,
+                'date' => $bonus->date,
+                'landlord' => $bonus->landlord,
+                'property' => $bonus->property,
+                'client' => $bonus->client,
+                'commission' => $bonus->commission,
+                'agent_commission' => $bonusAmount,
+                'bonus_split' => $bonus->bonus_split,
+                'status' => $bonus->status,
+                'notes' => $bonus->notes,
+                'type' => 'landlord_bonus'
+            ];
+        }
+
+        // Recalculate summary statistics after adding landlord bonuses
+        $summary = [
+            'total_agents' => count($filteredAgents),
+            'total_rental_codes' => $rentalCodes->count(),
+            'total_earnings' => array_sum(array_map(fn($x) => $x['total_earnings'], $filteredAgents)),
+            'total_agency_earnings' => array_sum(array_map(fn($x) => $x['agency_earnings'] ?? 0, $filteredAgents)),
+            'total_agent_earnings' => array_sum(array_map(fn($x) => $x['agent_earnings'] ?? 0, $filteredAgents)),
+            'total_marketing_earnings' => array_sum(array_map(fn($x) => $x['marketing_agent_earnings'] ?? 0, $filteredAgents)),
+            'total_marketing_deductions' => array_sum(array_map(fn($x) => $x['marketing_deductions'] ?? 0, $filteredAgents)),
+            'total_paid_amount' => array_sum(array_map(fn($x) => $x['paid_amount'], $filteredAgents)),
+            'total_entitled_amount' => array_sum(array_map(fn($x) => $x['entitled_amount'], $filteredAgents)),
+            'total_outstanding_amount' => array_sum(array_map(fn($x) => $x['outstanding_amount'], $filteredAgents)),
+            'total_transactions' => array_sum(array_map(fn($x) => $x['transaction_count'], $filteredAgents)),
+            'total_vat_deductions' => array_sum(array_map(fn($x) => $x['vat_deductions'] ?? 0, $filteredAgents)),
+            'avg_earnings_per_agent' => count($filteredAgents) > 0 
+                ? array_sum(array_map(fn($x) => $x['total_earnings'], $filteredAgents)) / count($filteredAgents) 
+                : 0,
+            'top_earner' => count($filteredAgents) > 0 ? array_values($filteredAgents)[0] : null,
+        ];
+
         return view('admin.rental-codes.agent-earnings', [
             'agentEarnings' => $filteredAgents,
             'summary' => $summary,
@@ -1105,6 +1185,448 @@ public function generateCode()
             'totalRentalCodes' => $rentalCodes->count(),
             'totalEarnings' => $summary['total_earnings'],
             'isPayrollView' => $isPayrollView,
+        ]);
+    }
+
+    /**
+     * Show individual agent payroll details
+     */
+    public function agentPayroll($requestedAgentName)
+    {
+        // Get all agent earnings data
+        $startDate = request('start_date');
+        $endDate = request('end_date') ?? now()->format('Y-m-d');
+        $status = request('status');
+        $paymentMethod = request('payment_method');
+        $marketingAgentFilter = request('marketing_agent_filter');
+
+        // Get rental codes
+        $query = RentalCode::with(['client', 'client.agent'])
+            ->where('rental_date', '<=', $endDate);
+
+        if ($startDate) {
+            $query->where('rental_date', '>=', $startDate);
+        }
+
+        if ($status) {
+            $query->where('status', $status);
+        }
+
+        if ($paymentMethod) {
+            $query->where('payment_method', $paymentMethod);
+        }
+
+        $rentalCodes = $query->get();
+
+        // Get agent users
+        $agentUsers = User::where('role', 'agent')->pluck('name', 'id')->toArray();
+        $agentUserIds = User::where('role', 'agent')->pluck('id')->toArray();
+        $agentUserNames = array_values($agentUsers);
+
+        // Process rental codes
+        $byAgent = [];
+        foreach ($rentalCodes as $code) {
+            $totalFee = (float) ($code->consultation_fee ?? 0);
+            $rentalDate = $code->rental_date ?? now();
+            $paymentMethod = $code->payment_method ?? 'Cash';
+
+            if ($totalFee <= 0) continue;
+
+            // Calculate base commission after VAT
+            $baseCommission = $totalFee;
+            if ($paymentMethod === 'Transfer') {
+                $baseCommission = $totalFee * 0.8;
+            }
+
+            // Determine agent
+            $agentId = $code->rent_by_agent;
+            $agentName = null;
+
+            if (!empty($agentId) && is_numeric($agentId) && in_array((int)$agentId, $agentUserIds)) {
+                $agentName = $agentUsers[(int)$agentId] ?? null;
+            } else {
+                $clientAgentName = $code->client && $code->client->agent ? $code->client->agent->company_name : null;
+                $rentAgentName = $code->rent_by_agent_name;
+
+                if (!empty($clientAgentName) && in_array($clientAgentName, $agentUserNames)) {
+                    $agentName = $clientAgentName;
+                } elseif (!empty($rentAgentName) && in_array($rentAgentName, $agentUserNames)) {
+                    $agentName = $rentAgentName;
+                } else {
+                    if (!empty($clientAgentName)) {
+                        foreach ($agentUsers as $id => $name) {
+                            if (!empty($name) && strcasecmp(trim($clientAgentName), trim($name)) === 0) {
+                                $agentName = $name;
+                                break;
+                            }
+                        }
+                    }
+
+                    if (empty($agentName) && !empty($rentAgentName)) {
+                        foreach ($agentUsers as $id => $name) {
+                            if (!empty($name) && strcasecmp(trim($rentAgentName), trim($name)) === 0) {
+                                $agentName = $name;
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (empty($agentName)) {
+                if (!empty($code->rent_by_agent_name)) {
+                    $agentName = $code->rent_by_agent_name;
+                } elseif (!empty($agentId)) {
+                    $agentName = is_string($agentId) ? trim($agentId) : "Agent-{$agentId}";
+                } else {
+                    $agentName = "Unknown Agent";
+                }
+            }
+
+            // Only process if this is the requested agent
+            if ($agentName !== $requestedAgentName) continue;
+
+            // Initialize agent data
+            if (!isset($byAgent[$agentName])) {
+                $byAgent[$agentName] = [
+                    'name' => $agentName,
+                    'agency_earnings' => 0.0,
+                    'agent_earnings' => 0.0,
+                    'total_earnings' => 0.0,
+                    'transaction_count' => 0,
+                    'transactions' => [],
+                    'monthly_earnings' => [],
+                    'avg_transaction_value' => 0.0,
+                    'last_transaction_date' => null,
+                    'vat_deductions' => 0.0,
+                    'marketing_deductions' => 0.0,
+                    'marketing_agent_earnings' => 0.0,
+                    'paid_amount' => 0.0,
+                    'entitled_amount' => 0.0,
+                    'outstanding_amount' => 0.0,
+                ];
+            }
+
+            // Calculate splits
+            $agencyCut = $baseCommission * 0.45;
+            $agentCut = $baseCommission * 0.55;
+
+            // Add to agent totals
+            $byAgent[$agentName]['agency_earnings'] += $agencyCut;
+            $byAgent[$agentName]['agent_earnings'] += $agentCut;
+            $byAgent[$agentName]['total_earnings'] += $baseCommission;
+            $byAgent[$agentName]['transaction_count'] += 1;
+
+            // Track VAT deductions
+            if ($paymentMethod === 'Transfer') {
+                $vatAmount = $totalFee - $baseCommission;
+                $byAgent[$agentName]['vat_deductions'] += $vatAmount;
+            }
+
+            // Track paid amounts
+            $isPaid = $code->paid ?? false;
+            $agentEarnings = $agentCut;
+
+            if ($isPaid) {
+                $byAgent[$agentName]['paid_amount'] += $agentEarnings;
+            } else {
+                $byAgent[$agentName]['entitled_amount'] += $agentEarnings;
+            }
+
+            $byAgent[$agentName]['outstanding_amount'] = max(0, $byAgent[$agentName]['entitled_amount'] - $byAgent[$agentName]['paid_amount']);
+
+            $byAgent[$agentName]['transactions'][] = [
+                'total_fee' => $totalFee,
+                'base_commission' => $baseCommission,
+                'agency_cut' => $agencyCut,
+                'agent_cut' => $agentCut,
+                'vat_amount' => $paymentMethod === 'Transfer' ? ($totalFee - $baseCommission) : 0,
+                'marketing_deduction' => 0,
+                'marketing_agent' => null,
+                'client_count' => 1,
+                'paid' => $isPaid,
+                'paid_at' => $code->paid_at,
+                'date' => $rentalDate,
+                'code' => $code->rental_code ?? 'N/A',
+                'status' => $code->status ?? 'Unknown',
+                'payment_method' => $paymentMethod,
+            ];
+
+            // Update last transaction date
+            if (!$byAgent[$agentName]['last_transaction_date'] || $rentalDate > $byAgent[$agentName]['last_transaction_date']) {
+                $byAgent[$agentName]['last_transaction_date'] = $rentalDate;
+            }
+        }
+
+        // Get landlord bonuses for this agent
+        $landlordBonuses = \App\Models\LandlordBonus::with(['agent.user'])
+            ->whereBetween('date', [$startDate ?? '1900-01-01', $endDate])
+            ->get()
+            ->filter(function($bonus) use ($requestedAgentName) {
+                return $bonus->agent->user->name === $requestedAgentName;
+            });
+
+        // Add landlord bonuses to agent data
+        if (isset($byAgent[$agentName])) {
+            $byAgent[$agentName]['landlord_bonuses'] = [];
+            foreach ($landlordBonuses as $bonus) {
+                $bonusAmount = $bonus->agent_commission;
+                $byAgent[$agentName]['total_earnings'] += $bonusAmount;
+                $byAgent[$agentName]['agent_earnings'] += $bonusAmount;
+                $byAgent[$agentName]['transaction_count'] += 1;
+
+                if ($bonus->status === 'paid') {
+                    $byAgent[$agentName]['paid_amount'] += $bonusAmount;
+                } else {
+                    $byAgent[$agentName]['entitled_amount'] += $bonusAmount;
+                }
+
+                $byAgent[$agentName]['outstanding_amount'] = max(0, 
+                    $byAgent[$agentName]['entitled_amount'] - $byAgent[$agentName]['paid_amount']
+                );
+
+                $byAgent[$agentName]['landlord_bonuses'][] = [
+                    'bonus_code' => $bonus->bonus_code,
+                    'date' => $bonus->date,
+                    'landlord' => $bonus->landlord,
+                    'property' => $bonus->property,
+                    'client' => $bonus->client,
+                    'commission' => $bonus->commission,
+                    'agent_commission' => $bonusAmount,
+                    'bonus_split' => $bonus->bonus_split,
+                    'status' => $bonus->status,
+                    'notes' => $bonus->notes,
+                    'type' => 'landlord_bonus'
+                ];
+            }
+        }
+
+        $agentData = $byAgent[$requestedAgentName] ?? null;
+        if (!$agentData) {
+            abort(404, 'Agent not found');
+        }
+
+        return view('admin.rental-codes.agent-payroll', [
+            'agent' => $agentData,
+            'agentName' => $requestedAgentName,
+            'startDate' => $startDate,
+            'endDate' => $endDate,
+        ]);
+    }
+
+    /**
+     * Show individual agent payroll details - NEW VERSION
+     */
+    public function agentPayrollNew($requestedAgentName)
+    {
+        $startDate = request('start_date');
+        $endDate = request('end_date') ?? now()->format('Y-m-d');
+        $status = request('status');
+        $paymentMethod = request('payment_method');
+
+        // Get rental codes for this agent
+        $query = RentalCode::with(['client', 'client.agent', 'rentalAgent', 'marketingAgentUser'])
+            ->where('rental_date', '<=', $endDate);
+
+        if ($startDate) {
+            $query->where('rental_date', '>=', $startDate);
+        }
+
+        if ($status) {
+            $query->where('status', $status);
+        }
+
+        if ($paymentMethod) {
+            $query->where('payment_method', $paymentMethod);
+        }
+
+        $rentalCodes = $query->get();
+
+        // Get agent users for matching
+        $agentUsers = User::where('role', 'agent')->pluck('name', 'id')->toArray();
+        $agentUserIds = User::where('role', 'agent')->pluck('id')->toArray();
+
+        // Initialize agent data
+        $agentData = [
+            'name' => $requestedAgentName,
+            'agency_earnings' => 0.0,
+            'agent_earnings' => 0.0,
+            'total_earnings' => 0.0,
+            'transaction_count' => 0,
+            'transactions' => [],
+            'vat_deductions' => 0.0,
+            'marketing_deductions' => 0.0,
+            'marketing_agent_earnings' => 0.0,
+            'paid_amount' => 0.0,
+            'entitled_amount' => 0.0,
+            'outstanding_amount' => 0.0,
+            'landlord_bonuses' => []
+        ];
+
+        // Process rental codes for this agent
+        foreach ($rentalCodes as $code) {
+            $totalFee = (float) ($code->consultation_fee ?? 0);
+            $rentalDate = $code->rental_date ?? now();
+            $paymentMethod = $code->payment_method ?? 'Cash';
+
+            if ($totalFee <= 0) continue;
+
+            // Calculate base commission after VAT
+            $baseCommission = $totalFee;
+            if ($paymentMethod === 'Transfer') {
+                $baseCommission = $totalFee * 0.8;
+            }
+
+            // Determine if this rental code belongs to the requested agent
+            $agentName = null;
+            $isMarketingEarnings = false;
+            $marketingAgent = null;
+            $clientCount = $code->client_count ?? 1; // Get actual client count or default to 1
+
+            // Check rental agent
+            if ($code->rentalAgent && $code->rentalAgent->name === $requestedAgentName) {
+                $agentName = $requestedAgentName;
+            }
+            // Check marketing agent
+            elseif ($code->marketingAgentUser && $code->marketingAgentUser->name === $requestedAgentName) {
+                $agentName = $requestedAgentName;
+                $isMarketingEarnings = true;
+                $marketingAgent = $requestedAgentName;
+            }
+            // Check by ID
+            elseif (!empty($code->rent_by_agent) && is_numeric($code->rent_by_agent) && in_array((int)$code->rent_by_agent, $agentUserIds)) {
+                $agentName = $agentUsers[(int)$code->rent_by_agent] ?? null;
+                if ($agentName !== $requestedAgentName) continue;
+            }
+            // Check by name
+            elseif (!empty($code->rent_by_agent_name) && $code->rent_by_agent_name === $requestedAgentName) {
+                $agentName = $requestedAgentName;
+            }
+            // Check client agent
+            elseif ($code->client && $code->client->agent && $code->client->agent->company_name === $requestedAgentName) {
+                $agentName = $requestedAgentName;
+            }
+
+            // Skip if this rental code doesn't belong to the requested agent
+            if ($agentName !== $requestedAgentName) continue;
+
+            // Calculate splits based on agent type
+            if ($isMarketingEarnings) {
+                // Marketing agent gets fixed commission: £30 for 1 client, £40 for 2+ clients
+                $marketingCommission = $clientCount >= 2 ? 40 : 30;
+                
+                $agencyCut = $baseCommission - $marketingCommission;
+                $agentCut = $marketingCommission;
+                
+                // Track marketing earnings
+                $agentData['marketing_agent_earnings'] += $marketingCommission;
+            } else {
+                // Regular rental agent gets 55% of base commission
+                $agencyCut = $baseCommission * 0.45;
+                $agentCut = $baseCommission * 0.55;
+                
+                // If there's a separate marketing agent, deduct marketing commission from rental agent
+                if ($code->marketing_agent && $code->marketing_agent != $code->rent_by_agent) {
+                    $marketingDeduction = $clientCount >= 2 ? 40 : 30;
+                    $agentCut -= $marketingDeduction;
+                    $agentData['marketing_deductions'] += $marketingDeduction;
+                }
+            }
+
+            // Add to agent totals
+            $agentData['agency_earnings'] += $agencyCut;
+            $agentData['agent_earnings'] += $agentCut;
+            $agentData['total_earnings'] += $baseCommission;
+            $agentData['transaction_count'] += 1;
+
+            // Track VAT deductions
+            if ($paymentMethod === 'Transfer') {
+                $vatAmount = $totalFee - $baseCommission;
+                $agentData['vat_deductions'] += $vatAmount;
+            }
+
+            // Track paid amounts
+            $isPaid = $code->paid ?? false;
+            $agentEarnings = $agentCut;
+
+            if ($isPaid) {
+                $agentData['paid_amount'] += $agentEarnings;
+            } else {
+                $agentData['entitled_amount'] += $agentEarnings;
+            }
+
+            $agentData['outstanding_amount'] = max(0, $agentData['entitled_amount'] - $agentData['paid_amount']);
+
+            // Add transaction details
+            $agentData['transactions'][] = [
+                'total_fee' => $totalFee,
+                'base_commission' => $baseCommission,
+                'agency_cut' => $agencyCut,
+                'agent_cut' => $agentCut,
+                'vat_amount' => $paymentMethod === 'Transfer' ? ($totalFee - $baseCommission) : 0,
+                'marketing_deduction' => 0,
+                'marketing_agent' => $marketingAgent,
+                'client_count' => $clientCount,
+                'paid' => $isPaid,
+                'paid_at' => $code->paid_at,
+                'date' => $rentalDate,
+                'code' => $code->rental_code ?? 'N/A',
+                'status' => $code->status ?? 'Unknown',
+                'payment_method' => $paymentMethod,
+                'is_marketing_earnings' => $isMarketingEarnings,
+            ];
+        }
+
+        // Get landlord bonuses for this agent
+        $landlordBonuses = \App\Models\LandlordBonus::with(['agent.user'])
+            ->whereBetween('date', [$startDate ?? '1900-01-01', $endDate])
+            ->get()
+            ->filter(function($bonus) use ($requestedAgentName) {
+                return $bonus->agent->user->name === $requestedAgentName;
+            });
+
+        // Add landlord bonuses to agent data
+        foreach ($landlordBonuses as $bonus) {
+            $bonusAmount = $bonus->agent_commission;
+            $agentData['total_earnings'] += $bonusAmount;
+            $agentData['agent_earnings'] += $bonusAmount;
+            $agentData['transaction_count'] += 1;
+
+            if ($bonus->status === 'paid') {
+                $agentData['paid_amount'] += $bonusAmount;
+            } else {
+                $agentData['entitled_amount'] += $bonusAmount;
+            }
+
+            $agentData['outstanding_amount'] = max(0, 
+                $agentData['entitled_amount'] - $agentData['paid_amount']
+            );
+
+            $agentData['landlord_bonuses'][] = [
+                'bonus_code' => $bonus->bonus_code,
+                'date' => $bonus->date,
+                'landlord' => $bonus->landlord,
+                'property' => $bonus->property,
+                'client' => $bonus->client,
+                'commission' => $bonus->commission,
+                'agent_commission' => $bonusAmount,
+                'bonus_split' => $bonus->bonus_split,
+                'status' => $bonus->status,
+                'notes' => $bonus->notes,
+                'type' => 'landlord_bonus'
+            ];
+        }
+
+        // Check if agent has any data
+        if ($agentData['transaction_count'] === 0 && count($agentData['landlord_bonuses']) === 0) {
+            abort(404, 'No data found for this agent');
+        }
+
+        return view('admin.rental-codes.agent-payroll', [
+            'agent' => $agentData,
+            'agentName' => $requestedAgentName,
+            'startDate' => $startDate,
+            'endDate' => $endDate,
         ]);
     }
 

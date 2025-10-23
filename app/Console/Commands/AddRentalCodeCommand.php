@@ -21,7 +21,7 @@ class AddRentalCodeCommand extends Command
      *
      * @var string
      */
-    protected $description = 'Add rental code CC0120 to the database';
+    protected $description = 'Add Client Code CC0120 to the database';
 
     /**
      * Execute the console command.
@@ -33,7 +33,7 @@ class AddRentalCodeCommand extends Command
             $existingCode = RentalCode::where('rental_code', 'CC0120')->first();
             
             if ($existingCode) {
-                $this->info('Rental code CC0120 already exists in the database.');
+                $this->info('Client Code CC0120 already exists in the database.');
                 return;
             }
 
@@ -55,7 +55,7 @@ class AddRentalCodeCommand extends Command
                 $this->info('Created dummy client for CC0120.');
             }
 
-            // Create the rental code CC0120
+            // Create the Client Code CC0120
             $rentalCode = RentalCode::create([
                 'rental_code' => 'CC0120',
                 'client_id' => $client->id,
@@ -73,12 +73,12 @@ class AddRentalCodeCommand extends Command
                 'updated_at' => Carbon::now()->subDays(1)
             ]);
 
-            $this->info('Successfully added rental code CC0120 to the database.');
-            $this->info('Rental code ID: ' . $rentalCode->id);
+            $this->info('Successfully added Client Code CC0120 to the database.');
+            $this->info('Client Code ID: ' . $rentalCode->id);
             $this->info('Client ID: ' . $client->id);
             
         } catch (\Exception $e) {
-            $this->error('Failed to add rental code CC0120: ' . $e->getMessage());
+            $this->error('Failed to add Client Code CC0120: ' . $e->getMessage());
             return 1;
         }
 

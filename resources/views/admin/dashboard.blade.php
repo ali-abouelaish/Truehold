@@ -98,6 +98,20 @@
                 </a>
                 @endif
                 
+                @if(auth()->user()->hasAdminPermission('landlord_bonuses', 'view'))
+                <a href="{{ route('landlord-bonuses.index') }}" 
+                   class="flex items-center p-4 rounded-lg transition-all duration-300 transform hover:scale-105"
+                   style="background: linear-gradient(135deg, #1f2937, #374151); border: 2px solid #10b981; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);"
+                   onmouseover="this.style.background='linear-gradient(135deg, #10b981, #059669)'; this.style.borderColor='#059669'; this.style.boxShadow='0 6px 16px rgba(16, 185, 129, 0.4)';"
+                   onmouseout="this.style.background='linear-gradient(135deg, #1f2937, #374151)'; this.style.borderColor='#10b981'; this.style.boxShadow='0 4px 12px rgba(16, 185, 129, 0.2)';">
+                    <i class="fas fa-gift text-xl mr-3" style="color: #10b981;"></i>
+                    <div>
+                        <div class="font-medium" style="color: #d1d5db;">Landlord Bonuses</div>
+                        <div class="text-sm" style="color: #9ca3af;">Manage Bonuses</div>
+                    </div>
+                </a>
+                @endif
+                
                 @if(auth()->user()->hasAdminPermission('invoices', 'view'))
                 <a href="{{ route('admin.invoices.index') }}" 
                    class="flex items-center p-4 rounded-lg transition-all duration-300 transform hover:scale-105"

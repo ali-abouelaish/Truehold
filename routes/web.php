@@ -27,6 +27,7 @@ Route::get('/properties', [PropertyController::class, 'index'])->name('propertie
 Route::get('/properties/map', [PropertyController::class, 'map'])->name('properties.map');
 Route::get('/properties/{property}', [PropertyController::class, 'show'])->name('properties.show');
 Route::get('/rental-codes/agent-earnings', [RentalCodeController::class, 'agentEarnings'])->name('rental-codes.agent-earnings');
+Route::get('/rental-codes/agent-payroll/{agentName}', [RentalCodeController::class, 'agentPayrollNew'])->name('rental-codes.agent-payroll');
 
 // Storage file serving route
 Route::get('/storage/{path}', function ($path) {
@@ -194,6 +195,9 @@ Route::middleware('auth')->prefix('admin')->group(function () {
     Route::post('/rental-codes/{rentalCode}/mark-unpaid', [RentalCodeController::class, 'markAsUnpaid'])->name('rental-codes.mark-unpaid');
     Route::post('/rental-codes/{rentalCode}/update-status', [RentalCodeController::class, 'updateStatus'])->name('rental-codes.update-status');
     Route::post('/rental-codes/bulk-update-status', [RentalCodeController::class, 'bulkUpdateStatus'])->name('rental-codes.bulk-update-status');
+    
+    // Landlord Bonus Management Routes
+    Route::resource('landlord-bonuses', \App\Http\Controllers\LandlordBonusController::class);
     Route::get('/rental-codes/agent/{agentName}', [RentalCodeController::class, 'agentDetails'])->name('rental-codes.agent-details');
     Route::get('/rental-codes/{rentalCode}/details', [RentalCodeController::class, 'getRentalDetails'])->name('rental-codes.details');
     

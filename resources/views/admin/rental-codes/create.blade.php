@@ -134,7 +134,7 @@
                                 
                                 <div class="form-group mb-3">
                                     <label for="rental_date" class="form-label">
-                                        Rental Date <span class="text-danger">*</span>
+                                        Date <span class="text-danger">*</span>
                                     </label>
                                     <div class="input-group">
                                         <span class="input-group-text"><i class="fas fa-calendar"></i></span>
@@ -1002,7 +1002,7 @@ document.addEventListener('DOMContentLoaded', function() {
     function getFieldLabel(fieldName) {
         const labels = {
             'rental_code': 'Rental Code',
-            'rental_date': 'Rental Date',
+            'rental_date': 'Date',
             'consultation_fee': 'Consultation Fee',
             'payment_method': 'Payment Method',
             'client_full_name': 'Client Full Name',
@@ -1012,7 +1012,7 @@ document.addEventListener('DOMContentLoaded', function() {
             'client_nationality': 'Client Nationality',
             'client_current_address': 'Client Current Address',
             'existing_client_id': 'Existing Client',
-            'rent_by_agent': 'Rent By Agent',
+            'rent_by_agent': 'Client Code',
             'client_count': 'Client Count'
         };
         return labels[fieldName] || fieldName;

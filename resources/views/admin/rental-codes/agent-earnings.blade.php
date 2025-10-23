@@ -195,6 +195,7 @@
 </div>
 
         <!-- Summary Dashboard -->
+        @if(!$agentSearch)
         <div class="grid grid-cols-2 gap-4 mb-6">
             <div class="bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg p-4 text-white">
                 <div class="flex items-center justify-between">
@@ -271,6 +272,7 @@
             </div>
         </div>
         @endif
+        @endif
 
 <!-- Agent Earnings Table -->
         <div class="bg-white rounded-xl shadow-sm border border-gray-200">
@@ -278,7 +280,9 @@
                 <div class="flex items-center justify-between">
                     <div>
                         <h3 class="text-lg font-semibold text-gray-900">
-                            @if($isPayrollView)
+                            @if($agentSearch)
+                                {{ $agentSearch }} - Payroll Details
+                            @elseif($isPayrollView)
                                 @if(auth()->user()->role === 'admin')
                                     Payroll Breakdown - {{ $agentSearch }}
                                 @else
@@ -293,7 +297,13 @@
                             @endif
                         </h3>
         <p class="text-sm text-gray-500 mt-1">
-                            @if($isPayrollView)
+                            @if($agentSearch)
+                                Complete payroll breakdown for {{ $agentSearch }}
+                                @if($startDate || $endDate)
+                                    • Period: {{ $startDate ? \Carbon\Carbon::parse($startDate)->format('d M Y') : 'Beginning' }}
+                                    — {{ \Carbon\Carbon::parse($endDate)->format('d M Y') }}
+                                @endif
+                            @elseif($isPayrollView)
                                 Approved rentals for this agent only
                                 @if($startDate || $endDate)
                                     • Period: {{ $startDate ? \Carbon\Carbon::parse($startDate)->format('d M Y') : 'Beginning' }}
@@ -371,7 +381,9 @@
                         @forelse($agentEarnings as $index => $agent)
                         @php
                             $isAdmin = auth()->user()->role === 'admin';
-                            $showUserRanking = !$isAdmin && $loop->index === 3;
+                            $currentUser = auth()->user()->name;
+                            $isCurrentUser = $agent['name'] === $currentUser;
+                            $showUserRanking = !$isAdmin && $isCurrentUser && $loop->index > 2;
                             $rankingClass = '';
                             $rankingIcon = '';
                             $rankingText = '';
@@ -512,21 +524,10 @@
                             
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="flex space-x-2">
-                                    @if($isPayrollView)
-                                    <button onclick="showAgentDetails('{{ $agent['name'] }}')" 
-                                                class="text-blue-600 hover:text-blue-800 font-medium">
-                                            <i class="fas fa-eye mr-1"></i>View Payroll Details
-                                        </button>
-                                        <button onclick="printPayroll('{{ $agent['name'] }}')" 
-                                            class="text-green-600 hover:text-green-800 font-medium">
-                                            <i class="fas fa-print mr-1"></i>Print Payroll
-                                    </button>
-                                    @else
-                                        <a href="{{ route('rental-codes.agent-earnings', ['agent_search' => $agent['name']]) }}" 
-                                           class="text-purple-600 hover:text-purple-800 font-medium">
-                                            <i class="fas fa-money-bill-wave mr-1"></i>View Payroll
-                                        </a>
-                                    @endif
+                                    <a href="{{ route('rental-codes.agent-payroll', ['agentName' => $agent['name']]) }}" 
+                                       class="text-blue-600 hover:text-blue-800 font-medium">
+                                        <i class="fas fa-eye mr-1"></i>View Payroll Details
+                                    </a>
                         </div>
                     </td>
                 </tr>
@@ -551,7 +552,9 @@
                     @foreach($agentEarnings as $index => $agent)
                     @php
                         $isAdmin = auth()->user()->role === 'admin';
-                        $showUserRanking = !$isAdmin && $loop->index === 3;
+                        $currentUser = auth()->user()->name;
+                        $isCurrentUser = $agent['name'] === $currentUser;
+                        $showUserRanking = !$isAdmin && $isCurrentUser && $loop->index > 2;
                         $cardClass = '';
                         $cardRing = '';
                         
@@ -706,17 +709,18 @@
     </div>
 </div>
 
+
 <!-- Agent Details Modal -->
 <div id="agentModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
-    <div class="relative top-20 mx-auto p-5 border w-11/12 md:w-3/4 lg:w-1/2 shadow-lg rounded-md bg-white">
+    <div class="relative top-10 mx-auto p-5 border w-11/12 md:w-4/5 lg:w-3/4 xl:w-2/3 shadow-lg rounded-md bg-white">
         <div class="mt-3">
             <div class="flex items-center justify-between mb-4">
-                <h3 class="text-lg font-semibold text-gray-900" id="modalTitle">Agent Details</h3>
+                <h3 class="text-lg font-semibold text-gray-900" id="modalTitle">Agent Payroll Details</h3>
                 <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600">
                     <i class="fas fa-times text-xl"></i>
                 </button>
             </div>
-            <div id="modalContent" class="max-h-96 overflow-y-auto">
+            <div id="modalContent" class="max-h-screen overflow-y-auto">
                 <!-- Content will be loaded here -->
             </div>
         </div>
@@ -855,64 +859,185 @@ function toggleFilters() {
     }
 }
 
-// Agent details modal
+// Agent payroll modal
 function showAgentDetails(agentName) {
     const agentData = {!! json_encode($agentEarnings) !!}[agentName];
     if (!agentData) return;
     
-    document.getElementById('modalTitle').textContent = agentName + ' - Detailed Analysis';
+    document.getElementById('modalTitle').textContent = agentName + ' - Payroll Details';
     
-     const transactions = agentData.transactions.slice(0, 10); // Show last 10 transactions
-     let transactionsHtml = '';
-     
-     transactions.forEach(transaction => {
-         transactionsHtml += `
-             <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg mb-2">
-                 <div class="flex items-center">
-                     <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${transaction.payment_method === 'Transfer' || transaction.payment_method === 'Card Machine' ? 'bg-purple-100 text-purple-800' : (transaction.payment_method === 'Cash' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800')}">
-                         ${(transaction.payment_method === 'Transfer' || transaction.payment_method === 'Card Machine') ? '⚡ ' : (transaction.payment_method === 'Cash' ? '💰 ' : '')}${transaction.payment_method}
-                     </span>
-                     <span class="ml-3 text-sm font-medium text-gray-900">${transaction.code}</span>
-                 </div>
-                 <div class="text-right">
-                     <div class="text-sm font-semibold text-gray-900">£${parseFloat(transaction.total_fee).toFixed(2)}</div>
-                     <div class="text-xs text-gray-500">Agency: £${parseFloat(transaction.agency_cut).toFixed(2)} | Agent: £${parseFloat(transaction.agent_cut).toFixed(2)}</div>
-                     ${transaction.vat_amount > 0 ? '<div class="text-xs text-orange-600">VAT: £' + parseFloat(transaction.vat_amount).toFixed(2) + '</div>' : ''}
-                     ${transaction.marketing_deduction > 0 ? '<div class="text-xs text-red-600">Marketing Deduction: £' + parseFloat(transaction.marketing_deduction).toFixed(2) + '</div>' : ''}
-                     ${transaction.is_marketing_earnings ? '<div class="text-xs text-green-600">Marketing Earnings</div>' : ''}
-                     ${transaction.client_count > 1 ? '<div class="text-xs text-blue-600">Multiple Clients: ' + transaction.client_count + '</div>' : ''}
-                     ${transaction.paid ? '<div class="text-xs text-green-600">✓ Paid</div>' : '<div class="text-xs text-orange-600">Pending Payment</div>'}
-                 </div>
-             </div>
-         `;
-     });
-     
-     document.getElementById('modalContent').innerHTML = `
-         <div class="space-y-6">
-             <div class="grid grid-cols-3 gap-4">
-                 <div class="text-center p-4 bg-blue-50 rounded-lg">
-                     <div class="text-2xl font-bold text-blue-900">£${parseFloat(agentData.total_earnings).toFixed(2)}</div>
-                     <div class="text-sm text-blue-600">Total Commission</div>
-                 </div>
-                 <div class="text-center p-4 bg-green-50 rounded-lg">
-                     <div class="text-2xl font-bold text-green-900">£${parseFloat(agentData.agent_earnings).toFixed(2)}</div>
-                     <div class="text-sm text-green-600">Agent Earnings</div>
-                 </div>
-                 <div class="text-center p-4 bg-purple-50 rounded-lg">
-                     <div class="text-2xl font-bold text-purple-900">${agentData.transaction_count}</div>
-                     <div class="text-sm text-purple-600">Transactions</div>
-                 </div>
-             </div>
-             
-             <div>
-                 <h4 class="font-semibold text-gray-900 mb-3">Recent Transactions</h4>
-                 ${transactionsHtml}
-             </div>
-         </div>
-     `;
+    const transactions = agentData.transactions || [];
+    const landlordBonuses = agentData.landlord_bonuses || [];
+    
+    // Calculate totals
+    const rentalCodeEarnings = transactions.reduce((sum, t) => sum + parseFloat(t.agent_cut || 0), 0);
+    const landlordBonusEarnings = landlordBonuses.reduce((sum, b) => sum + parseFloat(b.agent_commission || 0), 0);
+    const marketingEarnings = transactions.reduce((sum, t) => sum + parseFloat(t.is_marketing_earnings ? t.agent_cut : 0), 0);
+    const marketingDeductions = transactions.reduce((sum, t) => sum + parseFloat(t.marketing_deduction || 0), 0);
+    const vatDeductions = transactions.reduce((sum, t) => sum + parseFloat(t.vat_amount || 0), 0);
+    const totalEarnings = rentalCodeEarnings + landlordBonusEarnings;
+    
+    // Build rental codes HTML
+    let rentalCodesHtml = '';
+    if (transactions.length > 0) {
+        transactions.forEach(transaction => {
+            const isMarketingEarnings = transaction.is_marketing_earnings;
+            const bgColor = isMarketingEarnings ? 'bg-orange-50 border-orange-200' : 'bg-gray-50 border-gray-200';
+            
+            rentalCodesHtml += `
+                <div class="p-4 ${bgColor} rounded-lg border mb-3">
+                    <div class="flex justify-between items-start">
+                        <div class="flex-1">
+                            <div class="flex items-center space-x-3 mb-2">
+                                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${transaction.payment_method === 'Transfer' || transaction.payment_method === 'Card Machine' ? 'bg-purple-100 text-purple-800' : (transaction.payment_method === 'Cash' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800')}">
+                                    ${(transaction.payment_method === 'Transfer' || transaction.payment_method === 'Card Machine') ? '⚡ ' : (transaction.payment_method === 'Cash' ? '💰 ' : '')}${transaction.payment_method}
+                                </span>
+                                <span class="font-medium text-gray-900">${transaction.code}</span>
+                                ${isMarketingEarnings ? '<span class="text-xs text-orange-600 font-medium">Marketing</span>' : ''}
+                                ${transaction.paid ? '<span class="text-xs text-green-600 font-medium">✓ Paid</span>' : '<span class="text-xs text-yellow-600 font-medium">Pending</span>'}
+                            </div>
+                            <div class="text-sm text-gray-600 mb-2">
+                                Date: ${new Date(transaction.date).toLocaleDateString()}
+                                ${transaction.client_count > 1 ? ` | Clients: ${transaction.client_count}` : ''}
+                            </div>
+                            <div class="grid grid-cols-2 gap-4 text-sm">
+                                <div>
+                                    <span class="text-gray-500">Total Fee:</span>
+                                    <span class="font-semibold text-gray-900">£${parseFloat(transaction.total_fee).toFixed(2)}</span>
+                                </div>
+                                <div>
+                                    <span class="text-gray-500">Agent Cut:</span>
+                                    <span class="font-semibold text-green-600">£${parseFloat(transaction.agent_cut).toFixed(2)}</span>
+                                </div>
+                                <div>
+                                    <span class="text-gray-500">Agency Cut:</span>
+                                    <span class="font-semibold text-blue-600">£${parseFloat(transaction.agency_cut).toFixed(2)}</span>
+                                </div>
+                                <div>
+                                    <span class="text-gray-500">Base Commission:</span>
+                                    <span class="font-semibold text-gray-700">£${parseFloat(transaction.base_commission).toFixed(2)}</span>
+                                </div>
+                            </div>
+                            ${transaction.vat_amount > 0 || transaction.marketing_deduction > 0 ? `
+                                <div class="mt-2 pt-2 border-t border-gray-200">
+                                    <div class="text-xs text-gray-500">Deductions:</div>
+                                    ${transaction.vat_amount > 0 ? `<div class="text-xs text-orange-600">VAT: £${parseFloat(transaction.vat_amount).toFixed(2)}</div>` : ''}
+                                    ${transaction.marketing_deduction > 0 ? `<div class="text-xs text-red-600">Marketing: £${parseFloat(transaction.marketing_deduction).toFixed(2)}</div>` : ''}
+                                    ${transaction.marketing_agent ? `<div class="text-xs text-blue-600">Marketing Agent: ${transaction.marketing_agent}</div>` : ''}
+                                </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+    } else {
+        rentalCodesHtml = '<div class="text-center py-8 text-gray-500">No rental codes found</div>';
+    }
+    
+    // Build landlord bonuses HTML
+    let landlordBonusesHtml = '';
+    if (landlordBonuses.length > 0) {
+        landlordBonuses.forEach(bonus => {
+            landlordBonusesHtml += `
+                <div class="p-4 bg-green-50 border border-green-200 rounded-lg mb-3">
+                    <div class="flex justify-between items-start">
+                        <div class="flex-1">
+                            <div class="flex items-center space-x-3 mb-2">
+                                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                    <i class="fas fa-gift mr-1"></i>${bonus.bonus_code}
+                                </span>
+                                <span class="font-medium text-gray-900">${bonus.property}</span>
+                                <span class="text-xs ${bonus.status === 'paid' ? 'text-green-600' : 'text-yellow-600'}">${bonus.status === 'paid' ? '✓ Paid' : 'Pending'}</span>
+                            </div>
+                            <div class="text-sm text-gray-600 mb-2">
+                                Landlord: ${bonus.landlord} | Client: ${bonus.client}
+                            </div>
+                            <div class="grid grid-cols-2 gap-4 text-sm">
+                                <div>
+                                    <span class="text-gray-500">Total Commission:</span>
+                                    <span class="font-semibold text-gray-900">£${parseFloat(bonus.commission).toFixed(2)}</span>
+                                </div>
+                                <div>
+                                    <span class="text-gray-500">Agent Commission:</span>
+                                    <span class="font-semibold text-green-600">£${parseFloat(bonus.agent_commission).toFixed(2)}</span>
+                                </div>
+                                <div>
+                                    <span class="text-gray-500">Split:</span>
+                                    <span class="font-semibold text-blue-600">${bonus.bonus_split === '100_0' ? '100% Agent' : '55% Agent, 45% Agency'}</span>
+                                </div>
+                                <div>
+                                    <span class="text-gray-500">Date:</span>
+                                    <span class="font-semibold text-gray-700">${new Date(bonus.date).toLocaleDateString()}</span>
+                                </div>
+                            </div>
+                            ${bonus.notes ? `<div class="mt-2 text-xs text-gray-500">Notes: ${bonus.notes}</div>` : ''}
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+    } else {
+        landlordBonusesHtml = '<div class="text-center py-8 text-gray-500">No landlord bonuses found</div>';
+    }
+    
+    document.getElementById('modalContent').innerHTML = `
+        <div class="space-y-6">
+            <!-- Header with agent name and totals -->
+            <div class="bg-gradient-to-r from-blue-50 to-indigo-50 p-6 rounded-lg border">
+                <h2 class="text-2xl font-bold text-gray-900 mb-4">${agentName}</h2>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div class="text-center">
+                        <div class="text-3xl font-bold text-blue-900">£${parseFloat(totalEarnings).toFixed(2)}</div>
+                        <div class="text-sm text-blue-600">Total Earnings</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-2xl font-bold text-green-900">£${parseFloat(rentalCodeEarnings).toFixed(2)}</div>
+                        <div class="text-sm text-green-600">Rental Codes</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-2xl font-bold text-purple-900">£${parseFloat(landlordBonusEarnings).toFixed(2)}</div>
+                        <div class="text-sm text-purple-600">Landlord Bonuses</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-2xl font-bold text-orange-900">£${parseFloat(marketingEarnings).toFixed(2)}</div>
+                        <div class="text-sm text-orange-600">Marketing Earnings</div>
+                    </div>
+                </div>
+                ${marketingDeductions > 0 || vatDeductions > 0 ? `
+                    <div class="mt-4 pt-4 border-t border-gray-200">
+                        <div class="text-sm text-gray-600 mb-2">Deductions:</div>
+                        <div class="flex space-x-4">
+                            ${marketingDeductions > 0 ? `<span class="text-sm text-red-600">Marketing: £${parseFloat(marketingDeductions).toFixed(2)}</span>` : ''}
+                            ${vatDeductions > 0 ? `<span class="text-sm text-yellow-600">VAT: £${parseFloat(vatDeductions).toFixed(2)}</span>` : ''}
+                        </div>
+                    </div>
+                ` : ''}
+            </div>
+            
+            <!-- Rental Codes Section -->
+            <div>
+                <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                    <i class="fas fa-file-contract text-blue-600 mr-2"></i>
+                    Rental Codes (${transactions.length})
+                </h3>
+                ${rentalCodesHtml}
+            </div>
+            
+            <!-- Landlord Bonuses Section -->
+            <div>
+                <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                    <i class="fas fa-gift text-green-600 mr-2"></i>
+                    Landlord Bonuses (${landlordBonuses.length})
+                </h3>
+                ${landlordBonusesHtml}
+            </div>
+        </div>
+    `;
     
     document.getElementById('agentModal').classList.remove('hidden');
 }
+
 
 function closeModal() {
     document.getElementById('agentModal').classList.add('hidden');
@@ -1405,3 +1530,4 @@ document.addEventListener('DOMContentLoaded', function() {
 }
 </style>
 @endsection
+

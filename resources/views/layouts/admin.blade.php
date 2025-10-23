@@ -649,6 +649,12 @@
                     <i class="fas fa-bullhorn sidebar-icon mr-3 text-lg"></i>
                     <span class="sidebar-text">Marketing Agents</span>
                 </a>
+
+                <a href="{{ route('landlord-bonuses.index') }}" 
+                   class="sidebar-item flex items-center px-4 py-3 text-gray-700 hover:text-blue-600 {{ request()->routeIs('landlord-bonuses*') ? 'active' : '' }}">
+                    <i class="fas fa-gift sidebar-icon mr-3 text-lg"></i>
+                    <span class="sidebar-text">Landlord Bonuses</span>
+                </a>
                 @endif
 
                 @if(auth()->user()->hasAdminPermission('invoices', 'view'))

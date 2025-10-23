@@ -440,7 +440,7 @@ strong {
     color: #f9fafb !important;
 }
 
-/* Rental date from database */
+/* Date from database */
 .text-muted {
     color: #9ca3af !important;
 }
@@ -668,7 +668,7 @@ strong {
                                         </th>
                                         <th>Rental Code</th>
                                         <th>Client Name</th>
-                                        <th>Rental Date</th>
+                                        <th>Date</th>
                                         <th>Consultation Fee</th>
                                         <th>Status</th>
                                         <th>Agent</th>
