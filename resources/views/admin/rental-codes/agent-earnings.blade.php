@@ -292,7 +292,7 @@
                                 @if(auth()->user()->role === 'admin')
                                     Agent Earnings Breakdown
                                 @else
-                                    My Earnings Breakdown
+                                    Top 3 Agents Leaderboard
                                 @endif
                             @endif
                         </h3>
@@ -333,7 +333,7 @@
                                 @if(auth()->user()->role === 'admin')
                                     {{ count($agentEarnings) }} agents
                                 @else
-                                    My earnings data
+                                    Top 3 agents
                                 @endif
                             @endif
                         </span>
@@ -384,6 +384,12 @@
                             $currentUser = auth()->user()->name;
                             $isCurrentUser = $agent['name'] === $currentUser;
                             $showUserRanking = !$isAdmin && $isCurrentUser && $loop->index > 2;
+                            
+                            // For normal users, only show top 3 agents
+                            if (!$isAdmin && $loop->index >= 3) {
+                                continue;
+                            }
+                            
                             $rankingClass = '';
                             $rankingIcon = '';
                             $rankingText = '';
@@ -555,6 +561,12 @@
                         $currentUser = auth()->user()->name;
                         $isCurrentUser = $agent['name'] === $currentUser;
                         $showUserRanking = !$isAdmin && $isCurrentUser && $loop->index > 2;
+                        
+                        // For normal users, only show top 3 agents
+                        if (!$isAdmin && $loop->index >= 3) {
+                            continue;
+                        }
+                        
                         $cardClass = '';
                         $cardRing = '';
                         

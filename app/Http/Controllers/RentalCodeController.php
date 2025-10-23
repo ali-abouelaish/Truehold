@@ -541,6 +541,12 @@ public function generateCode()
 
         // Authorization: Check if user can view payroll
         $user = auth()->user();
+        
+        // Check if user is authenticated
+        if (!$user) {
+            return redirect()->route('login')->with('error', 'Please log in to view earnings data.');
+        }
+        
         $isAdmin = $user->role === 'admin';
         
         // If user is not admin and trying to view specific agent payroll
@@ -1419,6 +1425,12 @@ public function generateCode()
      */
     public function agentPayrollNew($requestedAgentName)
     {
+        // Check if user is authenticated
+        $user = auth()->user();
+        if (!$user) {
+            return redirect()->route('login')->with('error', 'Please log in to view payroll data.');
+        }
+        
         $startDate = request('start_date');
         $endDate = request('end_date') ?? now()->format('Y-m-d');
         $status = request('status');
