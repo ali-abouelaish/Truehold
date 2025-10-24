@@ -1404,6 +1404,11 @@ public function generateCode()
             abort(404, 'Agent not found');
         }
 
+        // If no data, render the view with an empty state instead of 404
+        if ($agentData['transaction_count'] === 0 && count($agentData['landlord_bonuses']) === 0) {
+            \Log::info('Agent payroll accessed with no data', ['agent' => $requestedAgentName]);
+        }
+
         return view('admin.rental-codes.agent-payroll', [
             'agent' => $agentData,
             'agentName' => $requestedAgentName,
@@ -1422,6 +1427,14 @@ public function generateCode()
         if (!$user) {
             return redirect()->route('login')->with('error', 'Please log in to view commission data.');
         }
+        
+        // Treat marketing agents as marketing-only for this view
+        $requestedIsMarketing = \App\Models\User::where('name', $requestedAgentName)
+            ->where(function($q) {
+                $q->where('role', 'marketing_agent')
+                  ->orWhereJsonContains('roles', 'marketing_agent');
+            })
+            ->exists();
         
         $startDate = request('start_date');
         $endDate = request('end_date') ?? now()->format('Y-m-d');
@@ -1514,6 +1527,9 @@ public function generateCode()
 
             // Skip if this rental code doesn't belong to the requested agent
             if ($agentName !== $requestedAgentName) continue;
+
+            // If requested agent is a marketing agent, only include marketing earnings
+            if ($requestedIsMarketing && !$isMarketingEarnings) continue;
 
             // Calculate splits based on agent type
             if ($isMarketingEarnings) {

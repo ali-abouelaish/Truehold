@@ -1237,7 +1237,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             hideUploadProgress();
             // Submit the form
-            document.getElementById('rental-code-form').submit();
+            document.getElementById('rentalCodeForm').submit();
         } else {
             // Continue waiting
             setTimeout(() => {
