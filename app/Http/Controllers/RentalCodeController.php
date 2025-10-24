@@ -665,42 +665,34 @@ public function generateCode()
             $agencyCut = $baseCommission * 0.45;
             $agentCut = $baseCommission * 0.55;
             
-            // Check if marketing agent is different from rental agent
-            $marketingAgent = $code->marketing_agent;
+            // Check if marketing agent is different from rental agent (use IDs when available)
             $marketingDeduction = 0;
-            $marketingAgentName = null;
             $clientCount = $code->client_count ?? 1;
             
-            // If marketing agent exists and is different from the rental agent
-            if (!empty($marketingAgent) && $marketingAgent != $code->rent_by_agent) {
+            $hasDifferentMarketingAgent = false;
+            if (!empty($code->marketing_agent_id) && !empty($code->rental_agent_id)) {
+                $hasDifferentMarketingAgent = (int) $code->marketing_agent_id !== (int) $code->rental_agent_id;
+            } else {
+                $rentAgentName = $code->rent_by_agent_name;
+                $marketingAgentName = $code->marketing_agent_name;
+                if ($marketingAgentName === 'N/A') { $marketingAgentName = null; }
+                if (!empty($marketingAgentName) && !empty($rentAgentName)) {
+                    $hasDifferentMarketingAgent = trim($marketingAgentName) !== trim($rentAgentName);
+                }
+            }
+            
+            if ($hasDifferentMarketingAgent) {
                 // £30 for single client, £40 for multiple clients
                 $marketingDeduction = $clientCount > 1 ? 40.0 : 30.0;
                 $agentCut -= $marketingDeduction; // Deduct from rental agent
                 
-                // Get marketing agent name
-                if (is_numeric($marketingAgent) && in_array((int)$marketingAgent, $agentUserIds)) {
-                    $marketingAgentName = $agentUsers[(int)$marketingAgent] ?? null;
-                } elseif (is_string($marketingAgent) && !empty(trim($marketingAgent))) {
-                    foreach ($agentUsers as $id => $name) {
-                        if (!empty($name) && strcasecmp(trim($marketingAgent), trim($name)) === 0) {
-                            $marketingAgentName = $name;
-                            break;
-                        }
-                    }
-                }
-                
-                // If no marketing agent found in registered users, try to resolve by ID
+                // Ensure marketing agent name is available for summaries
                 if (empty($marketingAgentName)) {
-                    if (is_numeric($marketingAgent)) {
-                        // Try to get user name by ID
-                        $user = \App\Models\User::find((int)$marketingAgent);
-                        $marketingAgentName = $user ? $user->name : "Marketing-{$marketingAgent}";
-                    } else {
-                        $marketingAgentName = is_string($marketingAgent) ? trim($marketingAgent) : "Marketing-{$marketingAgent}";
-                    }
+                    $marketingAgentName = $code->marketing_agent_name;
+                    if ($marketingAgentName === 'N/A') { $marketingAgentName = null; }
                 }
             }
-
+            
             // Determine the agent (use rent_by_agent)
             $agentId = $code->rent_by_agent;
             $agentName = null;
@@ -1539,7 +1531,19 @@ public function generateCode()
                 $agentCut = $baseCommission * 0.55;
                 
                 // If there's a separate marketing agent, deduct marketing commission from rental agent
-                if ($code->marketing_agent && $code->marketing_agent != $code->rent_by_agent) {
+                $hasDifferentMarketingAgent = false;
+                if (!empty($code->marketing_agent_id) && !empty($code->rental_agent_id)) {
+                    $hasDifferentMarketingAgent = (int) $code->marketing_agent_id !== (int) $code->rental_agent_id;
+                } else {
+                    $rentAgentNameCheck = $code->rent_by_agent_name;
+                    $marketingAgentNameCheck = $code->marketing_agent_name;
+                    if ($marketingAgentNameCheck === 'N/A') { $marketingAgentNameCheck = null; }
+                    if (!empty($marketingAgentNameCheck) && !empty($rentAgentNameCheck)) {
+                        $hasDifferentMarketingAgent = trim($marketingAgentNameCheck) !== trim($rentAgentNameCheck);
+                    }
+                }
+
+                if ($hasDifferentMarketingAgent) {
                     $marketingDeduction = $clientCount >= 2 ? 40 : 30;
                     $agentCut -= $marketingDeduction;
                     $agentData['marketing_deductions'] += $marketingDeduction;
@@ -1580,8 +1584,8 @@ public function generateCode()
                 'agency_cut' => $agencyCut,
                 'agent_cut' => $agentCut,
                 'vat_amount' => $paymentMethod === 'Transfer' ? ($totalFee - $baseCommission) : 0,
-                'marketing_deduction' => 0,
-                'marketing_agent' => $marketingAgent,
+                'marketing_deduction' => $marketingDeduction ?? 0,
+                'marketing_agent' => $code->marketing_agent_name,
                 'client_count' => $clientCount,
                 'paid' => $isPaid,
                 'paid_at' => $code->paid_at,

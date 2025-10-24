@@ -84,38 +84,7 @@
         </div>
     </div>
 
-    <!-- Deductions Summary -->
-    @if($agent['vat_deductions'] > 0 || $agent['marketing_deductions'] > 0)
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="card shadow">
-                <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary">Deductions Summary</h6>
-                </div>
-                <div class="card-body">
-                    <div class="row">
-                        @if($agent['vat_deductions'] > 0)
-                        <div class="col-md-6">
-                            <div class="d-flex justify-content-between">
-                                <span class="text-muted">VAT Deductions:</span>
-                                <span class="font-weight-bold text-warning">£{{ number_format($agent['vat_deductions'], 2) }}</span>
-                            </div>
-                        </div>
-                        @endif
-                        @if($agent['marketing_deductions'] > 0)
-                        <div class="col-md-6">
-                            <div class="d-flex justify-content-between">
-                                <span class="text-muted">Marketing Deductions:</span>
-                                <span class="font-weight-bold text-danger">£{{ number_format($agent['marketing_deductions'], 2) }}</span>
-                            </div>
-                        </div>
-                        @endif
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    @endif
+    
 
     <!-- Rental Codes Section -->
     <div class="row mb-4">
@@ -259,5 +228,38 @@
             </div>
         </div>
     </div>
+
+    <!-- Deductions Summary -->
+    @if($agent['vat_deductions'] > 0 || $agent['marketing_deductions'] > 0)
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Deductions Summary</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        @if($agent['vat_deductions'] > 0)
+                        <div class="col-md-6">
+                            <div class="d-flex justify-content-between">
+                                <span class="text-muted">VAT Deductions:</span>
+                                <span class="font-weight-bold text-warning">£{{ number_format($agent['vat_deductions'], 2) }}</span>
+                            </div>
+                        </div>
+                        @endif
+                        @if($agent['marketing_deductions'] > 0)
+                        <div class="col-md-6">
+                            <div class="d-flex justify-content-between">
+                                <span class="text-muted">Marketing Deductions:</span>
+                                <span class="font-weight-bold text-danger">£{{ number_format($agent['marketing_deductions'], 2) }}</span>
+                            </div>
+                        </div>
+                        @endif
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    @endif
 </div>
 @endsection
