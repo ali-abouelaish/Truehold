@@ -402,24 +402,29 @@
                             }
                             
                             $rankingClass = '';
-                            $rankingIcon = '';
+                            $rankBadgeClass = '';
+                            $rankingEmoji = '';
                             $rankingText = '';
                             
                             if ($loop->index === 0) {
                                 $rankingClass = 'ranking-row-gold';
-                                $rankingIcon = 'fas fa-crown';
+                                $rankBadgeClass = 'rank-gold';
+                                $rankingEmoji = '👑';
                                 $rankingText = 'Gold - #1';
                             } elseif ($loop->index === 1) {
                                 $rankingClass = 'ranking-row-silver';
-                                $rankingIcon = 'fas fa-medal';
+                                $rankBadgeClass = 'rank-silver';
+                                $rankingEmoji = '🥈';
                                 $rankingText = 'Silver - #2';
                             } elseif ($loop->index === 2) {
                                 $rankingClass = 'ranking-row-bronze';
-                                $rankingIcon = 'fas fa-award';
+                                $rankBadgeClass = 'rank-bronze';
+                                $rankingEmoji = '🥉';
                                 $rankingText = 'Bronze - #3';
                             } elseif ($showUserRanking) {
                                 $rankingClass = 'bg-gradient-to-r from-blue-50 to-indigo-50 border-l-4 border-blue-400';
-                                $rankingIcon = 'fas fa-user';
+                                $rankBadgeClass = 'rank-user';
+                                $rankingEmoji = '👤';
                                 $rankingText = 'Your Ranking - #' . ($loop->index + 1);
                             }
                         @endphp
@@ -448,15 +453,8 @@
                                     @endphp
                                     <div class="w-12 h-12 {{ $avatarClass }} rounded-full flex items-center justify-center mr-4 relative overflow-visible">
                                         @if($showRankingIcon)
-                                            <div class="ranking-container">
-                                                <i class="{{ $rankingIcon }}" id="ranking-icon-{{ $index }}"></i>
-                                                <span class="ranking-fallback" id="ranking-fallback-{{ $index }}" style="display: none;">
-                                                    @if($loop->index === 0) 👑
-                                                    @elseif($loop->index === 1) 🥈
-                                                    @elseif($loop->index === 2) 🥉
-                                                    @elseif($showUserRanking) 👤
-                                                    @endif
-                                                </span>
+                                            <div class="ranking-container {{ $rankBadgeClass }}" id="ranking-icon-{{ $index }}">
+                                                <span class="ranking-emoji">{{ $rankingEmoji }}</span>
                                             </div>
                                         @endif
                                         <span class="text-white font-bold text-xl relative z-10 drop-shadow-lg">
@@ -468,7 +466,7 @@
                                             {{ $agent['name'] }}
                                             @if($rankingText)
                                                 <span class="ml-2 {{ $loop->index === 0 ? 'bg-yellow-100 text-yellow-800' : ($loop->index === 1 ? 'bg-gray-100 text-gray-800' : ($loop->index === 2 ? 'bg-orange-100 text-orange-800' : 'bg-blue-100 text-blue-800')) }} text-xs font-medium px-2 py-1 rounded-full flex items-center">
-                                                    <i class="{{ $rankingIcon }} mr-1"></i>{{ $rankingText }}
+                                                    <span class="mr-1">{{ $rankingEmoji }}</span>{{ $rankingText }}
                                                 </span>
                                             @endif
                                         </div>
@@ -498,27 +496,27 @@
                     <td class="px-6 py-4 whitespace-nowrap">
                         @php
                             $totalEarningsClass = '';
-                            $totalEarningsIcon = '';
+                            $totalEarningsEmoji = '';
                             
                             if ($loop->index === 0) {
                                 $totalEarningsClass = 'text-yellow-600';
-                                $totalEarningsIcon = 'fas fa-crown mr-2 text-yellow-500';
+                                $totalEarningsEmoji = '👑';
                             } elseif ($loop->index === 1) {
                                 $totalEarningsClass = 'text-gray-600';
-                                $totalEarningsIcon = 'fas fa-medal mr-2 text-gray-500';
+                                $totalEarningsEmoji = '🥈';
                             } elseif ($loop->index === 2) {
                                 $totalEarningsClass = 'text-orange-600';
-                                $totalEarningsIcon = 'fas fa-award mr-2 text-orange-500';
+                                $totalEarningsEmoji = '🥉';
                             } elseif ($showUserRanking) {
                                 $totalEarningsClass = 'text-blue-600';
-                                $totalEarningsIcon = 'fas fa-user mr-2 text-blue-500';
+                                $totalEarningsEmoji = '👤';
                             } else {
                                 $totalEarningsClass = 'text-gray-900';
                             }
                         @endphp
                         <div class="text-lg font-bold {{ $totalEarningsClass }} flex items-center">
-                            @if($totalEarningsIcon)
-                                <i class="{{ $totalEarningsIcon }}"></i>
+                            @if($totalEarningsEmoji)
+                                <span class="mr-2">{{ $totalEarningsEmoji }}</span>
                             @endif
                             £{{ number_format($agent['total_earnings'], 2) }}
                         </div>
@@ -614,28 +612,33 @@
                                 @php
                                     $cardAvatarClass = '';
                                     $showCardRankingIcon = false;
-                                    $cardRankingIcon = '';
+                                    $cardRankingEmoji = '';
+                                    $cardRankBadgeClass = '';
                                     $cardRankingText = '';
                                     
                                     if ($loop->index === 0) {
                                         $cardAvatarClass = 'bg-gradient-to-r from-yellow-400 to-yellow-600 shadow-lg';
                                         $showCardRankingIcon = true;
-                                        $cardRankingIcon = 'fas fa-crown';
+                                        $cardRankingEmoji = '👑';
+                                        $cardRankBadgeClass = 'rank-gold';
                                         $cardRankingText = 'Gold - #1';
                                     } elseif ($loop->index === 1) {
                                         $cardAvatarClass = 'bg-gradient-to-r from-gray-300 to-gray-500 shadow-lg';
                                         $showCardRankingIcon = true;
-                                        $cardRankingIcon = 'fas fa-medal';
+                                        $cardRankingEmoji = '🥈';
+                                        $cardRankBadgeClass = 'rank-silver';
                                         $cardRankingText = 'Silver - #2';
                                     } elseif ($loop->index === 2) {
                                         $cardAvatarClass = 'bg-gradient-to-r from-orange-400 to-orange-600 shadow-lg';
                                         $showCardRankingIcon = true;
-                                        $cardRankingIcon = 'fas fa-award';
+                                        $cardRankingEmoji = '🥉';
+                                        $cardRankBadgeClass = 'rank-bronze';
                                         $cardRankingText = 'Bronze - #3';
                                     } elseif ($showUserRanking) {
                                         $cardAvatarClass = 'bg-gradient-to-r from-blue-500 to-indigo-600';
                                         $showCardRankingIcon = true;
-                                        $cardRankingIcon = 'fas fa-user';
+                                        $cardRankingEmoji = '👤';
+                                        $cardRankBadgeClass = 'rank-user';
                                         $cardRankingText = 'Your Ranking - #' . ($loop->index + 1);
                                     } else {
                                         $cardAvatarClass = 'bg-gradient-to-r from-blue-500 to-purple-600';
@@ -643,15 +646,8 @@
                                 @endphp
                                 <div class="w-12 h-12 {{ $cardAvatarClass }} rounded-full flex items-center justify-center mr-3 relative overflow-visible">
                                     @if($showCardRankingIcon)
-                                        <div class="ranking-container">
-                                            <i class="{{ $cardRankingIcon }}" id="ranking-icon-card-{{ $index }}"></i>
-                                            <span class="ranking-fallback" id="ranking-fallback-card-{{ $index }}" style="display: none;">
-                                                @if($loop->index === 0) 👑
-                                                @elseif($loop->index === 1) 🥈
-                                                @elseif($loop->index === 2) 🥉
-                                                @elseif($showUserRanking) 👤
-                                                @endif
-                                            </span>
+                                        <div class="ranking-container {{ $cardRankBadgeClass }}" id="ranking-icon-card-{{ $index }}">
+                                            <span class="ranking-emoji">{{ $cardRankingEmoji }}</span>
                                         </div>
                                     @endif
                                     <span class="text-white font-bold text-xl relative z-10 drop-shadow-lg">
@@ -663,7 +659,7 @@
                                             {{ $agent['name'] }}
                                             @if($cardRankingText)
                                                 <span class="ml-2 {{ $loop->index === 0 ? 'bg-yellow-100 text-yellow-800' : ($loop->index === 1 ? 'bg-gray-100 text-gray-800' : ($loop->index === 2 ? 'bg-orange-100 text-orange-800' : 'bg-blue-100 text-blue-800')) }} text-xs font-medium px-2 py-1 rounded-full flex items-center">
-                                                    <i class="{{ $cardRankingIcon }} mr-1"></i>{{ $cardRankingText }}
+                                                    <span class="mr-1">{{ $cardRankingEmoji }}</span>{{ $cardRankingText }}
                                                 </span>
                                             @endif
                                         </h4>
@@ -682,28 +678,28 @@
                             <div class="flex justify-between items-center">
                                 @php
                                     $cardTotalClass = '';
-                                    $cardTotalIcon = '';
+                                    $cardTotalEmoji = '';
                                     
                                     if ($loop->index === 0) {
                                         $cardTotalClass = 'text-yellow-600';
-                                        $cardTotalIcon = 'fas fa-crown mr-1 text-yellow-500';
+                                        $cardTotalEmoji = '👑';
                                     } elseif ($loop->index === 1) {
                                         $cardTotalClass = 'text-gray-600';
-                                        $cardTotalIcon = 'fas fa-medal mr-1 text-gray-500';
+                                        $cardTotalEmoji = '🥈';
                                     } elseif ($loop->index === 2) {
                                         $cardTotalClass = 'text-orange-600';
-                                        $cardTotalIcon = 'fas fa-award mr-1 text-orange-500';
+                                        $cardTotalEmoji = '🥉';
                                     } elseif ($showUserRanking) {
                                         $cardTotalClass = 'text-blue-600';
-                                        $cardTotalIcon = 'fas fa-user mr-1 text-blue-500';
+                                        $cardTotalEmoji = '👤';
                                     } else {
                                         $cardTotalClass = 'text-gray-600';
                                     }
                                 @endphp
                                 <span class="text-sm {{ $cardTotalClass }}">Total Earnings</span>
                                 <span class="text-lg font-bold {{ $cardTotalClass }} flex items-center">
-                                    @if($cardTotalIcon)
-                                        <i class="{{ $cardTotalIcon }}"></i>
+                                    @if($cardTotalEmoji)
+                                        <span class="mr-1">{{ $cardTotalEmoji }}</span>
                                     @endif
                                     £{{ number_format($agent['total_earnings'], 2) }}
                                 </span>
@@ -1352,28 +1348,13 @@ document.addEventListener('DOMContentLoaded', function() {
 }
 
 /* Gold ranking (1st place) */
-.ranking-container:has(.fa-crown) {
-    background: #FCD34D;
-    border: 2px solid #F59E0B;
-}
-
+.ranking-container.rank-gold { background: #FCD34D; border: 2px solid #F59E0B; }
 /* Silver ranking (2nd place) */
-.ranking-container:has(.fa-medal) {
-    background: #E5E7EB;
-    border: 2px solid #9CA3AF;
-}
-
+.ranking-container.rank-silver { background: #E5E7EB; border: 2px solid #9CA3AF; }
 /* Bronze ranking (3rd place) */
-.ranking-container:has(.fa-award) {
-    background: #FED7AA;
-    border: 2px solid #EA580C;
-}
-
+.ranking-container.rank-bronze { background: #FED7AA; border: 2px solid #EA580C; }
 /* User ranking (4th place for non-admin) */
-.ranking-container:has(.fa-user) {
-    background: #DBEAFE;
-    border: 2px solid #3B82F6;
-}
+.ranking-container.rank-user { background: #DBEAFE; border: 2px solid #3B82F6; }
 
 /* Crown visibility fixes */
 .crown-container {
@@ -1397,171 +1378,124 @@ document.addEventListener('DOMContentLoaded', function() {
     font-size: 12px;
 }
 
-/* Ranking icon styles */
-.ranking-container i {
-    font-size: 12px;
-}
-
-.ranking-container .fa-crown {
-    color: #92400E;
-}
-
-.ranking-container .fa-medal {
-    color: #6B7280;
-}
-
-.ranking-container .fa-award {
-    color: #EA580C;
-}
-
-.ranking-container .fa-user {
-    color: #1E40AF;
-}
+/* Ranking emoji styles */
+.ranking-container .ranking-emoji { font-size: 12px; line-height: 1; }
 
 /* Ensure crown is visible */
 .relative {
     overflow: visible !important;
 }
 
-/* Fallback emoji styles - show by default, hide if FontAwesome loads */
-.crown-fallback, .ranking-fallback {
-    font-size: 14px;
-    display: block !important;
-}
+/* Remove FontAwesome fallback logic since emojis are primary */
 
-.crown-fallback {
-    color: #92400E;
-}
-
-.ranking-fallback {
-    color: #6B7280;
-}
-
-.crown-container i {
-    display: none;
-}
-
-/* Show FontAwesome icon only if FontAwesome is loaded */
-.fontawesome-loaded .crown-container i,
-.fontawesome-loaded .ranking-container i {
-    display: block !important;
-}
-
-.fontawesome-loaded .crown-fallback,
-.fontawesome-loaded .ranking-fallback {
-    display: none !important;
-}
-
-/* Ensure ranking containers are visible */
+/* === VISIBILITY FIXES === */
 .crown-container,
 .ranking-container {
     display: flex !important;
     visibility: visible !important;
 }
 
-/* Ensure initials are always visible */
+/* === INITIALS VISIBILITY === */
 .relative span {
-    z-index: 10 !important;
     position: relative !important;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5) !important;
+    z-index: 10 !important;
     font-weight: 900 !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.45) !important;
 }
 
-/* Enhanced ranking colors - darker gradients */
+/* === GOLD RANK === */
 .ranking-row-gold {
-    background: linear-gradient(to right, #f59e0b, #d97706, #b45309) !important;
+    background: linear-gradient(135deg, #fbbf24, #f59e0b, #b45309) !important;
     border-left: 4px solid #92400e !important;
-    box-shadow: 0 10px 25px rgba(217, 119, 6, 0.4) !important;
+    box-shadow: 0 8px 20px rgba(217, 119, 6, 0.35) !important;
 }
 
 .ranking-row-gold td {
     background: transparent !important;
-    border-color: rgba(146, 64, 14, 0.3) !important;
-    color: #000000 !important;
+    border-color: rgba(146, 64, 14, 0.25) !important;
+    color: #1e1200 !important; /* 30% darker than #2d1b00 */
 }
 
+/* === SILVER RANK === */
 .ranking-row-silver {
-    background: linear-gradient(to right, #9ca3af, #6b7280, #4b5563) !important;
-    border-left: 4px solid #374151 !important;
-    box-shadow: 0 10px 25px rgba(107, 114, 128, 0.4) !important;
+    background: linear-gradient(135deg, #d1d5db, #9ca3af, #6b7280) !important;
+    border-left: 4px solid #4b5563 !important;
+    box-shadow: 0 8px 20px rgba(107, 114, 128, 0.35) !important;
 }
 
 .ranking-row-silver td {
     background: transparent !important;
-    border-color: rgba(31, 41, 55, 0.3) !important;
-    color: #000000 !important;
+    border-color: rgba(17, 112, 247, 0.2) !important;
+    color:rgb(255, 134, 14) !important; /* 30% darker than #3b2d1d */
 }
 
-.ranking-row-silver .total-earnings {
-    color: #1a0e03 !important;
-    font-weight: 900 !important;
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.9) !important;
-}
-
-.ranking-row-silver .ranking-container i {
-    color: #1a0e03 !important;
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.9) !important;
-    font-weight: 900 !important;
-}
-
-.ranking-row-silver .ranking-fallback {
-    color: #1a0e03 !important;
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.9) !important;
-    font-weight: 900 !important;
-}
-
+.ranking-row-silver .total-earnings,
+.ranking-row-silver .ranking-container i,
 .ranking-row-silver td .text-lg {
-    color: #1a0e03 !important;
+    color:rgb(33, 125, 58) !important;
+    font-weight: 800 !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3) !important;
+}
+/* Darken the main name text while keeping the badge light */
+.text-sm.font-semibold.text-gray-900 {
+    color: #0a0500 !important; /* deeper, richer dark tone */
     font-weight: 900 !important;
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.9) !important;
+}
+
+/* Keep the badge visually lighter for contrast */
+.text-sm.font-semibold.text-gray-900 span {
+    color: #1f2937 !important; /* restore neutral gray for badge */
+    font-weight: 600 !important;
 }
 
 .ranking-row-silver td .font-bold {
-    color: #1a0e03 !important;
+    color: #1a1005 !important; /* slightly deeper tone */
     font-weight: 900 !important;
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.9) !important;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5) !important;
 }
 
+/* === BRONZE RANK === */
 .ranking-row-bronze {
-    background: linear-gradient(to right, #8b4513, #654321, #4a2c2a) !important;
-    border-left: 4px solid #2d1810 !important;
-    box-shadow: 0 10px 25px rgba(139, 69, 19, 0.5) !important;
+    background: linear-gradient(135deg, #cd7f32, #8b5a2b, #5a3a1b) !important;
+    border-left: 4px solid #3a2414 !important;
+    box-shadow: 0 8px 20px rgba(139, 69, 19, 0.45) !important;
 }
 
 .ranking-row-bronze td {
     background: transparent !important;
-    border-color: rgba(153, 27, 27, 0.3) !important;
-    color: #000000 !important;
+    border-color: rgba(90, 30, 15, 0.3) !important;
+    color: #1e1200 !important; /* 30% darker than #2d1b00 */
 }
 
-/* Card gradient backgrounds - darker */
+/* === CARD VARIANTS === */
 .ranking-row-gold.shadow-xl {
-    background: linear-gradient(135deg, #f59e0b, #d97706, #b45309) !important;
+    background: linear-gradient(145deg, #fbbf24, #f59e0b, #b45309) !important;
     border: 2px solid #92400e !important;
-    color: #000000 !important;
+    color: #1e1200 !important;
 }
 
 .ranking-row-silver.shadow-xl {
-    background: linear-gradient(135deg, #9ca3af, #6b7280, #4b5563) !important;
-    border: 2px solid #374151 !important;
-    color: #000000 !important;
+    background: linear-gradient(145deg, #d1d5db, #9ca3af, #6b7280) !important;
+    border: 2px solid #4b5563 !important;
+    color: #281c10 !important;
 }
 
 .ranking-row-bronze.shadow-xl {
-    background: linear-gradient(135deg, #8b4513, #654321, #4a2c2a) !important;
-    border: 2px solid #2d1810 !important;
-    color: #000000 !important;
+    background: linear-gradient(145deg, #cd7f32, #8b5a2b, #5a3a1b) !important;
+    border: 2px solid #3a2414 !important;
+    color: #1e1200 !important;
 }
 
-/* Golden gradient for top earner */
+/* === TOP EARNER GRADIENT === */
 .from-yellow-400 {
-    --tw-gradient-from: #fbbf24;
-    --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, rgba(251, 191, 36, 0));
+    --tw-gradient-from: #facc15;
+    --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, rgba(250, 204, 21, 0));
 }
 
 .to-yellow-600 {
-    --tw-gradient-to: #d97706;
+    --tw-gradient-to: #ca8a04;
 }
+
 </style>
 @endsection
 
