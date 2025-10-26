@@ -29,6 +29,14 @@ Route::get('/properties/{property}', [PropertyController::class, 'show'])->name(
 Route::get('/rental-codes/agent-earnings', [RentalCodeController::class, 'agentEarnings'])->name('rental-codes.agent-earnings');
 Route::get('/rental-codes/agent-payroll/{agentName}', [RentalCodeController::class, 'agentPayrollNew'])->name('rental-codes.agent-payroll');
 
+// Backwards-compatible aliases for older/typo URLs
+Route::get('/rental-codes/agent-comissionfile/{agentName}', function ($agentName) {
+    return redirect()->route('rental-codes.agent-payroll', ['agentName' => $agentName]);
+});
+Route::get('/rental-codes/agent-commissionfile/{agentName}', function ($agentName) {
+    return redirect()->route('rental-codes.agent-payroll', ['agentName' => $agentName]);
+});
+
 // Storage file serving route
 Route::get('/storage/{path}', function ($path) {
     $filePath = storage_path('app/public/' . $path);
