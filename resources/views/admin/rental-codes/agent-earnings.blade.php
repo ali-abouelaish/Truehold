@@ -1434,7 +1434,7 @@ document.addEventListener('DOMContentLoaded', function() {
 .ranking-row-silver .total-earnings,
 .ranking-row-silver .ranking-container i,
 .ranking-row-silver td .text-lg {
-    color:rgb(33, 125, 58) !important;
+    color:rgb(245,170,21) !important;
     font-weight: 800 !important;
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3) !important;
 }
