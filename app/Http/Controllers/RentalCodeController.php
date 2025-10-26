@@ -539,29 +539,9 @@ public function generateCode()
         $agentSearch = $validated['agent_search'] ?? null;
         $marketingAgentFilter = $validated['marketing_agent_filter'] ?? null;
 
-        // Authorization: Check if user can view payroll
+        // Public access: do not enforce authentication; show all agents unless filtered
         $user = auth()->user();
-        
-        // Check if user is authenticated
-        if (!$user) {
-            return redirect()->route('login')->with('error', 'Please log in to view earnings data.');
-        }
-        
-        $isAdmin = $user->role === 'admin';
-        
-        // If user is not admin and trying to view specific agent payroll
-        if (!empty($agentSearch) && !$isAdmin) {
-            // Check if the agent name matches the current user's name
-            if ($agentSearch !== $user->name) {
-                return redirect()->route('rental-codes.agent-earnings')
-                    ->with('error', 'You can only view your own payroll.');
-            }
-        }
-        
-        // If user is not admin and no specific agent selected, show only their own data
-        if (empty($agentSearch) && !$isAdmin) {
-            $agentSearch = $user->name;
-        }
+        $isAdmin = $user && $user->role === 'admin';
 
         // Check if we're viewing a specific agent's commission file
         $isPayrollView = !empty($agentSearch);
@@ -1422,12 +1402,8 @@ public function generateCode()
      */
     public function agentPayrollNew($requestedAgentName)
     {
-        // Check if user is authenticated
+        // Public access: allow guests to view commission file
         $user = auth()->user();
-        if (!$user) {
-            return redirect()->route('login')->with('error', 'Please log in to view commission data.');
-        }
-        
         // Treat marketing agents as marketing-only for this view
         $requestedIsMarketing = \App\Models\User::where('name', $requestedAgentName)
             ->where(function($q) {

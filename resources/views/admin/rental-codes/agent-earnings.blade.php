@@ -15,13 +15,13 @@
     <div>
                         <h1 class="text-3xl font-bold text-gray-900">
                             @if($isPayrollView)
-                                @if(auth()->user()->role === 'admin')
+                                @if(auth()->check() && auth()->user()->role === 'admin')
                                     Agent Commission File - {{ $agentSearch }}
                                 @else
                                     My Commission File
                                 @endif
                             @else
-                                @if(auth()->user()->role === 'admin')
+                                @if(auth()->check() && auth()->user()->role === 'admin')
                                     Agent Earnings Analytics
                                 @else
                                     My Earnings
@@ -30,7 +30,7 @@
                         </h1>
                         <p class="text-gray-600 mt-1">
                             @if($isPayrollView)
-                                @if(auth()->user()->role === 'admin')
+                                @if(auth()->check() && auth()->user()->role === 'admin')
                                     Approved rentals up to 10th of each month - Commission view
                                 @else
                                     Your approved rentals up to 10th of each month
@@ -128,7 +128,7 @@
                                     </div>
                                 </div>
                                 <input type="hidden" name="agent_search" value="{{ $agentSearch }}">
-                            @elseif(auth()->user()->role === 'admin')
+                            @elseif(auth()->check() && auth()->user()->role === 'admin')
                             <select name="agent_search" class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200">
                                 <option value="">All Agents</option>
                                 @foreach($agentEarnings as $agent)
@@ -141,11 +141,13 @@
                                 <div class="w-full border-gray-300 rounded-lg shadow-sm bg-blue-50 p-3">
                                     <div class="flex items-center">
                                         <i class="fas fa-user-shield text-blue-600 mr-2"></i>
-                                        <span class="font-medium text-gray-900">{{ auth()->user()->name }}</span>
+                                        <span class="font-medium text-gray-900">{{ auth()->check() ? auth()->user()->name : 'Guest' }}</span>
                                         <span class="ml-2 text-sm text-gray-500">(Your Payroll Only)</span>
                                     </div>
                                 </div>
+                                @auth
                                 <input type="hidden" name="agent_search" value="{{ auth()->user()->name }}">
+                                @endauth
                             @endif
                         </div>
                         <div>
@@ -1447,7 +1449,7 @@ document.addEventListener('DOMContentLoaded', function() {
     color: #1f2937 !important; /* restore neutral gray for badge */
     font-weight: 600 !important;
 }
-
+    push
 .ranking-row-silver td .font-bold {
     color: #1a1005 !important; /* slightly deeper tone */
     font-weight: 900 !important;

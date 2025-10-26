@@ -585,6 +585,7 @@
                     <span class="sidebar-text text-xs font-semibold uppercase tracking-wider" style="color: #fbbf24;">Main</span>
                 </div>
                 
+                @auth
                 @if(auth()->user()->hasAdminPermission('dashboard', 'view'))
                 <a href="{{ route('admin.dashboard') }}" 
                    class="sidebar-item flex items-center px-4 py-3 hover:bg-gray-700 {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}"
@@ -593,7 +594,9 @@
                     <span class="sidebar-text">Dashboard</span>
                 </a>
                 @endif
+                @endauth
 
+                @auth
                 @if(auth()->user()->hasAdminPermission('properties', 'view'))
                 <div class="px-4 mt-6 mb-4">
                     <span class="sidebar-text text-xs font-semibold uppercase tracking-wider" style="color: #fbbf24;">Properties</span>
@@ -604,7 +607,9 @@
                     <span class="sidebar-text">All Properties</span>
                 </a>
                 @endif
+                @endauth
                 
+                @auth
                 @if(auth()->user()->hasAdminPermission('properties', 'create'))
                 <a href="{{ route('admin.properties.create') }}" 
                    class="sidebar-item flex items-center px-4 py-3 text-gray-700 hover:text-blue-600 {{ request()->routeIs('admin.properties.create') ? 'active' : '' }}">
@@ -612,7 +617,9 @@
                     <span class="sidebar-text">Add Property</span>
                 </a>
                 @endif
+                @endauth
 
+                @auth
                 @if(auth()->user()->hasAdminPermission('clients', 'view'))
                 <div class="px-4 mt-6 mb-4">
                     <span class="sidebar-text text-xs font-semibold text-gray-500 uppercase tracking-wider">Clients</span>
@@ -632,7 +639,9 @@
                 </a>
                 @endif
                 @endif
+                @endauth
 
+                @auth
                 @if(auth()->user()->hasAdminPermission('rental_codes', 'view'))
                 <div class="px-4 mt-6 mb-4">
                     <span class="sidebar-text text-xs font-semibold text-gray-500 uppercase tracking-wider">Reserved</span>
@@ -656,7 +665,9 @@
                     <span class="sidebar-text">Landlord Bonuses</span>
                 </a>
                 @endif
+                @endauth
 
+                @auth
                 @if(auth()->user()->hasAdminPermission('invoices', 'view'))
                 <div class="px-4 mt-6 mb-4">
                     <span class="sidebar-text text-xs font-semibold text-gray-500 uppercase tracking-wider">Invoicing</span>
@@ -676,7 +687,9 @@
                 </a>
                 @endif
                 @endif
+                @endauth
 
+                @auth
                 @if(auth()->user()->hasAdminPermission('group_viewings', 'view'))
                 <div class="px-4 mt-6 mb-4">
                     <span class="sidebar-text text-xs font-semibold text-gray-500 uppercase tracking-wider">Viewings</span>
@@ -688,7 +701,9 @@
                     <span class="sidebar-text">Group Viewings</span>
                 </a>
                 @endif
+                @endauth
 
+                @auth
                 @if(auth()->user()->hasAdminPermission('call_logs', 'view'))
                 <div class="px-4 mt-6 mb-4">
                     <span class="sidebar-text text-xs font-semibold text-gray-500 uppercase tracking-wider">Call Logs</span>
@@ -708,8 +723,10 @@
                 </a>
                 @endif
                 @endif
+                @endauth
 
 
+                @auth
                 @if(auth()->user()->hasAdminPermission('users', 'view'))
                 <div class="px-4 mt-6 mb-4">
                     <span class="sidebar-text text-xs font-semibold text-gray-500 uppercase tracking-wider">Users</span>
@@ -721,8 +738,10 @@
                     <span class="sidebar-text">Manage Agents</span>
                 </a>
                 @endif
+                @endauth
 
 
+                @auth
                 @if(auth()->user()->hasAdminPermission('admin_permissions', 'view'))
                 <div class="px-4 mt-6 mb-4">
                     <span class="sidebar-text text-xs font-semibold text-gray-500 uppercase tracking-wider">System</span>
@@ -740,6 +759,7 @@
                     <span class="sidebar-text">Property Scraper</span>
                 </a>
                 @endif
+                @endauth
 
                 <div class="px-4 mt-6 mb-4">
                     <span class="sidebar-text text-xs font-semibold uppercase tracking-wider" style="color: #fbbf24;">Public Access</span>
@@ -767,6 +787,7 @@
             <!-- Sidebar Footer -->
             <div class="w-full p-4 mt-auto" style="border-top: 1px solid #374151;">
                 <div class="flex items-center justify-between">
+                    @auth
                     @if(Auth::user()->role === 'agent')
                         <a href="{{ route('agent.profile.dashboard') }}" class="flex items-center flex-1 hover:bg-gray-700 rounded-lg p-2 transition-colors {{ request()->routeIs('agent.profile.*') ? 'bg-gray-700' : '' }}">
                             <div class="w-8 h-8 rounded-full flex items-center justify-center" style="background: linear-gradient(135deg, #1f2937, #374151); border: 1px solid #fbbf24;">
@@ -796,6 +817,17 @@
                             <i class="fas fa-sign-out-alt"></i>
                         </button>
                     </form>
+                    @else
+                        <a href="{{ route('login') }}" class="flex items-center flex-1 hover:bg-gray-700 rounded-lg p-2 transition-colors">
+                            <div class="w-8 h-8 rounded-full flex items-center justify-center" style="background: linear-gradient(135deg, #1f2937, #374151); border: 1px solid #fbbf24;">
+                                <i class="fas fa-user text-sm" style="color: #fbbf24;"></i>
+                            </div>
+                            <div class="ml-3 sidebar-text">
+                                <p class="text-sm font-medium" style="color: #d1d5db;">Guest</p>
+                                <p class="text-xs" style="color: #9ca3af;">Click to Login</p>
+                            </div>
+                        </a>
+                    @endauth
                 </div>
             </div>
         </div>
