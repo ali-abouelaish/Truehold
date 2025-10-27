@@ -20,15 +20,17 @@
     <!-- Summary Cards -->
     <div class="row mb-4">
         <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card border-left-primary shadow h-100 py-2" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-left: 4px solid #4e73df !important;">
+            <div class="card shadow h-100 py-2" style="background: linear-gradient(135deg, #111827 0%, #1f2937 100%); border: 1px solid #374151 !important; border-left: 4px solid #4e73df !important; border-radius: 12px; box-shadow: 0 10px 24px rgba(0,0,0,0.35) !important;">
                 <div class="card-body">
                     <div class="row no-gutters align-items-center">
                         <div class="col mr-2">
-                            <div class="text-xs font-weight-bold text-white text-uppercase mb-1">Total Earnings</div>
-                            <div class="h4 mb-0 font-weight-bold text-white">£{{ number_format($agent['total_earnings'], 2) }}</div>
+                            <div class="text-xs font-weight-bold text-white text-uppercase mb-1" style="letter-spacing: .04em; opacity:.9;">Total Earnings</div>
+                            <div class="h3 mb-0 font-weight-bold text-white">£{{ number_format($agent['total_earnings'], 2) }}</div>
                         </div>
                         <div class="col-auto">
-                            <i class="fas fa-pound-sign fa-2x text-white" style="opacity: 0.8;"></i>
+                            <div style="background: rgba(255,255,255,0.12); border-radius: 10px; padding: 10px;">
+                                <i class="fas fa-pound-sign fa-lg text-white" style="opacity: 0.95;"></i>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -36,15 +38,17 @@
         </div>
 
         <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card border-left-success shadow h-100 py-2" style="background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); border-left: 4px solid #1cc88a !important;">
+            <div class="card shadow h-100 py-2" style="background: linear-gradient(135deg, #111827 0%, #1f2937 100%); border: 1px solid #374151 !important; border-left: 4px solid #1cc88a !important; border-radius: 12px; box-shadow: 0 10px 24px rgba(0,0,0,0.35) !important;">
                 <div class="card-body">
                     <div class="row no-gutters align-items-center">
                         <div class="col mr-2">
-                            <div class="text-xs font-weight-bold text-white text-uppercase mb-1">Agent Earnings</div>
-                            <div class="h4 mb-0 font-weight-bold text-white">£{{ number_format($agent['agent_earnings'], 2) }}</div>
+                            <div class="text-xs font-weight-bold text-white text-uppercase mb-1" style="letter-spacing: .04em; opacity:.9;">Agent Earnings</div>
+                            <div class="h3 mb-0 font-weight-bold text-white">£{{ number_format($agent['agent_earnings'], 2) }}</div>
                         </div>
                         <div class="col-auto">
-                            <i class="fas fa-user-tie fa-2x text-white" style="opacity: 0.8;"></i>
+                            <div style="background: rgba(255,255,255,0.12); border-radius: 10px; padding: 10px;">
+                                <i class="fas fa-user-tie fa-lg text-white" style="opacity: 0.95;"></i>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -52,15 +56,17 @@
         </div>
 
         <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card border-left-info shadow h-100 py-2" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-left: 4px solid #36b9cc !important;">
+            <div class="card shadow h-100 py-2" style="background: linear-gradient(135deg, #111827 0%, #1f2937 100%); border: 1px solid #374151 !important; border-left: 4px solid #36b9cc !important; border-radius: 12px; box-shadow: 0 10px 24px rgba(0,0,0,0.35) !important;">
                 <div class="card-body">
                     <div class="row no-gutters align-items-center">
                         <div class="col mr-2">
-                            <div class="text-xs font-weight-bold text-white text-uppercase mb-1">Total Transactions</div>
-                            <div class="h4 mb-0 font-weight-bold text-white">{{ $agent['transaction_count'] }}</div>
+                            <div class="text-xs font-weight-bold text-white text-uppercase mb-1" style="letter-spacing: .04em; opacity:.9;">Total Transactions</div>
+                            <div class="h3 mb-0 font-weight-bold text-white">{{ $agent['transaction_count'] }}</div>
                         </div>
                         <div class="col-auto">
-                            <i class="fas fa-list fa-2x text-white" style="opacity: 0.8;"></i>
+                            <div style="background: rgba(255,255,255,0.12); border-radius: 10px; padding: 10px;">
+                                <i class="fas fa-list fa-lg text-white" style="opacity: 0.95;"></i>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -68,15 +74,17 @@
         </div>
 
         <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card border-left-warning shadow h-100 py-2" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); border-left: 4px solid #f6c23e !important;">
+            <div class="card shadow h-100 py-2" style="background: linear-gradient(135deg, #111827 0%, #1f2937 100%); border: 1px solid #374151 !important; border-left: 4px solid #f6c23e !important; border-radius: 12px; box-shadow: 0 10px 24px rgba(0,0,0,0.35) !important;">
                 <div class="card-body">
                     <div class="row no-gutters align-items-center">
                         <div class="col mr-2">
-                            <div class="text-xs font-weight-bold text-white text-uppercase mb-1">Outstanding</div>
-                            <div class="h4 mb-0 font-weight-bold text-white">£{{ number_format($agent['outstanding_amount'], 2) }}</div>
+                            <div class="text-xs font-weight-bold text-white text-uppercase mb-1" style="letter-spacing: .04em; opacity:.9;">Outstanding</div>
+                            <div class="h3 mb-0 font-weight-bold text-white">£{{ number_format($agent['outstanding_amount'], 2) }}</div>
                         </div>
                         <div class="col-auto">
-                            <i class="fas fa-clock fa-2x text-white" style="opacity: 0.8;"></i>
+                            <div style="background: rgba(255,255,255,0.12); border-radius: 10px; padding: 10px;">
+                                <i class="fas fa-clock fa-lg text-white" style="opacity: 0.95;"></i>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -91,15 +99,42 @@
         <div class="col-12">
             <div class="card shadow">
                 <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h6 class="m-0 font-weight-bold text-primary">
                         <i class="fas fa-file-contract mr-2"></i>Rental Codes ({{ count($agent['transactions']) }})
-                    </h6>
+                        </h6>
+                        @auth
+                        @if(auth()->user()->role === 'admin' && count($agent['transactions']) > 0)
+                        <form id="bulkPaidForm" method="POST" action="{{ route('rental-codes.bulk-mark-paid') }}" class="d-inline">
+                            @csrf
+                            <input type="hidden" name="rental_code_ids[]" value="" id="dummyIdsPlaceholder" style="display:none;">
+                            <button type="submit" class="btn btn-success btn-sm" onclick="return submitBulkPaid(event)">
+                                <i class="fas fa-check mr-1"></i> Mark Selected Paid
+                            </button>
+                        </form>
+                        @endif
+                        @endauth
+                    </div>
                 </div>
                 <div class="card-body">
                     @if(count($agent['transactions']) > 0)
+                        @auth
+                        @if(auth()->user()->role === 'admin')
+                        <div class="mb-3">
+                            <label class="mr-2"><input type="checkbox" id="selectAll" onchange="toggleSelectAll(this)"> Select All</label>
+                        </div>
+                        @endif
+                        @endauth
                         @foreach($agent['transactions'] as $transaction)
-                        <div class="row mb-3 p-3 border rounded" style="background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%) !important; border: 2px solid #495057 !important;">
-                            <div class="col-md-8">
+                        <div class="row mb-3 p-3 border rounded" style="{{ $transaction['paid'] ? 'background: linear-gradient(135deg, #065f46 0%, #059669 100%) !important; border: 2px solid #10b981 !important;' : 'background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%) !important; border: 2px solid #495057 !important;' }}">
+                            <div class="col-md-8 d-flex align-items-start">
+                                @auth
+                                @if(auth()->user()->role === 'admin' && !$transaction['paid'])
+                                <div class="mr-3 mt-1">
+                                    <input type="checkbox" class="bulk-checkbox" value="{{ $transaction['id'] }}">
+                                </div>
+                                @endif
+                                @endauth
                                 <div class="d-flex align-items-center mb-2">
                                     <span class="badge badge-{{ $transaction['payment_method'] === 'Transfer' || $transaction['payment_method'] === 'Card Machine' ? 'purple' : ($transaction['payment_method'] === 'Cash' ? 'success' : 'secondary') }} mr-2" style="font-size: 0.9rem; padding: 0.5rem 0.8rem;">
                                         @if($transaction['payment_method'] === 'Transfer' || $transaction['payment_method'] === 'Card Machine')
@@ -263,3 +298,33 @@
     @endif
 </div>
 @endsection
+
+@push('scripts')
+<script>
+function toggleSelectAll(source) {
+    document.querySelectorAll('.bulk-checkbox').forEach(cb => cb.checked = source.checked);
+}
+
+function submitBulkPaid(e) {
+    e.preventDefault();
+    const ids = Array.from(document.querySelectorAll('.bulk-checkbox:checked')).map(cb => cb.value);
+    if (ids.length === 0) {
+        alert('Select at least one unpaid rental.');
+        return false;
+    }
+    const form = document.getElementById('bulkPaidForm');
+    // Clear previous hidden inputs (except placeholder)
+    Array.from(form.querySelectorAll('input[name="rental_code_ids[]"]')).forEach(el => el.remove());
+    ids.forEach(id => {
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'rental_code_ids[]';
+        input.value = id;
+        form.appendChild(input);
+    });
+
+    form.submit();
+    return true;
+}
+</script>
+@endpush

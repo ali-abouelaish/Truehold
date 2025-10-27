@@ -3,6 +3,7 @@
 namespace App\Observers;
 
 use App\Models\RentalCode;
+use App\Services\WhatsAppService;
 
 class RentalCodeObserver
 {
@@ -23,6 +24,14 @@ class RentalCodeObserver
         
         // Clear any earnings cache if it exists
         $this->clearEarningsCache();
+
+        // Send WhatsApp notification using Twilio template if configured
+        try {
+            $client = $rentalCode->client ?? null;
+            app(WhatsAppService::class)->sendRentalCodeNotification($rentalCode, $client);
+        } catch (\Exception $e) {
+            \Log::error('Failed to send WhatsApp on rental created', ['error' => $e->getMessage(), 'rental_code_id' => $rentalCode->id]);
+        }
     }
 
     /**
@@ -43,6 +52,14 @@ class RentalCodeObserver
         
         // Clear any earnings cache if it exists
         $this->clearEarningsCache();
+
+        // Send WhatsApp notification for update to admin
+        try {
+            $client = $rentalCode->client ?? null;
+            app(WhatsAppService::class)->sendRentalCodeUpdateNotification($rentalCode, $client, 'updated');
+        } catch (\Exception $e) {
+            \Log::error('Failed to send WhatsApp on rental updated', ['error' => $e->getMessage(), 'rental_code_id' => $rentalCode->id]);
+        }
     }
 
     /**

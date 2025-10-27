@@ -1204,6 +1204,10 @@ public function generateCode()
         // Process rental codes
         $byAgent = [];
         foreach ($rentalCodes as $code) {
+            // Safety: ensure only approved rentals are processed
+            if (($code->status ?? null) !== 'approved') {
+                continue;
+            }
             $totalFee = (float) ($code->consultation_fee ?? 0);
             $rentalDate = $code->rental_date ?? now();
             $paymentMethod = $code->payment_method ?? 'Cash';
@@ -1402,8 +1406,16 @@ public function generateCode()
      */
     public function agentPayrollNew($requestedAgentName)
     {
-        // Public access: allow guests to view commission file
+        // Require authentication for payroll view; admins can view any agent, others only their own
         $user = auth()->user();
+        if (!$user) {
+            return redirect()->route('login')->with('error', 'Please log in to view payroll.');
+        }
+        $isAdmin = $user->role === 'admin';
+        if (!$isAdmin && $user->name !== $requestedAgentName) {
+            return redirect()->route('rental-codes.agent-earnings')->with('error', 'You can only view your own payroll.');
+        }
+
         // Treat marketing agents as marketing-only for this view
         $requestedIsMarketing = \App\Models\User::where('name', $requestedAgentName)
             ->where(function($q) {
@@ -1571,6 +1583,7 @@ public function generateCode()
 
             // Add transaction details
             $agentData['transactions'][] = [
+                'id' => $code->id,
                 'total_fee' => $totalFee,
                 'base_commission' => $baseCommission,
                 'agency_cut' => $agencyCut,
@@ -1771,6 +1784,55 @@ public function generateCode()
                 'success' => false,
                 'message' => 'Error updating rental code status: ' . $e->getMessage(),
             ], 500);
+        }
+    }
+
+    /**
+     * Bulk mark rentals as paid (admin only)
+     */
+    public function bulkMarkPaid(Request $request)
+    {
+        $user = auth()->user();
+        if (!$user || $user->role !== 'admin') {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Only administrators can perform bulk updates.',
+                ], 403);
+            }
+            return redirect()->back()->with('error', 'Only administrators can perform bulk updates.');
+        }
+
+        $validated = $request->validate([
+            'rental_code_ids' => 'required|array',
+            'rental_code_ids.*' => 'integer|exists:rental_codes,id',
+        ]);
+
+        $ids = $validated['rental_code_ids'];
+
+        try {
+            \Log::info('Bulk mark as paid', ['count' => count($ids)]);
+            \App\Models\RentalCode::whereIn('id', $ids)->update([
+                'paid' => true,
+                'paid_at' => now(),
+            ]);
+
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Selected rentals marked as paid.',
+                ]);
+            }
+            return redirect()->back()->with('success', 'Selected rentals marked as paid.');
+        } catch (\Exception $e) {
+            \Log::error('Bulk mark as paid failed', ['error' => $e->getMessage()]);
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Failed to mark selected rentals as paid: ' . $e->getMessage(),
+                ], 500);
+            }
+            return redirect()->back()->with('error', 'Failed to mark selected rentals as paid.');
         }
     }
 

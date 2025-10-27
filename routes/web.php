@@ -134,6 +134,41 @@ Route::get('/test-whatsapp', function () {
     }
 });
 
+// Test: send latest rental via WhatsApp (template by default; mode=text for plain)
+Route::middleware('auth')->get('/admin/test-rental-template', function (\Illuminate\Http\Request $request) {
+    $to = $request->query('to', config('services.twilio.test_whatsapp_number'));
+    $mode = $request->query('mode', 'template');
+    $latest = \App\Models\RentalCode::with('client','marketingAgentUser')->orderBy('id','desc')->first();
+    if (!$latest) {
+        return response()->json(['error' => 'No rental codes found'], 404);
+    }
+    $client = $latest->client;
+    if ($mode === 'text') {
+        $result = app(\App\Services\WhatsAppService::class)->sendRentalPlainTo($to ?: ($client->phone_number ?? ''), $latest, $client);
+    } elseif ($mode === 'dummy') {
+        $vars = [
+            'rental_code' => 'Alpha BRAVO Charlie Delta Echo',
+            'rentalcode_details' => 'Quick brown fox jumps swiftly',
+            'clientprofile' => 'Client profile sample five words',
+            'agent' => 'Agent name sample five words',
+            'marketing_agent' => 'Marketing agent sample five words',
+        ];
+        $result = app(\App\Services\WhatsAppService::class)->sendTemplateWithVariables($to, $vars);
+    } elseif ($mode === 'dummy_numeric') {
+        $vars = [
+            '1' => 'Alpha BRAVO Charlie Delta Echo',
+            '2' => 'Quick brown fox jumps swiftly',
+            '3' => 'Client profile sample five words',
+            '4' => 'Agent name sample five words',
+            '5' => 'Marketing agent sample five words',
+        ];
+        $result = app(\App\Services\WhatsAppService::class)->sendTemplateWithVariables($to, $vars);
+    } else {
+        $result = app(\App\Services\WhatsAppService::class)->sendRentalTemplateTo($to ?: ($client->phone_number ?? ''), $latest, $client);
+    }
+    return response()->json(['result' => $result, 'mode' => $mode]);
+})->name('admin.test-rental-template');
+
 // Authentication routes
 Route::middleware('guest')->group(function () {
     Route::get('/login', function () {
@@ -203,6 +238,7 @@ Route::middleware('auth')->prefix('admin')->group(function () {
     Route::post('/rental-codes/{rentalCode}/mark-unpaid', [RentalCodeController::class, 'markAsUnpaid'])->name('rental-codes.mark-unpaid');
     Route::post('/rental-codes/{rentalCode}/update-status', [RentalCodeController::class, 'updateStatus'])->name('rental-codes.update-status');
     Route::post('/rental-codes/bulk-update-status', [RentalCodeController::class, 'bulkUpdateStatus'])->name('rental-codes.bulk-update-status');
+    Route::post('/rental-codes/bulk-mark-paid', [RentalCodeController::class, 'bulkMarkPaid'])->name('rental-codes.bulk-mark-paid');
     
     // Landlord Bonus Management Routes
     Route::resource('landlord-bonuses', \App\Http\Controllers\LandlordBonusController::class);

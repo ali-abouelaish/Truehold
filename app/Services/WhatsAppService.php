@@ -11,6 +11,7 @@ class WhatsAppService
     protected $whatsappNumber;
     protected $messagingServiceSid;
     protected $adminNumber;
+    protected $rentalTemplateSid;
 
     public function __construct()
     {
@@ -27,6 +28,8 @@ class WhatsAppService
                 $this->client = null;
                 Log::warning('Twilio credentials not configured');
             }
+            $this->rentalTemplateSid = config('services.twilio.rental_template_sid');
+            $this->messagingServiceSid = config('services.twilio.messaging_service_sid');
         } catch (\Exception $e) {
             Log::error('Failed to initialize Twilio client', ['error' => $e->getMessage()]);
             $this->client = null;
@@ -107,9 +110,13 @@ class WhatsAppService
      */
     public function sendRentalCodeNotification($rentalCode, $client)
     {
+        // Prefer template message if configured
+        if ($this->rentalTemplateSid && $client && $client->phone_number) {
+            return $this->sendTemplateMessage($client->phone_number, $this->rentalTemplateSid, $this->buildTemplateVariables($rentalCode, $client));
+        }
+
+        // Fallback to plain text message
         $message = $this->buildRentalCodeMessage($rentalCode, $client);
-        
-        // Send to client if they have a phone number
         if ($client && $client->phone_number) {
             return $this->sendMessage($client->phone_number, $message);
         }
@@ -178,6 +185,195 @@ class WhatsAppService
         $message .= "\n_This is an automated message sent from the CRM. Please contact agent to change any details._";
 
         return $message;
+    }
+
+    /**
+     * Send a template-based WhatsApp message
+     */
+    private function sendTemplateMessage($to, $templateSid, array $templateVariables = [])
+    {
+        if (!$this->client) {
+            return ['success' => false, 'error' => 'Twilio client not initialized'];
+        }
+        $formattedTo = $this->formatPhoneNumber($to);
+        if (!str_starts_with($formattedTo, 'whatsapp:')) {
+            $formattedTo = 'whatsapp:' . $formattedTo;
+        }
+        try {
+            $params = [
+                'contentSid' => $templateSid,
+            ];
+            // Prefer Messaging Service if configured; else use From number
+            if (!empty($this->messagingServiceSid)) {
+                $params['messagingServiceSid'] = $this->messagingServiceSid;
+            } else {
+                $params['from'] = $this->whatsappNumber;
+            }
+            // Optional: content language
+            $contentLanguage = config('services.twilio.content_language');
+            if (!empty($contentLanguage)) {
+                $params['contentLanguage'] = $contentLanguage;
+            }
+            if (!empty($templateVariables)) {
+                // Only include the exact variable names your template defines
+                $allowedKeys = ['rental_code','rentalcode_details','clientprofile','agent','marketing_agent'];
+                $payload = [];
+                foreach ($allowedKeys as $key) {
+                    if (array_key_exists($key, $templateVariables)) {
+                        $payload[$key] = (string) $templateVariables[$key];
+                    }
+                }
+                $params['contentVariables'] = json_encode($payload);
+                Log::info('Twilio contentVariables payload', ['payload' => $params['contentVariables']]);
+            }
+            $messageObj = $this->client->messages->create($formattedTo, $params);
+            return ['success' => true, 'sid' => $messageObj->sid];
+        } catch (\Exception $e) {
+            Log::error('Failed to send WhatsApp template', ['error' => $e->getMessage()]);
+            return ['success' => false, 'error' => $e->getMessage()];
+        }
+    }
+
+    /**
+     * Build variables object for Twilio content template
+     */
+    private function buildTemplateVariables($rentalCode, $client)
+    {
+        $createdDate = $rentalCode->created_at->format('d/m/Y');
+        $rentalDate = $rentalCode->rental_date ? \Carbon\Carbon::parse($rentalCode->rental_date)->format('d/m/Y') : $createdDate;
+        $paymentMethod = $this->formatPaymentMethod($rentalCode->payment_method ?? '');
+        $consultationFee = $rentalCode->consultation_fee ?? $rentalCode->rent_amount ?? '';
+        if (is_numeric($consultationFee)) {
+            $consultationFee = '£' . number_format($consultationFee, 0);
+        }
+        $agentName = $rentalCode->agent_name ?? $rentalCode->rent_by_agent ?? 'Agent';
+        $marketingAgentName = $rentalCode->marketingAgentUser->name ?? ($rentalCode->marketing_agent_name ?? 'N/A');
+
+        // Build composite text blocks
+        $rentalDetails = "Rental Date: {$rentalDate}\n" .
+                         "Consultation fee: {$consultationFee}\n" .
+                         "Method of Payment: {$paymentMethod}\n" .
+                         "Property: " . ($rentalCode->property_address ?? ($rentalCode->property ?? 'Not specified')) . "\n" .
+                         "Licensor: " . ($rentalCode->licensor ?? 'Not specified');
+
+        $clientProfile = '';
+        if ($client) {
+            $clientProfile .= "Full Name: " . ($client->full_name ?? 'N/A') . "\n";
+            $clientProfile .= "Date of Birth: " . ($client->date_of_birth ? \Carbon\Carbon::parse($client->date_of_birth)->format('jS F Y') : 'Not provided') . "\n";
+            $clientProfile .= "Phone Number: " . ($client->phone_number ?? 'N/A') . "\n";
+            $clientProfile .= "Email: " . ($client->email ?? 'N/A') . "\n";
+            $clientProfile .= "Nationality: " . ucfirst($client->nationality ?? 'Not provided') . "\n";
+            $clientProfile .= "Current Address: " . ($client->current_address ?? 'N/A') . "\n";
+            $clientProfile .= "Company/University: " . ($client->company_university_name ?? 'N/A') . "\n";
+            $clientProfile .= "Position/Role: " . ($client->position_role ?? 'N/A');
+        }
+
+        // Sanitize values to meet Twilio Content constraints (no newlines/tabs, compressed spaces)
+        $sanitize = function ($v) {
+            if ($v === null) return 'N/A';
+            $v = (string) $v;
+            $v = str_replace(["\r", "\n", "\t"], ' ', $v);
+            $v = preg_replace('/\s{2,}/', ' ', $v);
+            $v = trim($v);
+            return $v === '' ? 'N/A' : $v;
+        };
+
+        // Provide exactly the named variables used in your template (sanitized)
+        $variables = [
+            'rental_code' => $sanitize($rentalCode->rental_code ?? 'N/A'),
+            'rentalcode_details' => $sanitize($rentalDetails),
+            'clientprofile' => $sanitize($clientProfile),
+            'agent' => $sanitize($agentName),
+            'marketing_agent' => $sanitize($marketingAgentName),
+        ];
+
+        return $variables;
+    }
+
+    /**
+     * Public helper: send rental template to a specific number (used for testing)
+     */
+    public function sendRentalTemplateTo(string $to, $rentalCode, $client)
+    {
+        if ($this->rentalTemplateSid) {
+            // Try named variables first
+            $named = $this->buildTemplateVariables($rentalCode, $client);
+            $result = $this->sendTemplateMessage($to, $this->rentalTemplateSid, $named);
+            if (!$result['success'] && isset($result['error']) && (stripos($result['error'], 'Content Variables') !== false || stripos($result['error'], 'Channel did not accept') !== false)) {
+                // Fallback to numeric placeholders 1..5
+                $numeric = $this->buildTemplateVariablesNumeric($rentalCode, $client);
+                Log::warning('Retrying Twilio send with numeric variables', ['numeric' => $numeric]);
+                $retry = $this->sendTemplateMessage($to, $this->rentalTemplateSid, $numeric);
+                if ($retry['success']) {
+                    return $retry;
+                }
+            } else {
+                return $result;
+            }
+        }
+        // Fallback to plain text message to target number
+        $message = $this->buildRentalCodeMessage($rentalCode, $client);
+        return $this->sendMessage($to, $message);
+    }
+
+    /**
+     * Public helper: send rental details as plain text (no template)
+     */
+    public function sendRentalPlainTo(string $to, $rentalCode, $client)
+    {
+        $message = $this->buildRentalCodeMessage($rentalCode, $client);
+        return $this->sendMessage($to, $message);
+    }
+
+    /**
+     * Public helper: send current template with explicit variables
+     */
+    public function sendTemplateWithVariables(string $to, array $variables)
+    {
+        if (!$this->rentalTemplateSid) {
+            return ['success' => false, 'error' => 'Template SID not configured'];
+        }
+        return $this->sendTemplateMessage($to, $this->rentalTemplateSid, $variables);
+    }
+
+    /**
+     * Build numeric variables mapping {1..5} in the order expected by the template
+     */
+    private function buildTemplateVariablesNumeric($rentalCode, $client)
+    {
+        $createdDate = $rentalCode->created_at->format('d/m/Y');
+        $rentalDate = $rentalCode->rental_date ? \Carbon\Carbon::parse($rentalCode->rental_date)->format('d/m/Y') : $createdDate;
+        $paymentMethod = $this->formatPaymentMethod($rentalCode->payment_method ?? '');
+        $consultationFee = $rentalCode->consultation_fee ?? $rentalCode->rent_amount ?? '';
+        if (is_numeric($consultationFee)) {
+            $consultationFee = '£' . number_format($consultationFee, 0);
+        }
+        $agentName = $rentalCode->agent_name ?? $rentalCode->rent_by_agent ?? 'Agent';
+        $marketingAgentName = $rentalCode->marketingAgentUser->name ?? ($rentalCode->marketing_agent_name ?? 'N/A');
+
+        $rentalDetails = "Rental Date: {$rentalDate}  Consultation fee: {$consultationFee}  Method of Payment: {$paymentMethod}  Property: " . ($rentalCode->property_address ?? ($rentalCode->property ?? 'Not specified')) . "  Licensor: " . ($rentalCode->licensor ?? 'Not specified');
+
+        $clientProfile = '';
+        if ($client) {
+            $clientProfile = "Full Name: " . ($client->full_name ?? 'N/A') . "  Date of Birth: " . ($client->date_of_birth ? \Carbon\Carbon::parse($client->date_of_birth)->format('jS F Y') : 'Not provided') . "  Phone Number: " . ($client->phone_number ?? 'N/A') . "  Email: " . ($client->email ?? 'N/A') . "  Nationality: " . ucfirst($client->nationality ?? 'Not provided') . "  Current Address: " . ($client->current_address ?? 'N/A') . "  Company/University: " . ($client->company_university_name ?? 'N/A') . "  Position/Role: " . ($client->position_role ?? 'N/A');
+        }
+
+        $sanitize = function ($v) {
+            if ($v === null) return 'N/A';
+            $v = (string) $v;
+            $v = str_replace(["\r", "\n", "\t"], ' ', $v);
+            $v = preg_replace('/\s{2,}/', ' ', $v);
+            $v = trim($v);
+            return $v === '' ? 'N/A' : $v;
+        };
+
+        return [
+            '1' => $sanitize($rentalCode->rental_code ?? 'N/A'),
+            '2' => $sanitize($rentalDetails),
+            '3' => $sanitize($clientProfile),
+            '4' => $sanitize($agentName),
+            '5' => $sanitize($marketingAgentName),
+        ];
     }
     
     /**

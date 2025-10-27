@@ -44,8 +44,13 @@ return [
         'auth_token' => env('TWILIO_AUTH_TOKEN'),
         'phone_number' => env('TWILIO_PHONE_NUMBER'),
         'whatsapp_number' => env('TWILIO_WHATSAPP_NUMBER'),
+        'messaging_service_sid' => env('TWILIO_MESSAGING_SERVICE_SID'),
         'test_whatsapp_number' => env('TEST_WHATSAPP_NUMBER'),
         'admin_whatsapp_number' => env('ADMIN_WHATSAPP_NUMBER', '+447947768707'),
+        // Approved WhatsApp Content Template SID (HX...)
+        'rental_template_sid' => env('TWILIO_RENTAL_TEMPLATE_SID', 'HXe7a5d7e1a64ec70a35cf674d9b0dd82d'),
+        // Optional content language (e.g., en)
+        'content_language' => env('TWILIO_CONTENT_LANGUAGE', 'en'),
     ],
 
 ];
