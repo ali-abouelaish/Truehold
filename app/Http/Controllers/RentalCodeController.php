@@ -537,7 +537,8 @@ public function generateCode()
         $status = $validated['status'] ?? null;
         $paymentMethod = $validated['payment_method'] ?? null;
         $agentSearch = $validated['agent_search'] ?? null;
-        $marketingAgentFilter = $validated['marketing_agent_filter'] ?? null;
+        // Default to showing only rental agents (hide marketing-only by default)
+        $marketingAgentFilter = $validated['marketing_agent_filter'] ?? 'rent_only';
 
         // Public access: do not enforce authentication; show all agents unless filtered
         $user = auth()->user();
