@@ -577,7 +577,7 @@ strong {
                 </div>
                 <div class="card-body">
                     <div class="info-item">
-                        <div class="info-label">Client Code</div>
+                        <div class="info-label">Assited by</div>
                         <div class="info-value">
                             <i class="fas fa-user-tie text-muted me-2"></i>
                             <strong>{{ $rentalCode->rent_by_agent_name }}</strong>

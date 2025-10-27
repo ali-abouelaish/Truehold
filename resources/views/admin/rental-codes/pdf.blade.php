@@ -150,7 +150,7 @@
                 <h3>📋 Rental Details</h3>
                 <div class="info-grid">
                     <div class="info-item">
-                        <span class="label">Rental Code</span>
+                        <span class="label">Client Code</span>
                         <span class="value">{{ $rentalCode->rental_code }}</span>
                     </div>
                     <div class="info-item">
@@ -220,7 +220,7 @@
                 <h3>👨‍💼 Agent Information</h3>
                 <div class="info-grid">
                     <div class="info-item">
-                        <span class="label">Client Code</span>
+                        <span class="label">Assisted by</span>
                         <span class="value">{{ $rentalCode->rent_by_agent ?? 'N/A' }}</span>
                     </div>
                     <div class="info-item">

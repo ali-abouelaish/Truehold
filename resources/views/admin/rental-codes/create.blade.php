@@ -1012,7 +1012,7 @@ document.addEventListener('DOMContentLoaded', function() {
             'client_nationality': 'Client Nationality',
             'client_current_address': 'Client Current Address',
             'existing_client_id': 'Existing Client',
-            'rent_by_agent': 'Client Code',
+            'rent_by_agent': 'Assited by',
             'client_count': 'Client Count'
         };
         return labels[fieldName] || fieldName;
