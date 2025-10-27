@@ -285,13 +285,13 @@
                             @if($agentSearch)
                                 {{ $agentSearch }} - Commission File
                             @elseif($isPayrollView)
-                                @if(auth()->user()->role === 'admin')
+                                @if(auth()->check() && auth()->user()->role === 'admin')
                                     Commission File - {{ $agentSearch }}
                                 @else
                                     My Commission File
                                 @endif
                             @else
-                                @if(auth()->user()->role === 'admin')
+                                @if(auth()->check() && auth()->user()->role === 'admin')
                                     Agent Earnings Breakdown
                                 @else
                                     Agent Leaderboard
@@ -326,13 +326,13 @@
                     <div class="flex items-center space-x-2">
                         <span class="text-sm text-gray-500">
                             @if($isPayrollView)
-                                @if(auth()->user()->role === 'admin')
+                                @if(auth()->check() && auth()->user()->role === 'admin')
                                     {{ count($agentEarnings) }} commission record{{ count($agentEarnings) !== 1 ? 's' : '' }}
                                 @else
                                     My commission record{{ count($agentEarnings) !== 1 ? 's' : '' }}
                                 @endif
                             @else
-                                @if(auth()->user()->role === 'admin')
+                                @if(auth()->check() && auth()->user()->role === 'admin')
                                     {{ count($agentEarnings) }} agents
                                 @else
                                     Leaderboard
@@ -382,8 +382,8 @@
             <tbody class="bg-white divide-y divide-gray-200">
                         @forelse($agentEarnings as $index => $agent)
                         @php
-                            $isAdmin = auth()->user()->role === 'admin';
-                            $currentUser = auth()->user()->name;
+                            $isAdmin = auth()->check() && auth()->user()->role === 'admin';
+                            $currentUser = auth()->check() ? auth()->user()->name : null;
                             $isCurrentUser = $agent['name'] === $currentUser;
                             $showUserRanking = !$isAdmin && $isCurrentUser && $loop->index > 2;
                             
@@ -568,8 +568,8 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     @foreach($agentEarnings as $index => $agent)
                     @php
-                        $isAdmin = auth()->user()->role === 'admin';
-                        $currentUser = auth()->user()->name;
+                        $isAdmin = auth()->check() && auth()->user()->role === 'admin';
+                        $currentUser = auth()->check() ? auth()->user()->name : null;
                         $isCurrentUser = $agent['name'] === $currentUser;
                         $showUserRanking = !$isAdmin && $isCurrentUser && $loop->index > 2;
                         
