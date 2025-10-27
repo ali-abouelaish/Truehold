@@ -36,7 +36,7 @@
                                     Your approved rentals up to 10th of each month
                                 @endif
                             @else
-                                @if(auth()->user()->role === 'admin')
+                                @if(auth()->check() && auth()->user()->role === 'admin')
                                     Comprehensive earnings analysis and performance insights
                                 @else
                                     Your earnings overview and performance insights
