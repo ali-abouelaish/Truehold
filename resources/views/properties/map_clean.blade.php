@@ -33,6 +33,10 @@
             pointer-events: none;
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
         }
+        /* Hide default Google Maps InfoWindow close button */
+        .gm-style .gm-ui-hover-effect {
+            display: none !important;
+        }
     </style>
     
     <style>
@@ -328,7 +332,7 @@
                 // Clear loading spinner
                 mapContainer.innerHTML = '';
                 
-                // Create map with Google Maps
+                // Create map with Google Maps (minimalist styling)
                 map = new google.maps.Map(mapContainer, {
                     center: { lat: 51.505, lng: -0.09 }, // London coordinates
                     zoom: 10,
@@ -338,11 +342,14 @@
                     fullscreenControl: true,
                     zoomControl: true,
                     styles: [
-                        {
-                            featureType: 'poi',
-                            elementType: 'labels',
-                            stylers: [{ visibility: 'off' }]
-                        }
+                        { elementType: 'labels', stylers: [{ visibility: 'off' }] },
+                        { featureType: 'poi', stylers: [{ visibility: 'off' }] },
+                        { featureType: 'transit', stylers: [{ visibility: 'off' }] },
+                        { featureType: 'administrative', stylers: [{ visibility: 'off' }] },
+                        { featureType: 'road', elementType: 'labels', stylers: [{ visibility: 'off' }] },
+                        { featureType: 'road', elementType: 'geometry', stylers: [{ color: '#e0e0e0' }] },
+                        { featureType: 'landscape', elementType: 'geometry', stylers: [{ color: '#f5f5f5' }] },
+                        { featureType: 'water', elementType: 'geometry', stylers: [{ color: '#e9f5ff' }] }
                     ]
                 });
                 console.log('Map created:', map);

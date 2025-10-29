@@ -1642,9 +1642,9 @@ public function generateCode()
             ];
         }
 
-        // Check if agent has any data
+        // Check if agent has any data; render empty state instead of 404
         if ($agentData['transaction_count'] === 0 && count($agentData['landlord_bonuses']) === 0) {
-            abort(404, 'No data found for this agent');
+            \Log::info('Agent payroll accessed with no data', ['agent' => $requestedAgentName]);
         }
 
         return view('admin.rental-codes.agent-payroll', [
