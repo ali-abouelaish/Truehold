@@ -1058,6 +1058,13 @@ public function generateCode()
         ksort($monthlyTotals);
         $chartData['monthly_totals'] = $monthlyTotals;
 
+        // Default behavior: show only rental agents (exclude marketing-only) unless explicitly requested
+        if (empty($marketingAgentFilter)) {
+            $filteredAgents = array_filter($filteredAgents, function ($agent) use ($agentUsers) {
+                return in_array($agent['name'], array_values($agentUsers), true);
+            });
+        }
+
         // Final debug logging
         \Log::info('Agent earnings summary', [
             'total_rental_codes' => $rentalCodes->count(),
