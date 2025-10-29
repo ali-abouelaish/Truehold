@@ -141,7 +141,7 @@
                                         <input type="date" class="form-control @error('rental_date') is-invalid @enderror" 
                                                id="rental_date" name="rental_date" 
                                                value="{{ old('rental_date') }}" 
-                                               min="{{ date('Y-m-d') }}" required>
+                                               required>
                                     </div>
                                     @error('rental_date')
                                         <div class="invalid-feedback">{{ $message }}</div>
@@ -427,12 +427,12 @@
                             <div class="col-md-4">
                                 <div class="mb-3">
                                     <label for="client_id_document" class="form-label">
-                                        <i class="fas fa-id-card text-info me-1"></i>Client ID Documents
-                                        <small class="text-muted d-block">Optional</small>
+                                        <i class="fas fa-id-card text-info me-1"></i>Client ID Documents <span class="text-danger">*</span>
+                                        <small class="text-danger d-block">Required</small>
                                     </label>
                                     <input type="file" class="form-control @error('client_id_document.*') is-invalid @enderror" 
                                            id="client_id_document" name="client_id_document[]" 
-                                           accept=".pdf,.jpg,.jpeg,.png" multiple>
+                                           accept=".pdf,.jpg,.jpeg,.png" multiple required>
                                     <small class="form-text text-muted">PDF, JPG, PNG files (max 10MB each)</small>
                                     @error('client_id_document.*')
                                         <div class="invalid-feedback">{{ $message }}</div>
@@ -460,7 +460,7 @@
                             <strong>File Upload Requirements:</strong>
                             <ul class="mb-0 mt-2">
                                 <li><strong>Client Contracts and Payment Proof are required</strong> - marked with red asterisks (*)</li>
-                                <li>Client ID Documents are optional but recommended for record keeping</li>
+                                <li><strong>Client ID Documents are required</strong></li>
                                 <li>If you upload files, the system will wait for all uploads to complete before submission</li>
                                 <li>You can upload multiple files for each document type</li>
                                 <li>Supported formats: PDF, JPG, JPEG, PNG</li>
@@ -1042,7 +1042,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Real-time validation for key fields
     const validationRules = {
-        'rental_date': { required: true, date: true, futureDate: true },
+        'rental_date': { required: true, date: true },
         'consultation_fee': { required: true, numeric: true, min: 0 },
         'payment_method': { required: true },
         'client_full_name': { required: true },
@@ -1126,9 +1126,9 @@ document.addEventListener('DOMContentLoaded', function() {
         });
         
         // Check if files are being uploaded and wait for completion
-        const requiredFileInputs = ['client_contract', 'payment_proof'];
-        const optionalFileInputs = ['client_id_document'];
-        const allFileInputs = [...requiredFileInputs, ...optionalFileInputs];
+    const requiredFileInputs = ['client_contract', 'payment_proof', 'client_id_document'];
+    const optionalFileInputs = [];
+    const allFileInputs = [...requiredFileInputs, ...optionalFileInputs];
         let hasFiles = false;
         let uploadInProgress = false;
         
@@ -1263,7 +1263,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     
     // Add specific validation for required fields
-    const requiredFileInputs = ['client_contract', 'payment_proof'];
+    const requiredFileInputs = ['client_contract', 'payment_proof', 'client_id_document'];
     requiredFileInputs.forEach(fieldName => {
         const fileInput = document.querySelector(`[name="${fieldName}[]"]`);
         if (fileInput) {

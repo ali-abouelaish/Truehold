@@ -27,14 +27,30 @@ Route::get('/properties', [PropertyController::class, 'index'])->name('propertie
 Route::get('/properties/map', [PropertyController::class, 'map'])->name('properties.map');
 Route::get('/properties/{property}', [PropertyController::class, 'show'])->name('properties.show');
 Route::get('/rental-codes/agent-earnings', [RentalCodeController::class, 'agentEarnings'])->name('rental-codes.agent-earnings');
-Route::get('/rental-codes/agent-payroll/{agentName}', [RentalCodeController::class, 'agentPayrollNew'])->name('rental-codes.agent-payroll');
+// New ID-based payroll route
+Route::get('/rental-codes/agent-payroll/{agentId}', [RentalCodeController::class, 'agentPayrollById'])
+    ->whereNumber('agentId')
+    ->name('rental-codes.agent-payroll');
+
+// Legacy name-based payroll route (kept as separate named route)
+Route::get('/rental-codes/agent-payroll-by-name/{agentName}', [RentalCodeController::class, 'agentPayrollNew'])
+    ->name('rental-codes.agent-payroll-by-name');
 
 // Backwards-compatible aliases for older/typo URLs
 Route::get('/rental-codes/agent-comissionfile/{agentName}', function ($agentName) {
-    return redirect()->route('rental-codes.agent-payroll', ['agentName' => $agentName]);
+    return redirect()->route('rental-codes.agent-payroll-by-name', ['agentName' => $agentName]);
 });
 Route::get('/rental-codes/agent-commissionfile/{agentName}', function ($agentName) {
-    return redirect()->route('rental-codes.agent-payroll', ['agentName' => $agentName]);
+    return redirect()->route('rental-codes.agent-payroll-by-name', ['agentName' => $agentName]);
+});
+
+// Old path redirect helper to ID-based when possible
+Route::get('/rental-codes/agent-payroll-name/{agentName}', function ($agentName) {
+    $id = \App\Models\User::where('name', $agentName)->value('id');
+    if ($id) {
+        return redirect()->route('rental-codes.agent-payroll', ['agentId' => $id]);
+    }
+    return redirect()->route('rental-codes.agent-payroll-by-name', ['agentName' => $agentName]);
 });
 
 // Storage file serving route

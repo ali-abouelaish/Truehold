@@ -541,7 +541,7 @@
                             
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="flex space-x-2">
-                                    <a href="{{ route('rental-codes.agent-payroll', ['agentName' => $agent['name']]) }}" 
+                                    <a href="{{ isset($agent['id']) ? route('rental-codes.agent-payroll', ['agentId' => $agent['id']]) : route('rental-codes.agent-payroll-by-name', ['agentName' => $agent['name']]) }}" 
                                        class="text-blue-600 hover:text-blue-800 font-medium">
                                         <i class="fas fa-eye mr-1"></i>View Commission File
                                     </a>
@@ -669,7 +669,7 @@
     </div>
 </div>
                             <div class="flex space-x-2">
-                                <a href="{{ route('rental-codes.agent-earnings', ['agent_search' => $agent['name']]) }}" 
+                                <a href="{{ isset($agent['id']) ? route('rental-codes.agent-payroll', ['agentId' => $agent['id']]) : route('rental-codes.agent-payroll-by-name', ['agentName' => $agent['name']]) }}" 
                                    class="text-purple-600 hover:text-purple-800">
                                     <i class="fas fa-money-bill-wave"></i>
                                 </a>
