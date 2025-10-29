@@ -1429,10 +1429,9 @@ public function generateCode()
         $status = request('status');
         $paymentMethod = request('payment_method');
 
-        // Get rental codes for this agent - ONLY APPROVED RENTALS
+        // Get rental codes for this agent (do not restrict to approved by default)
         $query = RentalCode::with(['client', 'client.agent', 'rentalAgent', 'marketingAgentUser'])
-            ->where('rental_date', '<=', $endDate)
-            ->where('status', 'approved'); // Only show approved rentals
+            ->where('rental_date', '<=', $endDate);
 
         if ($startDate) {
             $query->where('rental_date', '>=', $startDate);
@@ -1448,9 +1447,9 @@ public function generateCode()
 
         $rentalCodes = $query->get();
 
-        // Get agent users for matching
-        $agentUsers = User::where('role', 'agent')->pluck('name', 'id')->toArray();
-        $agentUserIds = User::where('role', 'agent')->pluck('id')->toArray();
+        // Get users for matching (include all users so IDs referenced in records still match)
+        $agentUsers = User::pluck('name', 'id')->toArray();
+        $agentUserIds = User::pluck('id')->toArray();
 
         // Initialize agent data
         $agentData = [
@@ -1472,7 +1471,7 @@ public function generateCode()
         // Process rental codes for this agent
         foreach ($rentalCodes as $code) {
             $totalFee = (float) ($code->consultation_fee ?? 0);
-            $rentalDate = $code->rental_date ?? now();
+            $rentalDate = $code->rental_date ?? ($code->created_at ?? now());
             $paymentMethod = $code->payment_method ?? 'Cash';
 
             if ($totalFee <= 0) continue;
@@ -1490,11 +1489,11 @@ public function generateCode()
             $clientCount = $code->client_count ?? 1; // Get actual client count or default to 1
 
             // Check rental agent
-            if ($code->rentalAgent && $code->rentalAgent->name === $requestedAgentName) {
+            if ($code->rentalAgent && strcasecmp($code->rentalAgent->name, $requestedAgentName) === 0) {
                 $agentName = $requestedAgentName;
             }
             // Check marketing agent
-            elseif ($code->marketingAgentUser && $code->marketingAgentUser->name === $requestedAgentName) {
+            elseif ($code->marketingAgentUser && strcasecmp($code->marketingAgentUser->name, $requestedAgentName) === 0) {
                 $agentName = $requestedAgentName;
                 $isMarketingEarnings = true;
                 $marketingAgent = $requestedAgentName;
@@ -1505,11 +1504,11 @@ public function generateCode()
                 if ($agentName !== $requestedAgentName) continue;
             }
             // Check by name
-            elseif (!empty($code->rent_by_agent_name) && $code->rent_by_agent_name === $requestedAgentName) {
+            elseif (!empty($code->rent_by_agent_name) && strcasecmp($code->rent_by_agent_name, $requestedAgentName) === 0) {
                 $agentName = $requestedAgentName;
             }
             // Check client agent
-            elseif ($code->client && $code->client->agent && $code->client->agent->company_name === $requestedAgentName) {
+            elseif ($code->client && $code->client->agent && strcasecmp($code->client->agent->company_name, $requestedAgentName) === 0) {
                 $agentName = $requestedAgentName;
             }
 
