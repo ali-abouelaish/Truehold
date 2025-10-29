@@ -15,6 +15,7 @@ use App\Http\Controllers\ScraperController;
 use App\Http\Controllers\PhpScraperController;
 use App\Http\Controllers\RentalCodeCashDocumentController;
 use App\Http\Controllers\AgentProfileController;
+use App\Http\Controllers\PublicClientController;
 use Twilio\Rest\Client;
 
 Route::get('/', function () {
@@ -52,6 +53,10 @@ Route::get('/rental-codes/agent-payroll-name/{agentName}', function ($agentName)
     }
     return redirect()->route('rental-codes.agent-payroll-by-name', ['agentName' => $agentName]);
 });
+
+// Public client intake (no auth required)
+Route::get('/apply', [PublicClientController::class, 'create'])->name('public.client.create');
+Route::post('/apply', [PublicClientController::class, 'store'])->name('public.client.store');
 
 // Storage file serving route
 Route::get('/storage/{path}', function ($path) {

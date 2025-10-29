@@ -29,12 +29,77 @@
     </div>
 @endif
 
+<script>
+function copyApplyUrl() {
+    const input = document.getElementById('publicApplyUrl');
+    input.select();
+    input.setSelectionRange(0, 99999);
+    try {
+        document.execCommand('copy');
+    } catch (e) {
+        navigator.clipboard.writeText(input.value);
+    }
+}
+
+function toggleClientFilters() {
+    const container = document.getElementById('clientFiltersContainer');
+    const toggleText = document.getElementById('clientFiltersToggleText');
+    if (!container || !toggleText) return;
+    if (container.style.display === 'none') {
+        container.style.display = 'block';
+        toggleText.textContent = 'Hide';
+    } else {
+        container.style.display = 'none';
+        toggleText.textContent = 'Show';
+    }
+}
+</script>
+
+<!-- Public Client Application Link & QR -->
+<div class="bg-white rounded-lg shadow-sm border border-gray-200 mb-6">
+    <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
+        <h3 class="text-lg font-medium text-gray-900 flex items-center">
+            <i class="fas fa-link text-blue-600 mr-2"></i> Public Client Application
+        </h3>
+        <a href="{{ route('public.client.create') }}" target="_blank"
+           class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium">
+            Open Form
+        </a>
+    </div>
+    <div class="p-6 grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
+        <div class="md:col-span-2">
+            <label class="block text-sm font-medium text-gray-700 mb-2">Shareable URL</label>
+            <div class="flex items-center">
+                <input type="text" id="publicApplyUrl" readonly
+                       value="{{ route('public.client.create') }}"
+                       class="flex-1 border-gray-300 rounded-l-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 px-3 py-2 text-sm">
+                <button type="button" onclick="copyApplyUrl()"
+                        class="bg-gray-600 hover:bg-gray-700 text-white px-3 py-2 rounded-r-lg text-sm">
+                    <i class="fas fa-copy mr-1"></i>Copy
+                </button>
+            </div>
+            <p class="text-xs text-gray-500 mt-2">Send this link to clients so they can submit their details directly.</p>
+        </div>
+        <div class="flex flex-col items-center">
+            @php($applyUrl = route('public.client.create'))
+            <img alt="Apply QR Code" class="rounded border border-gray-200"
+                 referrerpolicy="no-referrer"
+                 src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data={{ urlencode($applyUrl) }}"
+                 onerror="this.onerror=null; this.src='https://chart.googleapis.com/chart?cht=qr&chs=200x200&chl={{ urlencode($applyUrl) }}&chld=L|0';">
+            <p class="text-xs text-gray-500 mt-2">Scan to open the public application form</p>
+        </div>
+    </div>
+</div>
+
 <!-- Filters -->
 <div class="bg-white rounded-lg shadow-sm border border-gray-200 mb-6">
-    <div class="px-6 py-4 border-b border-gray-200">
+    <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
         <h3 class="text-lg font-medium text-gray-900">Filters</h3>
+        <button type="button" onclick="toggleClientFilters()" class="text-gray-600 hover:text-gray-800 text-sm">
+            <i class="fas fa-filter mr-1"></i><span id="clientFiltersToggleText">Show</span>
+        </button>
     </div>
-    <div class="p-6">
+    <div class="p-6" id="clientFiltersContainer" style="display: none;">
         <form method="GET" action="{{ route('admin.clients') }}" class="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">Agent</label>
