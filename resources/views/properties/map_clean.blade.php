@@ -332,25 +332,15 @@
                 // Clear loading spinner
                 mapContainer.innerHTML = '';
                 
-                // Create map with Google Maps (minimalist styling)
+                // Create map with Google Maps hybrid (satellite with labels)
                 map = new google.maps.Map(mapContainer, {
                     center: { lat: 51.505, lng: -0.09 }, // London coordinates
                     zoom: 10,
-                    mapTypeId: google.maps.MapTypeId.ROADMAP,
+                    mapTypeId: google.maps.MapTypeId.HYBRID,
                     mapTypeControl: true,
                     streetViewControl: true,
                     fullscreenControl: true,
-                    zoomControl: true,
-                    styles: [
-                        { elementType: 'labels', stylers: [{ visibility: 'off' }] },
-                        { featureType: 'poi', stylers: [{ visibility: 'off' }] },
-                        { featureType: 'transit', stylers: [{ visibility: 'off' }] },
-                        { featureType: 'administrative', stylers: [{ visibility: 'off' }] },
-                        { featureType: 'road', elementType: 'labels', stylers: [{ visibility: 'off' }] },
-                        { featureType: 'road', elementType: 'geometry', stylers: [{ color: '#e0e0e0' }] },
-                        { featureType: 'landscape', elementType: 'geometry', stylers: [{ color: '#f5f5f5' }] },
-                        { featureType: 'water', elementType: 'geometry', stylers: [{ color: '#e9f5ff' }] }
-                    ]
+                    zoomControl: true
                 });
                 console.log('Map created:', map);
                 

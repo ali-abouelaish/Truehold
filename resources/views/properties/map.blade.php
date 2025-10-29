@@ -1071,21 +1071,12 @@
                 // Hide loading screen
                 document.getElementById('loadingScreen').style.display = 'none';
                 
-                // Create map with minimalist styling (reduced details)
+                // Create map with satellite (hybrid) view
                 map = new google.maps.Map(document.getElementById('map'), {
                     center: { lat: 51.5074, lng: -0.1278 }, // London center
                     zoom: 12,
-                    mapTypeId: google.maps.MapTypeId.ROADMAP,
-                    styles: [
-                        { elementType: "labels", stylers: [{ visibility: "off" }] },
-                        { featureType: "poi", stylers: [{ visibility: "off" }] },
-                        { featureType: "transit", stylers: [{ visibility: "off" }] },
-                        { featureType: "administrative", stylers: [{ visibility: "off" }] },
-                        { featureType: "road", elementType: "labels", stylers: [{ visibility: "off" }] },
-                        { featureType: "road", elementType: "geometry", stylers: [{ color: "#e0e0e0" }] },
-                        { featureType: "landscape", elementType: "geometry", stylers: [{ color: "#f5f5f5" }] },
-                        { featureType: "water", elementType: "geometry", stylers: [{ color: "#e9f5ff" }] }
-                    ]
+                    mapTypeId: google.maps.MapTypeId.HYBRID,
+                    mapTypeControl: true
                 });
                 
                 // Create info window
