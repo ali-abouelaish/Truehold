@@ -85,6 +85,7 @@
                                 @php($currentStatus = old('status', $property->status ?? 'empty_available_now'))
                                 <select name="status" class="form-select" required>
                                     <option value="empty_available_now" {{ $currentStatus==='empty_available_now' ? 'selected' : '' }}>AVAILABLE NOW</option>
+                                    <option value="available_on_date" {{ $currentStatus==='available_on_date' ? 'selected' : '' }}>Available on DATE</option>
                                    
                                     <option value="booked" {{ $currentStatus==='booked' ? 'selected' : '' }}>Booked</option>
                                     <option value="renewal" {{ $currentStatus==='renewal' ? 'selected' : '' }}>Renewal</option>

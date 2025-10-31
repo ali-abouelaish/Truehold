@@ -76,6 +76,7 @@
                                 <label class="form-label">Status</label>
                                 <select name="status" class="form-select" required>
                                     <option value="empty_available_now" {{ old('status')==='empty_available_now' ? 'selected' : '' }}>AVAILABLE NOW</option>
+                                    <option value="available_on_date" {{ old('status')==='available_on_date' ? 'selected' : '' }}>Available on DATE</option>
                                  
                                     <option value="booked" {{ old('status')==='booked' ? 'selected' : '' }}>Booked</option>
                                     <option value="renewal" {{ old('status')==='renewal' ? 'selected' : '' }}>Renewal</option>
