@@ -127,6 +127,41 @@
         </div>
     </div>
 </div>
+<script src="https://cdn.jsdelivr.net/npm/heic2any@0.0.4/dist/heic2any.min.js"></script>
+<script>
+(function(){
+  const input = document.querySelector('input[name="images[]"]');
+  if (!input) return;
+  input.addEventListener('change', async function(e){
+    if (!window.heic2any) return; // Fallback: submit original files
+    const files = Array.from(input.files || []);
+    const needsConvert = files.some(f => /heic|heif/i.test(f.type) || /\.(heic|heif)$/i.test(f.name));
+    if (!needsConvert) return;
+    // Show small notice
+    let notice = document.createElement('div');
+    notice.className = 'text-muted small mt-2';
+    notice.textContent = 'Converting HEIC images to JPEG…';
+    input.parentElement.appendChild(notice);
+    const dt = new DataTransfer();
+    for (const file of files) {
+      try {
+        if (/heic|heif/i.test(file.type) || /\.(heic|heif)$/i.test(file.name)) {
+          const blob = await window.heic2any({ blob: file, toType: 'image/jpeg', quality: 0.88 });
+          const converted = new File([blob], file.name.replace(/\.(heic|heif)$/i, '.jpg'), { type: 'image/jpeg' });
+          dt.items.add(converted);
+        } else {
+          dt.items.add(file);
+        }
+      } catch(err) {
+        // On failure, keep original file so submission still works
+        dt.items.add(file);
+      }
+    }
+    input.files = dt.files;
+    if (notice && notice.remove) notice.remove();
+  });
+})();
+</script>
 @endsection
 
 
