@@ -21,6 +21,16 @@
         <div class="col-lg-10">
             <div class="card">
                 <div class="card-body">
+                    @if ($errors->any())
+                    <div class="alert alert-danger">
+                        <div class="fw-bold mb-1">Please fix the following:</div>
+                        <ul class="mb-0">
+                            @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                    @endif
                     <form method="POST" action="{{ route('admin.ap-properties.store') }}" enctype="multipart/form-data">
                         @csrf
 
