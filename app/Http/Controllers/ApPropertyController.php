@@ -177,6 +177,38 @@ class ApPropertyController extends Controller
             ->route('admin.ap-properties.index')
             ->with('success', 'AP Property deleted successfully.');
     }
+
+    /**
+     * Delete a single image by index from the property's images_url array.
+     */
+    public function destroyImage(ApProperty $ap_property, int $index)
+    {
+        $images = $ap_property->images_url ?? [];
+        if (!is_array($images) || !array_key_exists($index, $images)) {
+            return back()->with('error', 'Image not found.');
+        }
+
+        $path = $images[$index];
+
+        try {
+            if ($path && !preg_match('/^https?:/i', $path)) {
+                Storage::disk('public')->delete($path);
+            }
+        } catch (\Throwable $e) {
+            // ignore storage errors, proceed to remove from array
+        }
+
+        // Remove and reindex
+        array_splice($images, $index, 1);
+        $ap_property->images_url = $images;
+        $ap_property->save();
+
+        if (request()->wantsJson()) {
+            return response()->json(['success' => true]);
+        }
+
+        return back()->with('success', 'Image deleted.');
+    }
 }
 
 

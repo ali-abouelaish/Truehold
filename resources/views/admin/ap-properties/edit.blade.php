@@ -131,10 +131,19 @@
                                 <label class="form-label">Current Images</label>
                                 <div class="row g-2">
                                     @php($existing = $property->images_url ?? [])
-                                    @forelse($existing as $img)
+                                    @forelse($existing as $i => $img)
                                         @php($src = preg_match('/^https?:/i', $img) ? $img : Storage::url($img))
                                         <div class="col-md-3">
-                                            <img src="{{ $src }}" class="img-fluid rounded border" alt="Property image">
+                                            <div class="position-relative">
+                                                <img src="{{ $src }}" class="img-fluid rounded border" alt="Property image">
+                                                <form action="{{ route('admin.ap-properties.images.destroy', ['ap_property' => $property->id, 'index' => $i]) }}" method="POST" onsubmit="return confirm('Delete this image?');" class="mt-1">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit" class="btn btn-sm btn-outline-danger w-100">
+                                                        Delete
+                                                    </button>
+                                                </form>
+                                            </div>
                                         </div>
                                     @empty
                                         <div class="text-muted">No images uploaded.</div>

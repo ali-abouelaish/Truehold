@@ -321,6 +321,7 @@ Route::middleware('auth')->prefix('admin')->group(function () {
         'update' => 'admin.ap-properties.update',
         'destroy' => 'admin.ap-properties.destroy',
     ]);
+    Route::delete('/ap-properties/{ap_property}/images/{index}', [ApPropertyController::class, 'destroyImage'])->name('admin.ap-properties.images.destroy');
     
     // Admin Permissions Management
     // New simplified permission system
