@@ -162,36 +162,56 @@
         </div>
     </div>
 </div>
-<script src="https://cdn.jsdelivr.net/npm/heic2any@0.0.4/dist/heic2any.min.js"></script>
 <script>
 (function(){
+  function loadHeicLib(cb){
+    if (window.heic2any) return cb();
+    var s = document.createElement('script');
+    s.src = 'https://cdn.jsdelivr.net/npm/heic2any@0.0.4/dist/heic2any.min.js';
+    s.onload = cb;
+    s.onerror = function(){
+      var s2 = document.createElement('script');
+      s2.src = 'https://unpkg.com/heic2any@0.0.4/dist/heic2any.min.js';
+      s2.onload = cb;
+      document.head.appendChild(s2);
+    };
+    document.head.appendChild(s);
+  }
   const input = document.querySelector('input[name="images[]"]');
   if (!input) return;
-  input.addEventListener('change', async function(e){
-    if (!window.heic2any) return;
+  input.addEventListener('change', function(){
     const files = Array.from(input.files || []);
-    const needsConvert = files.some(f => /heic|heif/i.test(f.type) || /\.(heic|heif)$/i.test(f.name));
+    const needsConvert = files.some(function(f){
+      var ext = (f.name.split('.').pop() || '').toLowerCase();
+      return /heic|heif/.test((f.type || '').toLowerCase()) || ext === 'heic' || ext === 'heif';
+    });
     if (!needsConvert) return;
-    let notice = document.createElement('div');
-    notice.className = 'text-muted small mt-2';
-    notice.textContent = 'Converting HEIC images to JPEG…';
-    input.parentElement.appendChild(notice);
-    const dt = new DataTransfer();
-    for (const file of files) {
-      try {
-        if (/heic|heif/i.test(file.type) || /\.(heic|heif)$/i.test(file.name)) {
-          const blob = await window.heic2any({ blob: file, toType: 'image/jpeg', quality: 0.88 });
-          const converted = new File([blob], file.name.replace(/\.(heic|heif)$/i, '.jpg'), { type: 'image/jpeg' });
-          dt.items.add(converted);
-        } else {
+    loadHeicLib(async function(){
+      if (!window.heic2any) return;
+      var notice = document.createElement('div');
+      notice.className = 'text-muted small mt-2';
+      notice.textContent = 'Converting HEIC images to JPEG…';
+      input.parentElement.appendChild(notice);
+      const dt = new DataTransfer();
+      for (const file of files) {
+        try {
+          var ext = (file.name.split('.').pop() || '').toLowerCase();
+          var isHeic = /heic|heif/.test((file.type || '').toLowerCase()) || ext === 'heic' || ext === 'heif';
+          if (isHeic) {
+            let out = await window.heic2any({ blob: file, toType: 'image/jpeg', quality: 0.88 });
+            if (Array.isArray(out)) out = out[0];
+            const converted = new File([out], file.name.replace(/\.(heic|heif)$/i, '.jpg'), { type: 'image/jpeg' });
+            dt.items.add(converted);
+          } else {
+            dt.items.add(file);
+          }
+        } catch(e) {
           dt.items.add(file);
         }
-      } catch(err) {
-        dt.items.add(file);
       }
-    }
-    input.files = dt.files;
-    if (notice && notice.remove) notice.remove();
+      input.files = dt.files;
+      if (notice && notice.remove) notice.remove();
+    });
   });
 })();
 </script>
