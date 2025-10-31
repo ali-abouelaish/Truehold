@@ -21,6 +21,7 @@ class ApProperty extends Model
         'n_bathrooms',
         'images_url',
         'status',
+        'is_house_share',
     ];
 
     protected $casts = [
@@ -29,6 +30,7 @@ class ApProperty extends Model
         'pcm' => 'integer',
         'n_rooms' => 'integer',
         'n_bathrooms' => 'integer',
+        'is_house_share' => 'boolean',
     ];
 
     /**

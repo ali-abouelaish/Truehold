@@ -38,11 +38,13 @@ class ApPropertyController extends Controller
             'n_rooms' => 'nullable|integer|min:0',
             'n_bathrooms' => 'nullable|integer|min:0',
             'status' => 'required|string|in:booked,available_on_date,renewal,empty_available_now',
+            'is_house_share' => 'sometimes|boolean',
             'images' => 'nullable|array',
             'images.*' => 'nullable|image|max:5120',
         ]);
 
         $data = $validated;
+        $data['is_house_share'] = $request->boolean('is_house_share');
         $data['images_url'] = [];
 
         if ($request->hasFile('images')) {
@@ -90,11 +92,13 @@ class ApPropertyController extends Controller
             'n_rooms' => 'nullable|integer|min:0',
             'n_bathrooms' => 'nullable|integer|min:0',
             'status' => 'required|string|in:booked,available_on_date,renewal,empty_available_now',
+            'is_house_share' => 'sometimes|boolean',
             'images' => 'nullable|array',
             'images.*' => 'nullable|image|max:5120',
         ]);
 
         $data = $validated;
+        $data['is_house_share'] = $request->boolean('is_house_share');
 
         if ($request->hasFile('images')) {
             $paths = [];

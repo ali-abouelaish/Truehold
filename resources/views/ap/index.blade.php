@@ -29,6 +29,11 @@
                     <div class="p-4">
                         <h2 class="text-lg font-semibold text-gray-900">{{ $property->property_name }}</h2>
                         <div class="mt-2 text-sm text-gray-600">{{ $property->area }} {{ $property->postcode ? ' • ' . $property->postcode : '' }}</div>
+                        @if($property->is_house_share)
+                        <div class="mt-1 text-xs">
+                            <span class="inline-block px-2 py-1 rounded-full bg-blue-50 text-blue-700 border border-blue-200">House share</span>
+                        </div>
+                        @endif
                         <div class="mt-2 text-xs">
                             <span class="inline-block px-2 py-1 rounded-full bg-gray-100 text-gray-700 border">{{ $property->status_label }}</span>
                         </div>

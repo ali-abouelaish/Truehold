@@ -79,6 +79,12 @@
                                 <input type="file" name="images[]" class="form-control" multiple accept="image/*">
                                 @error('images.*')<div class="text-danger small">{{ $message }}</div>@enderror
                             </div>
+
+                            <div class="col-12 form-check mt-2">
+                                <input type="checkbox" id="is_house_share" name="is_house_share" class="form-check-input" {{ old('is_house_share') ? 'checked' : '' }}>
+                                <label class="form-check-label" for="is_house_share">This is a house share</label>
+                                <div class="form-text">For house shares, you can create multiple entries with the same name but different price and images.</div>
+                            </div>
                         </div>
 
                         <div class="mt-4 d-flex gap-2">
