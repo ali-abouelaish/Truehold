@@ -610,7 +610,7 @@
                 @endauth
                 <a href="{{ route('admin.ap-properties.index') }}" 
                    class="sidebar-item flex items-center px-4 py-3 text-gray-700 hover:text-blue-600 {{ request()->routeIs('admin.ap-properties*') ? 'active' : '' }}">
-                    <i class="fas fa-city sidebar-icon mr-3 text-lg"></i>
+                    <img src="{{ asset('images/apre-logo.png') }}" alt="AP" class="mr-3" style="width: 22px; height: 22px; object-fit: contain; border-radius: 3px;"/>
                     <span class="sidebar-text">AP Properties</span>
                     @if($apNewCount > 0)
                         <span class="ml-auto inline-flex items-center justify-center text-xs font-semibold rounded-full" style="background-color:#ef4444; color:#fff; min-width: 18px; height: 18px; padding: 0 6px;">
@@ -621,15 +621,7 @@
                 @endif
                 @endauth
                 
-                @auth
-                @if(auth()->user()->hasAdminPermission('properties', 'create'))
-                <a href="{{ route('admin.properties.create') }}" 
-                   class="sidebar-item flex items-center px-4 py-3 text-gray-700 hover:text-blue-600 {{ request()->routeIs('admin.properties.create') ? 'active' : '' }}">
-                    <i class="fas fa-plus sidebar-icon mr-3 text-lg"></i>
-                    <span class="sidebar-text">Add Property</span>
-                </a>
-                @endif
-                @endauth
+                
 
                 @auth
                 @if(auth()->user()->hasAdminPermission('clients', 'view'))
