@@ -16,6 +16,8 @@ use App\Http\Controllers\PhpScraperController;
 use App\Http\Controllers\RentalCodeCashDocumentController;
 use App\Http\Controllers\AgentProfileController;
 use App\Http\Controllers\PublicClientController;
+use App\Http\Controllers\ApPropertyController;
+use App\Http\Controllers\ApPublicPropertyController;
 use Twilio\Rest\Client;
 
 Route::get('/', function () {
@@ -299,6 +301,17 @@ Route::middleware('auth')->prefix('admin')->group(function () {
     Route::get('/call-logs/previous-calls', [CallLogController::class, 'getPreviousCalls'])->name('admin.call-logs.previous-calls');
     Route::post('/call-logs/{call_log}/update-next-step', [CallLogController::class, 'updateNextStep'])->name('admin.call-logs.update-next-step');
     
+    // AP Properties (full flats) Management Routes
+    Route::resource('ap-properties', ApPropertyController::class)->names([
+        'index' => 'admin.ap-properties.index',
+        'create' => 'admin.ap-properties.create',
+        'store' => 'admin.ap-properties.store',
+        'show' => 'admin.ap-properties.show',
+        'edit' => 'admin.ap-properties.edit',
+        'update' => 'admin.ap-properties.update',
+        'destroy' => 'admin.ap-properties.destroy',
+    ]);
+    
     // Admin Permissions Management
     // New simplified permission system
     Route::get('/user-permissions', [UserPermissionController::class, 'index'])->name('admin.user-permissions.index')->middleware('admin.permission:admin_permissions,view');
@@ -369,3 +382,9 @@ Route::post('/logout', function () {
     auth()->logout();
     return redirect('/properties');
 })->middleware('auth')->name('logout');
+
+// Public AP Properties on subdomain ap.truehold.co.uk
+Route::domain('ap.truehold.co.uk')->group(function () {
+    Route::get('/', [ApPublicPropertyController::class, 'index'])->name('ap.public.index');
+    Route::get('/properties/{ap_property}', [ApPublicPropertyController::class, 'show'])->name('ap.public.show');
+});
