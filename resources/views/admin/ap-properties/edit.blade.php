@@ -200,9 +200,11 @@
           var ext = (file.name.split('.').pop() || '').toLowerCase();
           var isHeic = /heic|heif/.test((file.type || '').toLowerCase()) || ext === 'heic' || ext === 'heif';
           if (isHeic) {
-            let out = await window.heic2any({ blob: file, toType: 'image/jpeg', quality: 0.88 });
+            let out = await window.heic2any({ blob: file, toType: 'image/png' });
             if (Array.isArray(out)) out = out[0];
-            const converted = new File([out], file.name.replace(/\.(heic|heif)$/i, '.jpg'), { type: 'image/jpeg' });
+            const img = await blobToImage(out);
+            const webpBlob = await imageToWebp(img, 0.88);
+            const converted = new File([webpBlob], file.name.replace(/\.(heic|heif)$/i, '.webp'), { type: 'image/webp' });
             dt.items.add(converted);
           } else {
             dt.items.add(file);
@@ -214,6 +216,25 @@
       input.files = dt.files;
       if (notice && notice.remove) notice.remove();
     });
+  function blobToImage(blob){
+    return new Promise(function(resolve,reject){
+      const url = URL.createObjectURL(blob);
+      const img = new Image();
+      img.onload = function(){ URL.revokeObjectURL(url); resolve(img); };
+      img.onerror = function(e){ URL.revokeObjectURL(url); reject(e); };
+      img.src = url;
+    });
+  }
+  function imageToWebp(img, quality){
+    return new Promise(function(resolve){
+      const canvas = document.createElement('canvas');
+      canvas.width = img.naturalWidth || img.width;
+      canvas.height = img.naturalHeight || img.height;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0);
+      canvas.toBlob(function(b){ resolve(b); }, 'image/webp', quality || 0.88);
+    });
+  }
   });
 })();
 </script>

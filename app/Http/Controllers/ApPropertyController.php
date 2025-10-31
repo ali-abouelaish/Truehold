@@ -147,11 +147,11 @@ class ApPropertyController extends Controller
                 if (class_exists(\Imagick::class)) {
                     $imagick = new \Imagick();
                     $imagick->readImageBlob(file_get_contents($uploadedFile->getRealPath()));
-                    $imagick->setImageFormat('jpeg');
+                    $imagick->setImageFormat('webp');
                     $imagick->setImageCompressionQuality(88);
-                    $jpegData = $imagick->getImageBlob();
-                    $filename = 'ap-properties/' . uniqid('ap_', true) . '.jpg';
-                    Storage::disk('public')->put($filename, $jpegData);
+                    $webpData = $imagick->getImageBlob();
+                    $filename = 'ap-properties/' . uniqid('ap_', true) . '.webp';
+                    Storage::disk('public')->put($filename, $webpData);
                     return $filename;
                 }
                 // If Imagick not available, store original HEIC so it's downloadable
