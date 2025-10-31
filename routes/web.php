@@ -20,7 +20,17 @@ use App\Http\Controllers\ApPropertyController;
 use App\Http\Controllers\ApPublicPropertyController;
 use Twilio\Rest\Client;
 
+// Public AP Properties on subdomain ap.truehold.co.uk - define before generic routes
+Route::domain('ap.truehold.co.uk')->group(function () {
+    Route::get('/', [ApPublicPropertyController::class, 'index'])->name('ap.public.index');
+    Route::get('/properties', [ApPublicPropertyController::class, 'index'])->name('ap.public.list');
+    Route::get('/properties/{ap_property}', [ApPublicPropertyController::class, 'show'])->name('ap.public.show');
+});
+
 Route::get('/', function () {
+    if (request()->getHost() === 'ap.truehold.co.uk') {
+        return redirect()->route('ap.public.index');
+    }
     return redirect('/properties');
 });
 
