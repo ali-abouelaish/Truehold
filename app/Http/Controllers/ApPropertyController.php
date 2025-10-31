@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\ApProperty;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class ApPropertyController extends Controller
 {
@@ -59,7 +60,7 @@ class ApPropertyController extends Controller
         if ($request->hasFile('images')) {
             foreach ($request->file('images') as $image) {
                 if ($image) {
-                    $data['images_url'][] = $image->store('ap-properties', 'public');
+                    $data['images_url'][] = $this->storeUploadedImage($image);
                 }
             }
         }
@@ -117,7 +118,7 @@ class ApPropertyController extends Controller
             $paths = [];
             foreach ($request->file('images') as $image) {
                 if ($image) {
-                    $paths[] = $image->store('ap-properties', 'public');
+                    $paths[] = $this->storeUploadedImage($image);
                 }
             }
             $data['images_url'] = $paths;
@@ -130,6 +131,39 @@ class ApPropertyController extends Controller
         return redirect()
             ->route('admin.ap-properties.show', $ap_property)
             ->with('success', 'AP Property updated successfully.');
+    }
+
+    /**
+     * Store an uploaded image. If the file is HEIC/HEIF and conversion is available,
+     * convert to JPEG for broad browser compatibility.
+     */
+    private function storeUploadedImage($uploadedFile): string
+    {
+        try {
+            $extension = strtolower($uploadedFile->getClientOriginalExtension());
+            $mime = $uploadedFile->getMimeType();
+
+            if (in_array($extension, ['heic', 'heif']) || in_array($mime, ['image/heic', 'image/heif'])) {
+                if (class_exists(\Imagick::class)) {
+                    $imagick = new \Imagick();
+                    $imagick->readImageBlob(file_get_contents($uploadedFile->getRealPath()));
+                    $imagick->setImageFormat('jpeg');
+                    $imagick->setImageCompressionQuality(88);
+                    $jpegData = $imagick->getImageBlob();
+                    $filename = 'ap-properties/' . uniqid('ap_', true) . '.jpg';
+                    Storage::disk('public')->put($filename, $jpegData);
+                    return $filename;
+                }
+                // If Imagick not available, store original HEIC so it's downloadable
+                return $uploadedFile->store('ap-properties', 'public');
+            }
+
+            // Non-HEIC: store as-is
+            return $uploadedFile->store('ap-properties', 'public');
+        } catch (\Throwable $e) {
+            // On failure, fall back to storing original
+            return $uploadedFile->store('ap-properties', 'public');
+        }
     }
 
     /**
