@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\ApProperty;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Intervention\Image\Facades\Image;
 
 class ApPropertyController extends Controller
 {
@@ -144,18 +145,12 @@ class ApPropertyController extends Controller
             $mime = $uploadedFile->getMimeType();
 
             if (in_array($extension, ['heic', 'heif']) || in_array($mime, ['image/heic', 'image/heif'])) {
-                if (class_exists(\Imagick::class)) {
-                    $imagick = new \Imagick();
-                    $imagick->readImageBlob(file_get_contents($uploadedFile->getRealPath()));
-                    $imagick->setImageFormat('webp');
-                    $imagick->setImageCompressionQuality(88);
-                    $webpData = $imagick->getImageBlob();
-                    $filename = 'ap-properties/' . uniqid('ap_', true) . '.webp';
-                    Storage::disk('public')->put($filename, $webpData);
-                    return $filename;
-                }
-                // If Imagick not available, store original HEIC so it's downloadable
-                return $uploadedFile->store('ap-properties', 'public');
+                // Convert HEIC/HEIF to WEBP using Intervention Image (requires driver support)
+                $image = Image::make($uploadedFile->getRealPath());
+                $encoded = $image->encode('webp', 88);
+                $filename = 'ap-properties/' . uniqid('ap_', true) . '.webp';
+                Storage::disk('public')->put($filename, (string) $encoded);
+                return $filename;
             }
 
             // Non-HEIC: store as-is
