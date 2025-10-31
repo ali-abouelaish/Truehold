@@ -48,7 +48,7 @@ class ApPropertyController extends Controller
             'room_label' => 'nullable|string|max:100|required_if:type,house_share|required_if:is_room,1',
             'couples_allowed' => 'sometimes|boolean',
             'images' => 'nullable|array',
-            'images.*' => 'nullable|image|max:20480',
+            'images.*' => 'nullable|file|mimes:jpg,jpeg,png,gif,webp,heic,heif|max:20480',
         ]);
 
         $data = $validated;
@@ -106,7 +106,7 @@ class ApPropertyController extends Controller
             'room_label' => 'nullable|string|max:100|required_if:type,house_share|required_if:is_room,1',
             'couples_allowed' => 'sometimes|boolean',
             'images' => 'nullable|array',
-            'images.*' => 'nullable|image|max:20480',
+            'images.*' => 'nullable|file|mimes:jpg,jpeg,png,gif,webp,heic,heif|max:20480',
         ]);
 
         $data = $validated;

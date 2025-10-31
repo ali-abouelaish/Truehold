@@ -91,7 +91,7 @@
 
                             <div class="col-12">
                                 <label class="form-label">Upload Images</label>
-                                <input type="file" name="images[]" class="form-control" multiple accept="image/*">
+                                <input type="file" name="images[]" class="form-control" multiple accept="image/*,.heic,.heif">
                                 @error('images.*')<div class="text-danger small">{{ $message }}</div>@enderror
                             </div>
 

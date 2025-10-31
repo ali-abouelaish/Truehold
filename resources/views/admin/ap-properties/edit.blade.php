@@ -101,7 +101,7 @@
 
                             <div class="col-12">
                                 <label class="form-label">Upload New Images (optional)</label>
-                                <input type="file" name="images[]" class="form-control" multiple accept="image/*">
+                                <input type="file" name="images[]" class="form-control" multiple accept="image/*,.heic,.heif">
                                 <div class="form-text">If you upload new images, they will replace the current set.</div>
                                 @error('images.*')<div class="text-danger small">{{ $message }}</div>@enderror
                             </div>
