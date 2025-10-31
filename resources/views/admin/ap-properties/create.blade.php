@@ -83,6 +83,12 @@
                                 @error('type')<div class="text-danger small">{{ $message }}</div>@enderror
                             </div>
 
+                            <div class="col-md-6">
+                                <label class="form-label">Room identifier (e.g., Room A, Room 2)</label>
+                                <input type="text" name="room_label" class="form-control" value="{{ old('room_label') }}" placeholder="Optional unless house share or single room">
+                                @error('room_label')<div class="text-danger small">{{ $message }}</div>@enderror
+                            </div>
+
                             <div class="col-12">
                                 <label class="form-label">Upload Images</label>
                                 <input type="file" name="images[]" class="form-control" multiple accept="image/*">

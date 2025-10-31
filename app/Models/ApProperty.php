@@ -23,6 +23,7 @@ class ApProperty extends Model
         'status',
         'type',
         'is_room',
+        'room_label',
         'couples_allowed',
     ];
 

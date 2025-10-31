@@ -18,6 +18,9 @@
         <div class="mt-4 bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
             <div class="p-6">
                 <h1 class="text-2xl font-bold text-gray-900">{{ $property->property_name }}</h1>
+                @if(($property->type ?? 'full_flat') === 'house_share' && $property->room_label)
+                    <div class="text-sm text-gray-500">Room: {{ $property->room_label }}</div>
+                @endif
                 <div class="mt-1 text-gray-600">{{ $property->area }} {{ $property->postcode ? ' • ' . $property->postcode : '' }}</div>
                 <div class="mt-3 flex items-center gap-4 text-gray-800">
                     <div class="text-xl font-bold">£{{ number_format((int)($property->pcm ?? 0)) }} pcm</div>

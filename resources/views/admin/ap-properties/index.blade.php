@@ -58,7 +58,12 @@
                             <tbody>
                                 @forelse($properties as $property)
                                 <tr>
-                                    <td><a href="{{ route('admin.ap-properties.show', $property) }}" class="fw-bold">{{ $property->property_name }}</a></td>
+                                     <td>
+                                         <a href="{{ route('admin.ap-properties.show', $property) }}" class="fw-bold">{{ $property->property_name }}</a>
+                                         @if(($property->type ?? 'full_flat') === 'house_share' && $property->room_label)
+                                             <div class="text-muted small">Room: {{ $property->room_label }}</div>
+                                         @endif
+                                     </td>
                                     <td>{{ $property->area ?? '—' }}</td>
                                     <td>{{ $property->postcode ?? '—' }}</td>
                                     <td>£{{ number_format((int)($property->pcm ?? 0)) }}</td>

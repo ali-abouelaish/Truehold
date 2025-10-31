@@ -38,6 +38,9 @@
                                 <p class="mb-1"><strong>Postcode:</strong> {{ $property->postcode ?? '—' }}</p>
                                 <p class="mb-1"><strong>PCM:</strong> £{{ number_format((int)($property->pcm ?? 0)) }}</p>
                                 <p class="mb-1"><strong>Type:</strong> {{ ($property->type ?? 'full_flat') === 'house_share' ? 'House share' : 'Full flat' }}</p>
+                                @if(($property->type ?? 'full_flat') === 'house_share' && $property->room_label)
+                                <p class="mb-1"><strong>Room:</strong> {{ $property->room_label }}</p>
+                                @endif
                                 <p class="mb-1"><strong>Rooms:</strong> {{ $property->n_rooms }}</p>
                                 <p class="mb-1"><strong>Bathrooms:</strong> {{ $property->n_bathrooms }}</p>
                                 <p class="mb-1"><strong>Room:</strong> {{ $property->is_room ? 'Yes' : 'No' }}</p>

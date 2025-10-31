@@ -27,7 +27,10 @@
                         <div class="w-full h-48 bg-gray-200 flex items-center justify-center text-gray-500">No Image</div>
                     @endif
                     <div class="p-4">
-                        <h2 class="text-lg font-semibold text-gray-900">{{ $property->property_name }}</h2>
+                         <h2 class="text-lg font-semibold text-gray-900">{{ $property->property_name }}</h2>
+                         @if(($property->type ?? 'full_flat') === 'house_share' && $property->room_label)
+                             <div class="text-xs text-gray-500">Room: {{ $property->room_label }}</div>
+                         @endif
                         <div class="mt-2 text-sm text-gray-600">{{ $property->area }} {{ $property->postcode ? ' • ' . $property->postcode : '' }}</div>
                          <div class="mt-1 text-xs space-x-1">
                              <span class="inline-block px-2 py-1 rounded-full bg-gray-100 text-gray-700 border">{{ $property->status_label }}</span>
