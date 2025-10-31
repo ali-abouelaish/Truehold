@@ -49,6 +49,7 @@
                                     <th>PCM</th>
                                     <th>Rooms</th>
                                     <th>Bathrooms</th>
+                                    <th>Status</th>
                                     <th>Availability</th>
                                     <th>Actions</th>
                                 </tr>
@@ -62,6 +63,9 @@
                                     <td>£{{ number_format((int)($property->pcm ?? 0)) }}</td>
                                     <td>{{ $property->n_rooms }}</td>
                                     <td>{{ $property->n_bathrooms }}</td>
+                                    <td>
+                                        <span class="badge bg-secondary">{{ $property->status_label }}</span>
+                                    </td>
                                     <td>{{ $property->availability_label }}</td>
                                     <td>
                                         <div class="btn-group">

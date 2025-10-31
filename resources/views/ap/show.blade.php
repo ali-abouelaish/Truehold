@@ -23,6 +23,7 @@
                     <div class="text-xl font-bold">£{{ number_format((int)($property->pcm ?? 0)) }} pcm</div>
                     <div>{{ $property->n_rooms }} bed • {{ $property->n_bathrooms }} bath</div>
                     <div class="text-sm text-gray-600">{{ $property->availability_label }}</div>
+                    <div class="text-xs px-2 py-1 rounded-full bg-gray-100 text-gray-700 border">{{ $property->status_label }}</div>
                 </div>
             </div>
 

@@ -208,10 +208,10 @@
             </div>
 
             <div class="section">
-                <h3>👨‍💼 Agent Information</h3>
+                <h3>👨‍💼</h3>
                 <div class="info-grid">
                     <div class="info-item">
-                        <span class="label">Client Code</span>
+                        <span class="label">Assisted by</span>
                         <span class="value">{{ $rentalCode->rent_by_agent ?? 'N/A' }}</span>
                     </div>
                     <div class="info-item">

@@ -20,6 +20,7 @@ class ApProperty extends Model
         'n_rooms',
         'n_bathrooms',
         'images_url',
+        'status',
     ];
 
     protected $casts = [
@@ -35,11 +36,22 @@ class ApProperty extends Model
      */
     public function getAvailabilityLabelAttribute(): string
     {
-        if ($this->availability && $this->availability->isToday()) {
-            return 'Available now';
-        }
-
         return $this->availability ? $this->availability->format('d/m/Y') : 'TBC';
+    }
+
+    /**
+     * Human-friendly status label (uses availability when applicable).
+     */
+    public function getStatusLabelAttribute(): string
+    {
+        $status = $this->status ?? 'empty_available_now';
+        return match ($status) {
+            'booked' => 'Booked',
+            'available_on_date' => ($this->availability ? 'Available on ' . $this->availability->format('d/m/Y') : 'Available soon'),
+            'renewal' => 'Renewal',
+            'empty_available_now', 'available_now' => 'EMPTY AVAILABLE NOW',
+            default => ucfirst(str_replace('_', ' ', $status)),
+        };
     }
 }
 

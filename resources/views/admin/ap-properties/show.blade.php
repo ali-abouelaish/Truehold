@@ -39,6 +39,7 @@
                                 <p class="mb-1"><strong>PCM:</strong> £{{ number_format((int)($property->pcm ?? 0)) }}</p>
                                 <p class="mb-1"><strong>Rooms:</strong> {{ $property->n_rooms }}</p>
                                 <p class="mb-1"><strong>Bathrooms:</strong> {{ $property->n_bathrooms }}</p>
+                                <p class="mb-1"><strong>Status:</strong> {{ $property->status_label }}</p>
                                 <p class="mb-0"><strong>Availability:</strong> {{ $property->availability_label }}</p>
                             </div>
                         </div>

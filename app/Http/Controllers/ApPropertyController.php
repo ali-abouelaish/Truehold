@@ -37,6 +37,7 @@ class ApPropertyController extends Controller
             'area' => 'nullable|string|max:255',
             'n_rooms' => 'nullable|integer|min:0',
             'n_bathrooms' => 'nullable|integer|min:0',
+            'status' => 'required|string|in:booked,available_on_date,renewal,empty_available_now',
             'images' => 'nullable|array',
             'images.*' => 'nullable|image|max:5120',
         ]);
@@ -88,6 +89,7 @@ class ApPropertyController extends Controller
             'area' => 'nullable|string|max:255',
             'n_rooms' => 'nullable|integer|min:0',
             'n_bathrooms' => 'nullable|integer|min:0',
+            'status' => 'required|string|in:booked,available_on_date,renewal,empty_available_now',
             'images' => 'nullable|array',
             'images.*' => 'nullable|image|max:5120',
         ]);

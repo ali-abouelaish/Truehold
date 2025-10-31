@@ -70,6 +70,19 @@
                                 @error('availability')<div class="text-danger small">{{ $message }}</div>@enderror
                             </div>
 
+                            <div class="col-md-4">
+                                <label class="form-label">Status</label>
+                                @php($currentStatus = old('status', $property->status ?? 'empty_available_now'))
+                                <select name="status" class="form-select" required>
+                                    <option value="empty_available_now" {{ $currentStatus==='empty_available_now' ? 'selected' : '' }}>EMPTY AVAILABLE NOW</option>
+                                    <option value="available_on_date" {{ $currentStatus==='available_on_date' ? 'selected' : '' }}>Available on DATE</option>
+                                    <option value="booked" {{ $currentStatus==='booked' ? 'selected' : '' }}>Booked</option>
+                                    <option value="renewal" {{ $currentStatus==='renewal' ? 'selected' : '' }}>Renewal</option>
+                                </select>
+                                <div class="form-text">If "Available on DATE" is chosen, ensure Availability date is set.</div>
+                                @error('status')<div class="text-danger small">{{ $message }}</div>@enderror
+                            </div>
+
                             <div class="col-12">
                                 <label class="form-label">Upload New Images (optional)</label>
                                 <input type="file" name="images[]" class="form-control" multiple accept="image/*">

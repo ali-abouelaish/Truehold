@@ -163,7 +163,7 @@
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="mb-3">
-                                    <label for="rent_by_agent" class="form-label">Client Code <span class="text-danger">*</span></label>
+                                    <label for="rent_by_agent" class="form-label">Assited by <span class="text-danger">*</span></label>
                                     <input type="text" class="form-control @error('rent_by_agent') is-invalid @enderror" 
                                            id="rent_by_agent" name="rent_by_agent" 
                                            value="{{ old('rent_by_agent', $rentalCode->rent_by_agent) }}" required>
