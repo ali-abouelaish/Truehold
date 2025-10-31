@@ -107,12 +107,14 @@
                             </div>
 
                             <div class="col-md-6 form-check mt-2">
-                                <input type="checkbox" id="is_room" name="is_room" class="form-check-input" {{ old('is_room') ? 'checked' : '' }}>
+                                <input type="hidden" name="is_room" value="0">
+                                <input type="checkbox" id="is_room" name="is_room" value="1" class="form-check-input" {{ old('is_room') ? 'checked' : '' }}>
                                 <label class="form-check-label" for="is_room">This listing is a single room</label>
                             </div>
 
                             <div class="col-md-6 form-check mt-2">
-                                <input type="checkbox" id="couples_allowed" name="couples_allowed" class="form-check-input" {{ old('couples_allowed') ? 'checked' : '' }}>
+                                <input type="hidden" name="couples_allowed" value="0">
+                                <input type="checkbox" id="couples_allowed" name="couples_allowed" value="1" class="form-check-input" {{ old('couples_allowed') ? 'checked' : '' }}>
                                 <label class="form-check-label" for="couples_allowed">Couples allowed</label>
                             </div>
                         </div>
