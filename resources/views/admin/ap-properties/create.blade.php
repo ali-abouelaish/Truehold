@@ -66,12 +66,21 @@
                                 <label class="form-label">Status</label>
                                 <select name="status" class="form-select" required>
                                     <option value="empty_available_now" {{ old('status')==='empty_available_now' ? 'selected' : '' }}>AVAILABLE NOW</option>
-
+                                    <option value="available_on_date" {{ old('status')==='available_on_date' ? 'selected' : '' }}>Available on DATE</option>
                                     <option value="booked" {{ old('status')==='booked' ? 'selected' : '' }}>Booked</option>
                                     <option value="renewal" {{ old('status')==='renewal' ? 'selected' : '' }}>Renewal</option>
                                 </select>
                                 <div class="form-text">If "Available on DATE" is chosen, set the Availability date above.</div>
                                 @error('status')<div class="text-danger small">{{ $message }}</div>@enderror
+                            </div>
+
+                            <div class="col-md-4">
+                                <label class="form-label">Type</label>
+                                <select name="type" class="form-select" required>
+                                    <option value="full_flat" {{ old('type', 'full_flat')==='full_flat' ? 'selected' : '' }}>Full flat</option>
+                                    <option value="house_share" {{ old('type')==='house_share' ? 'selected' : '' }}>House share</option>
+                                </select>
+                                @error('type')<div class="text-danger small">{{ $message }}</div>@enderror
                             </div>
 
                             <div class="col-12">

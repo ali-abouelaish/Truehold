@@ -64,7 +64,10 @@
                                     <td>£{{ number_format((int)($property->pcm ?? 0)) }}</td>
                                     <td>{{ $property->n_rooms }}</td>
                                      <td>{{ $property->n_bathrooms }}</td>
-                                     <td>
+                                    <td>
+                                        @if(($property->type ?? 'full_flat') === 'house_share')
+                                            <span class="badge bg-info me-1">House share</span>
+                                        @endif
                                          @if($property->is_room)
                                              <span class="badge bg-primary me-1">Room</span>
                                          @endif

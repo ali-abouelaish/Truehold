@@ -31,6 +31,9 @@
                         <div class="mt-2 text-sm text-gray-600">{{ $property->area }} {{ $property->postcode ? ' • ' . $property->postcode : '' }}</div>
                          <div class="mt-1 text-xs space-x-1">
                              <span class="inline-block px-2 py-1 rounded-full bg-gray-100 text-gray-700 border">{{ $property->status_label }}</span>
+                             @if(($property->type ?? 'full_flat') === 'house_share')
+                                 <span class="inline-block px-2 py-1 rounded-full bg-blue-50 text-blue-700 border border-blue-200">House share</span>
+                             @endif
                              @if($property->is_room)
                                  <span class="inline-block px-2 py-1 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200">Room</span>
                              @endif

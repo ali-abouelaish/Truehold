@@ -75,12 +75,22 @@
                                 @php($currentStatus = old('status', $property->status ?? 'empty_available_now'))
                                 <select name="status" class="form-select" required>
                                     <option value="empty_available_now" {{ $currentStatus==='empty_available_now' ? 'selected' : '' }}>AVAILABLE NOW</option>
-                                    
+                                    <option value="available_on_date" {{ $currentStatus==='available_on_date' ? 'selected' : '' }}>Available on DATE</option>
                                     <option value="booked" {{ $currentStatus==='booked' ? 'selected' : '' }}>Booked</option>
                                     <option value="renewal" {{ $currentStatus==='renewal' ? 'selected' : '' }}>Renewal</option>
                                 </select>
                                 <div class="form-text">If "Available on DATE" is chosen, ensure Availability date is set.</div>
                                 @error('status')<div class="text-danger small">{{ $message }}</div>@enderror
+                            </div>
+
+                            <div class="col-md-4">
+                                <label class="form-label">Type</label>
+                                @php($currentType = old('type', $property->type ?? 'full_flat'))
+                                <select name="type" class="form-select" required>
+                                    <option value="full_flat" {{ $currentType==='full_flat' ? 'selected' : '' }}>Full flat</option>
+                                    <option value="house_share" {{ $currentType==='house_share' ? 'selected' : '' }}>House share</option>
+                                </select>
+                                @error('type')<div class="text-danger small">{{ $message }}</div>@enderror
                             </div>
 
                             <div class="col-12">

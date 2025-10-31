@@ -21,6 +21,7 @@ class ApProperty extends Model
         'n_bathrooms',
         'images_url',
         'status',
+        'type',
         'is_room',
         'couples_allowed',
     ];
@@ -31,6 +32,7 @@ class ApProperty extends Model
         'pcm' => 'integer',
         'n_rooms' => 'integer',
         'n_bathrooms' => 'integer',
+        'type' => 'string',
         'is_room' => 'boolean',
         'couples_allowed' => 'boolean',
     ];
