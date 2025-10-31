@@ -65,7 +65,8 @@
                             <div class="col-md-4">
                                 <label class="form-label">Status</label>
                                 <select name="status" class="form-select" required>
-                                    <option value="empty_available_now" {{ old('status')==='empty_available_now' ? 'selected' : '' }}>AVAILABLE NOW</option
+                                    <option value="empty_available_now" {{ old('status')==='empty_available_now' ? 'selected' : '' }}>AVAILABLE NOW</option>
+
                                     <option value="booked" {{ old('status')==='booked' ? 'selected' : '' }}>Booked</option>
                                     <option value="renewal" {{ old('status')==='renewal' ? 'selected' : '' }}>Renewal</option>
                                 </select>
@@ -77,12 +78,6 @@
                                 <label class="form-label">Upload Images</label>
                                 <input type="file" name="images[]" class="form-control" multiple accept="image/*">
                                 @error('images.*')<div class="text-danger small">{{ $message }}</div>@enderror
-                            </div>
-
-                            <div class="col-12 form-check mt-2">
-                                <input type="checkbox" id="is_house_share" name="is_house_share" class="form-check-input" {{ old('is_house_share') ? 'checked' : '' }}>
-                                <label class="form-check-label" for="is_house_share">This is a house share</label>
-                                <div class="form-text">For house shares, you can create multiple entries with the same name but different price and images.</div>
                             </div>
 
                             <div class="col-md-6 form-check mt-2">

@@ -29,20 +29,15 @@
                     <div class="p-4">
                         <h2 class="text-lg font-semibold text-gray-900">{{ $property->property_name }}</h2>
                         <div class="mt-2 text-sm text-gray-600">{{ $property->area }} {{ $property->postcode ? ' • ' . $property->postcode : '' }}</div>
-                        <div class="mt-1 text-xs space-x-1">
-                            @if($property->is_house_share)
-                                <span class="inline-block px-2 py-1 rounded-full bg-blue-50 text-blue-700 border border-blue-200">House share</span>
-                            @endif
-                            @if($property->is_room)
-                                <span class="inline-block px-2 py-1 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200">Room</span>
-                            @endif
-                            @if($property->couples_allowed)
-                                <span class="inline-block px-2 py-1 rounded-full bg-green-50 text-green-700 border border-green-200">Couples</span>
-                            @endif
-                        </div>
-                        <div class="mt-2 text-xs">
-                            <span class="inline-block px-2 py-1 rounded-full bg-gray-100 text-gray-700 border">{{ $property->status_label }}</span>
-                        </div>
+                         <div class="mt-1 text-xs space-x-1">
+                             <span class="inline-block px-2 py-1 rounded-full bg-gray-100 text-gray-700 border">{{ $property->status_label }}</span>
+                             @if($property->is_room)
+                                 <span class="inline-block px-2 py-1 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200">Room</span>
+                             @endif
+                             @if($property->couples_allowed)
+                                 <span class="inline-block px-2 py-1 rounded-full bg-green-50 text-green-700 border border-green-200">Couples</span>
+                             @endif
+                         </div>
                         <div class="mt-3 flex items-center justify-between">
                             <div class="text-primary-600 font-bold">£{{ number_format((int)($property->pcm ?? 0)) }} pcm</div>
                             <div class="text-sm text-gray-600">{{ $property->n_rooms }} bed • {{ $property->n_bathrooms }} bath</div>

@@ -90,11 +90,6 @@
                                 @error('images.*')<div class="text-danger small">{{ $message }}</div>@enderror
                             </div>
 
-                            <div class="col-12 form-check mt-2">
-                                <input type="checkbox" id="is_house_share" name="is_house_share" class="form-check-input" {{ old('is_house_share', $property->is_house_share) ? 'checked' : '' }}>
-                                <label class="form-check-label" for="is_house_share">This is a house share</label>
-                            </div>
-
                             <div class="col-md-6 form-check mt-2">
                                 <input type="checkbox" id="is_room" name="is_room" class="form-check-input" {{ old('is_room', $property->is_room) ? 'checked' : '' }}>
                                 <label class="form-check-label" for="is_room">This listing is a single room</label>

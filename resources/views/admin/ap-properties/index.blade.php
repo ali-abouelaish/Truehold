@@ -47,9 +47,9 @@
                                     <th>Area</th>
                                     <th>Postcode</th>
                                     <th>PCM</th>
-                                    <th>Rooms</th>
-                                    <th>Tags</th>
-                                    <th>Bathrooms</th>
+                                     <th>Rooms</th>
+                                     <th>Bathrooms</th>
+                                     <th>Tags</th>
                                     <th>Status</th>
                                     <th>Availability</th>
                                     <th>Actions</th>
@@ -58,28 +58,20 @@
                             <tbody>
                                 @forelse($properties as $property)
                                 <tr>
-                                    <td>
-                                        <a href="{{ route('admin.ap-properties.show', $property) }}" class="fw-bold">{{ $property->property_name }}</a>
-                                        @if($property->is_house_share)
-                                            <span class="badge bg-info ms-2">House share</span>
-                                        @endif
-                                    </td>
+                                    <td><a href="{{ route('admin.ap-properties.show', $property) }}" class="fw-bold">{{ $property->property_name }}</a></td>
                                     <td>{{ $property->area ?? '—' }}</td>
                                     <td>{{ $property->postcode ?? '—' }}</td>
                                     <td>£{{ number_format((int)($property->pcm ?? 0)) }}</td>
                                     <td>{{ $property->n_rooms }}</td>
-                                    <td>{{ $property->n_bathrooms }}</td>
-                                    <td>
-                                        @if($property->is_house_share)
-                                            <span class="badge bg-info me-1">House share</span>
-                                        @endif
-                                        @if($property->is_room)
-                                            <span class="badge bg-primary me-1">Room</span>
-                                        @endif
-                                        @if($property->couples_allowed)
-                                            <span class="badge bg-success me-1">Couples</span>
-                                        @endif
-                                    </td>
+                                     <td>{{ $property->n_bathrooms }}</td>
+                                     <td>
+                                         @if($property->is_room)
+                                             <span class="badge bg-primary me-1">Room</span>
+                                         @endif
+                                         @if($property->couples_allowed)
+                                             <span class="badge bg-success me-1">Couples</span>
+                                         @endif
+                                     </td>
                                     <td>
                                         <span class="badge bg-secondary">{{ $property->status_label }}</span>
                                     </td>

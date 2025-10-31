@@ -38,7 +38,6 @@ class ApPropertyController extends Controller
             'n_rooms' => 'nullable|integer|min:0',
             'n_bathrooms' => 'nullable|integer|min:0',
             'status' => 'required|string|in:booked,available_on_date,renewal,empty_available_now',
-            'is_house_share' => 'sometimes|boolean',
             'is_room' => 'sometimes|boolean',
             'couples_allowed' => 'sometimes|boolean',
             'images' => 'nullable|array',
@@ -46,7 +45,6 @@ class ApPropertyController extends Controller
         ]);
 
         $data = $validated;
-        $data['is_house_share'] = $request->boolean('is_house_share');
         $data['is_room'] = $request->boolean('is_room');
         $data['couples_allowed'] = $request->boolean('couples_allowed');
         $data['images_url'] = [];
@@ -96,7 +94,6 @@ class ApPropertyController extends Controller
             'n_rooms' => 'nullable|integer|min:0',
             'n_bathrooms' => 'nullable|integer|min:0',
             'status' => 'required|string|in:booked,available_on_date,renewal,empty_available_now',
-            'is_house_share' => 'sometimes|boolean',
             'is_room' => 'sometimes|boolean',
             'couples_allowed' => 'sometimes|boolean',
             'images' => 'nullable|array',
@@ -104,7 +101,6 @@ class ApPropertyController extends Controller
         ]);
 
         $data = $validated;
-        $data['is_house_share'] = $request->boolean('is_house_share');
         $data['is_room'] = $request->boolean('is_room');
         $data['couples_allowed'] = $request->boolean('couples_allowed');
 

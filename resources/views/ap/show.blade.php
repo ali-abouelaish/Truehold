@@ -24,9 +24,6 @@
                     <div>{{ $property->n_rooms }} bed • {{ $property->n_bathrooms }} bath</div>
                     <div class="text-sm text-gray-600">{{ $property->availability_label }}</div>
                     <div class="text-xs px-2 py-1 rounded-full bg-gray-100 text-gray-700 border">{{ $property->status_label }}</div>
-                    @if($property->is_house_share)
-                        <div class="text-xs px-2 py-1 rounded-full bg-blue-50 text-blue-700 border border-blue-200">House share</div>
-                    @endif
                     @if($property->is_room)
                         <div class="text-xs px-2 py-1 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200">Room</div>
                     @endif
