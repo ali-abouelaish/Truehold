@@ -601,11 +601,7 @@
                 <div class="px-4 mt-6 mb-4">
                     <span class="sidebar-text text-xs font-semibold uppercase tracking-wider" style="color: #fbbf24;">Properties</span>
                 </div>
-                <a href="{{ route('admin.properties') }}" 
-                   class="sidebar-item flex items-center px-4 py-3 text-gray-700 hover:text-blue-600 {{ request()->routeIs('admin.properties*') ? 'active' : '' }}">
-                    <i class="fas fa-building sidebar-icon mr-3 text-lg"></i>
-                    <span class="sidebar-text">All Properties</span>
-                </a>
+                
                 @php($apNewCount = 0)
                 @auth
                     @php(
