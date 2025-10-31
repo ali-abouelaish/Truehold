@@ -20,8 +20,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('landlord_bonuses', function (Blueprint $table) {
-            //
-        });
+            return;
     }
 };

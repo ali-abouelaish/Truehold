@@ -11,9 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('landlord_bonuses', function (Blueprint $table) {
-            $table->string('bonus_code')->unique()->after('id');
-        });
+      return;
     }
 
     /**
@@ -21,8 +19,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('landlord_bonuses', function (Blueprint $table) {
-            $table->dropColumn('bonus_code');
-        });
+           return;
     }
 };
