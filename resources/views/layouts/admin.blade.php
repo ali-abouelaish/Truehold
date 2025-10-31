@@ -606,10 +606,21 @@
                     <i class="fas fa-building sidebar-icon mr-3 text-lg"></i>
                     <span class="sidebar-text">All Properties</span>
                 </a>
+                @php(
+                    $apNewCount = \App\Models\ApProperty::when(auth()->check(), function($q){
+                        $last = optional(auth()->user()->ap_properties_last_seen_at) ?: \Carbon\Carbon::createFromTimestamp(0);
+                        $q->where('created_at','>', $last);
+                    })->count()
+                )
                 <a href="{{ route('admin.ap-properties.index') }}" 
                    class="sidebar-item flex items-center px-4 py-3 text-gray-700 hover:text-blue-600 {{ request()->routeIs('admin.ap-properties*') ? 'active' : '' }}">
                     <i class="fas fa-city sidebar-icon mr-3 text-lg"></i>
                     <span class="sidebar-text">AP Properties</span>
+                    @if($apNewCount > 0)
+                        <span class="ml-auto inline-flex items-center justify-center text-xs font-semibold rounded-full" style="background-color:#ef4444; color:#fff; min-width: 18px; height: 18px; padding: 0 6px;">
+                            {{ $apNewCount > 9 ? '9+' : $apNewCount }}
+                        </span>
+                    @endif
                 </a>
                 @endif
                 @endauth

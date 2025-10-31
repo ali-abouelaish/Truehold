@@ -57,7 +57,7 @@
                             </thead>
                             <tbody>
                                 @forelse($properties as $property)
-                                <tr>
+                                 <tr>
                                      <td>
                                          <a href="{{ route('admin.ap-properties.show', $property) }}" class="fw-bold">{{ $property->property_name }}</a>
                                          @if(($property->type ?? 'full_flat') === 'house_share' && $property->room_label)
@@ -86,6 +86,9 @@
                                     <td>{{ $property->availability_label }}</td>
                                     <td>
                                         <div class="btn-group">
+                                             <button class="btn btn-sm btn-outline-primary" type="button" onclick="toggleDetails('property-{{ $property->id }}-details', this)">
+                                                 <i class="fas fa-chevron-down"></i>
+                                             </button>
                                             <a href="{{ route('admin.ap-properties.edit', $property) }}" class="btn btn-sm btn-secondary">
                                                 <i class="fas fa-edit"></i>
                                             </a>
@@ -98,7 +101,66 @@
                                             </form>
                                         </div>
                                     </td>
-                                </tr>
+                                 </tr>
+                                 <!-- Expandable details row -->
+                                <tr class="d-none" id="property-{{ $property->id }}-details">
+                                     <td colspan="10">
+                                         <div class="p-3 border rounded ap-details" style="background-color: #1f2937; border-color: #374151; color: #d1d5db;">
+                                             <div class="row g-3">
+                                                 <div class="col-md-6">
+                                                     <h6 class="mb-3" style="color: #d1d5db;">Details</h6>
+                                                     <div class="row mb-2">
+                                                         <div class="col-5 text-muted small">Type</div>
+                                                         <div class="col-7">{{ ($property->type ?? 'full_flat') === 'house_share' ? 'House share' : 'Full flat' }}</div>
+                                                     </div>
+                                                     @if(($property->type ?? 'full_flat') === 'house_share' && $property->room_label)
+                                                     <div class="row mb-2">
+                                                         <div class="col-5 text-muted small">Room</div>
+                                                         <div class="col-7">{{ $property->room_label }}</div>
+                                                     </div>
+                                                     @endif
+                                                     <div class="row mb-2">
+                                                         <div class="col-5 text-muted small">Area</div>
+                                                         <div class="col-7">{{ $property->area ?? '—' }}</div>
+                                                     </div>
+                                                     <div class="row mb-2">
+                                                         <div class="col-5 text-muted small">Postcode</div>
+                                                         <div class="col-7">{{ $property->postcode ?? '—' }}</div>
+                                                     </div>
+                                                     <div class="row mb-2">
+                                                         <div class="col-5 text-muted small">PCM</div>
+                                                         <div class="col-7">£{{ number_format((int)($property->pcm ?? 0)) }}</div>
+                                                     </div>
+                                                     <div class="row mb-2">
+                                                         <div class="col-5 text-muted small">Rooms / Bathrooms</div>
+                                                         <div class="col-7">{{ $property->n_rooms }} / {{ $property->n_bathrooms }}</div>
+                                                     </div>
+                                                     <div class="row mb-2">
+                                                         <div class="col-5 text-muted small">Status</div>
+                                                         <div class="col-7">{{ $property->status_label }}</div>
+                                                     </div>
+                                                     <div class="row">
+                                                         <div class="col-5 text-muted small">Availability</div>
+                                                         <div class="col-7">{{ $property->availability_label }}</div>
+                                                     </div>
+                                                 </div>
+                                                 <div class="col-md-6">
+                                                     <h6 class="mb-3" style="color: #d1d5db;">Images</h6>
+                                                     <div class="row g-2">
+                                                         @forelse(($property->images_url ?? []) as $url)
+                                                             @php($src = preg_match('/^https?:/i', $url) ? $url : Storage::url($url))
+                                                             <div class="col-6 col-md-4">
+                                                                 <img src="{{ $src }}" class="img-fluid rounded border" alt="Image" />
+                                                             </div>
+                                                         @empty
+                                                             <div class="text-muted small">No images uploaded.</div>
+                                                         @endforelse
+                                                     </div>
+                                                 </div>
+                                             </div>
+                                         </div>
+                                     </td>
+                                 </tr>
                                 @empty
                                 <tr>
                                     <td colspan="8" class="text-center py-4">
@@ -126,7 +188,26 @@
             </div>
         </div>
     </div>
-</div>
+ </div>
+<style>
+.ap-details .text-muted { color: #9ca3af !important; }
+.ap-details .border { border-color: #374151 !important; }
+</style>
+<script>
+function toggleDetails(id, btn) {
+    var row = document.getElementById(id);
+    if (!row) return;
+    if (row.classList.contains('d-none')) {
+        row.classList.remove('d-none');
+        var icon = btn && btn.querySelector('i');
+        if (icon) { icon.classList.remove('fa-chevron-down'); icon.classList.add('fa-chevron-up'); }
+    } else {
+        row.classList.add('d-none');
+        var icon = btn && btn.querySelector('i');
+        if (icon) { icon.classList.remove('fa-chevron-up'); icon.classList.add('fa-chevron-down'); }
+    }
+}
+</script>
 @endsection
 
 

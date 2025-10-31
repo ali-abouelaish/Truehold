@@ -13,6 +13,11 @@ class ApPropertyController extends Controller
     public function index()
     {
         $properties = ApProperty::orderByDesc('created_at')->paginate(20);
+        if (auth()->check()) {
+            $user = auth()->user();
+            $user->ap_properties_last_seen_at = now();
+            $user->save();
+        }
         return view('admin.ap-properties.index', compact('properties'));
     }
 
@@ -123,7 +128,7 @@ class ApPropertyController extends Controller
         $ap_property->update($data);
 
         return redirect()
-            ->route('admin.ap-properties.edit', $ap_property)
+            ->route('admin.ap-properties.show', $ap_property)
             ->with('success', 'AP Property updated successfully.');
     }
 
