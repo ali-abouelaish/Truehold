@@ -74,8 +74,8 @@
                                 <label class="form-label">Status</label>
                                 @php($currentStatus = old('status', $property->status ?? 'empty_available_now'))
                                 <select name="status" class="form-select" required>
-                                    <option value="empty_available_now" {{ $currentStatus==='empty_available_now' ? 'selected' : '' }}>EMPTY AVAILABLE NOW</option>
-                                    <option value="available_on_date" {{ $currentStatus==='available_on_date' ? 'selected' : '' }}>Available on DATE</option>
+                                    <option value="empty_available_now" {{ $currentStatus==='empty_available_now' ? 'selected' : '' }}>AVAILABLE NOW</option>
+                                    
                                     <option value="booked" {{ $currentStatus==='booked' ? 'selected' : '' }}>Booked</option>
                                     <option value="renewal" {{ $currentStatus==='renewal' ? 'selected' : '' }}>Renewal</option>
                                 </select>
@@ -93,6 +93,16 @@
                             <div class="col-12 form-check mt-2">
                                 <input type="checkbox" id="is_house_share" name="is_house_share" class="form-check-input" {{ old('is_house_share', $property->is_house_share) ? 'checked' : '' }}>
                                 <label class="form-check-label" for="is_house_share">This is a house share</label>
+                            </div>
+
+                            <div class="col-md-6 form-check mt-2">
+                                <input type="checkbox" id="is_room" name="is_room" class="form-check-input" {{ old('is_room', $property->is_room) ? 'checked' : '' }}>
+                                <label class="form-check-label" for="is_room">This listing is a single room</label>
+                            </div>
+
+                            <div class="col-md-6 form-check mt-2">
+                                <input type="checkbox" id="couples_allowed" name="couples_allowed" class="form-check-input" {{ old('couples_allowed', $property->couples_allowed) ? 'checked' : '' }}>
+                                <label class="form-check-label" for="couples_allowed">Couples allowed</label>
                             </div>
 
                             <div class="col-12">

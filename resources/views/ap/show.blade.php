@@ -27,6 +27,12 @@
                     @if($property->is_house_share)
                         <div class="text-xs px-2 py-1 rounded-full bg-blue-50 text-blue-700 border border-blue-200">House share</div>
                     @endif
+                    @if($property->is_room)
+                        <div class="text-xs px-2 py-1 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200">Room</div>
+                    @endif
+                    @if($property->couples_allowed)
+                        <div class="text-xs px-2 py-1 rounded-full bg-green-50 text-green-700 border border-green-200">Couples</div>
+                    @endif
                 </div>
             </div>
 

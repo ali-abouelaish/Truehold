@@ -40,6 +40,8 @@
                                 <p class="mb-1"><strong>Rooms:</strong> {{ $property->n_rooms }}</p>
                                 <p class="mb-1"><strong>Bathrooms:</strong> {{ $property->n_bathrooms }}</p>
                                 <p class="mb-1"><strong>House Share:</strong> {{ $property->is_house_share ? 'Yes' : 'No' }}</p>
+                                <p class="mb-1"><strong>Room:</strong> {{ $property->is_room ? 'Yes' : 'No' }}</p>
+                                <p class="mb-1"><strong>Couples Allowed:</strong> {{ $property->couples_allowed ? 'Yes' : 'No' }}</p>
                                 <p class="mb-1"><strong>Status:</strong> {{ $property->status_label }}</p>
                                 <p class="mb-0"><strong>Availability:</strong> {{ $property->availability_label }}</p>
                             </div>
