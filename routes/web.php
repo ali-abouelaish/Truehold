@@ -393,6 +393,13 @@ Route::post('/logout', function () {
     return redirect('/properties');
 })->middleware('auth')->name('logout');
 
+// Localhost fallback for AP public views (when not using subdomain)
+Route::prefix('ap')->group(function () {
+    Route::get('/', [ApPublicPropertyController::class, 'index'])->name('ap.local.index');
+    Route::get('/properties', [ApPublicPropertyController::class, 'index'])->name('ap.local.list');
+    Route::get('/properties/{ap_property}', [ApPublicPropertyController::class, 'show'])->name('ap.local.show');
+});
+
 // Public AP Properties on subdomain ap.truehold.co.uk
 Route::domain('ap.truehold.co.uk')->group(function () {
     Route::get('/', [ApPublicPropertyController::class, 'index'])->name('ap.public.index');

@@ -606,12 +606,12 @@
                     <i class="fas fa-building sidebar-icon mr-3 text-lg"></i>
                     <span class="sidebar-text">All Properties</span>
                 </a>
-                @php(
-                    $apNewCount = \App\Models\ApProperty::when(auth()->check(), function($q){
-                        $last = optional(auth()->user()->ap_properties_last_seen_at) ?: \Carbon\Carbon::createFromTimestamp(0);
-                        $q->where('created_at','>', $last);
-                    })->count()
-                )
+                @php($apNewCount = 0)
+                @auth
+                    @php(
+                        $apNewCount = \App\Models\ApProperty::where('created_at', '>', (auth()->user()->ap_properties_last_seen_at ?? \Carbon\Carbon::createFromTimestamp(0)))->count()
+                    )
+                @endauth
                 <a href="{{ route('admin.ap-properties.index') }}" 
                    class="sidebar-item flex items-center px-4 py-3 text-gray-700 hover:text-blue-600 {{ request()->routeIs('admin.ap-properties*') ? 'active' : '' }}">
                     <i class="fas fa-city sidebar-icon mr-3 text-lg"></i>

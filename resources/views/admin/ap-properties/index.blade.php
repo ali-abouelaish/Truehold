@@ -105,10 +105,10 @@
                                  <!-- Expandable details row -->
                                 <tr class="d-none" id="property-{{ $property->id }}-details">
                                      <td colspan="10">
-                                         <div class="p-3 border rounded ap-details" style="background-color: #1f2937; border-color: #374151; color: #d1d5db;">
+                                         <div class="p-3 border rounded ap-details" style="background: linear-gradient(180deg,#ffffff 0%,#fbfbfb 100%); border-color: #e5e7eb; color: #111827; border-left: 4px solid #fbbf24; box-shadow: 0 6px 16px rgba(0,0,0,0.06);">
                                              <div class="row g-3">
                                                  <div class="col-md-6">
-                                                     <h6 class="mb-3" style="color: #d1d5db;">Details</h6>
+                                                     <h6 class="mb-3" style="color: #111827; font-weight: 700;">Details</h6>
                                                      <div class="row mb-2">
                                                          <div class="col-5 text-muted small">Type</div>
                                                          <div class="col-7">{{ ($property->type ?? 'full_flat') === 'house_share' ? 'House share' : 'Full flat' }}</div>
@@ -145,12 +145,12 @@
                                                      </div>
                                                  </div>
                                                  <div class="col-md-6">
-                                                     <h6 class="mb-3" style="color: #d1d5db;">Images</h6>
+                                                     <h6 class="mb-3" style="color: #111827; font-weight: 700;">Images</h6>
                                                      <div class="row g-2">
                                                          @forelse(($property->images_url ?? []) as $url)
                                                              @php($src = preg_match('/^https?:/i', $url) ? $url : Storage::url($url))
                                                              <div class="col-6 col-md-4">
-                                                                 <img src="{{ $src }}" class="img-fluid rounded border" alt="Image" />
+                                                                 <img src="{{ $src }}" class="img-fluid rounded border" style="border-color:#e5e7eb; box-shadow: 0 4px 10px rgba(0,0,0,0.08);" alt="Image" />
                                                              </div>
                                                          @empty
                                                              <div class="text-muted small">No images uploaded.</div>
@@ -190,8 +190,8 @@
     </div>
  </div>
 <style>
-.ap-details .text-muted { color: #9ca3af !important; }
-.ap-details .border { border-color: #374151 !important; }
+.ap-details .text-muted { color: #6b7280 !important; }
+.ap-details .badge { background-color: #f9fafb; color: #111827; border: 1px solid #e5e7eb; }
 </style>
 <script>
 function toggleDetails(id, btn) {
