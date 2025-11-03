@@ -11,8 +11,18 @@ return new class extends Migration
      */
     public function up(): void
     {
-        
-        return;
+        if (! Schema::hasTable('landlord_bonuses')) {
+            return;
+        }
+
+        Schema::table('landlord_bonuses', function (Blueprint $table) {
+            if (! Schema::hasColumn('landlord_bonuses', 'agent_commission')) {
+                $table->decimal('agent_commission', 10, 2)->default(0)->after('commission');
+            }
+            if (! Schema::hasColumn('landlord_bonuses', 'agency_commission')) {
+                $table->decimal('agency_commission', 10, 2)->default(0)->after('agent_commission');
+            }
+        });
     }
 
     /**
@@ -20,6 +30,17 @@ return new class extends Migration
      */
     public function down(): void
     {
+        if (! Schema::hasTable('landlord_bonuses')) {
             return;
+        }
+
+        Schema::table('landlord_bonuses', function (Blueprint $table) {
+            if (Schema::hasColumn('landlord_bonuses', 'agency_commission')) {
+                $table->dropColumn('agency_commission');
+            }
+            if (Schema::hasColumn('landlord_bonuses', 'agent_commission')) {
+                $table->dropColumn('agent_commission');
+            }
+        });
     }
 };

@@ -11,7 +11,15 @@ return new class extends Migration
      */
     public function up(): void
     {
-     return;
+        if (! Schema::hasTable('landlord_bonuses')) {
+            return;
+        }
+
+        if (! Schema::hasColumn('landlord_bonuses', 'bonus_split')) {
+            Schema::table('landlord_bonuses', function (Blueprint $table) {
+                $table->string('bonus_split')->default('55_45')->after('commission');
+            });
+        }
     }
 
     /**
@@ -19,6 +27,14 @@ return new class extends Migration
      */
     public function down(): void
     {
-        return;
+        if (! Schema::hasTable('landlord_bonuses')) {
+            return;
+        }
+
+        if (Schema::hasColumn('landlord_bonuses', 'bonus_split')) {
+            Schema::table('landlord_bonuses', function (Blueprint $table) {
+                $table->dropColumn('bonus_split');
+            });
+        }
     }
 };
