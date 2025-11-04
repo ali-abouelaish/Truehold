@@ -1845,6 +1845,104 @@ public function generateCode()
             ];
         }
 
+        // Also include rentals where this agent acted as the marketing agent (not the rental agent)
+        $marketingQuery = RentalCode::with(['client', 'client.agent', 'rentalAgent', 'marketingAgentUser'])
+            ->where('marketing_agent_id', (int)$agentId)
+            ->where(function($q) use ($endDateTime) {
+                $q->where(function($q2) use ($endDateTime) {
+                    $q2->whereNotNull('rental_date')
+                       ->where('rental_date', '<=', $endDateTime->toDateString());
+                })->orWhere(function($q3) use ($endDateTime) {
+                    $q3->whereNull('rental_date')
+                       ->where('created_at', '<=', $endDateTime);
+                });
+            })
+            // ensure it's a different rental agent; no marketing commission if same person
+            ->where(function($q) use ($agentId) {
+                $q->whereNull('rental_agent_id')
+                  ->orWhere('rental_agent_id', '!=', (int)$agentId);
+            });
+
+        if ($startDateTime) {
+            $marketingQuery->where(function($q) use ($startDateTime) {
+                $q->where(function($q2) use ($startDateTime) {
+                    $q2->whereNotNull('rental_date')
+                       ->where('rental_date', '>=', $startDateTime->toDateString());
+                })->orWhere(function($q3) use ($startDateTime) {
+                    $q3->whereNull('rental_date')
+                       ->where('created_at', '>=', $startDateTime);
+                });
+            });
+        }
+
+        if ($status) {
+            $marketingQuery->where('status', $status);
+        }
+
+        if ($paymentMethod) {
+            $marketingQuery->where('payment_method', $paymentMethod);
+        }
+
+        $marketingCodes = $marketingQuery->get();
+
+        foreach ($marketingCodes as $code) {
+            $totalFee = (float) ($code->consultation_fee ?? 0);
+            if ($totalFee <= 0) continue;
+
+            $rentalDate = $code->rental_date ?? ($code->created_at ?? now());
+            $paymentMethod = $code->payment_method ?? 'Cash';
+            $clientCount = $code->client_count ?? 1;
+
+            $baseCommission = $totalFee;
+            if ($paymentMethod === 'Transfer') {
+                $baseCommission = $totalFee * 0.8;
+            }
+
+            // Marketing agent gets fixed commission: £30 (1 client) or £40 (2+ clients)
+            $marketingCommission = $clientCount >= 2 ? 40 : 30;
+            $agencyCut = max(0, $baseCommission - $marketingCommission);
+            $agentCut = $marketingCommission;
+
+            // Totals
+            $agentData['agency_earnings'] += $agencyCut;
+            $agentData['agent_earnings'] += $agentCut;
+            $agentData['total_earnings'] += $baseCommission;
+            $agentData['transaction_count'] += 1;
+            $agentData['marketing_agent_earnings'] += $marketingCommission;
+
+            if ($paymentMethod === 'Transfer') {
+                $vatAmount = $totalFee - $baseCommission;
+                $agentData['vat_deductions'] += $vatAmount;
+            }
+
+            $isPaid = $code->paid ?? false;
+            if ($isPaid) {
+                $agentData['paid_amount'] += $agentCut;
+            } else {
+                $agentData['entitled_amount'] += $agentCut;
+            }
+            $agentData['outstanding_amount'] = max(0, $agentData['entitled_amount'] - $agentData['paid_amount']);
+
+            $agentData['transactions'][] = [
+                'id' => $code->id,
+                'total_fee' => $totalFee,
+                'base_commission' => $baseCommission,
+                'agency_cut' => $agencyCut,
+                'agent_cut' => $agentCut,
+                'vat_amount' => $paymentMethod === 'Transfer' ? ($totalFee - $baseCommission) : 0,
+                'marketing_deduction' => 0,
+                'marketing_agent' => $agentUser->name,
+                'client_count' => $clientCount,
+                'paid' => $isPaid,
+                'paid_at' => $code->paid_at,
+                'date' => $rentalDate,
+                'code' => $code->rental_code ?? 'N/A',
+                'status' => $code->status ?? 'Unknown',
+                'payment_method' => $paymentMethod,
+                'is_marketing_earnings' => true,
+            ];
+        }
+
         // Landlord bonuses by agent user id
         $landlordBonuses = \App\Models\LandlordBonus::with(['agent.user'])
             ->whereBetween('date', [$startDate ?? '1900-01-01', $endDate])

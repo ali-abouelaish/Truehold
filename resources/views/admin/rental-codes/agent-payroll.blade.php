@@ -56,6 +56,24 @@
         </div>
 
         <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card shadow h-100 py-2" style="background: linear-gradient(135deg, #111827 0%, #1f2937 100%); border: 1px solid #374151 !important; border-left: 4px solid #e83e8c !important; border-radius: 12px; box-shadow: 0 10px 24px rgba(0,0,0,0.35) !important;">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-white text-uppercase mb-1" style="letter-spacing: .04em; opacity:.9;">Marketing Earnings</div>
+                            <div class="h3 mb-0 font-weight-bold text-white">£{{ number_format($agent['marketing_agent_earnings'] ?? 0, 2) }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <div style="background: rgba(255,255,255,0.12); border-radius: 10px; padding: 10px;">
+                                <i class="fas fa-bullhorn fa-lg text-white" style="opacity: 0.95;"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
             <div class="card shadow h-100 py-2" style="background: linear-gradient(135deg, #111827 0%, #1f2937 100%); border: 1px solid #374151 !important; border-left: 4px solid #36b9cc !important; border-radius: 12px; box-shadow: 0 10px 24px rgba(0,0,0,0.35) !important;">
                 <div class="card-body">
                     <div class="row no-gutters align-items-center">
@@ -169,7 +187,7 @@
                                         <div class="font-weight-bold" style="color: #ffffff !important; font-size: 1.1rem;">£{{ number_format($transaction['total_fee'], 2) }}</div>
                                     </div>
                                     <div class="col-6">
-                                        <div class="text-muted" style="color: #ecf0f1 !important; font-weight: 600;">Agent Cut:</div>
+                                        <div class="text-muted" style="color: #ecf0f1 !important; font-weight: 600;">{{ ($transaction['is_marketing_earnings'] ?? false) ? 'Marketing Cut:' : 'Agent Cut:' }}</div>
                                         <div class="font-weight-bold text-success" style="color: #2ecc71 !important; font-size: 1.1rem;">£{{ number_format($transaction['agent_cut'], 2) }}</div>
                                     </div>
                                 </div>
