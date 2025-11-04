@@ -1058,10 +1058,11 @@ public function generateCode()
         ksort($monthlyTotals);
         $chartData['monthly_totals'] = $monthlyTotals;
 
-        // Default behavior: show only rental agents (exclude marketing-only) unless explicitly requested
+        // Default behavior: show only agents with rental earnings (exclude marketing-only) unless explicitly requested
         if (empty($marketingAgentFilter)) {
-            $filteredAgents = array_filter($filteredAgents, function ($agent) use ($agentUsers) {
-                return in_array($agent['name'], array_values($agentUsers), true);
+            $filteredAgents = array_filter($filteredAgents, function ($agent) {
+                // Keep agents that have any rental/bonus earnings attributed to them
+                return ($agent['agent_earnings'] ?? 0) > 0;
             });
         }
 

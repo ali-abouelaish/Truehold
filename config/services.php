@@ -53,4 +53,11 @@ return [
         'content_language' => env('TWILIO_CONTENT_LANGUAGE', 'en'),
     ],
 
+	'zapier' => [
+		// Primary key used by code
+		'zapier_webhook_url' => env('ZAPIER_WEBHOOK_URL'),
+		// Backward compatibility
+		'rental_code_webhook_url' => env('ZAPIER_RENTAL_CODE_WEBHOOK_URL'),
+	],
+
 ];

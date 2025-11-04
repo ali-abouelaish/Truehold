@@ -57,7 +57,7 @@
                 @endif
                 
                 @if(auth()->user()->hasAdminPermission('properties', 'view'))
-                <a href="{{ route('admin.properties') }}" 
+                <a href="{{ route('admin.ap-properties.index') }}" 
                    class="flex items-center p-4 rounded-lg transition-all duration-300 transform hover:scale-105"
                    style="background: linear-gradient(135deg, #1f2937, #374151); border: 2px solid #fbbf24; box-shadow: 0 4px 12px rgba(251, 191, 36, 0.2);"
                    onmouseover="this.style.background='linear-gradient(135deg, #fbbf24, #f59e0b)'; this.style.borderColor='#f59e0b'; this.style.boxShadow='0 6px 16px rgba(251, 191, 36, 0.4)';"
