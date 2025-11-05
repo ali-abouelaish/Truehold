@@ -18,8 +18,12 @@ use App\Http\Controllers\AgentProfileController;
 use App\Http\Controllers\PublicClientController;
 use App\Http\Controllers\ApPropertyController;
 use App\Http\Controllers\ApPublicPropertyController;
+use App\Http\Controllers\TwilioWebhookController;
 use Twilio\Rest\Client;
 
+
+
+Route::post('/twilio/webhook', [TwilioWebhookController::class, 'handle']);
 // Public AP Properties on subdomain ap.truehold.co.uk - define before generic routes
 Route::domain('ap.truehold.co.uk')->group(function () {
     Route::get('/', [ApPublicPropertyController::class, 'index'])->name('ap.public.index');

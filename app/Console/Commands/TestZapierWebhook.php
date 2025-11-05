@@ -108,7 +108,8 @@ class TestZapierWebhook extends Command
 			'agent' => $agentName,
 			'marketing_agent' => $marketingAgentName,
 			// Composed message
-			'message' => $message,
+			'message' => str_replace("\n", "\\n", $message),
+
 		];
 
 		$this->info('Sending Zapier webhook...');

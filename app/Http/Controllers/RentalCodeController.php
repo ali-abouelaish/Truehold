@@ -1201,7 +1201,9 @@ public function generateCode()
 
         // Get rental codes
         $query = RentalCode::with(['client', 'client.agent'])
-            ->where('rental_date', '<=', $endDate);
+            ->where('rental_date', '<=', $endDate)
+            // Payroll should only include approved rentals
+            ->where('status', 'approved');
 
         if ($startDate) {
             $query->where('rental_date', '>=', $startDate);
@@ -1453,7 +1455,7 @@ public function generateCode()
         $endDateTime = \Carbon\Carbon::parse($endDate)->endOfDay();
         $startDateTime = $startDate ? \Carbon\Carbon::parse($startDate)->startOfDay() : null;
 
-        // Get rental codes for this agent (do not restrict to approved by default)
+        // Get rental codes for this agent (restrict to approved)
         $query = RentalCode::with(['client', 'client.agent', 'rentalAgent', 'marketingAgentUser'])
             ->where(function($q) use ($endDateTime) {
                 $q->where(function($q2) use ($endDateTime) {
@@ -1463,7 +1465,8 @@ public function generateCode()
                     $q3->whereNull('rental_date')
                        ->where('created_at', '<=', $endDateTime);
                 });
-            });
+            })
+            ->where('status', 'approved');
 
         if ($startDateTime) {
             $query->where(function($q) use ($startDateTime) {
@@ -1731,7 +1734,8 @@ public function generateCode()
                     $q3->whereNull('rental_date')
                        ->where('created_at', '<=', $endDateTime);
                 });
-            });
+            })
+            ->where('status', 'approved');
 
         if ($startDateTime) {
             $query->where(function($q) use ($startDateTime) {
@@ -1861,7 +1865,8 @@ public function generateCode()
             ->where(function($q) use ($agentId) {
                 $q->whereNull('rental_agent_id')
                   ->orWhere('rental_agent_id', '!=', (int)$agentId);
-            });
+            })
+            ->where('status', 'approved');
 
         if ($startDateTime) {
             $marketingQuery->where(function($q) use ($startDateTime) {
