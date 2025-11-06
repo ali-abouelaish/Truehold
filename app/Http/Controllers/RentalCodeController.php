@@ -548,7 +548,7 @@ public function generateCode()
         $isPayrollView = !empty($agentSearch);
         
         // Build query with filters
-        $query = RentalCode::with('client');
+        $query = RentalCode::with(['client', 'client.agent', 'rentalAgent', 'marketingAgentUser']);
 
         if ($startDate) {
             $query->where('rental_date', '>=', $startDate);
@@ -651,12 +651,14 @@ public function generateCode()
             $clientCount = $code->client_count ?? 1;
             
             $hasDifferentMarketingAgent = false;
+            // Resolve marketing agent name from relation or fallback field
+            $marketingAgentName = $code->marketingAgentUser->name ?? ($code->marketing_agent_name ?? null);
+            if ($marketingAgentName === 'N/A') { $marketingAgentName = null; }
+
             if (!empty($code->marketing_agent_id) && !empty($code->rental_agent_id)) {
                 $hasDifferentMarketingAgent = (int) $code->marketing_agent_id !== (int) $code->rental_agent_id;
             } else {
                 $rentAgentName = $code->rent_by_agent_name;
-                $marketingAgentName = $code->marketing_agent_name;
-                if ($marketingAgentName === 'N/A') { $marketingAgentName = null; }
                 if (!empty($marketingAgentName) && !empty($rentAgentName)) {
                     $hasDifferentMarketingAgent = trim($marketingAgentName) !== trim($rentAgentName);
                 }
@@ -669,7 +671,7 @@ public function generateCode()
                 
                 // Ensure marketing agent name is available for summaries
                 if (empty($marketingAgentName)) {
-                    $marketingAgentName = $code->marketing_agent_name;
+                    $marketingAgentName = $code->marketingAgentUser->name ?? ($code->marketing_agent_name ?? null);
                     if ($marketingAgentName === 'N/A') { $marketingAgentName = null; }
                 }
             }
