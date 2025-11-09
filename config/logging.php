@@ -123,6 +123,13 @@ return [
             'handler' => NullHandler::class,
         ],
 
+        'twilio' => [
+            'driver' => 'single',
+            'path' => storage_path('logs/twilio.log'),
+            'level' => env('LOG_LEVEL', 'debug'),
+            'replace_placeholders' => true,
+        ],
+
         'emergency' => [
             'path' => storage_path('logs/laravel.log'),
         ],

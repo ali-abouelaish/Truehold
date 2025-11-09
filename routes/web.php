@@ -23,7 +23,8 @@ use Twilio\Rest\Client;
 
 
 
-Route::post('/twilio/webhook', [TwilioWebhookController::class, 'handle']);
+Route::post('/twilio/webhook', [TwilioWebhookController::class, 'handle'])
+    ->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class]);
 // Public AP Properties on subdomain ap.truehold.co.uk - define before generic routes
 Route::domain('ap.truehold.co.uk')->group(function () {
     Route::get('/', [ApPublicPropertyController::class, 'index'])->name('ap.public.index');

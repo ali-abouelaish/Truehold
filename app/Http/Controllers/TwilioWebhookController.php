@@ -36,6 +36,19 @@ class TwilioWebhookController extends Controller
         if ($direction === 'inbound' || str_starts_with($from, 'whatsapp:')) {
             Log::info("💬 Incoming WhatsApp message from {$from}: {$body}");
 
+            // If user asks to unsubscribe/stop, skip Zapier send
+            try {
+                if (is_string($body) && preg_match('/\b(unsubscribe|stop|cancel|opt\s*out|remove\s*me)\b/i', $body)) {
+                    Log::info('Skipping Zapier send due to unsubscribe keyword', [
+                        'from' => $from,
+                        'body' => $body,
+                    ]);
+                    return response('OK', 200);
+                }
+            } catch (\Throwable $e) {
+                Log::warning('Failed unsubscribe keyword check', ['error' => $e->getMessage()]);
+            }
+
             // Example: store reply in DB
             // IncomingMessage::create([
             //     'from' => $from,

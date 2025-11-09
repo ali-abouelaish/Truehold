@@ -7,8 +7,8 @@
     <!-- Header -->
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
-            <h1 class="h3 mb-0 text-gray-800">{{ $agentName }} - Commission File</h1>
-            <p class="text-muted">Complete commission breakdown for {{ $agentName }}</p>
+            <h1 class="h3 mb-0 text-white">{{ $agentName }} - Commission File</h1>
+            <p class="text-white-50">Complete commission breakdown for {{ $agentName }}</p>
         </div>
         <div>
             <a href="{{ route('rental-codes.agent-earnings') }}" class="btn btn-secondary">
@@ -231,7 +231,7 @@
                 <div class="card-body">
                     @if(count($agent['landlord_bonuses'] ?? []) > 0)
                         @foreach($agent['landlord_bonuses'] as $bonus)
-                        <div class="row mb-3 p-3 border rounded bg-green-50 border-green-200">
+                        <div class="row mb-3 p-3 border rounded bg-dark text-light border-secondary" style="background-color: #1f2937 !important; color: #e5e7eb !important; border-color: #374151 !important;">
                             <div class="col-md-8">
                                 <div class="d-flex align-items-center mb-2">
                                     <span class="badge badge-info mr-2">
@@ -244,27 +244,27 @@
                                         <span class="badge badge-warning ml-2">Pending</span>
                                     @endif
                                 </div>
-                                <div class="text-muted small">
+                                <div class="text-white-50 small">
                                     Landlord: {{ $bonus['landlord'] }} | Client: {{ $bonus['client'] }}
                                 </div>
                             </div>
                             <div class="col-md-4">
                                 <div class="row text-sm">
                                     <div class="col-6">
-                                        <div class="text-muted">Total Commission:</div>
+                                        <div class="text-white-50" style="color: #e5e7eb !important;">Total Commission:</div>
                                         <div class="font-weight-bold">£{{ number_format($bonus['commission'], 2) }}</div>
                                     </div>
                                     <div class="col-6">
-                                        <div class="text-muted">Agent Commission:</div>
+                                        <div class="text-white-50" style="color: #e5e7eb !important;">Agent Commission:</div>
                                         <div class="font-weight-bold text-success">£{{ number_format($bonus['agent_commission'], 2) }}</div>
                                     </div>
                                 </div>
                                 <div class="mt-2">
-                                    <div class="text-xs text-muted">Split: {{ $bonus['bonus_split'] === '100_0' ? '100% Agent' : '55% Agent, 45% Agency' }}</div>
-                                    <div class="text-xs text-muted">Date: {{ \Carbon\Carbon::parse($bonus['date'])->format('M d, Y') }}</div>
+                                    <div class="text-xs text-white-50" style="color: #e5e7eb !important;">Split: {{ $bonus['bonus_split'] === '100_0' ? '100% Agent' : '55% Agent, 45% Agency' }}</div>
+                                    <div class="text-xs text-white-50" style="color: #e5e7eb !important;">Date: {{ \Carbon\Carbon::parse($bonus['date'])->format('M d, Y') }}</div>
                                 </div>
                                 @if($bonus['notes'])
-                                <div class="mt-2 text-xs text-muted">
+                                <div class="mt-2 text-xs text-white-50" style="color: #e5e7eb !important;">
                                     <strong>Notes:</strong> {{ $bonus['notes'] }}
                                 </div>
                                 @endif

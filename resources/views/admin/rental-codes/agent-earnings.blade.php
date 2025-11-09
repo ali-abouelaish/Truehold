@@ -368,9 +368,6 @@
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Total Earnings
                     </th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Transactions
-                            </th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Last Activity
                     </th>
@@ -429,6 +426,8 @@
                                 $rankingEmoji = '👤';
                                 $rankingText = 'Your Ranking - #' . ($loop->index + 1);
                             }
+                            
+                            $isAfterTopThree = $loop->index >= 3;
                         @endphp
                         <tr class="transition-colors duration-200 {{ $rankingClass }}">
                     <td class="px-6 py-4 whitespace-nowrap">
@@ -464,7 +463,7 @@
                                         </span>
                             </div>
                                     <div>
-                                        <div class="text-sm font-semibold text-gray-900 flex items-center">
+                                        <div class="text-sm font-semibold {{ $isAfterTopThree ? 'text-gray-700' : 'text-gray-900' }} flex items-center">
                                             {{ $agent['name'] }}
                                             @if($rankingText)
                                                 <span class="ml-2 {{ $loop->index === 0 ? 'bg-yellow-100 text-yellow-800' : ($loop->index === 1 ? 'bg-gray-100 text-gray-800' : ($loop->index === 2 ? 'bg-orange-100 text-orange-800' : 'bg-blue-100 text-blue-800')) }} text-xs font-medium px-2 py-1 rounded-full flex items-center">
@@ -472,25 +471,25 @@
                                                 </span>
                                             @endif
                                         </div>
-                                        <div class="text-xs text-gray-500">{{ $agent['transaction_count'] }} total transactions</div>
+                                        <div class="text-xs {{ $isAfterTopThree ? 'text-gray-600' : 'text-gray-500' }}">{{ $agent['transaction_count'] }} total transactions</div>
                             </div>
                         </div>
                     </td>
                     
                     <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm font-semibold text-gray-900">
+                                <div class="text-sm font-semibold {{ $isAfterTopThree ? 'text-gray-700' : 'text-gray-900' }}">
                                     £{{ number_format($agent['agent_earnings'], 2) }}
                         </div>
-                        <div class="text-xs text-gray-500">
+                        <div class="text-xs {{ $isAfterTopThree ? 'text-gray-600' : 'text-gray-500' }}">
                                     55% of commission
                         </div>
                     </td>
                     
                     <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm font-semibold text-gray-900">
+                                <div class="text-sm font-semibold {{ $isAfterTopThree ? 'text-gray-700' : 'text-gray-900' }}">
                                     £{{ number_format($agent['agency_earnings'], 2) }}
                         </div>
-                        <div class="text-xs text-gray-500">
+                        <div class="text-xs {{ $isAfterTopThree ? 'text-gray-600' : 'text-gray-500' }}">
                                     45% of commission
                         </div>
                     </td>
@@ -516,23 +515,17 @@
                                 $totalEarningsClass = 'text-gray-900';
                             }
                         @endphp
-                        <div class="text-lg font-bold {{ $totalEarningsClass }} flex items-center">
+                        <div class="text-lg font-bold {{ $isAfterTopThree ? 'text-gray-700' : $totalEarningsClass }} flex items-center">
                             @if($totalEarningsEmoji)
                                 <span class="mr-2">{{ $totalEarningsEmoji }}</span>
                             @endif
                             £{{ number_format($agent['total_earnings'], 2) }}
                         </div>
-                        <div class="text-xs {{ $totalEarningsClass }}">
+                        <div class="text-xs {{ $isAfterTopThree ? 'text-gray-600' : $totalEarningsClass }}">
                                     {{ $agent['transaction_count'] }} total
                         </div>
                     </td>
-                    
-                    <td class="px-6 py-4 whitespace-nowrap">
-                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                                    {{ $agent['transaction_count'] }} transactions
-                        </span>
-                    </td>
-                    
+                                        
                     <td class="px-6 py-4 whitespace-nowrap">
                         <div class="text-sm text-gray-900">
                                     {{ $agent['last_transaction_date'] ? $agent['last_transaction_date']->format('d M Y') : 'N/A' }}
@@ -591,6 +584,7 @@
                         
                         $cardClass = '';
                         $cardRing = '';
+                        $isAfterTopThree = $loop->index >= 3;
                         
                         if ($loop->index === 0) {
                             $cardClass = 'ranking-row-gold shadow-xl';
@@ -657,7 +651,7 @@
                                     </span>
                                 </div>
                                     <div>
-                                        <h4 class="font-semibold text-gray-900 flex items-center">
+                                        <h4 class="font-semibold {{ $isAfterTopThree ? 'text-gray-700' : 'text-gray-900' }} flex items-center">
                                             {{ $agent['name'] }}
                                             @if($cardRankingText)
                                                 <span class="ml-2 {{ $loop->index === 0 ? 'bg-yellow-100 text-yellow-800' : ($loop->index === 1 ? 'bg-gray-100 text-gray-800' : ($loop->index === 2 ? 'bg-orange-100 text-orange-800' : 'bg-blue-100 text-blue-800')) }} text-xs font-medium px-2 py-1 rounded-full flex items-center">
@@ -665,7 +659,7 @@
                                                 </span>
                                             @endif
                                         </h4>
-                                        <p class="text-xs text-gray-500">{{ $agent['transaction_count'] }} transactions</p>
+                                        <p class="text-xs {{ $isAfterTopThree ? 'text-gray-600' : 'text-gray-500' }}">{{ $agent['transaction_count'] }} transactions</p>
     </div>
 </div>
                             <div class="flex space-x-2">
@@ -698,8 +692,8 @@
                                         $cardTotalClass = 'text-gray-600';
                                     }
                                 @endphp
-                                <span class="text-sm {{ $cardTotalClass }}">Total Earnings</span>
-                                <span class="text-lg font-bold {{ $cardTotalClass }} flex items-center">
+                                <span class="text-sm {{ $isAfterTopThree ? 'text-gray-600' : $cardTotalClass }}">Total Earnings</span>
+                                <span class="text-lg font-bold {{ $isAfterTopThree ? 'text-gray-700' : $cardTotalClass }} flex items-center">
                                     @if($cardTotalEmoji)
                                         <span class="mr-1">{{ $cardTotalEmoji }}</span>
                                     @endif
@@ -718,7 +712,7 @@
                                 </div>
                             </div>
                             
-                            <div class="flex justify-between items-center text-xs text-gray-500">
+                            <div class="flex justify-between items-center text-xs {{ $isAfterTopThree ? 'text-gray-600' : 'text-gray-500' }}">
                                 <span>Avg: £{{ number_format($agent['avg_transaction_value'], 2) }}</span>
                                 <span>{{ $agent['last_transaction_date'] ? $agent['last_transaction_date']->format('d M') : 'N/A' }}</span>
                             </div>
@@ -1223,11 +1217,20 @@ document.addEventListener('DOMContentLoaded', function() {
     function checkCrownFallback() {
         // Check if FontAwesome is loaded by testing a simple icon
         const testDiv = document.createElement('div');
-       
+        const testIcon = document.createElement('i');
+        testIcon.className = 'fas fa-user';
+        // keep off-screen to avoid layout shift
+        testDiv.style.position = 'absolute';
+        testDiv.style.left = '-9999px';
+        testDiv.appendChild(testIcon);
         document.body.appendChild(testDiv);
-        const testIcon = testDiv.querySelector('i');
-        const isFontAwesomeLoaded = window.getComputedStyle(testIcon).fontFamily.includes('Font Awesome') || 
-                                   window.getComputedStyle(testIcon).fontFamily.includes('FontAwesome');
+        let isFontAwesomeLoaded = false;
+        try {
+            const fontFamily = window.getComputedStyle(testIcon).fontFamily || '';
+            isFontAwesomeLoaded = fontFamily.includes('Font Awesome') || fontFamily.includes('FontAwesome');
+        } catch (e) {
+            isFontAwesomeLoaded = false;
+        }
         document.body.removeChild(testDiv);
         
         console.log('FontAwesome loaded:', isFontAwesomeLoaded);
