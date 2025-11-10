@@ -1127,6 +1127,7 @@ public function generateCode()
             );
             
             $filteredAgents[$agentName]['landlord_bonuses'][] = [
+                'id' => $bonus->id,
                 'bonus_code' => $bonus->bonus_code,
                 'date' => $bonus->date,
                 'landlord' => $bonus->landlord,
@@ -1393,6 +1394,7 @@ public function generateCode()
                 );
 
                 $byAgent[$agentName]['landlord_bonuses'][] = [
+                    'id' => $bonus->id,
                     'bonus_code' => $bonus->bonus_code,
                     'date' => $bonus->date,
                     'landlord' => $bonus->landlord,
@@ -1671,6 +1673,7 @@ public function generateCode()
             );
 
             $agentData['landlord_bonuses'][] = [
+                'id' => $bonus->id,
                 'bonus_code' => $bonus->bonus_code,
                 'date' => $bonus->date,
                 'landlord' => $bonus->landlord,

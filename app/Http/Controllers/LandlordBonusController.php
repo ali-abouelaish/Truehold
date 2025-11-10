@@ -11,6 +11,55 @@ use Illuminate\Support\Facades\Auth;
 class LandlordBonusController extends Controller
 {
     /**
+     * Bulk mark selected landlord bonuses as paid (admin only)
+     */
+    public function bulkMarkPaid(Request $request)
+    {
+        $user = auth()->user();
+        if (!$user || $user->role !== 'admin') {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Only administrators can perform bulk updates.',
+                ], 403);
+            }
+            return redirect()->back()->with('error', 'Only administrators can perform bulk updates.');
+        }
+
+        $validated = $request->validate([
+            'landlord_bonus_ids' => 'required|array',
+            'landlord_bonus_ids.*' => 'integer|exists:landlord_bonuses,id',
+        ]);
+
+        $ids = $validated['landlord_bonus_ids'];
+
+        try {
+            \Log::info('Bulk mark landlord bonuses as paid', ['count' => count($ids)]);
+            LandlordBonus::whereIn('id', $ids)->update([
+                'status' => 'paid',
+                'updated_at' => now(),
+            ]);
+
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Selected landlord bonuses marked as paid.',
+                ]);
+            }
+            return redirect()->back()->with('success', 'Selected landlord bonuses marked as paid.');
+        } catch (\Exception $e) {
+            \Log::error('Bulk mark landlord bonuses as paid failed', ['error' => $e->getMessage()]);
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Failed to mark selected landlord bonuses as paid: ' . $e->getMessage(),
+                ], 500);
+            }
+            return redirect()->back()->with('error', 'Failed to mark selected landlord bonuses as paid.');
+        }
+    }
+
+    /**
      * Display a listing of landlord bonuses
      */
     public function index()

@@ -230,9 +230,30 @@
                 </div>
                 <div class="card-body">
                     @if(count($agent['landlord_bonuses'] ?? []) > 0)
+                        @auth
+                        @if(auth()->user()->role === 'admin')
+                        <div class="mb-3">
+                            <label class="mr-2"><input type="checkbox" id="bonusSelectAll" onchange="toggleSelectAllBonuses(this)"> Select All</label>
+                            <form id="bonusBulkPaidForm" method="POST" action="{{ route('landlord-bonuses.bulk-mark-paid') }}" class="d-inline">
+                                @csrf
+                                <input type="hidden" name="landlord_bonus_ids[]" value="" id="dummyBonusIdsPlaceholder" style="display:none;">
+                                <button type="submit" class="btn btn-success btn-sm" onclick="return submitBonusesBulkPaid(event)">
+                                    <i class="fas fa-check mr-1"></i> Mark Selected Bonuses Paid
+                                </button>
+                            </form>
+                        </div>
+                        @endif
+                        @endauth
                         @foreach($agent['landlord_bonuses'] as $bonus)
                         <div class="row mb-3 p-3 border rounded bg-dark text-light border-secondary" style="background-color: #1f2937 !important; color: #e5e7eb !important; border-color: #374151 !important;">
-                            <div class="col-md-8">
+                            <div class="col-md-8 d-flex align-items-start">
+                                @auth
+                                @if(auth()->user()->role === 'admin' && ($bonus['status'] ?? 'pending') !== 'paid')
+                                <div class="mr-3 mt-1">
+                                    <input type="checkbox" class="bonus-bulk-checkbox" value="{{ $bonus['id'] ?? '' }}">
+                                </div>
+                                @endif
+                                @endauth
                                 <div class="d-flex align-items-center mb-2">
                                     <span class="badge badge-info mr-2">
                                         <i class="fas fa-gift mr-1"></i>{{ $bonus['bonus_code'] }}
@@ -341,6 +362,31 @@ function submitBulkPaid(e) {
         form.appendChild(input);
     });
 
+    form.submit();
+    return true;
+}
+
+function toggleSelectAllBonuses(source) {
+    document.querySelectorAll('.bonus-bulk-checkbox').forEach(cb => cb.checked = source.checked);
+}
+
+function submitBonusesBulkPaid(e) {
+    e.preventDefault();
+    const ids = Array.from(document.querySelectorAll('.bonus-bulk-checkbox:checked')).map(cb => cb.value).filter(Boolean);
+    if (ids.length === 0) {
+        alert('Select at least one unpaid landlord bonus.');
+        return false;
+    }
+    const form = document.getElementById('bonusBulkPaidForm');
+    // Clear previous hidden inputs (except placeholder)
+    Array.from(form.querySelectorAll('input[name="landlord_bonus_ids[]"]')).forEach(el => el.remove());
+    ids.forEach(id => {
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'landlord_bonus_ids[]';
+        input.value = id;
+        form.appendChild(input);
+    });
     form.submit();
     return true;
 }
