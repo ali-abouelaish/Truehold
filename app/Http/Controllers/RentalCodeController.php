@@ -55,21 +55,30 @@ class RentalCodeController extends Controller
 
         $rentalCodes = $query->orderBy('created_at', 'desc')->paginate(20)->withQueryString();
 
-        // Monthly stats (calendar month) across all rentals, not just current page
-        $startOfMonth = now()->startOfMonth()->toDateString();
-        $endOfMonthDate = now()->endOfMonth();
-        $endOfMonth = $endOfMonthDate->toDateString();
-        $endOfMonthEndOfDay = $endOfMonthDate->copy()->endOfDay();
+        // Cycle stats (11th -> 10th) across all rentals, not just current page
+        $today = now();
+        if ($today->day <= 10) {
+            $cycleStart = $today->copy()->subMonthNoOverflow()->day(11);
+            $cycleEnd = $today->copy()->day(10)->endOfDay();
+        } else {
+            $cycleStart = $today->copy()->day(11);
+            $cycleEnd = $today->copy()->addMonthNoOverflow()->day(10)->endOfDay();
+        }
+        // prevent future end date
+        if ($cycleEnd->gt($today->copy()->endOfDay())) {
+            $cycleEnd = $today->copy()->endOfDay();
+        }
+        $cycleStartDate = $cycleStart->toDateString();
 
-        $baseMonthQuery = RentalCode::where(function($q) use ($startOfMonth, $endOfMonth, $endOfMonthEndOfDay) {
-            $q->where(function($q2) use ($startOfMonth, $endOfMonth) {
+        $baseMonthQuery = RentalCode::where(function($q) use ($cycleStartDate, $cycleEnd) {
+            $q->where(function($q2) use ($cycleStartDate, $cycleEnd) {
                 $q2->whereNotNull('rental_date')
-                   ->where('rental_date', '>=', $startOfMonth)
-                   ->where('rental_date', '<=', $endOfMonth);
-            })->orWhere(function($q3) use ($startOfMonth, $endOfMonthEndOfDay) {
+                   ->where('rental_date', '>=', $cycleStartDate)
+                   ->where('rental_date', '<=', $cycleEnd->toDateString());
+            })->orWhere(function($q3) use ($cycleStartDate, $cycleEnd) {
                 $q3->whereNull('rental_date')
-                   ->where('created_at', '>=', $startOfMonth)
-                   ->where('created_at', '<=', $endOfMonthEndOfDay);
+                   ->where('created_at', '>=', $cycleStartDate)
+                   ->where('created_at', '<=', $cycleEnd);
             });
         });
 
@@ -1000,12 +1009,19 @@ public function generateCode()
             'agent_comparison' => array_slice($filteredAgents, 0, 10, true), // Top 10 agents
         ];
 
-        // Calculate monthly totals - only for registered agent users with proper commission structure (ID-based only)
-        $monthlyTotals = [];
+        // Calculate cycle totals (11th -> 10th) - only for registered agent users with proper commission structure (ID-based only)
+        $monthlyTotals = []; // reuse key name for view compatibility
         foreach ($rentalCodes as $code) {
             $totalFee = (float) ($code->consultation_fee ?? 0);
-            $rentalDate = $code->rental_date ?? now();
-            $monthKey = $rentalDate->format('Y-m');
+            $rentalDate = $code->rental_date ?? ($code->created_at ?? now());
+            // Determine cycle end for this record
+            $cycleEnd = $rentalDate->copy();
+            if ($cycleEnd->day <= 10) {
+                $cycleEnd = $cycleEnd->copy()->day(10);
+            } else {
+                $cycleEnd = $cycleEnd->copy()->addMonthNoOverflow()->day(10);
+            }
+            $monthKey = $cycleEnd->format('Y-m-10');
             $paymentMethod = $code->payment_method ?? 'Cash';
             
             // Skip if no consultation fee
@@ -1028,7 +1044,7 @@ public function generateCode()
                 continue;
             }
             
-            // Add to monthly totals
+            // Add to cycle totals
             if ($agentName) {
                 if (!isset($monthlyTotals[$monthKey])) {
                     $monthlyTotals[$monthKey] = 0;
