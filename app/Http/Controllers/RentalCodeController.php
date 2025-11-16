@@ -1789,7 +1789,7 @@ public function generateCode()
             $clientCount = $code->client_count ?? 1;
 
             $baseCommission = $totalFee;
-            if ($paymentMethod === 'Transfer') {
+            if ($paymentMethod === 'Transfer' || $paymentMethod === 'Card Machine') {
                 $baseCommission = $totalFee * 0.8;
             }
 
