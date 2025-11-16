@@ -544,7 +544,7 @@ strong {
                     <div class="row no-gutters align-items-center">
                         <div class="col mr-2">
                             <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Total Codes</div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ $rentalCodes->total() }}</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ $monthlyStats['total'] ?? 0 }}</div>
                         </div>
                         <div class="col-auto">
                             <i class="fas fa-key fa-2x text-gray-300"></i>
@@ -560,7 +560,7 @@ strong {
                     <div class="row no-gutters align-items-center">
                         <div class="col mr-2">
                             <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Completed</div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ $rentalCodes->where('status', 'completed')->count() }}</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ $monthlyStats['completed'] ?? 0 }}</div>
                         </div>
                         <div class="col-auto">
                             <i class="fas fa-check-circle fa-2x text-gray-300"></i>
@@ -576,7 +576,7 @@ strong {
                     <div class="row no-gutters align-items-center">
                         <div class="col mr-2">
                             <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Pending</div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ $rentalCodes->where('status', 'pending')->count() }}</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ $monthlyStats['pending'] ?? 0 }}</div>
                         </div>
                         <div class="col-auto">
                             <i class="fas fa-clock fa-2x text-gray-300"></i>
@@ -592,7 +592,7 @@ strong {
                     <div class="row no-gutters align-items-center">
                         <div class="col mr-2">
                             <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Approved</div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ $rentalCodes->where('status', 'approved')->count() }}</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ $monthlyStats['approved'] ?? 0 }}</div>
                         </div>
                         <div class="col-auto">
                             <i class="fas fa-thumbs-up fa-2x text-gray-300"></i>
@@ -631,32 +631,44 @@ strong {
                         </div>
                     @endif
 
-                    <!-- Search and Filter Bar -->
-                    <div class="row mb-3">
+                    <!-- Search and Filter Bar (server-side filtering) -->
+                    <form method="GET" action="{{ route('rental-codes.index') }}" class="row mb-3 g-2 align-items-end">
                         <div class="col-md-4">
+                            <label class="form-label">Search</label>
                             <div class="input-group">
                                 <span class="input-group-text"><i class="fas fa-search"></i></span>
-                                <input type="text" class="form-control" id="searchInput" placeholder="Search rental codes...">
+                                <input type="text" class="form-control" name="q" value="{{ $search ?? request('q') }}" placeholder="Search code, client, property, licensor...">
                             </div>
                         </div>
                         <div class="col-md-3">
-                            <select class="form-select" id="statusFilter">
-                                <option value="">All Statuses</option>
-                                <option value="pending">Pending</option>
-                                <option value="approved">Approved</option>
-                                <option value="completed">Completed</option>
-                                <option value="cancelled">Cancelled</option>
+                            <label class="form-label">Payment Method</label>
+                            <select class="form-select" name="payment_method">
+                                <option value="">All Methods</option>
+                                <option value="Cash" {{ ($filterPaymentMethod ?? request('payment_method')) === 'Cash' ? 'selected' : '' }}>Cash</option>
+                                <option value="Transfer" {{ ($filterPaymentMethod ?? request('payment_method')) === 'Transfer' ? 'selected' : '' }}>Transfer</option>
+                                <option value="Card machine" {{ ($filterPaymentMethod ?? request('payment_method')) === 'Card machine' ? 'selected' : '' }}>Card machine</option>
                             </select>
                         </div>
                         <div class="col-md-3">
-                            <input type="date" class="form-control" id="dateFilter" placeholder="Filter by date">
+                            <label class="form-label">Agent</label>
+                            <select class="form-select" name="agent_id">
+                                <option value="">All Agents</option>
+                                @foreach(($agents ?? []) as $id => $name)
+                                    <option value="{{ $id }}" {{ (string)($filterAgentId ?? request('agent_id')) === (string)$id ? 'selected' : '' }}>
+                                        {{ $name }}
+                                    </option>
+                                @endforeach
+                            </select>
                         </div>
-                        <div class="col-md-2">
-                            <button class="btn btn-outline-secondary w-100" onclick="clearFilters()">
-                                <i class="fas fa-times"></i> Clear
+                        <div class="col-md-2 d-flex gap-2">
+                            <button type="submit" class="btn btn-outline-primary w-100">
+                                <i class="fas fa-filter"></i> Apply
                             </button>
+                            <a href="{{ route('rental-codes.index') }}" class="btn btn-outline-secondary w-100">
+                                <i class="fas fa-times"></i> Clear
+                            </a>
                         </div>
-                    </div>
+                    </form>
 
                     @if($rentalCodes->count() > 0)
                         <div class="table-responsive">

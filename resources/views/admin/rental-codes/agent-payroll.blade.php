@@ -136,6 +136,27 @@
                 </div>
                 <div class="card-body">
                     @if(count($agent['transactions']) > 0)
+                        @php
+                            $rt = $agent['rental_totals'] ?? ['count'=>0,'agent_cut'=>0,'paid'=>0,'entitled'=>0,'outstanding'=>0];
+                        @endphp
+                        <div class="row mb-3">
+                            <div class="col-md-3">
+                                <div class="text-muted" style="color: #ecf0f1 !important; font-weight: 600;">Rental Count</div>
+                                <div class="font-weight-bold" style="color: #ffffff !important; font-size: 1.1rem;">{{ $rt['count'] }}</div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="text-muted" style="color: #ecf0f1 !important; font-weight: 600;">Agent Earnings</div>
+                                <div class="font-weight-bold text-success" style="color: #2ecc71 !important; font-size: 1.1rem;">£{{ number_format($rt['agent_cut'], 2) }}</div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="text-muted" style="color: #ecf0f1 !important; font-weight: 600;">Paid</div>
+                                <div class="font-weight-bold text-success" style="color: #10b981 !important; font-size: 1.1rem;">£{{ number_format($rt['paid'], 2) }}</div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="text-muted" style="color: #ecf0f1 !important; font-weight: 600;">To Be Paid</div>
+                                <div class="font-weight-bold text-warning" style="color: #f59e0b !important; font-size: 1.1rem;">£{{ number_format($rt['entitled'], 2) }}</div>
+                            </div>
+                        </div>
                         @auth
                         @if(auth()->user()->role === 'admin')
                         <div class="mb-3">
@@ -232,6 +253,27 @@
                 </div>
                 <div class="card-body">
                     @if(count($agent['landlord_bonuses'] ?? []) > 0)
+                        @php
+                            $bt = $agent['bonus_totals'] ?? ['count'=>0,'agent_commission'=>0,'paid'=>0,'entitled'=>0,'outstanding'=>0];
+                        @endphp
+                        <div class="row mb-3 p-2">
+                            <div class="col-md-3">
+                                <div class="text-muted">Bonuses</div>
+                                <div class="font-weight-bold">{{ $bt['count'] }}</div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="text-muted">Agent Commission</div>
+                                <div class="font-weight-bold text-success">£{{ number_format($bt['agent_commission'], 2) }}</div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="text-muted">Paid</div>
+                                <div class="font-weight-bold text-success">£{{ number_format($bt['paid'], 2) }}</div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="text-muted">To Be Paid</div>
+                                <div class="font-weight-bold text-warning">£{{ number_format($bt['entitled'], 2) }}</div>
+                            </div>
+                        </div>
                         @auth
                         @if(auth()->user()->role === 'admin')
                         <div class="mb-3">
