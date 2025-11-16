@@ -528,7 +528,7 @@ public function generateCode()
             'start_date' => ['nullable', 'date'],
             'end_date' => ['nullable', 'date', 'after_or_equal:start_date'],
             'status' => ['nullable', 'in:pending,approved,completed,cancelled'],
-            'payment_method' => ['nullable', 'in:Cash,Transfer'],
+            'payment_method' => ['nullable', 'in:Cash,Transfer,Card machine'],
             'agent_search' => ['nullable', 'string', 'max:255'],
             'marketing_agent_filter' => ['nullable', 'string', 'in:marketing_only,rent_only,both'],
         ]);
@@ -637,7 +637,7 @@ public function generateCode()
 
             // Calculate base commission after VAT (for Transfer payments)
             $baseCommission = $totalFee;
-            if ($paymentMethod === 'Transfer') {
+            if (in_array($paymentMethod, ['Transfer', 'Card machine'])) {
                 // Subtract 20% VAT for transfer payments
                 $baseCommission = $totalFee * 0.8;
             }
@@ -785,7 +785,7 @@ public function generateCode()
                 $byAgent[$agentName]['transaction_count'] += 1;
                 
                 // Track VAT deductions
-                if ($paymentMethod === 'Transfer') {
+                if (in_array($paymentMethod, ['Transfer', 'Card machine'])) {
                     $vatAmount = $totalFee - $baseCommission;
                     $byAgent[$agentName]['vat_deductions'] += $vatAmount;
                 }
@@ -813,7 +813,7 @@ public function generateCode()
                     'base_commission' => $baseCommission,
                     'agency_cut' => $agencyCut,
                     'agent_cut' => $agentCut,
-                    'vat_amount' => $paymentMethod === 'Transfer' ? ($totalFee - $baseCommission) : 0,
+                    'vat_amount' => in_array($paymentMethod, ['Transfer', 'Card machine']) ? ($totalFee - $baseCommission) : 0,
                     'marketing_deduction' => $marketingDeduction,
                     'marketing_agent' => $marketingAgentName,
                     'client_count' => $clientCount,
@@ -993,7 +993,7 @@ public function generateCode()
             
             // Calculate base commission after VAT (for Transfer payments)
             $baseCommission = $totalFee;
-            if ($paymentMethod === 'Transfer') {
+            if (in_array($paymentMethod, ['Transfer', 'Card machine'])) {
                 $baseCommission = $totalFee * 0.8;
             }
             
@@ -1242,7 +1242,7 @@ public function generateCode()
 
             // Calculate base commission after VAT
             $baseCommission = $totalFee;
-            if ($paymentMethod === 'Transfer') {
+            if (in_array($paymentMethod, ['Transfer', 'Card machine'])) {
                 $baseCommission = $totalFee * 0.8;
             }
 
@@ -1348,7 +1348,7 @@ public function generateCode()
                 'base_commission' => $baseCommission,
                 'agency_cut' => $agencyCut,
                 'agent_cut' => $agentCut,
-                'vat_amount' => $paymentMethod === 'Transfer' ? ($totalFee - $baseCommission) : 0,
+                'vat_amount' => in_array($paymentMethod, ['Transfer', 'Card machine']) ? ($totalFee - $baseCommission) : 0,
                 'marketing_deduction' => 0,
                 'marketing_agent' => null,
                 'client_count' => 1,
@@ -1525,7 +1525,7 @@ public function generateCode()
 
             // Calculate base commission after VAT
             $baseCommission = $totalFee;
-            if ($paymentMethod === 'Transfer') {
+            if (in_array($paymentMethod, ['Transfer', 'Card machine'])) {
                 $baseCommission = $totalFee * 0.8;
             }
 
@@ -1609,7 +1609,7 @@ public function generateCode()
             $agentData['transaction_count'] += 1;
 
             // Track VAT deductions
-            if ($paymentMethod === 'Transfer') {
+            if (in_array($paymentMethod, ['Transfer', 'Card machine'])) {
                 $vatAmount = $totalFee - $baseCommission;
                 $agentData['vat_deductions'] += $vatAmount;
             }
@@ -1633,7 +1633,7 @@ public function generateCode()
                 'base_commission' => $baseCommission,
                 'agency_cut' => $agencyCut,
                 'agent_cut' => $agentCut,
-                'vat_amount' => $paymentMethod === 'Transfer' ? ($totalFee - $baseCommission) : 0,
+                'vat_amount' => in_array($paymentMethod, ['Transfer', 'Card machine']) ? ($totalFee - $baseCommission) : 0,
                 'marketing_deduction' => $marketingDeduction ?? 0,
                 'marketing_agent' => $code->marketing_agent_name,
                 'client_count' => $clientCount,
@@ -1789,7 +1789,7 @@ public function generateCode()
             $clientCount = $code->client_count ?? 1;
 
             $baseCommission = $totalFee;
-            if ($paymentMethod === 'Transfer' || $paymentMethod === 'Card Machine') {
+            if (in_array($paymentMethod, ['Transfer', 'Card machine'])) {
                 $baseCommission = $totalFee * 0.8;
             }
 
@@ -1821,7 +1821,7 @@ public function generateCode()
             $agentData['total_earnings'] += $baseCommission;
             $agentData['transaction_count'] += 1;
 
-            if ($paymentMethod === 'Transfer') {
+            if (in_array($paymentMethod, ['Transfer', 'Card machine'])) {
                 $vatAmount = $totalFee - $baseCommission;
                 $agentData['vat_deductions'] += $vatAmount;
             }
@@ -1840,7 +1840,7 @@ public function generateCode()
                 'base_commission' => $baseCommission,
                 'agency_cut' => $agencyCut,
                 'agent_cut' => $agentCut,
-                'vat_amount' => $paymentMethod === 'Transfer' ? ($totalFee - $baseCommission) : 0,
+                'vat_amount' => in_array($paymentMethod, ['Transfer', 'Card machine']) ? ($totalFee - $baseCommission) : 0,
                 'marketing_deduction' => $marketingDeduction ?? 0,
                 'marketing_agent' => $code->marketing_agent_name,
                 'client_count' => $clientCount,
@@ -1904,7 +1904,7 @@ public function generateCode()
             $clientCount = $code->client_count ?? 1;
 
             $baseCommission = $totalFee;
-            if ($paymentMethod === 'Transfer') {
+            if (in_array($paymentMethod, ['Transfer', 'Card machine'])) {
                 $baseCommission = $totalFee * 0.8;
             }
 
@@ -1920,7 +1920,7 @@ public function generateCode()
             $agentData['transaction_count'] += 1;
             $agentData['marketing_agent_earnings'] += $marketingCommission;
 
-            if ($paymentMethod === 'Transfer') {
+            if (in_array($paymentMethod, ['Transfer', 'Card machine'])) {
                 $vatAmount = $totalFee - $baseCommission;
                 $agentData['vat_deductions'] += $vatAmount;
             }
@@ -1939,7 +1939,7 @@ public function generateCode()
                 'base_commission' => $baseCommission,
                 'agency_cut' => $agencyCut,
                 'agent_cut' => $agentCut,
-                'vat_amount' => $paymentMethod === 'Transfer' ? ($totalFee - $baseCommission) : 0,
+                'vat_amount' => in_array($paymentMethod, ['Transfer', 'Card machine']) ? ($totalFee - $baseCommission) : 0,
                 'marketing_deduction' => 0,
                 'marketing_agent' => $agentUser->name,
                 'client_count' => $clientCount,
@@ -2185,7 +2185,7 @@ public function generateCode()
             'start_date' => ['nullable', 'date'],
             'end_date' => ['nullable', 'date', 'after_or_equal:start_date'],
             'status' => ['nullable', 'in:pending,approved,completed,cancelled'],
-            'payment_method' => ['nullable', 'in:Cash,Transfer'],
+            'payment_method' => ['nullable', 'in:Cash,Transfer,Card machine'],
         ]);
 
         $startDate = $validated['start_date'] ?? null;
@@ -2236,7 +2236,7 @@ public function generateCode()
             
             // Calculate base commission after VAT
             $baseCommission = $totalFee;
-            if ($paymentMethod === 'Transfer') {
+            if (in_array($paymentMethod, ['Transfer', 'Card machine'])) {
                 $baseCommission = $totalFee * 0.8;
             }
 
@@ -2304,7 +2304,7 @@ public function generateCode()
             $clientCount = $code->client_count ?? 1;
             
             $baseCommission = $totalFee;
-            if ($paymentMethod === 'Transfer') {
+            if (in_array($paymentMethod, ['Transfer', 'Card machine'])) {
                 $baseCommission = $totalFee * 0.8;
             }
 

@@ -915,8 +915,8 @@ function showAgentDetails(agentName) {
                     <div class="flex justify-between items-start">
                         <div class="flex-1">
                             <div class="flex items-center space-x-3 mb-2">
-                                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${transaction.payment_method === 'Transfer' || transaction.payment_method === 'Card Machine' ? 'bg-purple-100 text-purple-800' : (transaction.payment_method === 'Cash' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800')}">
-                                    ${(transaction.payment_method === 'Transfer' || transaction.payment_method === 'Card Machine') ? '⚡ ' : (transaction.payment_method === 'Cash' ? '💰 ' : '')}${transaction.payment_method}
+                                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${transaction.payment_method === 'Transfer' || transaction.payment_method === 'Card Machine' || transaction.payment_method === 'Card machine' ? 'bg-purple-100 text-purple-800' : (transaction.payment_method === 'Cash' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800')}">
+                                    ${transaction.payment_method === 'Transfer' ? '⚡ ' : ((transaction.payment_method === 'Card Machine' || transaction.payment_method === 'Card machine') ? '💳 ' : (transaction.payment_method === 'Cash' ? '💰 ' : ''))}${transaction.payment_method}
                                 </span>
                                 <span class="font-medium text-gray-900">${transaction.code}</span>
                                 ${isMarketingEarnings ? '<span class="text-xs text-orange-600 font-medium">Marketing</span>' : ''}
@@ -1141,7 +1141,7 @@ function printPayroll(agentName) {
                         <tr>
                             <td>${transaction.code}</td>
                             <td>${new Date(transaction.date).toLocaleDateString()}</td>
-                            <td>${(transaction.payment_method === 'Transfer' || transaction.payment_method === 'Card Machine') ? '⚡ ' : (transaction.payment_method === 'Cash' ? '💰 ' : '')}£${parseFloat(transaction.total_fee).toFixed(2)}</td>
+                            <td>${transaction.payment_method === 'Transfer' ? '⚡ ' : ((transaction.payment_method === 'Card Machine' || transaction.payment_method === 'Card machine') ? '💳 ' : (transaction.payment_method === 'Cash' ? '💰 ' : ''))}£${parseFloat(transaction.total_fee).toFixed(2)}</td>
                             <td>£${parseFloat(transaction.agent_cut).toFixed(2)}</td>
                             <td>£${parseFloat(transaction.agency_cut).toFixed(2)}</td>
                             <td>${transaction.status}</td>

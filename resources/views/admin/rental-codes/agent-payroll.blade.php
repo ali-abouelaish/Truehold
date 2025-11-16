@@ -154,9 +154,11 @@
                                 @endif
                                 @endauth
                                 <div class="d-flex align-items-center mb-2">
-                                    <span class="badge badge-{{ $transaction['payment_method'] === 'Transfer' || $transaction['payment_method'] === 'Card Machine' ? 'purple' : ($transaction['payment_method'] === 'Cash' ? 'success' : 'secondary') }} mr-2" style="font-size: 0.9rem; padding: 0.5rem 0.8rem;">
-                                        @if($transaction['payment_method'] === 'Transfer' || $transaction['payment_method'] === 'Card Machine')
+                                    <span class="badge badge-{{ $transaction['payment_method'] === 'Transfer' || $transaction['payment_method'] === 'Card Machine' || $transaction['payment_method'] === 'Card machine' ? 'purple' : ($transaction['payment_method'] === 'Cash' ? 'success' : 'secondary') }} mr-2" style="font-size: 0.9rem; padding: 0.5rem 0.8rem;">
+                                        @if($transaction['payment_method'] === 'Transfer')
                                             ⚡ {{ $transaction['payment_method'] }}
+                                        @elseif($transaction['payment_method'] === 'Card Machine' || $transaction['payment_method'] === 'Card machine')
+                                            💳 {{ $transaction['payment_method'] }}
                                         @elseif($transaction['payment_method'] === 'Cash')
                                             💰 {{ $transaction['payment_method'] }}
                                         @else

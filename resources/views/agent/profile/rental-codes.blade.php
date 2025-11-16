@@ -149,8 +149,10 @@
                                                 @php
                                                     $paymentMethod = $code->payment_method ?? 'N/A';
                                                     $emoji = '';
-                                                    if (strtolower($paymentMethod) === 'transfer' || strtolower($paymentMethod) === 'card machine') {
+                                                    if (strtolower($paymentMethod) === 'transfer') {
                                                         $emoji = '⚡';
+                                                    } elseif (strtolower($paymentMethod) === 'card machine') {
+                                                        $emoji = '💳';
                                                     } elseif (strtolower($paymentMethod) === 'cash') {
                                                         $emoji = '💰';
                                                     }

@@ -225,8 +225,10 @@
                                         @php
                                             $paymentMethod = $rental->payment_method ?? 'N/A';
                                             $emoji = '';
-                                            if (strtolower($paymentMethod) === 'transfer' || strtolower($paymentMethod) === 'card machine') {
+                                            if (strtolower($paymentMethod) === 'transfer') {
                                                 $emoji = '⚡';
+                                            } elseif (strtolower($paymentMethod) === 'card machine') {
+                                                $emoji = '💳';
                                             } elseif (strtolower($paymentMethod) === 'cash') {
                                                 $emoji = '💰';
                                             }
@@ -620,8 +622,8 @@ function showRentalDetails(rentalId) {
                     </div>
                     <div class="mb-3">
                         <strong>Payment Method:</strong> 
-                        <span class="badge bg-${data.payment_method === 'Transfer' || data.payment_method === 'Card Machine' ? 'info' : (data.payment_method === 'Cash' ? 'success' : 'secondary')}">
-                            ${(data.payment_method === 'Transfer' || data.payment_method === 'Card Machine') ? '⚡ ' : (data.payment_method === 'Cash' ? '💰 ' : '')}${data.payment_method || 'N/A'}
+                        <span class="badge bg-${data.payment_method === 'Transfer' || data.payment_method === 'Card Machine' || data.payment_method === 'Card machine' ? 'info' : (data.payment_method === 'Cash' ? 'success' : 'secondary')}">
+                            ${data.payment_method === 'Transfer' ? '⚡ ' : ((data.payment_method === 'Card Machine' || data.payment_method === 'Card machine') ? '💳 ' : (data.payment_method === 'Cash' ? '💰 ' : ''))}${data.payment_method || 'N/A'}
                         </span>
                     </div>
                     <div class="mb-3">
