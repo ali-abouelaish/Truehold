@@ -533,8 +533,21 @@ public function generateCode()
             'marketing_agent_filter' => ['nullable', 'string', 'in:marketing_only,rent_only,both'],
         ]);
 
-        $startDate = $validated['start_date'] ?? null;
-        $endDate = $validated['end_date'] ?? now()->format('Y-m-d');
+        // Define commission cycle: 11th -> 10th; default to current cycle if not provided
+        $today = now();
+        if ($today->day <= 10) {
+            $cycleStart = $today->copy()->subMonthNoOverflow()->day(11);
+            $cycleEnd = $today->copy()->day(10);
+        } else {
+            $cycleStart = $today->copy()->day(11);
+            $cycleEnd = $today->copy()->addMonthNoOverflow()->day(10);
+        }
+        $cycleStartDate = $cycleStart->toDateString();
+        // Do not extend into the future beyond today
+        $cycleEndDate = min($today->toDateString(), $cycleEnd->toDateString());
+
+        $startDate = $validated['start_date'] ?? $cycleStartDate;
+        $endDate = $validated['end_date'] ?? $cycleEndDate;
         $status = $validated['status'] ?? null;
         $paymentMethod = $validated['payment_method'] ?? null;
         $agentSearch = $validated['agent_search'] ?? null;
@@ -550,12 +563,11 @@ public function generateCode()
         // Build query with filters
         $query = RentalCode::with(['client', 'client.agent', 'rentalAgent', 'marketingAgentUser']);
 
-        if ($startDate) {
-            $query->where('rental_date', '>=', $startDate);
-        }
-        if ($endDate) {
-            $query->where('rental_date', '<=', $endDate);
-        }
+        // Current cycle rentals OR any unpaid rentals (carry over)
+        $query->where(function($q) use ($startDate, $endDate) {
+            $q->whereBetween('rental_date', [$startDate, $endDate])
+              ->orWhere('paid', false);
+        });
         
         // For payroll view, only show approved rentals for the specific agent
         if ($isPayrollView) {
@@ -587,7 +599,12 @@ public function generateCode()
             $query->where('payment_method', $paymentMethod);
         }
 
-        $rentalCodes = $query->get();
+        $rentalCodes = $query->get()->filter(function($code) use ($startDate, $endDate) {
+            $date = $code->rental_date ?? ($code->created_at ?? now());
+            $dateStr = $date instanceof \Carbon\Carbon ? $date->toDateString() : (string)$date;
+            $inCycle = $dateStr >= $startDate && $dateStr <= $endDate;
+            return $inCycle || !($code->paid ?? false);
+        });
 
         // Get all agent users from the users table with null checks
         $agentUsers = User::where('role', 'agent')->pluck('name', 'id')->toArray();
@@ -1077,8 +1094,12 @@ public function generateCode()
         ]);
 
         // Add landlord bonuses to agent earnings
+        // Landlord bonuses in current cycle OR any unpaid bonuses
         $landlordBonuses = \App\Models\LandlordBonus::with(['agent.user'])
-            ->whereBetween('date', [$startDate ?? '1900-01-01', $endDate])
+            ->where(function($q) use ($startDate, $endDate) {
+                $q->whereBetween('date', [$startDate, $endDate])
+                  ->orWhere('status', '!=', 'paid');
+            })
             ->get();
 
         foreach ($landlordBonuses as $bonus) {
@@ -1193,8 +1214,20 @@ public function generateCode()
     public function agentPayroll($requestedAgentName)
     {
         // Get all agent earnings data
-        $startDate = request('start_date');
-        $endDate = request('end_date') ?? now()->format('Y-m-d');
+        // Commission cycle defaults: 11th -> 10th
+        $today = now();
+        if ($today->day <= 10) {
+            $cycleStart = $today->copy()->subMonthNoOverflow()->day(11);
+            $cycleEnd = $today->copy()->day(10);
+        } else {
+            $cycleStart = $today->copy()->day(11);
+            $cycleEnd = $today->copy()->addMonthNoOverflow()->day(10);
+        }
+        $cycleStartDate = $cycleStart->toDateString();
+        $cycleEndDate = min($today->toDateString(), $cycleEnd->toDateString());
+
+        $startDate = request('start_date') ?? $cycleStartDate;
+        $endDate = request('end_date') ?? $cycleEndDate;
         $normalizedRequestedName = trim($requestedAgentName);
         $endDateTime = \Carbon\Carbon::parse($endDate)->endOfDay();
         $startDateTime = $startDate ? \Carbon\Carbon::parse($startDate)->startOfDay() : null;
@@ -1220,7 +1253,12 @@ public function generateCode()
             $query->where('payment_method', $paymentMethod);
         }
 
-        $rentalCodes = $query->get();
+        $rentalCodes = $query->get()->filter(function($code) use ($startDate, $endDate) {
+            $date = $code->rental_date ?? ($code->created_at ?? now());
+            $dateStr = $date instanceof \Carbon\Carbon ? $date->toDateString() : (string)$date;
+            $inCycle = $dateStr >= $startDate && $dateStr <= $endDate;
+            return $inCycle || !($code->paid ?? false);
+        });
 
         // Get agent users
         $agentUsers = User::where('role', 'agent')->pluck('name', 'id')->toArray();
@@ -1368,7 +1406,10 @@ public function generateCode()
 
         // Get landlord bonuses for this agent
         $landlordBonuses = \App\Models\LandlordBonus::with(['agent.user'])
-            ->whereBetween('date', [$startDate ?? '1900-01-01', $endDate])
+            ->where(function($q) use ($startDate, $endDate) {
+                $q->whereBetween('date', [$startDate, $endDate])
+                  ->orWhere('status', '!=', 'paid');
+            })
             ->get()
             ->filter(function($bonus) use ($requestedAgentName) {
                 return $bonus->agent->user->name === $requestedAgentName;
@@ -1451,8 +1492,20 @@ public function generateCode()
             })
             ->exists();
         
-        $startDate = request('start_date');
-        $endDate = request('end_date') ?? now()->format('Y-m-d');
+        // Commission cycle defaults: 11th -> 10th
+        $today = now();
+        if ($today->day <= 10) {
+            $cycleStart = $today->copy()->subMonthNoOverflow()->day(11);
+            $cycleEnd = $today->copy()->day(10);
+        } else {
+            $cycleStart = $today->copy()->day(11);
+            $cycleEnd = $today->copy()->addMonthNoOverflow()->day(10);
+        }
+        $cycleStartDate = $cycleStart->toDateString();
+        $cycleEndDate = min($today->toDateString(), $cycleEnd->toDateString());
+
+        $startDate = request('start_date') ?? $cycleStartDate;
+        $endDate = request('end_date') ?? $cycleEndDate;
         $status = request('status');
         $paymentMethod = request('payment_method');
         $normalizedRequestedName = trim($requestedAgentName);
@@ -1893,7 +1946,12 @@ public function generateCode()
             $marketingQuery->where('payment_method', $paymentMethod);
         }
 
-        $marketingCodes = $marketingQuery->get();
+        $marketingCodes = $marketingQuery->get()->filter(function($code) use ($startDate, $endDate) {
+            $date = $code->rental_date ?? ($code->created_at ?? now());
+            $dateStr = $date instanceof \Carbon\Carbon ? $date->toDateString() : (string)$date;
+            $inCycle = $dateStr >= $startDate && $dateStr <= $endDate;
+            return $inCycle || !($code->paid ?? false);
+        });
 
         foreach ($marketingCodes as $code) {
             $totalFee = (float) ($code->consultation_fee ?? 0);
@@ -1955,7 +2013,10 @@ public function generateCode()
 
         // Landlord bonuses by agent user id
         $landlordBonuses = \App\Models\LandlordBonus::with(['agent.user'])
-            ->whereBetween('date', [$startDate ?? '1900-01-01', $endDate])
+            ->where(function($q) use ($startDate, $endDate) {
+                $q->whereBetween('date', [$startDate, $endDate])
+                  ->orWhere('status', '!=', 'paid');
+            })
             ->get()
             ->filter(function($bonus) use ($agentId) {
                 return $bonus->agent && $bonus->agent->user && (int)$bonus->agent->user->id === (int)$agentId;
@@ -2188,20 +2249,31 @@ public function generateCode()
             'payment_method' => ['nullable', 'in:Cash,Transfer,Card machine'],
         ]);
 
-        $startDate = $validated['start_date'] ?? null;
-        $endDate = $validated['end_date'] ?? now()->format('Y-m-d');
+        // Commission cycle defaults: 11th -> 10th; restrict to current cycle by default
+        $today = now();
+        if ($today->day <= 10) {
+            $cycleStart = $today->copy()->subMonthNoOverflow()->day(11);
+            $cycleEnd = $today->copy()->day(10);
+        } else {
+            $cycleStart = $today->copy()->day(11);
+            $cycleEnd = $today->copy()->addMonthNoOverflow()->day(10);
+        }
+        $cycleStartDate = $cycleStart->toDateString();
+        $cycleEndDate = min($today->toDateString(), $cycleEnd->toDateString());
+
+        $startDate = $validated['start_date'] ?? $cycleStartDate;
+        $endDate = $validated['end_date'] ?? $cycleEndDate;
         $status = $validated['status'] ?? null;
         $paymentMethod = $validated['payment_method'] ?? null;
 
         // Build query with filters
         $query = RentalCode::with('client');
         
-        if ($startDate) {
-            $query->where('rental_date', '>=', $startDate);
-        }
-        if ($endDate) {
-            $query->where('rental_date', '<=', $endDate);
-        }
+        // Current cycle rentals OR any unpaid rentals (carry over)
+        $query->where(function($q) use ($startDate, $endDate) {
+            $q->whereBetween('rental_date', [$startDate, $endDate])
+              ->orWhere('paid', false);
+        });
         if ($status) {
             $query->where('status', $status);
         } else {
