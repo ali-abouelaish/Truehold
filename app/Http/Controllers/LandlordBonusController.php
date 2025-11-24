@@ -199,42 +199,31 @@ class LandlordBonusController extends Controller
         }
 
         try {
-            // Load bonuses with agent information
-            $bonuses = LandlordBonus::with(['agent.user'])
-                ->whereIn('id', $bonusIds)
-                ->get();
+            // Load bonuses
+            $bonuses = LandlordBonus::whereIn('id', $bonusIds)->get();
 
             if ($bonuses->isEmpty()) {
                 return redirect()->back()->with('error', 'No valid bonuses found.');
             }
 
-            // Group bonuses by agent
-            $bonusesByAgent = $bonuses->groupBy('agent_id');
+            // Group bonuses by landlord name
+            $bonusesByLandlord = $bonuses->groupBy('landlord');
 
             DB::beginTransaction();
 
             $createdInvoices = [];
 
-            foreach ($bonusesByAgent as $agentId => $agentBonuses) {
-                $firstBonus = $agentBonuses->first();
-                $agent = $firstBonus->agent;
-                $agentUser = $agent->user ?? null;
-
-                if (!$agentUser) {
-                    continue; // Skip if agent doesn't have a user
-                }
+            foreach ($bonusesByLandlord as $landlordName => $landlordBonuses) {
+                $firstBonus = $landlordBonuses->first();
 
                 // Prepare invoice items from bonuses
                 $invoiceItems = [];
                 $totalAmount = 0;
 
-                foreach ($agentBonuses as $bonus) {
+                foreach ($landlordBonuses as $bonus) {
                     $description = "Landlord Bonus - {$bonus->bonus_code}";
                     if ($bonus->property) {
                         $description .= " ({$bonus->property})";
-                    }
-                    if ($bonus->landlord) {
-                        $description .= " - {$bonus->landlord}";
                     }
                     if ($bonus->client) {
                         $description .= " - Client: {$bonus->client}";
@@ -243,17 +232,17 @@ class LandlordBonusController extends Controller
                     $invoiceItems[] = [
                         'description' => $description,
                         'quantity' => 1,
-                        'rate' => (float) $bonus->agent_commission,
+                        'rate' => (float) $bonus->commission,
                     ];
 
-                    $totalAmount += (float) $bonus->agent_commission;
+                    $totalAmount += (float) $bonus->commission;
                 }
 
-                // Get client information (use agent's details or first bonus's landlord)
-                $clientName = $agentUser->name ?? 'Agent';
-                $clientAddress = $agent->address ?? 'Address not provided';
-                $clientEmail = $agentUser->email ?? null;
-                $clientPhone = $agent->phone ?? null;
+                // Use landlord name as client (receiver)
+                $clientName = $landlordName ?? 'Landlord';
+                $clientAddress = null; // Landlord address not available in bonus data
+                $clientEmail = null; // Landlord email not available in bonus data
+                $clientPhone = null; // Landlord phone not available in bonus data
 
                 // Create invoice
                 $invoice = new Invoice();
@@ -278,11 +267,18 @@ class LandlordBonusController extends Controller
                 $invoice->bank_name = 'Business Banking';
                 
                 // Add notes about the bonuses
-                $bonusCodes = $agentBonuses->pluck('bonus_code')->implode(', ');
+                $bonusCodes = $landlordBonuses->pluck('bonus_code')->implode(', ');
                 $invoice->notes = "Invoice generated from Landlord Bonuses: {$bonusCodes}";
                 
                 $invoice->calculateTotals();
                 $invoice->save();
+
+                // Mark bonuses as paid and link to invoice
+                $bonusIds = $landlordBonuses->pluck('id')->toArray();
+                LandlordBonus::whereIn('id', $bonusIds)->update([
+                    'status' => 'paid',
+                    'updated_at' => now(),
+                ]);
 
                 $createdInvoices[] = $invoice;
             }
