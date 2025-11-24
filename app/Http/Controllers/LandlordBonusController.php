@@ -5,8 +5,10 @@ namespace App\Http\Controllers;
 use App\Models\LandlordBonus;
 use App\Models\Agent;
 use App\Models\User;
+use App\Models\Invoice;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class LandlordBonusController extends Controller
 {
@@ -174,5 +176,137 @@ class LandlordBonusController extends Controller
 
         return redirect()->route('landlord-bonuses.index')
             ->with('success', 'Landlord bonus deleted successfully.');
+    }
+
+    /**
+     * Generate invoice from selected landlord bonuses
+     */
+    public function generateInvoice(Request $request)
+    {
+        $user = auth()->user();
+        if (!$user || $user->role !== 'admin') {
+            return redirect()->back()->with('error', 'Only administrators can generate invoices.');
+        }
+
+        $validated = $request->validate([
+            'bonus_ids' => 'required|string',
+        ]);
+
+        $bonusIds = json_decode($validated['bonus_ids'], true);
+        
+        if (empty($bonusIds) || !is_array($bonusIds)) {
+            return redirect()->back()->with('error', 'Please select at least one bonus to generate an invoice.');
+        }
+
+        try {
+            // Load bonuses with agent information
+            $bonuses = LandlordBonus::with(['agent.user'])
+                ->whereIn('id', $bonusIds)
+                ->get();
+
+            if ($bonuses->isEmpty()) {
+                return redirect()->back()->with('error', 'No valid bonuses found.');
+            }
+
+            // Group bonuses by agent
+            $bonusesByAgent = $bonuses->groupBy('agent_id');
+
+            DB::beginTransaction();
+
+            $createdInvoices = [];
+
+            foreach ($bonusesByAgent as $agentId => $agentBonuses) {
+                $firstBonus = $agentBonuses->first();
+                $agent = $firstBonus->agent;
+                $agentUser = $agent->user ?? null;
+
+                if (!$agentUser) {
+                    continue; // Skip if agent doesn't have a user
+                }
+
+                // Prepare invoice items from bonuses
+                $invoiceItems = [];
+                $totalAmount = 0;
+
+                foreach ($agentBonuses as $bonus) {
+                    $description = "Landlord Bonus - {$bonus->bonus_code}";
+                    if ($bonus->property) {
+                        $description .= " ({$bonus->property})";
+                    }
+                    if ($bonus->landlord) {
+                        $description .= " - {$bonus->landlord}";
+                    }
+                    if ($bonus->client) {
+                        $description .= " - Client: {$bonus->client}";
+                    }
+
+                    $invoiceItems[] = [
+                        'description' => $description,
+                        'quantity' => 1,
+                        'rate' => (float) $bonus->agent_commission,
+                    ];
+
+                    $totalAmount += (float) $bonus->agent_commission;
+                }
+
+                // Get client information (use agent's details or first bonus's landlord)
+                $clientName = $agentUser->name ?? 'Agent';
+                $clientAddress = $agent->address ?? 'Address not provided';
+                $clientEmail = $agentUser->email ?? null;
+                $clientPhone = $agent->phone ?? null;
+
+                // Create invoice
+                $invoice = new Invoice();
+                $invoice->invoice_number = $invoice->generateInvoiceNumber();
+                $invoice->invoice_date = now()->toDateString();
+                $invoice->due_date = now()->addDays(30)->toDateString();
+                $invoice->payment_terms = '30 days';
+                $invoice->client_name = $clientName;
+                $invoice->client_address = $clientAddress;
+                $invoice->client_email = $clientEmail;
+                $invoice->client_phone = $clientPhone;
+                $invoice->agent_name = auth()->user()->name ?? 'System';
+                $invoice->items = $invoiceItems;
+                $invoice->tax_rate = 0;
+                
+                // Set company details
+                $invoice->company_name = 'Truehold Group Limited';
+                $invoice->company_address = 'Business Banking';
+                $invoice->account_holder_name = 'TRUEHOLD GROUP LTD';
+                $invoice->account_number = '63935841';
+                $invoice->sort_code = '20-41-50';
+                $invoice->bank_name = 'Business Banking';
+                
+                // Add notes about the bonuses
+                $bonusCodes = $agentBonuses->pluck('bonus_code')->implode(', ');
+                $invoice->notes = "Invoice generated from Landlord Bonuses: {$bonusCodes}";
+                
+                $invoice->calculateTotals();
+                $invoice->save();
+
+                $createdInvoices[] = $invoice;
+            }
+
+            DB::commit();
+
+            if (count($createdInvoices) === 1) {
+                // Single invoice created, redirect to it
+                return redirect()->route('admin.invoices.show', $createdInvoices[0])
+                    ->with('success', 'Invoice generated successfully from selected bonuses!');
+            } else {
+                // Multiple invoices created, redirect to invoice index
+                return redirect()->route('admin.invoices.index')
+                    ->with('success', count($createdInvoices) . ' invoices generated successfully from selected bonuses!');
+            }
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            \Log::error('Failed to generate invoice from landlord bonuses', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            
+            return redirect()->back()->with('error', 'Failed to generate invoice: ' . $e->getMessage());
+        }
     }
 }

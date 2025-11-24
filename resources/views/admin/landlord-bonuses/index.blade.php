@@ -25,6 +25,13 @@
                             <h5 class="card-title mb-0">Landlord Bonus Records</h5>
                         </div>
                         <div class="col-auto">
+                            <form id="generateInvoiceForm" method="POST" action="{{ route('landlord-bonuses.generate-invoice') }}" class="d-inline me-2" style="display: none;">
+                                @csrf
+                                <input type="hidden" name="bonus_ids" id="selectedBonusIds" value="">
+                                <button type="submit" class="btn btn-success" id="generateInvoiceBtn">
+                                    <i class="fas fa-file-invoice me-1"></i> Generate Invoice
+                                </button>
+                            </form>
                             <a href="{{ route('landlord-bonuses.create') }}" class="btn btn-primary">
                                 <i class="fas fa-plus me-1"></i> Add Landlord Bonus
                             </a>
@@ -43,6 +50,9 @@
                         <table class="table table-striped table-hover">
                             <thead class="table-dark">
                                 <tr>
+                                    <th>
+                                        <input type="checkbox" id="selectAllBonuses" class="form-check-input">
+                                    </th>
                                     <th>Bonus Code</th>
                                     <th>Date</th>
                                     <th>Agent</th>
@@ -58,6 +68,9 @@
                             <tbody>
                                 @forelse($landlordBonuses as $bonus)
                                 <tr>
+                                    <td>
+                                        <input type="checkbox" class="form-check-input bonus-checkbox" value="{{ $bonus->id }}" data-bonus-id="{{ $bonus->id }}">
+                                    </td>
                                     <td>
                                         <span class="badge bg-primary fs-6">{{ $bonus->bonus_code }}</span>
                                     </td>
@@ -143,7 +156,7 @@
                                 </tr>
                                 @empty
                                 <tr>
-                                    <td colspan="10" class="text-center py-4">
+                                    <td colspan="11" class="text-center py-4">
                                         <div class="text-muted">
                                             <i class="fas fa-gift fa-3x mb-3"></i>
                                             <h5>No Landlord Bonuses Found</h5>
@@ -169,4 +182,79 @@
         </div>
     </div>
 </div>
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const selectAllCheckbox = document.getElementById('selectAllBonuses');
+    const bonusCheckboxes = document.querySelectorAll('.bonus-checkbox');
+    const generateInvoiceForm = document.getElementById('generateInvoiceForm');
+    const generateInvoiceBtn = document.getElementById('generateInvoiceBtn');
+    const selectedBonusIdsInput = document.getElementById('selectedBonusIds');
+
+    // Select all functionality
+    if (selectAllCheckbox) {
+        selectAllCheckbox.addEventListener('change', function() {
+            bonusCheckboxes.forEach(checkbox => {
+                checkbox.checked = this.checked;
+            });
+            updateGenerateInvoiceButton();
+        });
+    }
+
+    // Individual checkbox change
+    bonusCheckboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', function() {
+            updateSelectAllState();
+            updateGenerateInvoiceButton();
+        });
+    });
+
+    function updateSelectAllState() {
+        const checkedBoxes = document.querySelectorAll('.bonus-checkbox:checked');
+        if (selectAllCheckbox) {
+            if (checkedBoxes.length === 0) {
+                selectAllCheckbox.indeterminate = false;
+                selectAllCheckbox.checked = false;
+            } else if (checkedBoxes.length === bonusCheckboxes.length) {
+                selectAllCheckbox.indeterminate = false;
+                selectAllCheckbox.checked = true;
+            } else {
+                selectAllCheckbox.indeterminate = true;
+            }
+        }
+    }
+
+    function updateGenerateInvoiceButton() {
+        const checkedBoxes = document.querySelectorAll('.bonus-checkbox:checked');
+        const selectedIds = Array.from(checkedBoxes).map(cb => cb.value);
+        
+        if (selectedIds.length > 0) {
+            generateInvoiceForm.style.display = 'inline-block';
+            selectedBonusIdsInput.value = JSON.stringify(selectedIds);
+        } else {
+            generateInvoiceForm.style.display = 'none';
+            selectedBonusIdsInput.value = '';
+        }
+    }
+
+    // Form submission confirmation
+    if (generateInvoiceForm) {
+        generateInvoiceForm.addEventListener('submit', function(e) {
+            const checkedBoxes = document.querySelectorAll('.bonus-checkbox:checked');
+            if (checkedBoxes.length === 0) {
+                e.preventDefault();
+                alert('Please select at least one bonus to generate an invoice.');
+                return false;
+            }
+            
+            if (!confirm(`Generate invoice for ${checkedBoxes.length} selected bonus(es)?`)) {
+                e.preventDefault();
+                return false;
+            }
+        });
+    }
+});
+</script>
+@endpush
 @endsection

@@ -281,6 +281,7 @@ Route::middleware('auth')->prefix('admin')->group(function () {
     // Landlord Bonus Management Routes
     Route::resource('landlord-bonuses', \App\Http\Controllers\LandlordBonusController::class);
     Route::post('/landlord-bonuses/bulk-mark-paid', [\App\Http\Controllers\LandlordBonusController::class, 'bulkMarkPaid'])->name('landlord-bonuses.bulk-mark-paid');
+    Route::post('/landlord-bonuses/generate-invoice', [\App\Http\Controllers\LandlordBonusController::class, 'generateInvoice'])->name('landlord-bonuses.generate-invoice');
     Route::get('/rental-codes/agent/{agentName}', [RentalCodeController::class, 'agentDetails'])->name('rental-codes.agent-details');
     Route::get('/rental-codes/{rentalCode}/details', [RentalCodeController::class, 'getRentalDetails'])->name('rental-codes.details');
     
