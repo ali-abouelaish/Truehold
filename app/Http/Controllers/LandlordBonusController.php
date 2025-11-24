@@ -190,6 +190,10 @@ class LandlordBonusController extends Controller
 
         $validated = $request->validate([
             'bonus_ids' => 'required|string',
+            'recipient_name' => 'required|string|max:255',
+            'recipient_address' => 'required|string',
+            'recipient_email' => 'nullable|email|max:255',
+            'recipient_phone' => 'nullable|string|max:50',
         ]);
 
         $bonusIds = json_decode($validated['bonus_ids'], true);
@@ -211,15 +215,11 @@ class LandlordBonusController extends Controller
             // Prepare invoice items from all bonuses
             $invoiceItems = [];
             $totalAmount = 0;
-            $uniqueLandlords = [];
 
             foreach ($bonuses as $bonus) {
                 $description = "Landlord Bonus - {$bonus->bonus_code}";
                 if ($bonus->landlord) {
                     $description .= " - Landlord: {$bonus->landlord}";
-                    if (!in_array($bonus->landlord, $uniqueLandlords)) {
-                        $uniqueLandlords[] = $bonus->landlord;
-                    }
                 }
                 if ($bonus->property) {
                     $description .= " ({$bonus->property})";
@@ -237,13 +237,11 @@ class LandlordBonusController extends Controller
                 $totalAmount += (float) $bonus->commission;
             }
 
-            // Use landlord name(s) as client (receiver)
-            $clientName = !empty($uniqueLandlords) 
-                ? (count($uniqueLandlords) === 1 ? $uniqueLandlords[0] : implode(', ', $uniqueLandlords))
-                : 'Landlord';
-            $clientAddress = null; // Landlord address not available in bonus data
-            $clientEmail = null; // Landlord email not available in bonus data
-            $clientPhone = null; // Landlord phone not available in bonus data
+            // Use provided recipient information
+            $clientName = $validated['recipient_name'];
+            $clientAddress = $validated['recipient_address'];
+            $clientEmail = $validated['recipient_email'] ?? null;
+            $clientPhone = $validated['recipient_phone'] ?? null;
 
             // Create single invoice
             $invoice = new Invoice();

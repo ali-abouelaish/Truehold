@@ -25,13 +25,9 @@
                             <h5 class="card-title mb-0">Landlord Bonus Records</h5>
                         </div>
                         <div class="col-auto">
-                            <form id="generateInvoiceForm" method="POST" action="{{ route('landlord-bonuses.generate-invoice') }}" class="d-inline me-2" style="display: none;">
-                                @csrf
-                                <input type="hidden" name="bonus_ids" id="selectedBonusIds" value="">
-                                <button type="submit" class="btn btn-success" id="generateInvoiceBtn">
-                                    <i class="fas fa-file-invoice me-1"></i> Generate Invoice
-                                </button>
-                            </form>
+                            <button type="button" class="btn btn-success me-2" id="generateInvoiceBtn" style="display: none;" data-bs-toggle="modal" data-bs-target="#invoiceRecipientModal">
+                                <i class="fas fa-file-invoice me-1"></i> Generate Invoice
+                            </button>
                             <a href="{{ route('landlord-bonuses.create') }}" class="btn btn-primary">
                                 <i class="fas fa-plus me-1"></i> Add Landlord Bonus
                             </a>
@@ -183,6 +179,56 @@
     </div>
 </div>
 
+<!-- Invoice Recipient Modal -->
+<div class="modal fade" id="invoiceRecipientModal" tabindex="-1" aria-labelledby="invoiceRecipientModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="invoiceRecipientModalLabel">
+                    <i class="fas fa-file-invoice me-2"></i>Generate Invoice - Recipient Details
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="generateInvoiceForm" method="POST" action="{{ route('landlord-bonuses.generate-invoice') }}">
+                @csrf
+                <input type="hidden" name="bonus_ids" id="selectedBonusIds" value="">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="recipient_name" class="form-label">
+                            Recipient Name <span class="text-danger">*</span>
+                        </label>
+                        <input type="text" class="form-control" id="recipient_name" name="recipient_name" required placeholder="Enter recipient name">
+                        <small class="form-text text-muted">The name of the person or company receiving the invoice</small>
+                    </div>
+                    <div class="mb-3">
+                        <label for="recipient_address" class="form-label">
+                            Recipient Address <span class="text-danger">*</span>
+                        </label>
+                        <textarea class="form-control" id="recipient_address" name="recipient_address" rows="4" required placeholder="Enter recipient address"></textarea>
+                        <small class="form-text text-muted">Full address of the recipient</small>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="recipient_email" class="form-label">Recipient Email</label>
+                            <input type="email" class="form-control" id="recipient_email" name="recipient_email" placeholder="Enter recipient email (optional)">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="recipient_phone" class="form-label">Recipient Phone</label>
+                            <input type="text" class="form-control" id="recipient_phone" name="recipient_phone" placeholder="Enter recipient phone (optional)">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-file-invoice me-1"></i> Generate Invoice
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function() {
@@ -191,6 +237,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const generateInvoiceForm = document.getElementById('generateInvoiceForm');
     const generateInvoiceBtn = document.getElementById('generateInvoiceBtn');
     const selectedBonusIdsInput = document.getElementById('selectedBonusIds');
+    const invoiceRecipientModal = document.getElementById('invoiceRecipientModal');
 
     // Select all functionality
     if (selectAllCheckbox) {
@@ -230,15 +277,22 @@ document.addEventListener('DOMContentLoaded', function() {
         const selectedIds = Array.from(checkedBoxes).map(cb => cb.value);
         
         if (selectedIds.length > 0) {
-            generateInvoiceForm.style.display = 'inline-block';
+            generateInvoiceBtn.style.display = 'inline-block';
             selectedBonusIdsInput.value = JSON.stringify(selectedIds);
         } else {
-            generateInvoiceForm.style.display = 'none';
+            generateInvoiceBtn.style.display = 'none';
             selectedBonusIdsInput.value = '';
         }
     }
 
-    // Form submission confirmation
+    // Reset form when modal is closed
+    if (invoiceRecipientModal) {
+        invoiceRecipientModal.addEventListener('hidden.bs.modal', function() {
+            generateInvoiceForm.reset();
+        });
+    }
+
+    // Form submission - ensure bonus IDs are set
     if (generateInvoiceForm) {
         generateInvoiceForm.addEventListener('submit', function(e) {
             const checkedBoxes = document.querySelectorAll('.bonus-checkbox:checked');
@@ -248,10 +302,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 return false;
             }
             
-            if (!confirm(`Generate invoice for ${checkedBoxes.length} selected bonus(es)?`)) {
-                e.preventDefault();
-                return false;
-            }
+            // Ensure bonus IDs are set before submission
+            const selectedIds = Array.from(checkedBoxes).map(cb => cb.value);
+            selectedBonusIdsInput.value = JSON.stringify(selectedIds);
         });
     }
 });
