@@ -206,94 +206,85 @@ class LandlordBonusController extends Controller
                 return redirect()->back()->with('error', 'No valid bonuses found.');
             }
 
-            // Group bonuses by landlord name
-            $bonusesByLandlord = $bonuses->groupBy('landlord');
-
             DB::beginTransaction();
 
-            $createdInvoices = [];
+            // Prepare invoice items from all bonuses
+            $invoiceItems = [];
+            $totalAmount = 0;
+            $uniqueLandlords = [];
 
-            foreach ($bonusesByLandlord as $landlordName => $landlordBonuses) {
-                $firstBonus = $landlordBonuses->first();
-
-                // Prepare invoice items from bonuses
-                $invoiceItems = [];
-                $totalAmount = 0;
-
-                foreach ($landlordBonuses as $bonus) {
-                    $description = "Landlord Bonus - {$bonus->bonus_code}";
-                    if ($bonus->property) {
-                        $description .= " ({$bonus->property})";
+            foreach ($bonuses as $bonus) {
+                $description = "Landlord Bonus - {$bonus->bonus_code}";
+                if ($bonus->landlord) {
+                    $description .= " - Landlord: {$bonus->landlord}";
+                    if (!in_array($bonus->landlord, $uniqueLandlords)) {
+                        $uniqueLandlords[] = $bonus->landlord;
                     }
-                    if ($bonus->client) {
-                        $description .= " - Client: {$bonus->client}";
-                    }
-
-                    $invoiceItems[] = [
-                        'description' => $description,
-                        'quantity' => 1,
-                        'rate' => (float) $bonus->commission,
-                    ];
-
-                    $totalAmount += (float) $bonus->commission;
+                }
+                if ($bonus->property) {
+                    $description .= " ({$bonus->property})";
+                }
+                if ($bonus->client) {
+                    $description .= " - Client: {$bonus->client}";
                 }
 
-                // Use landlord name as client (receiver)
-                $clientName = $landlordName ?? 'Landlord';
-                $clientAddress = null; // Landlord address not available in bonus data
-                $clientEmail = null; // Landlord email not available in bonus data
-                $clientPhone = null; // Landlord phone not available in bonus data
+                $invoiceItems[] = [
+                    'description' => $description,
+                    'quantity' => 1,
+                    'rate' => (float) $bonus->commission,
+                ];
 
-                // Create invoice
-                $invoice = new Invoice();
-                $invoice->invoice_number = $invoice->generateInvoiceNumber();
-                $invoice->invoice_date = now()->toDateString();
-                $invoice->due_date = now()->addDays(30)->toDateString();
-                $invoice->payment_terms = '30 days';
-                $invoice->client_name = $clientName;
-                $invoice->client_address = $clientAddress;
-                $invoice->client_email = $clientEmail;
-                $invoice->client_phone = $clientPhone;
-                $invoice->agent_name = auth()->user()->name ?? 'System';
-                $invoice->items = $invoiceItems;
-                $invoice->tax_rate = 0;
-                
-                // Set company details
-                $invoice->company_name = 'Truehold Group Limited';
-                $invoice->company_address = 'Business Banking';
-                $invoice->account_holder_name = 'TRUEHOLD GROUP LTD';
-                $invoice->account_number = '63935841';
-                $invoice->sort_code = '20-41-50';
-                $invoice->bank_name = 'Business Banking';
-                
-                // Add notes about the bonuses
-                $bonusCodes = $landlordBonuses->pluck('bonus_code')->implode(', ');
-                $invoice->notes = "Invoice generated from Landlord Bonuses: {$bonusCodes}";
-                
-                $invoice->calculateTotals();
-                $invoice->save();
-
-                // Mark bonuses as paid and link to invoice
-                $bonusIds = $landlordBonuses->pluck('id')->toArray();
-                LandlordBonus::whereIn('id', $bonusIds)->update([
-                    'status' => 'paid',
-                    'updated_at' => now(),
-                ]);
-
-                $createdInvoices[] = $invoice;
+                $totalAmount += (float) $bonus->commission;
             }
+
+            // Use landlord name(s) as client (receiver)
+            $clientName = !empty($uniqueLandlords) 
+                ? (count($uniqueLandlords) === 1 ? $uniqueLandlords[0] : implode(', ', $uniqueLandlords))
+                : 'Landlord';
+            $clientAddress = null; // Landlord address not available in bonus data
+            $clientEmail = null; // Landlord email not available in bonus data
+            $clientPhone = null; // Landlord phone not available in bonus data
+
+            // Create single invoice
+            $invoice = new Invoice();
+            $invoice->invoice_number = $invoice->generateInvoiceNumber();
+            $invoice->invoice_date = now()->toDateString();
+            $invoice->due_date = now()->addDays(30)->toDateString();
+            $invoice->payment_terms = '30 days';
+            $invoice->client_name = $clientName;
+            $invoice->client_address = $clientAddress;
+            $invoice->client_email = $clientEmail;
+            $invoice->client_phone = $clientPhone;
+            $invoice->agent_name = auth()->user()->name ?? 'System';
+            $invoice->items = $invoiceItems;
+            $invoice->tax_rate = 0;
+            
+            // Set company details
+            $invoice->company_name = 'Truehold Group Limited';
+            $invoice->company_address = 'Business Banking';
+            $invoice->account_holder_name = 'TRUEHOLD GROUP LTD';
+            $invoice->account_number = '63935841';
+            $invoice->sort_code = '20-41-50';
+            $invoice->bank_name = 'Business Banking';
+            
+            // Add notes about the bonuses
+            $bonusCodes = $bonuses->pluck('bonus_code')->implode(', ');
+            $invoice->notes = "Invoice generated from Landlord Bonuses: {$bonusCodes}";
+            
+            $invoice->calculateTotals();
+            $invoice->save();
+
+            // Mark all bonuses as paid
+            LandlordBonus::whereIn('id', $bonusIds)->update([
+                'status' => 'paid',
+                'updated_at' => now(),
+            ]);
 
             DB::commit();
 
-            if (count($createdInvoices) === 1) {
-                // Single invoice created, redirect to it
-                return redirect()->route('admin.invoices.show', $createdInvoices[0])
-                    ->with('success', 'Invoice generated successfully from selected bonuses!');
-            } else {
-                // Multiple invoices created, redirect to invoice index
-                return redirect()->route('admin.invoices.index')
-                    ->with('success', count($createdInvoices) . ' invoices generated successfully from selected bonuses!');
-            }
+            // Redirect to the created invoice
+            return redirect()->route('admin.invoices.show', $invoice)
+                ->with('success', 'Invoice generated successfully from selected bonuses!');
 
         } catch (\Exception $e) {
             DB::rollBack();
