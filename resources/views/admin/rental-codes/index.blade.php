@@ -1030,7 +1030,31 @@ function bulkAction(action) {
 
 // Export to CSV
 function exportToCSV() {
-    // Implement CSV export logic
+    // Get current filter parameters from the form
+    const form = document.querySelector('form[method="GET"][action*="rental-codes"]');
+    const params = new URLSearchParams();
+    
+    if (form) {
+        const searchInput = form.querySelector('input[name="q"]');
+        const paymentMethodSelect = form.querySelector('select[name="payment_method"]');
+        const agentSelect = form.querySelector('select[name="agent_id"]');
+        
+        if (searchInput && searchInput.value) {
+            params.append('q', searchInput.value);
+        }
+        if (paymentMethodSelect && paymentMethodSelect.value) {
+            params.append('payment_method', paymentMethodSelect.value);
+        }
+        if (agentSelect && agentSelect.value) {
+            params.append('agent_id', agentSelect.value);
+        }
+    }
+    
+    // Build export URL with current filters
+    const exportUrl = '{{ route("rental-codes.export") }}' + (params.toString() ? '?' + params.toString() : '');
+    
+    // Open export URL in new window to trigger download
+    window.location.href = exportUrl;
 }
 
 // Print table

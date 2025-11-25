@@ -7,6 +7,7 @@ use App\Models\Agent;
 use App\Models\User;
 use App\Models\Client;
 use App\Services\WhatsAppService;
+use App\Services\GoogleSheetsService;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Mail;
@@ -305,6 +306,18 @@ class RentalCodeController extends Controller
 
         // Send WhatsApp notifications
         $this->sendWhatsAppNotifications($rentalCode, $client);
+
+        // Send to Google Sheets
+        try {
+            $googleSheetsService = new GoogleSheetsService();
+            $googleSheetsService->appendRentalCode($rentalCode);
+        } catch (\Exception $e) {
+            \Log::error('Failed to send rental code to Google Sheets', [
+                'rental_code_id' => $rentalCode->id,
+                'error' => $e->getMessage()
+            ]);
+            // Don't fail the request if Google Sheets fails
+        }
 
         return redirect()->route('rental-codes.index')
             ->with('success', 'Rental code created successfully and notifications sent!');
@@ -3014,5 +3027,105 @@ public function generateCode()
             
             abort(500, 'Failed to view file');
         }
+    }
+
+    /**
+     * Export rental codes to CSV
+     */
+    public function export(Request $request)
+    {
+        $query = RentalCode::with(['client', 'rentalAgent', 'marketingAgentUser']);
+
+        // Apply same filters as index method
+        $search = trim((string)$request->input('q', ''));
+        if ($search !== '') {
+            $query->where(function($q) use ($search) {
+                $q->where('rental_code', 'like', '%' . $search . '%')
+                  ->orWhere('property', 'like', '%' . $search . '%')
+                  ->orWhere('licensor', 'like', '%' . $search . '%')
+                  ->orWhere('notes', 'like', '%' . $search . '%')
+                  ->orWhere('payment_method', 'like', '%' . $search . '%')
+                  ->orWhereHas('client', function($cq) use ($search) {
+                      $cq->where('full_name', 'like', '%' . $search . '%')
+                         ->orWhere('email', 'like', '%' . $search . '%')
+                         ->orWhere('phone_number', 'like', '%' . $search . '%');
+                  });
+            });
+        }
+
+        // Filter by payment method
+        $paymentMethod = $request->input('payment_method');
+        if (!empty($paymentMethod)) {
+            $query->where('payment_method', $paymentMethod);
+        }
+
+        // Filter by agent (either rental or marketing agent)
+        $agentId = $request->input('agent_id');
+        if (!empty($agentId)) {
+            $query->where(function($q) use ($agentId) {
+                $q->where('rental_agent_id', (int)$agentId)
+                  ->orWhere('marketing_agent_id', (int)$agentId);
+            });
+        }
+
+        // Get all results (no pagination)
+        $rentalCodes = $query->orderBy('created_at', 'desc')->get();
+
+        $filename = 'rental_codes_export_' . date('Y-m-d_H-i-s') . '.csv';
+        
+        $headers = [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+        ];
+        
+        $callback = function() use ($rentalCodes) {
+            $file = fopen('php://output', 'w');
+            
+            // CSV headers
+            fputcsv($file, [
+                'Rental Code',
+                'Rental Date',
+                'Client Name',
+                'Client Email',
+                'Client Phone',
+                'Property',
+                'Licensor',
+                'Consultation Fee',
+                'Payment Method',
+                'Status',
+                'Rental Agent',
+                'Marketing Agent',
+                'Client Count',
+                'Notes',
+                'Created At',
+                'Updated At'
+            ]);
+            
+            // CSV data
+            foreach ($rentalCodes as $rentalCode) {
+                fputcsv($file, [
+                    $rentalCode->rental_code ?? 'N/A',
+                    $rentalCode->rental_date ? $rentalCode->rental_date->format('Y-m-d') : 'N/A',
+                    $rentalCode->client->full_name ?? 'N/A',
+                    $rentalCode->client->email ?? 'N/A',
+                    $rentalCode->client->phone_number ?? 'N/A',
+                    $rentalCode->property ?? 'N/A',
+                    $rentalCode->licensor ?? 'N/A',
+                    number_format($rentalCode->consultation_fee ?? 0, 2),
+                    $rentalCode->payment_method ?? 'N/A',
+                    ucfirst($rentalCode->status ?? 'N/A'),
+                    $rentalCode->rentalAgent->name ?? 'N/A',
+                    $rentalCode->marketingAgentUser->name ?? 'N/A',
+                    $rentalCode->client_count ?? 1,
+                    $rentalCode->notes ?? '',
+                    $rentalCode->created_at ? $rentalCode->created_at->format('Y-m-d H:i:s') : 'N/A',
+                    $rentalCode->updated_at ? $rentalCode->updated_at->format('Y-m-d H:i:s') : 'N/A',
+                ]);
+            }
+            
+            fclose($file);
+        };
+        
+        return response()->stream($callback, 200, $headers);
     }
 }

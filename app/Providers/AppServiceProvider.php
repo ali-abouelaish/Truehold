@@ -13,7 +13,13 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        // Ensure Google API Client classes are autoloaded
+        if (class_exists('Composer\Autoload\ClassLoader')) {
+            $loader = require base_path('vendor/autoload.php');
+            // Force load Google API client namespace
+            $loader->addPsr4('Google\\', base_path('vendor/google/apiclient/src'));
+            $loader->addPsr4('Google\\Service\\', base_path('vendor/google/apiclient-services/src'));
+        }
     }
 
     /**

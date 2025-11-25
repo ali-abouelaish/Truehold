@@ -270,8 +270,10 @@ Route::middleware('auth')->prefix('admin')->group(function () {
     Route::post('/clients/{client}/toggle-registration', [AdminController::class, 'toggleRegistrationStatus'])->name('admin.clients.toggle-registration');
     
     // Rental Code Management Routes
-    Route::resource('rental-codes', RentalCodeController::class);
+    // Specific routes must be defined BEFORE resource routes to avoid conflicts
+    Route::get('/rental-codes/export', [RentalCodeController::class, 'export'])->name('rental-codes.export');
     Route::get('/rental-codes/generate-code', [RentalCodeController::class, 'generateCode'])->name('rental-codes.generate-code');
+    Route::resource('rental-codes', RentalCodeController::class);
     Route::post('/rental-codes/{rentalCode}/mark-paid', [RentalCodeController::class, 'markAsPaid'])->name('rental-codes.mark-paid');
     Route::post('/rental-codes/{rentalCode}/mark-unpaid', [RentalCodeController::class, 'markAsUnpaid'])->name('rental-codes.mark-unpaid');
     Route::post('/rental-codes/{rentalCode}/update-status', [RentalCodeController::class, 'updateStatus'])->name('rental-codes.update-status');

@@ -37,6 +37,12 @@ return [
 
     'google' => [
         'maps_api_key' => env('GOOGLE_MAPS_API_KEY'),
+        'sheets' => [
+            'spreadsheet_id' => env('GOOGLE_SHEETS_SPREADSHEET_ID'),
+            'sheet_name' => env('GOOGLE_SHEETS_SHEET_NAME', 'Sheet1'),
+            'credentials_path' => env('GOOGLE_SHEETS_CREDENTIALS_PATH'),
+            'credentials_json' => env('GOOGLE_SHEETS_CREDENTIALS_JSON'),
+        ],
     ],
 
     'twilio' => [
