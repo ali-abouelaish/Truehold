@@ -3,7 +3,17 @@
 require __DIR__.'/vendor/autoload.php';
 
 $app = require_once __DIR__.'/bootstrap/app.php';
-$app->make('Illuminate\Contracts\Console\Kernel')->bootstrap();
+$kernel = $app->make('Illuminate\Contracts\Console\Kernel');
+$kernel->bootstrap();
+
+// Check if Google API Client is available
+if (!class_exists('Google\Client')) {
+    echo "❌ ERROR: Google API Client classes not found!\n";
+    echo "Please run on the server:\n";
+    echo "  composer install\n";
+    echo "  composer dump-autoload\n\n";
+    exit(1);
+}
 
 // Check configuration
 $spreadsheetId = config('services.google.sheets.spreadsheet_id');

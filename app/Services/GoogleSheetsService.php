@@ -2,9 +2,9 @@
 
 namespace App\Services;
 
-use Google\Client;
-use Google\Service\Sheets;
-use Google\Service\Sheets\ValueRange;
+use Google\Client as GoogleClient;
+use Google\Service\Sheets as GoogleSheets;
+use Google\Service\Sheets\ValueRange as GoogleSheetsValueRange;
 use Illuminate\Support\Facades\Log;
 
 class GoogleSheetsService
@@ -35,9 +35,9 @@ class GoogleSheetsService
     protected function initializeClient()
     {
         try {
-            $this->client = new Client();
+            $this->client = new GoogleClient();
             $this->client->setApplicationName('Property Scraper App');
-            $this->client->setScopes([Sheets::SPREADSHEETS]);
+            $this->client->setScopes([GoogleSheets::SPREADSHEETS]);
             $this->client->setAccessType('offline');
             $this->client->setPrompt('select_account consent');
 
@@ -56,7 +56,7 @@ class GoogleSheetsService
                 }
             }
 
-            $this->service = new Sheets($this->client);
+            $this->service = new GoogleSheets($this->client);
         } catch (\Exception $e) {
             Log::error('Failed to initialize Google Sheets client', [
                 'error' => $e->getMessage(),
@@ -139,7 +139,7 @@ class GoogleSheetsService
 
             // Append the row (10 columns: A to J)
             $range = $this->sheetName . '!A:J';
-            $valueRange = new ValueRange();
+            $valueRange = new GoogleSheetsValueRange();
             $valueRange->setValues([$rowData]);
             $valueRange->setMajorDimension('ROWS');
 
@@ -192,7 +192,7 @@ class GoogleSheetsService
                     'Agent cut'
                 ];
 
-                $valueRange = new ValueRange();
+                $valueRange = new GoogleSheetsValueRange();
                 $valueRange->setValues([$headers]);
                 $valueRange->setMajorDimension('ROWS');
 
