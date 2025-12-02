@@ -2947,28 +2947,30 @@ public function generateCode()
                 abort(404, 'No file found for this field');
             }
 
-            // Handle array fields (JSON string or array)
+            // Handle array fields (JSON string or array) - with backward compatibility for old single-string records
             if (is_string($fieldValue)) {
                 $decoded = json_decode($fieldValue, true);
                 if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
-                    // It's a JSON array
+                    // It's a JSON array (new format with multiple files)
                     if (isset($decoded[$index])) {
                         $filePath = $decoded[$index];
                     } else {
                         abort(404, 'File index not found');
                     }
                 } else {
-                    // It's a single string path
+                    // It's a single string path (old format - backward compatibility)
+                    // For old records, ignore index and use the single string
                     $filePath = $fieldValue;
                 }
             } elseif (is_array($fieldValue)) {
-                // Already an array
+                // Already an array (new format)
                 if (isset($fieldValue[$index])) {
                     $filePath = $fieldValue[$index];
                 } else {
                     abort(404, 'File index not found');
                 }
             } else {
+                // Fallback for other types (backward compatibility)
                 $filePath = $fieldValue;
             }
 
@@ -3038,28 +3040,30 @@ public function generateCode()
                 abort(404, 'No file found for this field');
             }
 
-            // Handle array fields (JSON string or array)
+            // Handle array fields (JSON string or array) - with backward compatibility for old single-string records
             if (is_string($fieldValue)) {
                 $decoded = json_decode($fieldValue, true);
                 if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
-                    // It's a JSON array
+                    // It's a JSON array (new format with multiple files)
                     if (isset($decoded[$index])) {
                         $filePath = $decoded[$index];
                     } else {
                         abort(404, 'File index not found');
                     }
                 } else {
-                    // It's a single string path
+                    // It's a single string path (old format - backward compatibility)
+                    // For old records, ignore index and use the single string
                     $filePath = $fieldValue;
                 }
             } elseif (is_array($fieldValue)) {
-                // Already an array
+                // Already an array (new format)
                 if (isset($fieldValue[$index])) {
                     $filePath = $fieldValue[$index];
                 } else {
                     abort(404, 'File index not found');
                 }
             } else {
+                // Fallback for other types (backward compatibility)
                 $filePath = $fieldValue;
             }
 

@@ -641,19 +641,21 @@ strong {
                         @php
                             $clientContracts = null;
                             if ($rentalCode->client_contract) {
-                                // Check if it's a JSON string or already an array
+                                // Handle both new format (JSON array) and old format (single string) for backward compatibility
                                 if (is_string($rentalCode->client_contract)) {
                                     $decoded = json_decode($rentalCode->client_contract, true);
-                                    // If JSON decode was successful and it's an array, use it
+                                    // If JSON decode was successful and it's an array, use it (new format)
                                     if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
                                         $clientContracts = $decoded;
                                     } else {
-                                        // If it's a single string path, convert to array
+                                        // If it's a single string path (old format), convert to array for consistent display
                                         $clientContracts = [$rentalCode->client_contract];
                                     }
                                 } elseif (is_array($rentalCode->client_contract)) {
+                                    // Already an array (new format)
                                     $clientContracts = $rentalCode->client_contract;
                                 } else {
+                                    // Fallback: wrap in array for backward compatibility
                                     $clientContracts = [$rentalCode->client_contract];
                                 }
                             }
