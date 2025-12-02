@@ -2918,32 +2918,64 @@ public function generateCode()
         try {
             // Get the file path for the specified field
             $filePath = null;
+            $fieldValue = null;
+            
             switch ($field) {
                 case 'client_contract':
-                    $filePath = $rentalCode->client_contract;
+                    $fieldValue = $rentalCode->client_contract;
                     break;
                 case 'payment_proof':
-                    $filePath = $rentalCode->payment_proof;
+                    $fieldValue = $rentalCode->payment_proof;
                     break;
                 case 'client_id_document':
-                    $filePath = $rentalCode->client_id_document;
+                    $fieldValue = $rentalCode->client_id_document;
                     break;
                 case 'client_id_image':
-                    $filePath = $rentalCode->client_id_image;
+                    $fieldValue = $rentalCode->client_id_image;
                     break;
                 case 'cash_receipt_image':
-                    $filePath = $rentalCode->cash_receipt_image;
+                    $fieldValue = $rentalCode->cash_receipt_image;
                     break;
                 case 'contact_images':
-                    $filePath = $rentalCode->contact_images;
+                    $fieldValue = $rentalCode->contact_images;
                     break;
                 default:
                     abort(404, 'File type not found');
             }
 
+            if (!$fieldValue || empty($fieldValue)) {
+                abort(404, 'No file found for this field');
+            }
+
+            // Handle array fields (JSON string or array)
+            if (is_string($fieldValue)) {
+                $decoded = json_decode($fieldValue, true);
+                if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+                    // It's a JSON array
+                    if (isset($decoded[$index])) {
+                        $filePath = $decoded[$index];
+                    } else {
+                        abort(404, 'File index not found');
+                    }
+                } else {
+                    // It's a single string path
+                    $filePath = $fieldValue;
+                }
+            } elseif (is_array($fieldValue)) {
+                // Already an array
+                if (isset($fieldValue[$index])) {
+                    $filePath = $fieldValue[$index];
+                } else {
+                    abort(404, 'File index not found');
+                }
+            } else {
+                $filePath = $fieldValue;
+            }
+
             if (!$filePath || empty($filePath)) {
                 abort(404, 'No file found for this field');
             }
+            
             $fullPath = storage_path('app/public/' . $filePath);
 
             if (!file_exists($fullPath)) {
@@ -2977,32 +3009,64 @@ public function generateCode()
         try {
             // Get the file path for the specified field
             $filePath = null;
+            $fieldValue = null;
+            
             switch ($field) {
                 case 'client_contract':
-                    $filePath = $rentalCode->client_contract;
+                    $fieldValue = $rentalCode->client_contract;
                     break;
                 case 'payment_proof':
-                    $filePath = $rentalCode->payment_proof;
+                    $fieldValue = $rentalCode->payment_proof;
                     break;
                 case 'client_id_document':
-                    $filePath = $rentalCode->client_id_document;
+                    $fieldValue = $rentalCode->client_id_document;
                     break;
                 case 'client_id_image':
-                    $filePath = $rentalCode->client_id_image;
+                    $fieldValue = $rentalCode->client_id_image;
                     break;
                 case 'cash_receipt_image':
-                    $filePath = $rentalCode->cash_receipt_image;
+                    $fieldValue = $rentalCode->cash_receipt_image;
                     break;
                 case 'contact_images':
-                    $filePath = $rentalCode->contact_images;
+                    $fieldValue = $rentalCode->contact_images;
                     break;
                 default:
                     abort(404, 'File type not found');
             }
 
+            if (!$fieldValue || empty($fieldValue)) {
+                abort(404, 'No file found for this field');
+            }
+
+            // Handle array fields (JSON string or array)
+            if (is_string($fieldValue)) {
+                $decoded = json_decode($fieldValue, true);
+                if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+                    // It's a JSON array
+                    if (isset($decoded[$index])) {
+                        $filePath = $decoded[$index];
+                    } else {
+                        abort(404, 'File index not found');
+                    }
+                } else {
+                    // It's a single string path
+                    $filePath = $fieldValue;
+                }
+            } elseif (is_array($fieldValue)) {
+                // Already an array
+                if (isset($fieldValue[$index])) {
+                    $filePath = $fieldValue[$index];
+                } else {
+                    abort(404, 'File index not found');
+                }
+            } else {
+                $filePath = $fieldValue;
+            }
+
             if (!$filePath || empty($filePath)) {
                 abort(404, 'No file found for this field');
             }
+            
             $fullPath = storage_path('app/public/' . $filePath);
 
             if (!file_exists($fullPath)) {

@@ -638,26 +638,50 @@ strong {
                 <div class="card-body">
                     <div class="row">
                         <!-- Client Contract -->
-                        @if($rentalCode->client_contract && !empty($rentalCode->client_contract))
+                        @php
+                            $clientContracts = null;
+                            if ($rentalCode->client_contract) {
+                                // Check if it's a JSON string or already an array
+                                if (is_string($rentalCode->client_contract)) {
+                                    $decoded = json_decode($rentalCode->client_contract, true);
+                                    // If JSON decode was successful and it's an array, use it
+                                    if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+                                        $clientContracts = $decoded;
+                                    } else {
+                                        // If it's a single string path, convert to array
+                                        $clientContracts = [$rentalCode->client_contract];
+                                    }
+                                } elseif (is_array($rentalCode->client_contract)) {
+                                    $clientContracts = $rentalCode->client_contract;
+                                } else {
+                                    $clientContracts = [$rentalCode->client_contract];
+                                }
+                            }
+                        @endphp
+                        @if($clientContracts && is_array($clientContracts) && count($clientContracts) > 0)
                         <div class="col-md-4 mb-3">
                             <div class="document-item">
                                 <div class="d-flex align-items-center">
                                     <i class="fas fa-file-contract text-primary me-3 fs-4"></i>
                                     <div>
                                         <h6 class="mb-1">Client Contract</h6>
-                                        <small class="text-muted">Contract document</small>
+                                        <small class="text-muted">{{ count($clientContracts) }} document(s)</small>
                                     </div>
                                 </div>
                                 <div class="mt-2">
-                                    <a href="{{ route('rental-codes.view-file', ['rentalCode' => $rentalCode->id, 'field' => 'client_contract']) }}" 
-                                       target="_blank" 
-                                       class="btn btn-outline-primary btn-sm me-2">
-                                        <i class="fas fa-eye me-1"></i>View Document
-                                    </a>
-                                    <a href="{{ route('rental-codes.download-file', ['rentalCode' => $rentalCode->id, 'field' => 'client_contract']) }}" 
-                                       class="btn btn-outline-secondary btn-sm me-2">
-                                        <i class="fas fa-download me-1"></i>Download
-                                    </a>
+                                    @foreach($clientContracts as $index => $contract)
+                                        @if($contract && is_string($contract))
+                                            <a href="{{ route('rental-codes.view-file', ['rentalCode' => $rentalCode->id, 'field' => 'client_contract', 'index' => $index]) }}" 
+                                               target="_blank" 
+                                               class="btn btn-outline-primary btn-sm me-1 mb-1">
+                                                <i class="fas fa-eye me-1"></i>View {{ $index + 1 }}
+                                            </a>
+                                            <a href="{{ route('rental-codes.download-file', ['rentalCode' => $rentalCode->id, 'field' => 'client_contract', 'index' => $index]) }}" 
+                                               class="btn btn-outline-secondary btn-sm me-1 mb-1">
+                                                <i class="fas fa-download me-1"></i>Download {{ $index + 1 }}
+                                            </a>
+                                        @endif
+                                    @endforeach
                                 </div>
                             </div>
                         </div>
@@ -807,10 +831,21 @@ strong {
                     <!-- No Documents Message -->
                     @php
                         $hasDocuments = false;
-                        if ($rentalCode->client_contract || $rentalCode->payment_proof || $rentalCode->client_id_document || 
+                        // Check client_contract (can be array or string)
+                        if ($rentalCode->client_contract) {
+                            $contracts = is_string($rentalCode->client_contract) ? json_decode($rentalCode->client_contract, true) : $rentalCode->client_contract;
+                            if (is_array($contracts) && count($contracts) > 0) {
+                                $hasDocuments = true;
+                            } elseif (is_string($rentalCode->client_contract) && !empty($rentalCode->client_contract)) {
+                                $hasDocuments = true;
+                            }
+                        }
+                        // Check other single file fields
+                        if ($rentalCode->payment_proof || $rentalCode->client_id_document || 
                             $rentalCode->client_id_image || $rentalCode->cash_receipt_image) {
                             $hasDocuments = true;
                         }
+                        // Check contact_images array
                         if ($rentalCode->contact_images) {
                             $contactImages = is_string($rentalCode->contact_images) ? json_decode($rentalCode->contact_images, true) : $rentalCode->contact_images;
                             if ($contactImages && is_array($contactImages) && count($contactImages) > 0) {
