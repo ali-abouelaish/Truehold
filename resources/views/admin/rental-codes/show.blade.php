@@ -663,7 +663,7 @@ strong {
                         @if($clientContracts && is_array($clientContracts) && count($clientContracts) > 0)
                         <div class="col-md-4 mb-3">
                             <div class="document-item">
-                                <div class="d-flex align-items-center">
+                                <div class="d-flex align-items-center mb-3">
                                     <i class="fas fa-file-contract text-primary me-3 fs-4"></i>
                                     <div>
                                         <h6 class="mb-1">Client Contract</h6>
@@ -672,16 +672,29 @@ strong {
                                 </div>
                                 <div class="mt-2">
                                     @foreach($clientContracts as $index => $contract)
-                                        @if($contract && is_string($contract))
-                                            <a href="{{ route('rental-codes.view-file', ['rentalCode' => $rentalCode->id, 'field' => 'client_contract', 'index' => $index]) }}" 
-                                               target="_blank" 
-                                               class="btn btn-outline-primary btn-sm me-1 mb-1">
-                                                <i class="fas fa-eye me-1"></i>View {{ $index + 1 }}
-                                            </a>
-                                            <a href="{{ route('rental-codes.download-file', ['rentalCode' => $rentalCode->id, 'field' => 'client_contract', 'index' => $index]) }}" 
-                                               class="btn btn-outline-secondary btn-sm me-1 mb-1">
-                                                <i class="fas fa-download me-1"></i>Download {{ $index + 1 }}
-                                            </a>
+                                        @if($contract && is_string($contract) && !empty(trim($contract)))
+                                            <div class="mb-2">
+                                                <div class="d-flex align-items-center mb-1">
+                                                    <span class="text-muted me-2" style="font-size: 0.875rem;">Document {{ $index + 1 }}:</span>
+                                                    <span class="text-info" style="font-size: 0.875rem;">{{ basename($contract) }}</span>
+                                                </div>
+                                                <div>
+                                                    <a href="{{ route('rental-codes.view-file', ['rentalCode' => $rentalCode->id, 'field' => 'client_contract', 'index' => $index]) }}" 
+                                                       target="_blank" 
+                                                       class="btn btn-outline-primary btn-sm me-2" 
+                                                       style="border-color: #3b82f6 !important; color: #3b82f6 !important; background-color: transparent !important;">
+                                                        <i class="fas fa-eye me-1"></i>View
+                                                    </a>
+                                                    <a href="{{ route('rental-codes.download-file', ['rentalCode' => $rentalCode->id, 'field' => 'client_contract', 'index' => $index]) }}" 
+                                                       class="btn btn-outline-secondary btn-sm" 
+                                                       style="border-color: #6b7280 !important; color: #d1d5db !important; background-color: transparent !important;">
+                                                        <i class="fas fa-download me-1"></i>Download
+                                                    </a>
+                                                </div>
+                                            </div>
+                                            @if(!$loop->last)
+                                                <hr style="border-color: #4b5563; margin: 0.75rem 0;">
+                                            @endif
                                         @endif
                                     @endforeach
                                 </div>
