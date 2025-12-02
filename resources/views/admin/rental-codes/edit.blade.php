@@ -245,6 +245,76 @@
                     </div>
                 </div>
 
+                <!-- Existing Documents -->
+                @php
+                    // Parse existing client contracts (handle both old single string and new array format)
+                    $existingClientContracts = null;
+                    if ($rentalCode->client_contract) {
+                        if (is_string($rentalCode->client_contract)) {
+                            $decoded = json_decode($rentalCode->client_contract, true);
+                            if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+                                $existingClientContracts = $decoded;
+                            } else {
+                                $existingClientContracts = [$rentalCode->client_contract];
+                            }
+                        } elseif (is_array($rentalCode->client_contract)) {
+                            $existingClientContracts = $rentalCode->client_contract;
+                        } else {
+                            $existingClientContracts = [$rentalCode->client_contract];
+                        }
+                    }
+                @endphp
+                @if($existingClientContracts && is_array($existingClientContracts) && count($existingClientContracts) > 0)
+                <div class="card shadow mb-4">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-file-alt me-2"></i>Existing Documents
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-12">
+                                <h6 class="mb-3">
+                                    <i class="fas fa-file-contract text-primary me-2"></i>Client Contracts ({{ count($existingClientContracts) }})
+                                </h6>
+                                <div class="list-group">
+                                    @foreach($existingClientContracts as $index => $contract)
+                                        @if($contract && is_string($contract))
+                                            <div class="list-group-item d-flex justify-content-between align-items-center">
+                                                <div class="d-flex align-items-center">
+                                                    <i class="fas fa-file-contract text-primary me-3"></i>
+                                                    <div>
+                                                        <strong>{{ basename($contract) }}</strong>
+                                                        <br>
+                                                        <small class="text-muted">Document {{ $index + 1 }}</small>
+                                                    </div>
+                                                </div>
+                                                <div>
+                                                    <a href="{{ route('rental-codes.view-file', ['rentalCode' => $rentalCode->id, 'field' => 'client_contract', 'index' => $index]) }}" 
+                                                       target="_blank" 
+                                                       class="btn btn-sm btn-outline-primary me-2">
+                                                        <i class="fas fa-eye me-1"></i>View
+                                                    </a>
+                                                    <a href="{{ route('rental-codes.download-file', ['rentalCode' => $rentalCode->id, 'field' => 'client_contract', 'index' => $index]) }}" 
+                                                       class="btn btn-sm btn-outline-secondary me-2">
+                                                        <i class="fas fa-download me-1"></i>Download
+                                                    </a>
+                                                    <button type="button" 
+                                                            class="btn btn-sm btn-outline-danger" 
+                                                            onclick="removeDocument('client_contract', {{ $index }})">
+                                                        <i class="fas fa-trash me-1"></i>Remove
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        @endif
+                                    @endforeach
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                @endif
+
                 <!-- Document Uploads -->
                 <div class="card shadow mb-4">
                     <div class="card-header bg-primary text-white">
@@ -262,7 +332,7 @@
                                     <input type="file" class="form-control @error('client_contract.*') is-invalid @enderror" 
                                            id="client_contract" name="client_contract[]" multiple 
                                            accept=".pdf,.jpg,.jpeg,.png">
-                                    <small class="form-text text-muted">PDF, JPG, PNG files (max 10MB each)</small>
+                                    <small class="form-text text-muted">PDF, JPG, PNG files (max 10MB each). New files will be added to existing documents.</small>
                                     @error('client_contract.*')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
@@ -329,16 +399,56 @@
                         </div>
                     </div>
                 </div>
+                
+                <!-- Hidden input to track documents to remove -->
+                <input type="hidden" id="removed_client_contracts" name="removed_client_contracts" value="">
             </form>
         </div>
     </div>
 </div>
 
 <script>
+// Track removed documents
+let removedClientContracts = [];
+
+// Remove document function
+function removeDocument(field, index) {
+    if (confirm('Are you sure you want to remove this document? This action cannot be undone.')) {
+        if (field === 'client_contract') {
+            removedClientContracts.push(index);
+            document.getElementById('removed_client_contracts').value = JSON.stringify(removedClientContracts);
+            
+            // Hide the removed document in the UI
+            const listItems = document.querySelectorAll('.list-group-item');
+            listItems.forEach((item, idx) => {
+                if (item.querySelector(`button[onclick*="removeDocument('client_contract', ${index})"]`)) {
+                    item.style.opacity = '0.5';
+                    item.style.textDecoration = 'line-through';
+                    item.querySelector('button[onclick*="removeDocument"]').disabled = true;
+                    item.querySelector('button[onclick*="removeDocument"]').innerHTML = '<i class="fas fa-check me-1"></i>Marked for Removal';
+                }
+            });
+        }
+    }
+}
+
 // Form reset function
 function resetForm() {
     if (confirm('Are you sure you want to reset all changes?')) {
         document.getElementById('editRentalCodeForm').reset();
+        removedClientContracts = [];
+        document.getElementById('removed_client_contracts').value = '';
+        
+        // Reset UI changes
+        document.querySelectorAll('.list-group-item').forEach(item => {
+            item.style.opacity = '1';
+            item.style.textDecoration = 'none';
+            const removeBtn = item.querySelector('button[onclick*="removeDocument"]');
+            if (removeBtn) {
+                removeBtn.disabled = false;
+                removeBtn.innerHTML = '<i class="fas fa-trash me-1"></i>Remove';
+            }
+        });
     }
 }
 

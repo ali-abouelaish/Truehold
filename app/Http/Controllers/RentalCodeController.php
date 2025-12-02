@@ -407,6 +407,9 @@ class RentalCodeController extends Controller
         // Remove client selection field from rental code data
         unset($rentalCodeData['existing_client_id']);
 
+        // Handle document removal before updating
+        $this->handleDocumentRemoval($request, $rentalCode);
+
         $rentalCode->update($rentalCodeData);
 
         // Handle file uploads for updates
@@ -2804,6 +2807,81 @@ public function generateCode()
     }
 
     /**
+     * Handle document removal for rental codes
+     */
+    private function handleDocumentRemoval(Request $request, RentalCode $rentalCode)
+    {
+        if ($request->has('removed_client_contracts') && !empty($request->input('removed_client_contracts'))) {
+            $removedIndices = json_decode($request->input('removed_client_contracts'), true);
+            
+            if (is_array($removedIndices) && count($removedIndices) > 0) {
+                // Get current client contracts
+                $currentContracts = null;
+                if ($rentalCode->client_contract) {
+                    if (is_string($rentalCode->client_contract)) {
+                        $decoded = json_decode($rentalCode->client_contract, true);
+                        if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+                            $currentContracts = $decoded;
+                        } else {
+                            $currentContracts = [$rentalCode->client_contract];
+                        }
+                    } elseif (is_array($rentalCode->client_contract)) {
+                        $currentContracts = $rentalCode->client_contract;
+                    } else {
+                        $currentContracts = [$rentalCode->client_contract];
+                    }
+                }
+                
+                if ($currentContracts && is_array($currentContracts)) {
+                    // Remove files at specified indices (sort descending to maintain indices)
+                    rsort($removedIndices);
+                    foreach ($removedIndices as $index) {
+                        if (isset($currentContracts[$index])) {
+                            // Delete the file from storage
+                            $filePath = $currentContracts[$index];
+                            $fullPath = storage_path('app/public/' . $filePath);
+                            if (file_exists($fullPath)) {
+                                try {
+                                    unlink($fullPath);
+                                    \Log::info('Deleted client contract file', [
+                                        'rental_code_id' => $rentalCode->id,
+                                        'file_path' => $filePath
+                                    ]);
+                                } catch (\Exception $e) {
+                                    \Log::error('Failed to delete client contract file', [
+                                        'rental_code_id' => $rentalCode->id,
+                                        'file_path' => $filePath,
+                                        'error' => $e->getMessage()
+                                    ]);
+                                }
+                            }
+                            // Remove from array
+                            unset($currentContracts[$index]);
+                        }
+                    }
+                    
+                    // Re-index array and update
+                    $currentContracts = array_values($currentContracts);
+                    
+                    if (count($currentContracts) > 0) {
+                        $rentalCode->client_contract = json_encode($currentContracts);
+                    } else {
+                        $rentalCode->client_contract = null;
+                    }
+                    
+                    $rentalCode->save();
+                    
+                    \Log::info('Document removal completed', [
+                        'rental_code_id' => $rentalCode->id,
+                        'removed_indices' => $removedIndices,
+                        'remaining_count' => count($currentContracts)
+                    ]);
+                }
+            }
+        }
+    }
+
+    /**
      * Handle file uploads for rental codes - Simplified and reliable
      */
     private function handleFileUploads(Request $request, RentalCode $rentalCode)
@@ -2861,21 +2939,39 @@ public function generateCode()
             'field' => $fieldName
         ]);
         
-        // For simplicity, just store the first valid file as a text path
-        $storedPath = null;
+        // Get existing files for this field (to append new ones)
+        $existingFiles = [];
+        $currentValue = $rentalCode->$fieldName;
+        if ($currentValue) {
+            if (is_string($currentValue)) {
+                $decoded = json_decode($currentValue, true);
+                if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+                    $existingFiles = $decoded;
+                } else {
+                    // Old format - single string, convert to array
+                    $existingFiles = [$currentValue];
+                }
+            } elseif (is_array($currentValue)) {
+                $existingFiles = $currentValue;
+            } else {
+                $existingFiles = [$currentValue];
+            }
+        }
+        
+        // Store all valid files
+        $storedPaths = $existingFiles; // Start with existing files
         
         foreach ($files as $index => $file) {
             if ($file && $file->isValid() && $file->getSize() > 0) {
                 try {
                     $path = $file->store($storagePath, 'public');
-                    $storedPath = $path;
+                    $storedPaths[] = $path; // Add to array
                     \Log::info("Stored file for {$fieldName}", [
                         'index' => $index,
                         'path' => $path,
                         'size' => $file->getSize(),
                         'name' => $file->getClientOriginalName()
                     ]);
-                    break; // Only store the first valid file
                 } catch (\Exception $e) {
                     \Log::error("Failed to store file for {$fieldName}", [
                         'index' => $index,
@@ -2893,17 +2989,24 @@ public function generateCode()
             }
         }
         
-        // Update the field with simple text path
+        // Update the field with JSON array (or single string for backward compatibility if only one file)
         try {
-            $rentalCode->update([$fieldName => $storedPath]);
-            \Log::info("Updated {$fieldName} field", [
-                'path' => $storedPath,
-                'success' => $storedPath !== null
-            ]);
+            if (count($storedPaths) > 0) {
+                if (count($storedPaths) === 1) {
+                    // For backward compatibility, store as single string if only one file
+                    $rentalCode->update([$fieldName => $storedPaths[0]]);
+                } else {
+                    // Store as JSON array for multiple files
+                    $rentalCode->update([$fieldName => json_encode($storedPaths)]);
+                }
+                \Log::info("Updated {$fieldName} field", [
+                    'total_files' => count($storedPaths),
+                    'success' => true
+                ]);
+            }
         } catch (\Exception $e) {
             \Log::error("Failed to update {$fieldName} field in database", [
                 'error' => $e->getMessage(),
-                'path' => $storedPath,
                 'rental_code_id' => $rentalCode->id
             ]);
         }
