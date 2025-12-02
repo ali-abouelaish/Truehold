@@ -381,6 +381,18 @@ class ImportNewScrapeProperties extends Command
                     $cleaned[$key] = $this->cleanString($value);
                     break;
                     
+                case 'paying':
+                    // Handle paying column - normalize to yes/no
+                    $payingValue = strtolower(trim($value));
+                    if (in_array($payingValue, ['yes', 'y', '1', 'true'])) {
+                        $cleaned[$key] = 'yes';
+                    } elseif (in_array($payingValue, ['no', 'n', '0', 'false', ''])) {
+                        $cleaned[$key] = 'no';
+                    } else {
+                        $cleaned[$key] = $this->cleanString($value);
+                    }
+                    break;
+                    
                 default:
                     // Clean special characters and encoding issues
                     $cleaned[$key] = $this->cleanString($value);

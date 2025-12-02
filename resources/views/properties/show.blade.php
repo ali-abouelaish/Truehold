@@ -1716,7 +1716,12 @@
                                 <span>Property Manager</span>
                             </h2>
                             <div class="bg-blue-50 p-4 rounded-12 border border-blue-200">
-                                <p class="text-gray-700 font-medium">{{ $property->agent_name }}</p>
+                                <p class="text-gray-700 font-medium">
+                                    {{ $property->agent_name }}
+                                    @if($property->paying && in_array(strtolower(trim($property->paying)), ['yes', 'y', '1', 'true']))
+                                        <span class="ml-2">⚡</span>
+                                    @endif
+                                </p>
                             </div>
                         </div>
                     @elseif($property->agent_name && $property->agent_name !== 'N/A')

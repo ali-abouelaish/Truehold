@@ -56,13 +56,26 @@ class PropertyController extends Controller
         $propertyTypes = Property::distinct()->pluck('property_type')->filter()->sort()->values();
         $availableDates = Property::distinct()->pluck('available_date')->filter()->sort()->values();
         
-        // Get agent names - only for authenticated users
+        // Get agent names with paying status - only for authenticated users
         if (auth()->check()) {
             $agentNames = Property::distinct()->pluck('agent_name')->filter()->sort()->values();
+            // Get agents with paying status
+            $agentsWithPaying = Property::whereNotNull('agent_name')
+                ->where('agent_name', '!=', '')
+                ->select('agent_name', 'paying')
+                ->get()
+                ->groupBy('agent_name')
+                ->map(function ($properties) {
+                    // Check if any property for this agent has paying = 'yes'
+                    return $properties->contains(function ($property) {
+                        return strtolower($property->paying ?? '') === 'yes';
+                    });
+                });
             \Log::info('Agent names found for authenticated user:', $agentNames->toArray());
             \Log::info('Total properties with agent_name:', ['count' => Property::whereNotNull('agent_name')->where('agent_name', '!=', '')->count()]);
         } else {
             $agentNames = collect(); // Empty collection for non-authenticated users
+            $agentsWithPaying = collect();
             \Log::info('User not authenticated, agent names not available');
         }
 
@@ -82,7 +95,7 @@ class PropertyController extends Controller
             'management_company_filter' => $request->input('management_company')
         ]);
 
-        return view('properties.index', compact('properties', 'locations', 'propertyTypes', 'availableDates', 'agentNames'));
+        return view('properties.index', compact('properties', 'locations', 'propertyTypes', 'availableDates', 'agentNames', 'agentsWithPaying'));
     }
 
     /**
@@ -147,11 +160,24 @@ class PropertyController extends Controller
         $propertyTypes = Property::distinct()->pluck('property_type')->sort()->values();
         $availableDates = Property::distinct()->pluck('available_date')->sort()->values();
         
-        // Get agent names - only for authenticated users
+        // Get agent names with paying status - only for authenticated users
         if (auth()->check()) {
             $agentNames = Property::distinct()->pluck('agent_name')->filter()->sort()->values();
+            // Get agents with paying status
+            $agentsWithPaying = Property::whereNotNull('agent_name')
+                ->where('agent_name', '!=', '')
+                ->select('agent_name', 'paying')
+                ->get()
+                ->groupBy('agent_name')
+                ->map(function ($properties) {
+                    // Check if any property for this agent has paying = 'yes'
+                    return $properties->contains(function ($property) {
+                        return strtolower($property->paying ?? '') === 'yes';
+                    });
+                });
         } else {
-            $agentNames = collect(); // Empty collection for non-authenticated users
+            $agentNames = collect();
+            $agentsWithPaying = collect();
         }
 
         // Get properties with all necessary fields for map display
@@ -183,7 +209,7 @@ class PropertyController extends Controller
             })
         ]);
 
-        return view('properties.map', compact('properties', 'locations', 'propertyTypes', 'availableDates', 'agentNames'));
+        return view('properties.map', compact('properties', 'locations', 'propertyTypes', 'availableDates', 'agentNames', 'agentsWithPaying'));
     }
 
     /**

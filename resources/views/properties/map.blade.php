@@ -968,7 +968,7 @@
                                 <option value="">All Agents</option>
                                 @foreach($agentNames as $agent)
                                     <option value="{{ $agent }}" {{ request('agent_name') == $agent ? 'selected' : '' }}>
-                                        {{ $agent }}
+                                        {{ $agent }}@if(isset($agentsWithPaying[$agent]) && $agentsWithPaying[$agent]) ⚡@endif
                                     </option>
                                 @endforeach
                             </select>
