@@ -256,22 +256,22 @@
                         @php
                             $bt = $agent['bonus_totals'] ?? ['count'=>0,'agent_commission'=>0,'paid'=>0,'entitled'=>0,'outstanding'=>0];
                         @endphp
-                        <div class="row mb-3 p-2">
+                        <div class="row mb-3 p-3" style="background-color: #374151 !important; border-radius: 8px; border: 1px solid #4b5563 !important;">
                             <div class="col-md-3">
-                                <div class="text-muted">Bonuses</div>
-                                <div class="font-weight-bold">{{ $bt['count'] }}</div>
+                                <div style="color: #d1d5db !important; font-weight: 600; font-size: 0.95rem;">Bonuses</div>
+                                <div class="font-weight-bold" style="color: #ffffff !important; font-size: 1.2rem;">{{ $bt['count'] }}</div>
                             </div>
                             <div class="col-md-3">
-                                <div class="text-muted">Agent Commission</div>
-                                <div class="font-weight-bold text-success">£{{ number_format($bt['agent_commission'], 2) }}</div>
+                                <div style="color: #d1d5db !important; font-weight: 600; font-size: 0.95rem;">Agent Commission</div>
+                                <div class="font-weight-bold" style="color: #60a5fa !important; font-size: 1.3rem;">£{{ number_format($bt['agent_commission'], 2) }}</div>
                             </div>
                             <div class="col-md-3">
-                                <div class="text-muted">Paid</div>
-                                <div class="font-weight-bold text-success">£{{ number_format($bt['paid'], 2) }}</div>
+                                <div style="color: #d1d5db !important; font-weight: 600; font-size: 0.95rem;">Paid</div>
+                                <div class="font-weight-bold" style="color: #34d399 !important; font-size: 1.2rem;">£{{ number_format($bt['paid'], 2) }}</div>
                             </div>
                             <div class="col-md-3">
-                                <div class="text-muted">To Be Paid</div>
-                                <div class="font-weight-bold text-warning">£{{ number_format($bt['entitled'], 2) }}</div>
+                                <div style="color: #d1d5db !important; font-weight: 600; font-size: 0.95rem;">To Be Paid</div>
+                                <div class="font-weight-bold" style="color: #fbbf24 !important; font-size: 1.3rem;">£{{ number_format($bt['entitled'], 2) }}</div>
                             </div>
                         </div>
                         @auth

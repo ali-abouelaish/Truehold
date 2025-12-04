@@ -2999,10 +2999,10 @@ public function generateCode()
                     // Store as JSON array for multiple files
                     $rentalCode->update([$fieldName => json_encode($storedPaths)]);
                 }
-                \Log::info("Updated {$fieldName} field", [
+            \Log::info("Updated {$fieldName} field", [
                     'total_files' => count($storedPaths),
                     'success' => true
-                ]);
+            ]);
             }
         } catch (\Exception $e) {
             \Log::error("Failed to update {$fieldName} field in database", [

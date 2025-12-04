@@ -645,18 +645,30 @@ strong {
                                 if (is_string($rentalCode->client_contract)) {
                                     $decoded = json_decode($rentalCode->client_contract, true);
                                     // If JSON decode was successful and it's an array, use it (new format)
-                                    if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
-                                        $clientContracts = $decoded;
+                                    if (json_last_error() === JSON_ERROR_NONE && is_array($decoded) && count($decoded) > 0) {
+                                        $clientContracts = array_filter($decoded, function($item) {
+                                            return !empty($item) && is_string($item);
+                                        });
+                                        // Re-index array after filtering
+                                        $clientContracts = array_values($clientContracts);
                                     } else {
                                         // If it's a single string path (old format), convert to array for consistent display
-                                        $clientContracts = [$rentalCode->client_contract];
+                                        if (!empty(trim($rentalCode->client_contract))) {
+                                            $clientContracts = [$rentalCode->client_contract];
+                                        }
                                     }
                                 } elseif (is_array($rentalCode->client_contract)) {
-                                    // Already an array (new format)
-                                    $clientContracts = $rentalCode->client_contract;
+                                    // Already an array (new format) - filter out empty values
+                                    $clientContracts = array_filter($rentalCode->client_contract, function($item) {
+                                        return !empty($item) && is_string($item);
+                                    });
+                                    // Re-index array after filtering
+                                    $clientContracts = array_values($clientContracts);
                                 } else {
                                     // Fallback: wrap in array for backward compatibility
-                                    $clientContracts = [$rentalCode->client_contract];
+                                    if (!empty($rentalCode->client_contract)) {
+                                        $clientContracts = [$rentalCode->client_contract];
+                                    }
                                 }
                             }
                         @endphp
@@ -680,16 +692,16 @@ strong {
                                                 </div>
                                                 <div>
                                                     <a href="{{ route('rental-codes.view-file', ['rentalCode' => $rentalCode->id, 'field' => 'client_contract', 'index' => $index]) }}" 
-                                                       target="_blank" 
+                                       target="_blank" 
                                                        class="btn btn-outline-primary btn-sm me-2" 
                                                        style="border-color: #3b82f6 !important; color: #3b82f6 !important; background-color: transparent !important;">
                                                         <i class="fas fa-eye me-1"></i>View
-                                                    </a>
+                                    </a>
                                                     <a href="{{ route('rental-codes.download-file', ['rentalCode' => $rentalCode->id, 'field' => 'client_contract', 'index' => $index]) }}" 
                                                        class="btn btn-outline-secondary btn-sm" 
                                                        style="border-color: #6b7280 !important; color: #d1d5db !important; background-color: transparent !important;">
-                                                        <i class="fas fa-download me-1"></i>Download
-                                                    </a>
+                                        <i class="fas fa-download me-1"></i>Download
+                                    </a>
                                                 </div>
                                             </div>
                                             @if(!$loop->last)
