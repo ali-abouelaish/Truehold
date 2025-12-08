@@ -1494,10 +1494,14 @@
                         
                         @auth
                         <div class="pt-4">
-                            <a href="{{ route('admin.properties.edit', $property) }}" class="action-button w-full sm:w-auto">
-                                <i class="fas fa-edit"></i>
-                                Edit Property
-                            </a>
+                            @if($property instanceof \App\Models\PropertyFromSheet)
+                                <span class="text-sm text-gray-500">Properties from Google Sheets cannot be edited through the admin panel.</span>
+                            @else
+                                <a href="{{ route('admin.properties.edit', $property->id) }}" class="action-button w-full sm:w-auto">
+                                    <i class="fas fa-edit"></i>
+                                    Edit Property
+                                </a>
+                            @endif
                         </div>
                         @endauth
                     </div>
@@ -1860,11 +1864,17 @@
                         </h2>
                         <div class="space-y-4">
                             @auth
-                            <a href="{{ route('admin.properties.edit', $property) }}" 
-                               class="action-button w-full justify-center">
-                                <i class="fas fa-edit"></i>
-                                Edit Property
-                            </a>
+                            @if($property instanceof \App\Models\PropertyFromSheet)
+                                <div class="text-sm text-gray-500 text-center p-4 bg-gray-50 rounded-lg">
+                                    Properties from Google Sheets cannot be edited through the admin panel.
+                                </div>
+                            @else
+                                <a href="{{ route('admin.properties.edit', $property->id) }}" 
+                                   class="action-button w-full justify-center">
+                                    <i class="fas fa-edit"></i>
+                                    Edit Property
+                                </a>
+                            @endif
                             @endauth
                             
                             <button onclick="shareProperty()" 

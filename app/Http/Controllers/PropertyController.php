@@ -205,30 +205,50 @@ class PropertyController extends Controller
      */
     public function show(string $id)
     {
-        // Try to get from Google Sheets first
-        $propertyData = $this->sheetsService->getPropertyById($id);
+        // Check if Google Sheets is configured
+        $useGoogleSheets = !empty(config('services.google.properties.spreadsheet_id'));
         
-        if ($propertyData) {
-            $property = new PropertyFromSheet($propertyData);
-            
-            // Load interests from database if they exist (hybrid approach)
-            // Note: This assumes property interests are still stored in DB
-            $propertyId = $property->id;
-            $interests = \App\Models\PropertyInterest::where('property_id', $propertyId)
-                ->with('client')
-                ->get();
-            
-            $property->setRelation('interests', $interests);
-            
-            $interestedClients = $interests->map(function ($interest) {
-                return $interest->client;
-            })->filter();
-            
-            $property->setRelation('interestedClients', $interestedClients);
-        } else {
-            // Fallback to database if not found in sheets
-            $property = Property::with(['interests.client', 'interestedClients'])->findOrFail($id);
+        if ($useGoogleSheets) {
+            try {
+                // Try to get from Google Sheets first
+                $propertyData = $this->sheetsService->getPropertyById($id);
+                
+                if ($propertyData) {
+                    $property = new PropertyFromSheet($propertyData);
+                    
+                    // Load interests from database if they exist (hybrid approach)
+                    // Note: This assumes property interests are still stored in DB
+                    $propertyId = $property->id;
+                    $interests = \App\Models\PropertyInterest::where('property_id', $propertyId)
+                        ->with('client')
+                        ->get();
+                    
+                    $property->setRelation('interests', $interests);
+                    
+                    $interestedClients = $interests->map(function ($interest) {
+                        return $interest->client;
+                    })->filter();
+                    
+                    $property->setRelation('interestedClients', $interestedClients);
+                    
+                    $clients = collect();
+                    if (auth()->check()) {
+                        $clients = Client::orderBy('full_name', 'asc')->get();
+                    }
+                    
+                    return view('properties.show', compact('property', 'clients'));
+                }
+            } catch (\Exception $e) {
+                \Log::error('Error loading property from Google Sheets, falling back to database', [
+                    'id' => $id,
+                    'error' => $e->getMessage()
+                ]);
+                // Fall through to database fallback
+            }
         }
+        
+        // Fallback to database if not found in sheets or Google Sheets not configured
+        $property = Property::with(['interests.client', 'interestedClients'])->findOrFail($id);
         
         $clients = collect();
         if (auth()->check()) {

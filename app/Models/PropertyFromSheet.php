@@ -257,6 +257,46 @@ class PropertyFromSheet
     }
 
     /**
+     * Convert to string (returns ID for route model binding compatibility)
+     */
+    public function __toString()
+    {
+        return (string) ($this->attributes['id'] ?? '');
+    }
+
+    /**
+     * Get the ID for route model binding
+     */
+    public function getRouteKey()
+    {
+        return $this->attributes['id'] ?? null;
+    }
+
+    /**
+     * Get the route key name
+     */
+    public function getRouteKeyName()
+    {
+        return 'id';
+    }
+
+    /**
+     * Get the value of the model's primary key
+     */
+    public function getKey()
+    {
+        return $this->attributes['id'] ?? null;
+    }
+
+    /**
+     * Get the name of the primary key
+     */
+    public function getKeyName()
+    {
+        return 'id';
+    }
+
+    /**
      * Magic method for property access
      */
     public function getAttribute($key)
