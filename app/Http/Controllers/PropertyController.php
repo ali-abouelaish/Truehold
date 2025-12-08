@@ -26,6 +26,12 @@ class PropertyController extends Controller
         // Check if Google Sheets is configured
         $useGoogleSheets = !empty(config('services.google.properties.spreadsheet_id'));
         
+        // Force clear cache if requested (for debugging)
+        if ($request->has('clear_cache')) {
+            $this->sheetsService->clearCache();
+            \Log::info('Properties cache manually cleared');
+        }
+        
         if ($useGoogleSheets) {
             try {
                 // Build filters array
@@ -95,15 +101,17 @@ class PropertyController extends Controller
                     ['path' => $request->url(), 'query' => $request->query()]
                 );
 
-                // Log filter results for debugging
-                \Log::info('Property index filters applied (Google Sheets)', [
-                    'filters' => $filters,
-                    'total_results' => $properties->total(),
-                    'current_page' => $properties->currentPage(),
-                    'per_page' => $properties->perPage(),
-                ]);
+        // Log filter results for debugging
+        \Log::info('Property index filters applied (Google Sheets)', [
+            'filters' => $filters,
+            'total_results' => $properties->total(),
+            'current_page' => $properties->currentPage(),
+            'per_page' => $properties->perPage(),
+            'data_source' => 'google_sheets',
+            'spreadsheet_id' => config('services.google.properties.spreadsheet_id'),
+        ]);
 
-                return view('properties.index', compact('properties', 'locations', 'propertyTypes', 'availableDates', 'agentNames', 'agentsWithPaying'));
+        return view('properties.index', compact('properties', 'locations', 'propertyTypes', 'availableDates', 'agentNames', 'agentsWithPaying'));
             } catch (\Exception $e) {
                 \Log::error('Error loading properties from Google Sheets, falling back to database', [
                     'error' => $e->getMessage(),
@@ -180,11 +188,13 @@ class PropertyController extends Controller
         $properties = $query->latest()->paginate(20);
 
         // Log filter results for debugging
-        \Log::info('Property index filters applied (Database)', [
+        \Log::info('Property index filters applied (Database Fallback)', [
             'filters' => $request->all(),
             'total_results' => $properties->total(),
             'current_page' => $properties->currentPage(),
             'per_page' => $properties->perPage(),
+            'data_source' => 'database',
+            'google_sheets_configured' => !empty(config('services.google.properties.spreadsheet_id')),
         ]);
 
         return view('properties.index', compact('properties', 'locations', 'propertyTypes', 'availableDates', 'agentNames', 'agentsWithPaying'));

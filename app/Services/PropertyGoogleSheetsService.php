@@ -50,29 +50,59 @@ class PropertyGoogleSheetsService
             
             if ($credentialsPath) {
                 // Handle both relative and absolute paths
-                $fullPath = $credentialsPath;
-                if (!file_exists($fullPath) && !str_starts_with($fullPath, '/')) {
-                    // Try relative to storage/app
-                    $fullPath = storage_path('app/' . ltrim($credentialsPath, '/'));
-                }
-                if (!file_exists($fullPath) && !str_starts_with($fullPath, '/')) {
-                    // Try relative to base path
-                    $fullPath = base_path($credentialsPath);
+                $pathsToTry = [];
+                
+                // If it's already an absolute path
+                if (str_starts_with($credentialsPath, '/')) {
+                    $pathsToTry[] = $credentialsPath;
+                } else {
+                    // Try as-is first (in case it's already a full path from storage_path)
+                    $pathsToTry[] = $credentialsPath;
+                    
+                    // Remove 'storage/app/' prefix if present, then add it properly
+                    $cleanPath = preg_replace('#^storage/app/#', '', $credentialsPath);
+                    $cleanPath = preg_replace('#^storage\\\\app\\\\#', '', $cleanPath); // Windows
+                    
+                    // Try storage/app path
+                    $pathsToTry[] = storage_path('app/' . ltrim($cleanPath, '/'));
+                    
+                    // Try base path
+                    $pathsToTry[] = base_path($credentialsPath);
+                    
+                    // Try base path with storage/app
+                    $pathsToTry[] = base_path('storage/app/' . ltrim($cleanPath, '/'));
                 }
                 
-                if (file_exists($fullPath)) {
+                $foundPath = null;
+                foreach ($pathsToTry as $path) {
+                    if (file_exists($path) && is_readable($path)) {
+                        $foundPath = $path;
+                        break;
+                    }
+                }
+                
+                if ($foundPath) {
                     Log::info('Loading Google Sheets credentials from file', [
-                        'path' => $fullPath,
-                        'readable' => is_readable($fullPath)
+                        'original_path' => $credentialsPath,
+                        'resolved_path' => $foundPath,
+                        'readable' => is_readable($foundPath),
+                        'file_size' => filesize($foundPath)
                     ]);
-                    $this->client->setAuthConfig($fullPath);
+                    $this->client->setAuthConfig($foundPath);
                     $credentialsLoaded = true;
                 } else {
-                    Log::warning('Google Sheets credentials file not found', [
-                        'tried_path' => $credentialsPath,
-                        'tried_full_path' => $fullPath
+                    Log::error('Google Sheets credentials file not found', [
+                        'original_path' => $credentialsPath,
+                        'paths_tried' => $pathsToTry,
+                        'storage_path' => storage_path('app'),
+                        'base_path' => base_path()
                     ]);
                 }
+            } else {
+                Log::warning('No credentials path configured', [
+                    'properties_credentials_path' => config('services.google.properties.credentials_path'),
+                    'sheets_credentials_path' => config('services.google.sheets.credentials_path')
+                ]);
             }
             
             if (!$credentialsLoaded) {
@@ -445,7 +475,9 @@ class PropertyGoogleSheetsService
      */
     public function clearCache(): void
     {
-        Cache::forget('properties_google_sheets_all');
+        $cacheKey = 'properties_google_sheets_all';
+        Cache::forget($cacheKey);
+        Log::info('Properties Google Sheets cache cleared', ['cache_key' => $cacheKey]);
     }
 
     /**
