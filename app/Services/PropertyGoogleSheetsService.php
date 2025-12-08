@@ -330,7 +330,14 @@ class PropertyGoogleSheetsService
                     // Use row number as ID if no ID column exists
                     $property[$propertyField] = $value ?: null;
                 } elseif ($propertyField === 'latitude' || $propertyField === 'longitude') {
-                    $property[$propertyField] = is_numeric($value) ? (float) $value : null;
+                    // Handle coordinates - can be string or number
+                    if (empty($value) || $value === '' || $value === 'N/A') {
+                        $property[$propertyField] = null;
+                    } else {
+                        // Try to convert to float, handle comma as decimal separator
+                        $cleanValue = str_replace(',', '.', trim($value));
+                        $property[$propertyField] = is_numeric($cleanValue) ? (float) $cleanValue : null;
+                    }
                 } elseif ($propertyField === 'photo_count') {
                     $property[$propertyField] = is_numeric($value) ? (int) $value : 0;
                 } elseif ($propertyField === 'photos') {

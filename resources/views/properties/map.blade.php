@@ -1037,7 +1037,7 @@
     <div id="map"></div>
 
     <!-- Properties Data -->
-    <div id="properties-data" style="display: none;">{!! json_encode($properties) !!}</div>
+    <div id="properties-data" style="display: none;">{!! json_encode($propertiesForJson ?? $properties->map(fn($p) => $p->toArray())) !!}</div>
 
     <!-- Google Maps API -->
     @if(config('services.google.maps_api_key') && config('services.google.maps_api_key') !== 'YOUR_GOOGLE_MAPS_API_KEY')

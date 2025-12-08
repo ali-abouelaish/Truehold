@@ -263,82 +263,242 @@ class PropertyController extends Controller
      */
     public function map(Request $request)
     {
-        // Build filters array
-        $filters = [];
+        // Check if Google Sheets is configured
+        $useGoogleSheets = !empty(config('services.google.properties.spreadsheet_id'));
         
+        if ($useGoogleSheets) {
+            try {
+                // Build filters array
+                $filters = [];
+                
+                if ($request->filled('location')) {
+                    $filters['location'] = $request->location;
+                }
+
+                if ($request->filled('min_price')) {
+                    $filters['min_price'] = $request->min_price;
+                }
+                
+                if ($request->filled('max_price')) {
+                    $filters['max_price'] = $request->max_price;
+                }
+
+                if ($request->filled('property_type')) {
+                    $filters['property_type'] = $request->property_type;
+                }
+
+                if ($request->filled('available_date')) {
+                    $filters['available_date'] = $request->available_date;
+                }
+
+                if ($request->filled('management_company')) {
+                    $filters['management_company'] = $request->management_company;
+                }
+
+                if ($request->filled('agent_name') && auth()->check()) {
+                    $filters['agent_name'] = $request->agent_name;
+                }
+
+                if ($request->filled('couples_allowed')) {
+                    $filters['couples_allowed'] = $request->couples_allowed;
+                }
+
+                // Get filtered properties from Google Sheets
+                $filteredProperties = $this->sheetsService->filterProperties($filters);
+                
+                // Filter properties with valid coordinates
+                $properties = $filteredProperties->filter(function ($property) {
+                    $lat = $property['latitude'] ?? null;
+                    $lng = $property['longitude'] ?? null;
+                    
+                    // Handle string coordinates
+                    if (is_string($lat)) {
+                        $lat = str_replace(',', '.', trim($lat));
+                    }
+                    if (is_string($lng)) {
+                        $lng = str_replace(',', '.', trim($lng));
+                    }
+                    
+                    if (empty($lat) || empty($lng) || $lat === 'N/A' || $lng === 'N/A') {
+                        return false;
+                    }
+                    
+                    $latFloat = (float) $lat;
+                    $lngFloat = (float) $lng;
+                    
+                    // Check if valid numeric values
+                    if (!is_numeric($lat) || !is_numeric($lng)) {
+                        return false;
+                    }
+                    
+                    return (-90 <= $latFloat && $latFloat <= 90) && (-180 <= $lngFloat && $lngFloat <= 180);
+                });
+                
+                \Log::info('Properties filtered by coordinates', [
+                    'before_filter' => $filteredProperties->count(),
+                    'after_filter' => $properties->count(),
+                    'sample_properties' => $properties->take(3)->map(function($p) {
+                        return [
+                            'id' => $p['id'] ?? 'NO ID',
+                            'title' => $p['title'] ?? 'NO TITLE',
+                            'lat' => $p['latitude'] ?? null,
+                            'lng' => $p['longitude'] ?? null,
+                            'lat_type' => gettype($p['latitude'] ?? null),
+                            'lng_type' => gettype($p['longitude'] ?? null),
+                        ];
+                    })
+                ]);
+
+                // Convert to Property-like objects for view compatibility
+                $propertyObjects = $properties->map(function ($propertyData) {
+                    return new PropertyFromSheet($propertyData);
+                })->take(400);
+
+                // For JSON encoding in the view, convert back to arrays with proper coordinate types
+                $propertiesForJson = $properties->map(function ($propertyData) {
+                    // Ensure coordinates are properly formatted as numbers
+                    $propertyData['latitude'] = isset($propertyData['latitude']) ? (float) $propertyData['latitude'] : null;
+                    $propertyData['longitude'] = isset($propertyData['longitude']) ? (float) $propertyData['longitude'] : null;
+                    return $propertyData;
+                })->take(400);
+
+                // Get filter values for dropdowns
+                $filterValues = $this->sheetsService->getFilterValues();
+                $locations = $filterValues['locations'];
+                $propertyTypes = $filterValues['propertyTypes'];
+                $availableDates = $filterValues['available_dates'];
+                $agentNames = $filterValues['agent_names'];
+                $agentsWithPaying = $filterValues['agents_with_paying'];
+
+                // Log validation results for debugging
+                \Log::info('Map query results (Google Sheets)', [
+                    'total_properties' => $propertyObjects->count(),
+                    'properties_with_coords' => $propertiesForJson->filter(function($p) {
+                        return !empty($p['latitude']) && !empty($p['longitude']);
+                    })->count(),
+                    'filters_applied' => $filters,
+                    'sample_coords' => $propertiesForJson->take(3)->map(function($p) {
+                        return [
+                            'id' => $p['id'] ?? 'NO ID',
+                            'lat' => $p['latitude'] ?? null,
+                            'lng' => $p['longitude'] ?? null
+                        ];
+                    })
+                ]);
+
+                return view('properties.map', [
+                    'properties' => $propertyObjects,
+                    'propertiesForJson' => $propertiesForJson,
+                    'locations' => $locations,
+                    'propertyTypes' => $propertyTypes,
+                    'availableDates' => $availableDates,
+                    'agentNames' => $agentNames,
+                    'agentsWithPaying' => $agentsWithPaying
+                ]);
+            } catch (\Exception $e) {
+                \Log::error('Error loading properties from Google Sheets for map, falling back to database', [
+                    'error' => $e->getMessage(),
+                    'trace' => $e->getTraceAsString()
+                ]);
+                // Fall through to database fallback
+            }
+        }
+        
+        // Fallback to database if Google Sheets not configured or fails
+        $query = Property::query()->withValidCoordinates();
+
+        // Apply filters
         if ($request->filled('location')) {
-            $filters['location'] = $request->location;
+            $query->byLocation($request->location);
         }
 
         if ($request->filled('min_price')) {
-            $filters['min_price'] = $request->min_price;
+            $query->byMinPrice($request->min_price);
         }
         
         if ($request->filled('max_price')) {
-            $filters['max_price'] = $request->max_price;
+            $query->byMaxPrice($request->max_price);
         }
 
         if ($request->filled('property_type')) {
-            $filters['property_type'] = $request->property_type;
+            $query->where('property_type', 'like', "%{$request->property_type}%");
         }
 
         if ($request->filled('available_date')) {
-            $filters['available_date'] = $request->available_date;
+            $query->where('available_date', 'like', "%{$request->available_date}%");
         }
 
         if ($request->filled('management_company')) {
-            $filters['management_company'] = $request->management_company;
+            $query->byManagementCompany($request->management_company);
         }
 
         if ($request->filled('agent_name') && auth()->check()) {
-            $filters['agent_name'] = $request->agent_name;
+            $query->where('agent_name', 'like', "%{$request->agent_name}%");
         }
 
         if ($request->filled('couples_allowed')) {
-            $filters['couples_allowed'] = $request->couples_allowed;
+            $query->byCouplesAllowed($request->couples_allowed);
         }
 
-        // Get filtered properties from Google Sheets
-        $filteredProperties = $this->sheetsService->filterProperties($filters);
-        
-        // Filter properties with valid coordinates
-        $properties = $filteredProperties->filter(function ($property) {
-            $lat = $property['latitude'] ?? null;
-            $lng = $property['longitude'] ?? null;
-            
-            if (empty($lat) || empty($lng)) {
-                return false;
-            }
-            
-            $latFloat = (float) $lat;
-            $lngFloat = (float) $lng;
-            
-            return (-90 <= $latFloat && $latFloat <= 90) && (-180 <= $lngFloat && $lngFloat <= 180);
-        });
-
-        // Convert to Property-like objects
-        $properties = $properties->map(function ($propertyData) {
-            return new PropertyFromSheet($propertyData);
-        })->take(400);
+        // Get properties with all necessary fields for map display
+        $properties = $query->limit(400)->get();
 
         // Get filter values for dropdowns
-        $filterValues = $this->sheetsService->getFilterValues();
-        $locations = $filterValues['locations'];
-        $propertyTypes = $filterValues['propertyTypes'];
-        $availableDates = $filterValues['available_dates'];
-        $agentNames = $filterValues['agent_names'];
-        $agentsWithPaying = $filterValues['agents_with_paying'];
+        $locations = Property::distinct()->pluck('location')->filter()->sort()->values();
+        $propertyTypes = Property::distinct()->pluck('property_type')->sort()->values();
+        $availableDates = Property::distinct()->pluck('available_date')->sort()->values();
+        
+        if (auth()->check()) {
+            $agentNames = Property::distinct()->pluck('agent_name')->filter()->sort()->values();
+            $agentsWithPaying = Property::whereNotNull('agent_name')
+                ->where('agent_name', '!=', '')
+                ->select('agent_name', 'paying')
+                ->get()
+                ->groupBy('agent_name')
+                ->map(function ($properties) {
+                    return $properties->contains(function ($property) {
+                        return strtolower($property->paying ?? '') === 'yes';
+                    });
+                });
+        } else {
+            $agentNames = collect();
+            $agentsWithPaying = collect();
+        }
 
-        // Log validation results for debugging
-        \Log::info('Map query results (Google Sheets)', [
+        // Convert to array for JSON encoding
+        $propertiesForJson = $properties->map(function ($property) {
+            return [
+                'id' => $property->id,
+                'title' => $property->title,
+                'location' => $property->location,
+                'latitude' => $property->latitude ? (float) $property->latitude : null,
+                'longitude' => $property->longitude ? (float) $property->longitude : null,
+                'price' => $property->price,
+                'property_type' => $property->property_type,
+                'agent_name' => $property->agent_name,
+                'management_company' => $property->management_company,
+                'couples_ok' => $property->couples_ok,
+                'first_photo_url' => $property->first_photo_url,
+                'high_quality_photos_array' => $property->high_quality_photos_array,
+            ];
+        });
+
+        \Log::info('Map query results (Database Fallback)', [
             'total_properties' => $properties->count(),
-            'filters_applied' => $filters,
             'with_coords' => $properties->filter(function($p) {
                 return !empty($p->latitude) && !empty($p->longitude);
             })->count(),
         ]);
 
-        return view('properties.map', compact('properties', 'locations', 'propertyTypes', 'availableDates', 'agentNames', 'agentsWithPaying'));
+        return view('properties.map', [
+            'properties' => $properties,
+            'propertiesForJson' => $propertiesForJson,
+            'locations' => $locations,
+            'propertyTypes' => $propertyTypes,
+            'availableDates' => $availableDates,
+            'agentNames' => $agentNames,
+            'agentsWithPaying' => $agentsWithPaying
+        ]);
     }
 
     /**
