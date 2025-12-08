@@ -1906,11 +1906,17 @@
     <div id="fullscreenModal" class="modal-overlay fixed inset-0 hidden z-50 flex items-center justify-center p-4">
         <div class="modal-content relative max-w-7xl max-h-full">
             <img id="fullscreenImage" src="" alt="Property photo" class="max-w-full max-h-full object-contain rounded-20">
-            <button onclick="closeFullscreen()" class="absolute top-6 right-6 text-white text-4xl hover:text-gray-300 transition-colors duration-300 bg-black bg-opacity-50 p-3 rounded-full">
+            <button onclick="closeFullscreen()" class="absolute top-6 right-6 text-white text-4xl hover:text-gray-300 transition-colors duration-300 bg-black bg-opacity-50 p-3 rounded-full z-10">
                 <i class="fas fa-times"></i>
             </button>
+            <button onclick="previousFullscreenImage()" class="absolute left-6 top-1/2 transform -translate-y-1/2 text-white text-4xl hover:text-gray-300 transition-colors duration-300 bg-black bg-opacity-50 p-4 rounded-full z-10">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+            <button onclick="nextFullscreenImage()" class="absolute right-6 top-1/2 transform -translate-y-1/2 text-white text-4xl hover:text-gray-300 transition-colors duration-300 bg-black bg-opacity-50 p-4 rounded-full z-10">
+                <i class="fas fa-chevron-right"></i>
+            </button>
             <div class="absolute bottom-6 left-1/2 transform -translate-x-1/2 text-white text-xl bg-black bg-opacity-50 px-6 py-3 rounded-full">
-                <span id="fullscreenCounter">1</span> of {{ count($property->all_photos_array ?? []) }}
+                <span id="fullscreenCounter">1</span> of {{ count($property->high_quality_photos_array ?? $property->all_photos_array ?? []) }}
             </div>
         </div>
     </div>
@@ -1926,25 +1932,48 @@
         // Global photos data from PHP
         let propertyPhotos = []; // High quality photos for main image
         let originalPhotos = []; // Original photos for thumbnails
-        
-        try {
-            const photosElement = document.querySelector('[data-photos]');
-            if (photosElement && photosElement.dataset.photos) {
-                propertyPhotos = JSON.parse(photosElement.dataset.photos);
-            }
-            if (photosElement && photosElement.dataset.originalPhotos) {
-                originalPhotos = JSON.parse(photosElement.dataset.originalPhotos);
-            }
-        } catch (error) {
-            console.error('Error parsing photos data:', error);
-            propertyPhotos = [];
-            originalPhotos = [];
-        }
-        
         let currentImageIndex = 0;
-        const totalImages = propertyPhotos.length;
+        let totalImages = 0;
+        
+        // Initialize photos on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            try {
+                const photosElement = document.querySelector('[data-photos]');
+                if (photosElement && photosElement.dataset.photos) {
+                    const photosData = photosElement.dataset.photos;
+                    propertyPhotos = JSON.parse(photosData);
+                    totalImages = propertyPhotos.length;
+                    console.log('Loaded photos:', totalImages, propertyPhotos);
+                }
+                if (photosElement && photosElement.dataset.originalPhotos) {
+                    originalPhotos = JSON.parse(photosElement.dataset.originalPhotos);
+                }
+                
+                // Fallback: if no photos from data attribute, try to get from thumbnails
+                if (totalImages === 0) {
+                    const thumbnails = document.querySelectorAll('.thumbnail img');
+                    propertyPhotos = Array.from(thumbnails).map(img => img.src).filter(src => src && !src.includes('data:image/svg'));
+                    totalImages = propertyPhotos.length;
+                    console.log('Loaded photos from thumbnails:', totalImages);
+                }
+            } catch (error) {
+                console.error('Error parsing photos data:', error);
+                propertyPhotos = [];
+                originalPhotos = [];
+                totalImages = 0;
+            }
+        });
         
         function showImage(index) {
+            if (totalImages === 0) {
+                console.warn('No photos available');
+                return;
+            }
+            
+            // Ensure index is within bounds
+            if (index < 0) index = totalImages - 1;
+            if (index >= totalImages) index = 0;
+            
             currentImageIndex = index;
             const mainImage = document.getElementById('mainImage');
             const currentImageSpan = document.getElementById('currentImage');
@@ -1962,16 +1991,28 @@
                             thumb.classList.remove('active');
                         }
                     });
+                } else {
+                    console.warn('Photo not found at index:', index, 'Total photos:', propertyPhotos.length);
                 }
+            } else {
+                console.warn('Main image or counter element not found');
             }
         }
 
         function nextImage() {
+            if (totalImages === 0) {
+                console.warn('No photos to navigate');
+                return;
+            }
             currentImageIndex = (currentImageIndex + 1) % totalImages;
             showImage(currentImageIndex);
         }
 
         function previousImage() {
+            if (totalImages === 0) {
+                console.warn('No photos to navigate');
+                return;
+            }
             currentImageIndex = (currentImageIndex - 1 + totalImages) % totalImages;
             showImage(currentImageIndex);
         }
@@ -1982,10 +2023,43 @@
             const fullscreenCounter = document.getElementById('fullscreenCounter');
             
             if (fullscreenModal && fullscreenImage && fullscreenCounter) {
-                fullscreenImage.src = document.getElementById('mainImage').src;
-                fullscreenCounter.textContent = currentImageIndex + 1;
+                const mainImage = document.getElementById('mainImage');
+                if (mainImage && propertyPhotos.length > 0) {
+                    fullscreenImage.src = propertyPhotos[currentImageIndex] || mainImage.src;
+                } else if (mainImage) {
+                    fullscreenImage.src = mainImage.src;
+                }
+                fullscreenCounter.textContent = (currentImageIndex + 1) + ' of ' + totalImages;
                 fullscreenModal.classList.remove('hidden');
                 document.body.style.overflow = 'hidden';
+            }
+        }
+        
+        function nextFullscreenImage() {
+            if (totalImages > 0) {
+                nextImage();
+                const fullscreenImage = document.getElementById('fullscreenImage');
+                const fullscreenCounter = document.getElementById('fullscreenCounter');
+                if (fullscreenImage && propertyPhotos.length > 0) {
+                    fullscreenImage.src = propertyPhotos[currentImageIndex];
+                }
+                if (fullscreenCounter) {
+                    fullscreenCounter.textContent = (currentImageIndex + 1) + ' of ' + totalImages;
+                }
+            }
+        }
+        
+        function previousFullscreenImage() {
+            if (totalImages > 0) {
+                previousImage();
+                const fullscreenImage = document.getElementById('fullscreenImage');
+                const fullscreenCounter = document.getElementById('fullscreenCounter');
+                if (fullscreenImage && propertyPhotos.length > 0) {
+                    fullscreenImage.src = propertyPhotos[currentImageIndex];
+                }
+                if (fullscreenCounter) {
+                    fullscreenCounter.textContent = (currentImageIndex + 1) + ' of ' + totalImages;
+                }
             }
         }
 
@@ -1996,6 +2070,17 @@
                 document.body.style.overflow = 'auto';
             }
         }
+        
+        // Keyboard navigation
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'ArrowLeft') {
+                previousImage();
+            } else if (e.key === 'ArrowRight') {
+                nextImage();
+            } else if (e.key === 'Escape') {
+                closeFullscreen();
+            }
+        });
 
         function shareProperty() {
             if (navigator.share) {
@@ -2029,22 +2114,28 @@
 
         // Keyboard navigation for fullscreen
         document.addEventListener('keydown', function(e) {
-            if (document.getElementById('fullscreenModal').classList.contains('hidden')) return;
+            const fullscreenModal = document.getElementById('fullscreenModal');
+            if (!fullscreenModal || fullscreenModal.classList.contains('hidden')) {
+                // If not in fullscreen, allow arrow keys to navigate main gallery
+                if (e.key === 'ArrowLeft') {
+                    e.preventDefault();
+                    previousImage();
+                } else if (e.key === 'ArrowRight') {
+                    e.preventDefault();
+                    nextImage();
+                }
+                return;
+            }
             
+            // In fullscreen mode
             if (e.key === 'Escape') {
                 closeFullscreen();
             } else if (e.key === 'ArrowLeft') {
-                previousImage();
-                if (document.getElementById('fullscreenImage')) {
-                    document.getElementById('fullscreenImage').src = document.getElementById('mainImage').src;
-                    document.getElementById('fullscreenCounter').textContent = currentImageIndex + 1;
-                }
+                e.preventDefault();
+                previousFullscreenImage();
             } else if (e.key === 'ArrowRight') {
-                nextImage();
-                if (document.getElementById('fullscreenImage')) {
-                    document.getElementById('fullscreenImage').src = document.getElementById('mainImage').src;
-                    document.getElementById('fullscreenCounter').textContent = currentImageIndex + 1;
-                }
+                e.preventDefault();
+                nextFullscreenImage();
             }
         });
 
