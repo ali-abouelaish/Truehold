@@ -43,6 +43,13 @@ return [
             'credentials_path' => env('GOOGLE_SHEETS_CREDENTIALS_PATH'),
             'credentials_json' => env('GOOGLE_SHEETS_CREDENTIALS_JSON'),
         ],
+        'properties' => [
+            'spreadsheet_id' => env('GOOGLE_PROPERTIES_SPREADSHEET_ID'),
+            'sheet_name' => env('GOOGLE_PROPERTIES_SHEET_NAME', 'Properties'),
+            'credentials_path' => env('GOOGLE_PROPERTIES_CREDENTIALS_PATH'),
+            'credentials_json' => env('GOOGLE_PROPERTIES_CREDENTIALS_JSON'),
+            'cache_timeout' => env('GOOGLE_PROPERTIES_CACHE_TIMEOUT', 300), // 5 minutes
+        ],
     ],
 
     'twilio' => [

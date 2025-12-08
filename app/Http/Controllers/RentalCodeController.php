@@ -2933,10 +2933,19 @@ public function generateCode()
             return;
         }
         
+        // Ensure storage directory exists
+        $fullStoragePath = storage_path('app/public/' . $storagePath);
+        if (!file_exists($fullStoragePath)) {
+            \Log::info("Creating storage directory: {$fullStoragePath}");
+            \File::makeDirectory($fullStoragePath, 0755, true);
+        }
+        
         $files = $request->file($fieldName);
         \Log::info("Processing {$fieldName} uploads", [
             'count' => count($files),
-            'field' => $fieldName
+            'field' => $fieldName,
+            'storage_path' => $storagePath,
+            'full_storage_path' => $fullStoragePath
         ]);
         
         // Get existing files for this field (to append new ones)
@@ -3016,9 +3025,23 @@ public function generateCode()
     /**
      * Download a file from storage
      */
-    public function downloadFile(RentalCode $rentalCode, $field, $index = 0)
+    public function downloadFile(RentalCode $rentalCode, $field, $index = null)
     {
         try {
+            // Normalize index - if null or empty string, default to 0
+            if ($index === null || $index === '') {
+                $index = 0;
+            } else {
+                $index = (int) $index;
+            }
+            
+            \Log::info('Download file request', [
+                'rental_code_id' => $rentalCode->id,
+                'field' => $field,
+                'index' => $index,
+                'raw_index' => request()->route('index')
+            ]);
+            
             // Get the file path for the specified field
             $filePath = null;
             $fieldValue = null;
@@ -3043,21 +3066,35 @@ public function generateCode()
                     $fieldValue = $rentalCode->contact_images;
                     break;
                 default:
+                    \Log::warning('Invalid field type requested for download', [
+                        'rental_code_id' => $rentalCode->id,
+                        'field' => $field
+                    ]);
                     abort(404, 'File type not found');
             }
 
             if (!$fieldValue || empty($fieldValue)) {
+                \Log::warning('No file value found for field (download)', [
+                    'rental_code_id' => $rentalCode->id,
+                    'field' => $field
+                ]);
                 abort(404, 'No file found for this field');
             }
 
             // Handle array fields (JSON string or array) - with backward compatibility for old single-string records
             if (is_string($fieldValue)) {
                 $decoded = json_decode($fieldValue, true);
-                if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+                if (json_last_error() === JSON_ERROR_NONE && is_array($decoded) && count($decoded) > 0) {
                     // It's a JSON array (new format with multiple files)
                     if (isset($decoded[$index])) {
                         $filePath = $decoded[$index];
                     } else {
+                        \Log::warning('File index not found in array (download)', [
+                            'rental_code_id' => $rentalCode->id,
+                            'field' => $field,
+                            'requested_index' => $index,
+                            'available_indices' => array_keys($decoded)
+                        ]);
                         abort(404, 'File index not found');
                     }
                 } else {
@@ -3070,6 +3107,12 @@ public function generateCode()
                 if (isset($fieldValue[$index])) {
                     $filePath = $fieldValue[$index];
                 } else {
+                    \Log::warning('File index not found in array (download)', [
+                        'rental_code_id' => $rentalCode->id,
+                        'field' => $field,
+                        'requested_index' => $index,
+                        'available_indices' => array_keys($fieldValue)
+                    ]);
                     abort(404, 'File index not found');
                 }
             } else {
@@ -3078,17 +3121,44 @@ public function generateCode()
             }
 
             if (!$filePath || empty($filePath)) {
+                \Log::warning('File path is empty after processing (download)', [
+                    'rental_code_id' => $rentalCode->id,
+                    'field' => $field,
+                    'index' => $index
+                ]);
                 abort(404, 'No file found for this field');
             }
             
             $fullPath = storage_path('app/public/' . $filePath);
+            
+            \Log::info('Attempting to download file', [
+                'rental_code_id' => $rentalCode->id,
+                'field' => $field,
+                'file_path' => $filePath,
+                'full_path' => $fullPath,
+                'file_exists' => file_exists($fullPath)
+            ]);
 
             if (!file_exists($fullPath)) {
-                abort(404, 'File does not exist on server');
+                \Log::error('File does not exist on server (download)', [
+                    'rental_code_id' => $rentalCode->id,
+                    'field' => $field,
+                    'file_path' => $filePath,
+                    'full_path' => $fullPath
+                ]);
+                abort(404, 'File does not exist on server: ' . $filePath);
             }
 
             $originalName = basename($filePath);
             $mimeType = mime_content_type($fullPath);
+            
+            \Log::info('File found, preparing download', [
+                'rental_code_id' => $rentalCode->id,
+                'field' => $field,
+                'file_path' => $filePath,
+                'original_name' => $originalName,
+                'mime_type' => $mimeType
+            ]);
 
             return response()->download($fullPath, $originalName, [
                 'Content-Type' => $mimeType,
@@ -3099,19 +3169,34 @@ public function generateCode()
                 'rental_code_id' => $rentalCode->id,
                 'field' => $field,
                 'index' => $index,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
             ]);
             
-            abort(500, 'Failed to download file');
+            abort(500, 'Failed to download file: ' . $e->getMessage());
         }
     }
 
     /**
      * View a file in browser
      */
-    public function viewFile(RentalCode $rentalCode, $field, $index = 0)
+    public function viewFile(RentalCode $rentalCode, $field, $index = null)
     {
         try {
+            // Normalize index - if null or empty string, default to 0
+            if ($index === null || $index === '') {
+                $index = 0;
+            } else {
+                $index = (int) $index;
+            }
+            
+            \Log::info('View file request', [
+                'rental_code_id' => $rentalCode->id,
+                'field' => $field,
+                'index' => $index,
+                'raw_index' => request()->route('index')
+            ]);
+            
             // Get the file path for the specified field
             $filePath = null;
             $fieldValue = null;
@@ -3136,52 +3221,131 @@ public function generateCode()
                     $fieldValue = $rentalCode->contact_images;
                     break;
                 default:
+                    \Log::warning('Invalid field type requested', [
+                        'rental_code_id' => $rentalCode->id,
+                        'field' => $field
+                    ]);
                     abort(404, 'File type not found');
             }
 
             if (!$fieldValue || empty($fieldValue)) {
+                \Log::warning('No file value found for field', [
+                    'rental_code_id' => $rentalCode->id,
+                    'field' => $field,
+                    'field_value' => $fieldValue
+                ]);
                 abort(404, 'No file found for this field');
             }
+
+            \Log::info('Field value retrieved', [
+                'rental_code_id' => $rentalCode->id,
+                'field' => $field,
+                'field_value_type' => gettype($fieldValue),
+                'field_value_preview' => is_string($fieldValue) ? substr($fieldValue, 0, 100) : 'array/object'
+            ]);
 
             // Handle array fields (JSON string or array) - with backward compatibility for old single-string records
             if (is_string($fieldValue)) {
                 $decoded = json_decode($fieldValue, true);
-                if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+                if (json_last_error() === JSON_ERROR_NONE && is_array($decoded) && count($decoded) > 0) {
                     // It's a JSON array (new format with multiple files)
+                    \Log::info('Field value is JSON array', [
+                        'rental_code_id' => $rentalCode->id,
+                        'field' => $field,
+                        'array_count' => count($decoded),
+                        'requested_index' => $index
+                    ]);
                     if (isset($decoded[$index])) {
                         $filePath = $decoded[$index];
                     } else {
+                        \Log::warning('File index not found in array', [
+                            'rental_code_id' => $rentalCode->id,
+                            'field' => $field,
+                            'requested_index' => $index,
+                            'available_indices' => array_keys($decoded)
+                        ]);
                         abort(404, 'File index not found');
                     }
                 } else {
                     // It's a single string path (old format - backward compatibility)
                     // For old records, ignore index and use the single string
+                    \Log::info('Field value is single string', [
+                        'rental_code_id' => $rentalCode->id,
+                        'field' => $field,
+                        'file_path' => $fieldValue
+                    ]);
                     $filePath = $fieldValue;
                 }
             } elseif (is_array($fieldValue)) {
                 // Already an array (new format)
+                \Log::info('Field value is array', [
+                    'rental_code_id' => $rentalCode->id,
+                    'field' => $field,
+                    'array_count' => count($fieldValue),
+                    'requested_index' => $index
+                ]);
                 if (isset($fieldValue[$index])) {
                     $filePath = $fieldValue[$index];
                 } else {
+                    \Log::warning('File index not found in array', [
+                        'rental_code_id' => $rentalCode->id,
+                        'field' => $field,
+                        'requested_index' => $index,
+                        'available_indices' => array_keys($fieldValue)
+                    ]);
                     abort(404, 'File index not found');
                 }
             } else {
                 // Fallback for other types (backward compatibility)
+                \Log::info('Field value is other type, using as-is', [
+                    'rental_code_id' => $rentalCode->id,
+                    'field' => $field,
+                    'type' => gettype($fieldValue)
+                ]);
                 $filePath = $fieldValue;
             }
 
             if (!$filePath || empty($filePath)) {
+                \Log::warning('File path is empty after processing', [
+                    'rental_code_id' => $rentalCode->id,
+                    'field' => $field,
+                    'index' => $index
+                ]);
                 abort(404, 'No file found for this field');
             }
             
             $fullPath = storage_path('app/public/' . $filePath);
+            
+            \Log::info('Attempting to access file', [
+                'rental_code_id' => $rentalCode->id,
+                'field' => $field,
+                'file_path' => $filePath,
+                'full_path' => $fullPath,
+                'file_exists' => file_exists($fullPath)
+            ]);
 
             if (!file_exists($fullPath)) {
-                abort(404, 'File does not exist on server');
+                \Log::error('File does not exist on server', [
+                    'rental_code_id' => $rentalCode->id,
+                    'field' => $field,
+                    'file_path' => $filePath,
+                    'full_path' => $fullPath,
+                    'storage_base' => storage_path('app/public'),
+                    'directory_exists' => is_dir(storage_path('app/public'))
+                ]);
+                abort(404, 'File does not exist on server: ' . $filePath);
             }
 
             $mimeType = mime_content_type($fullPath);
             $fileSize = filesize($fullPath);
+            
+            \Log::info('File found, serving to browser', [
+                'rental_code_id' => $rentalCode->id,
+                'field' => $field,
+                'file_path' => $filePath,
+                'mime_type' => $mimeType,
+                'file_size' => $fileSize
+            ]);
 
             return response()->file($fullPath, [
                 'Content-Type' => $mimeType,
@@ -3193,10 +3357,11 @@ public function generateCode()
                 'rental_code_id' => $rentalCode->id,
                 'field' => $field,
                 'index' => $index,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
             ]);
             
-            abort(500, 'Failed to view file');
+            abort(500, 'Failed to view file: ' . $e->getMessage());
         }
     }
 
