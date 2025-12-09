@@ -214,12 +214,22 @@ class PropertyGoogleSheetsService
                 'has_values' => !empty($values)
             ]);
 
-            if (empty($values) || count($values) < 2) {
-                Log::warning('No property data found in Google Sheet', [
+            if (empty($values)) {
+                Log::warning('No data returned from Google Sheet', [
                     'spreadsheet_id' => $this->spreadsheetId,
                     'sheet_name' => $this->sheetName,
-                    'values_count' => $values ? count($values) : 0,
-                    'values_preview' => $values ? array_slice($values, 0, 2) : null
+                    'values_count' => 0
+                ]);
+                return collect([]);
+            }
+            
+            if (count($values) < 2) {
+                Log::warning('Google Sheet has headers but no data rows', [
+                    'spreadsheet_id' => $this->spreadsheetId,
+                    'sheet_name' => $this->sheetName,
+                    'values_count' => count($values),
+                    'has_headers' => count($values) >= 1,
+                    'headers' => count($values) >= 1 ? $values[0] : null
                 ]);
                 return collect([]);
             }
@@ -254,10 +264,31 @@ class PropertyGoogleSheetsService
                 $row = $values[$i];
                 $processedRows++;
                 
-                // Skip empty rows
-                if (empty(array_filter($row))) {
+                // Skip empty rows (check if row has any non-empty values)
+                $rowHasData = false;
+                foreach ($row as $cell) {
+                    $trimmed = is_string($cell) ? trim($cell) : (string)$cell;
+                    if (!empty($trimmed)) {
+                        $rowHasData = true;
+                        break;
+                    }
+                }
+                
+                if (!$rowHasData) {
                     $skippedRows++;
+                    if ($skippedRows <= 3) {
+                        Log::debug('Skipping empty row', [
+                            'row_index' => $i,
+                            'row_data' => $row,
+                            'row_length' => count($row)
+                        ]);
+                    }
                     continue;
+                }
+                
+                // Ensure row has same length as headers (pad with empty strings if needed)
+                while (count($row) < count($headers)) {
+                    $row[] = '';
                 }
                 
                 $property = $this->mapRowToProperty($row, $headers, $headerMap);
@@ -269,13 +300,17 @@ class PropertyGoogleSheetsService
                 } else {
                     $skippedRows++;
                     // Log first few skipped rows for debugging
-                    Log::warning('Skipped property row - no ID generated', [
-                        'row_index' => $i,
-                        'row_preview' => array_slice($row, 0, 5),
-                        'row_count' => count($row),
-                        'mapped_property' => $property ? array_keys($property) : null,
-                        'has_id' => $property && !empty($property['id'])
-                    ]);
+                    if ($skippedRows <= 5) {
+                        Log::warning('Skipped property row - no ID generated', [
+                            'row_index' => $i,
+                            'row_preview' => array_slice($row, 0, 10),
+                            'row_count' => count($row),
+                            'header_count' => count($headers),
+                            'mapped_property' => $property ? array_keys($property) : null,
+                            'has_id' => $property && !empty($property['id']),
+                            'property_data' => $property
+                        ]);
+                    }
                 }
             }
 
@@ -285,8 +320,23 @@ class PropertyGoogleSheetsService
                 'skipped_rows' => $skippedRows,
                 'spreadsheet_id' => $this->spreadsheetId,
                 'sheet_name' => $this->sheetName,
-                'sample_property_ids' => $properties->take(5)->pluck('id')->toArray()
+                'sample_property_ids' => $properties->take(5)->pluck('id')->toArray(),
+                'total_rows_in_sheet' => count($values),
+                'headers_found' => count($headers),
+                'sample_headers' => array_slice($headers, 0, 10)
             ]);
+            
+            // If no properties found, log more details for debugging
+            if ($properties->count() === 0) {
+                Log::error('No properties extracted from Google Sheet', [
+                    'total_rows' => count($values),
+                    'data_rows' => count($values) - 1,
+                    'headers' => $headers,
+                    'first_data_row' => isset($values[1]) ? $values[1] : null,
+                    'first_data_row_count' => isset($values[1]) ? count($values[1]) : 0,
+                    'header_count' => count($headers)
+                ]);
+            }
 
             return $properties;
         } catch (\Google\Service\Exception $e) {
@@ -318,12 +368,29 @@ class PropertyGoogleSheetsService
     {
         $property = [];
         
+        // Log first row for debugging
+        static $firstRowLogged = false;
+        if (!$firstRowLogged && !empty($row)) {
+            Log::info('Mapping first data row', [
+                'row_length' => count($row),
+                'header_count' => count($headers),
+                'row_preview' => array_slice($row, 0, 10),
+                'headers_preview' => array_slice($headers, 0, 10)
+            ]);
+            $firstRowLogged = true;
+        }
+        
         foreach ($headerMap as $sheetHeader => $propertyField) {
             // Find the header index (headers are already normalized to lowercase)
             $headerIndex = array_search(strtolower(trim($sheetHeader)), $headers);
             
-            if ($headerIndex !== false && isset($row[$headerIndex]) && $row[$headerIndex] !== '') {
-                $value = is_string($row[$headerIndex]) ? trim($row[$headerIndex]) : $row[$headerIndex];
+            if ($headerIndex !== false && isset($row[$headerIndex])) {
+                $rawValue = $row[$headerIndex];
+                // Only process non-empty values
+                if ($rawValue === '' || $rawValue === null) {
+                    continue;
+                }
+                $value = is_string($rawValue) ? trim($rawValue) : $rawValue;
                 
                 // Handle special field types
                 if ($propertyField === 'id') {
