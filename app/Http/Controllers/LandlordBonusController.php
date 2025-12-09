@@ -294,4 +294,70 @@ class LandlordBonusController extends Controller
             return redirect()->back()->with('error', 'Failed to generate invoice: ' . $e->getMessage());
         }
     }
+
+    /**
+     * Export all landlord bonuses to CSV
+     */
+    public function export(Request $request)
+    {
+        $query = LandlordBonus::with(['agent.user', 'creator']);
+
+        // Get all landlord bonuses
+        $landlordBonuses = $query->orderBy('date', 'desc')->get();
+
+        $filename = 'landlord_bonuses_export_' . date('Y-m-d_H-i-s') . '.csv';
+        
+        $headers = [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+        ];
+        
+        $callback = function() use ($landlordBonuses) {
+            $file = fopen('php://output', 'w');
+            
+            // CSV headers
+            fputcsv($file, [
+                'Bonus Code',
+                'Date',
+                'Agent Name',
+                'Landlord',
+                'Property',
+                'Client',
+                'Commission',
+                'Bonus Split',
+                'Agent Commission',
+                'Agency Commission',
+                'Status',
+                'Notes',
+                'Created By',
+                'Created At',
+                'Updated At'
+            ]);
+            
+            // CSV data
+            foreach ($landlordBonuses as $bonus) {
+                fputcsv($file, [
+                    $bonus->bonus_code ?? 'N/A',
+                    $bonus->date ? $bonus->date->format('Y-m-d') : 'N/A',
+                    $bonus->agent->user->name ?? 'N/A',
+                    $bonus->landlord ?? 'N/A',
+                    $bonus->property ?? 'N/A',
+                    $bonus->client ?? 'N/A',
+                    number_format($bonus->commission ?? 0, 2),
+                    $bonus->bonus_split === '100_0' ? '100% Agent' : '55% Agent / 45% Agency',
+                    number_format($bonus->agent_commission ?? 0, 2),
+                    number_format($bonus->agency_commission ?? 0, 2),
+                    ucfirst($bonus->status ?? 'pending'),
+                    $bonus->notes ?? '',
+                    $bonus->creator->name ?? 'N/A',
+                    $bonus->created_at ? $bonus->created_at->format('Y-m-d H:i:s') : 'N/A',
+                    $bonus->updated_at ? $bonus->updated_at->format('Y-m-d H:i:s') : 'N/A',
+                ]);
+            }
+            
+            fclose($file);
+        };
+        
+        return response()->stream($callback, 200, $headers);
+    }
 }

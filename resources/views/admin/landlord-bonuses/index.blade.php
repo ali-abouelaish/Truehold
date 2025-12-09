@@ -28,6 +28,9 @@
                             <button type="button" class="btn btn-success me-2" id="generateInvoiceBtn" style="display: none;" data-bs-toggle="modal" data-bs-target="#invoiceRecipientModal">
                                 <i class="fas fa-file-invoice me-1"></i> Generate Invoice
                             </button>
+                            <a href="{{ route('landlord-bonuses.export') }}" class="btn btn-info me-2">
+                                <i class="fas fa-file-csv me-1"></i> Export CSV
+                            </a>
                             <a href="{{ route('landlord-bonuses.create') }}" class="btn btn-primary">
                                 <i class="fas fa-plus me-1"></i> Add Landlord Bonus
                             </a>
