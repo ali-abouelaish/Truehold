@@ -62,6 +62,74 @@ class LandlordBonusController extends Controller
     }
 
     /**
+     * Bulk update status for selected landlord bonuses (admin only)
+     */
+    public function bulkUpdateStatus(Request $request)
+    {
+        $user = auth()->user();
+        if (!$user || $user->role !== 'admin') {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Only administrators can perform bulk updates.',
+                ], 403);
+            }
+            return redirect()->back()->with('error', 'Only administrators can perform bulk updates.');
+        }
+
+        $validated = $request->validate([
+            'bonus_ids' => 'required|string',
+            'status' => 'required|in:pending,paid,cancelled',
+        ]);
+
+        $bonusIds = json_decode($validated['bonus_ids'], true);
+        
+        if (empty($bonusIds) || !is_array($bonusIds)) {
+            return redirect()->back()->with('error', 'Please select at least one bonus to update.');
+        }
+
+        $status = $validated['status'];
+
+        try {
+            $count = count($bonusIds);
+            \Log::info('Bulk update landlord bonus status', [
+                'count' => $count,
+                'status' => $status,
+                'bonus_ids' => $bonusIds
+            ]);
+            
+            LandlordBonus::whereIn('id', $bonusIds)->update([
+                'status' => $status,
+                'updated_at' => now(),
+            ]);
+
+            $statusLabel = ucfirst($status);
+            $message = "Successfully updated {$count} landlord bonus(es) to {$statusLabel}.";
+
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => $message,
+                ]);
+            }
+            return redirect()->back()->with('success', $message);
+        } catch (\Exception $e) {
+            \Log::error('Bulk update landlord bonus status failed', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Failed to update status: ' . $e->getMessage(),
+                ], 500);
+            }
+            return redirect()->back()->with('error', 'Failed to update status: ' . $e->getMessage());
+        }
+    }
+
+    /**
      * Display a listing of landlord bonuses
      */
     public function index()

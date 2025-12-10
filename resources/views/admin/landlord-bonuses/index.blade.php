@@ -25,6 +25,9 @@
                             <h5 class="card-title mb-0">Landlord Bonus Records</h5>
                         </div>
                         <div class="col-auto">
+                            <button type="button" class="btn btn-warning me-2" id="bulkUpdateStatusBtn" style="display: none;" data-bs-toggle="modal" data-bs-target="#bulkStatusModal">
+                                <i class="fas fa-edit me-1"></i> Update Status
+                            </button>
                             <button type="button" class="btn btn-success me-2" id="generateInvoiceBtn" style="display: none;" data-bs-toggle="modal" data-bs-target="#invoiceRecipientModal">
                                 <i class="fas fa-file-invoice me-1"></i> Generate Invoice
                             </button>
@@ -182,6 +185,54 @@
     </div>
 </div>
 
+<!-- Bulk Status Update Modal -->
+<div class="modal fade" id="bulkStatusModal" tabindex="-1" aria-labelledby="bulkStatusModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="bulkStatusModalLabel">
+                    <i class="fas fa-edit me-2"></i>Update Status for Selected Bonuses
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="bulkStatusUpdateForm" method="POST" action="{{ route('landlord-bonuses.bulk-update-status') }}">
+                @csrf
+                <input type="hidden" name="bonus_ids" id="bulkStatusBonusIds" value="">
+                <div class="modal-body">
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        You are about to update the status of <strong><span id="selectedBonusCount">0</span> bonus(es)</strong>.
+                    </div>
+                    <div class="mb-3">
+                        <label for="bulk_status" class="form-label">
+                            New Status <span class="text-danger">*</span>
+                        </label>
+                        <select class="form-select" id="bulk_status" name="status" required>
+                            <option value="">-- Select Status --</option>
+                            <option value="pending">
+                                <i class="fas fa-clock"></i> Pending
+                            </option>
+                            <option value="paid">
+                                <i class="fas fa-check-circle"></i> Paid
+                            </option>
+                            <option value="cancelled">
+                                <i class="fas fa-times-circle"></i> Cancelled
+                            </option>
+                        </select>
+                        <small class="form-text text-muted">All selected bonuses will be updated to this status</small>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-warning">
+                        <i class="fas fa-check me-1"></i> Update Status
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 <!-- Invoice Recipient Modal -->
 <div class="modal fade" id="invoiceRecipientModal" tabindex="-1" aria-labelledby="invoiceRecipientModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
@@ -239,8 +290,13 @@ document.addEventListener('DOMContentLoaded', function() {
     const bonusCheckboxes = document.querySelectorAll('.bonus-checkbox');
     const generateInvoiceForm = document.getElementById('generateInvoiceForm');
     const generateInvoiceBtn = document.getElementById('generateInvoiceBtn');
+    const bulkUpdateStatusBtn = document.getElementById('bulkUpdateStatusBtn');
     const selectedBonusIdsInput = document.getElementById('selectedBonusIds');
     const invoiceRecipientModal = document.getElementById('invoiceRecipientModal');
+    const bulkStatusModal = document.getElementById('bulkStatusModal');
+    const bulkStatusUpdateForm = document.getElementById('bulkStatusUpdateForm');
+    const bulkStatusBonusIds = document.getElementById('bulkStatusBonusIds');
+    const selectedBonusCount = document.getElementById('selectedBonusCount');
 
     // Select all functionality
     if (selectAllCheckbox) {
@@ -248,7 +304,7 @@ document.addEventListener('DOMContentLoaded', function() {
             bonusCheckboxes.forEach(checkbox => {
                 checkbox.checked = this.checked;
             });
-            updateGenerateInvoiceButton();
+            updateBulkActionButtons();
         });
     }
 
@@ -256,7 +312,7 @@ document.addEventListener('DOMContentLoaded', function() {
     bonusCheckboxes.forEach(checkbox => {
         checkbox.addEventListener('change', function() {
             updateSelectAllState();
-            updateGenerateInvoiceButton();
+            updateBulkActionButtons();
         });
     });
 
@@ -275,27 +331,45 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    function updateGenerateInvoiceButton() {
+    function updateBulkActionButtons() {
         const checkedBoxes = document.querySelectorAll('.bonus-checkbox:checked');
         const selectedIds = Array.from(checkedBoxes).map(cb => cb.value);
         
         if (selectedIds.length > 0) {
+            // Show both bulk action buttons
             generateInvoiceBtn.style.display = 'inline-block';
+            bulkUpdateStatusBtn.style.display = 'inline-block';
+            
+            // Update hidden inputs and count
             selectedBonusIdsInput.value = JSON.stringify(selectedIds);
+            bulkStatusBonusIds.value = JSON.stringify(selectedIds);
+            if (selectedBonusCount) {
+                selectedBonusCount.textContent = selectedIds.length;
+            }
         } else {
+            // Hide both bulk action buttons
             generateInvoiceBtn.style.display = 'none';
+            bulkUpdateStatusBtn.style.display = 'none';
             selectedBonusIdsInput.value = '';
+            bulkStatusBonusIds.value = '';
         }
     }
 
-    // Reset form when modal is closed
+    // Reset invoice form when modal is closed
     if (invoiceRecipientModal) {
         invoiceRecipientModal.addEventListener('hidden.bs.modal', function() {
             generateInvoiceForm.reset();
         });
     }
 
-    // Form submission - ensure bonus IDs are set
+    // Reset bulk status form when modal is closed
+    if (bulkStatusModal) {
+        bulkStatusModal.addEventListener('hidden.bs.modal', function() {
+            bulkStatusUpdateForm.reset();
+        });
+    }
+
+    // Invoice form submission - ensure bonus IDs are set
     if (generateInvoiceForm) {
         generateInvoiceForm.addEventListener('submit', function(e) {
             const checkedBoxes = document.querySelectorAll('.bonus-checkbox:checked');
@@ -308,6 +382,30 @@ document.addEventListener('DOMContentLoaded', function() {
             // Ensure bonus IDs are set before submission
             const selectedIds = Array.from(checkedBoxes).map(cb => cb.value);
             selectedBonusIdsInput.value = JSON.stringify(selectedIds);
+        });
+    }
+
+    // Bulk status form submission - ensure bonus IDs and status are set
+    if (bulkStatusUpdateForm) {
+        bulkStatusUpdateForm.addEventListener('submit', function(e) {
+            const checkedBoxes = document.querySelectorAll('.bonus-checkbox:checked');
+            const statusSelect = document.getElementById('bulk_status');
+            
+            if (checkedBoxes.length === 0) {
+                e.preventDefault();
+                alert('Please select at least one bonus to update.');
+                return false;
+            }
+            
+            if (!statusSelect.value) {
+                e.preventDefault();
+                alert('Please select a status.');
+                return false;
+            }
+            
+            // Ensure bonus IDs are set before submission
+            const selectedIds = Array.from(checkedBoxes).map(cb => cb.value);
+            bulkStatusBonusIds.value = JSON.stringify(selectedIds);
         });
     }
 });
