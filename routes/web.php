@@ -387,6 +387,7 @@ Route::middleware('auth')->prefix('admin')->group(function () {
     Route::post('/rental-codes/{rentalCode}/update-status', [RentalCodeController::class, 'updateStatus'])->name('rental-codes.update-status');
     Route::post('/rental-codes/bulk-update-status', [RentalCodeController::class, 'bulkUpdateStatus'])->name('rental-codes.bulk-update-status');
     Route::post('/rental-codes/bulk-mark-paid', [RentalCodeController::class, 'bulkMarkPaid'])->name('rental-codes.bulk-mark-paid');
+    Route::post('/rental-codes/approve-all-pending', [RentalCodeController::class, 'approveAllPending'])->name('rental-codes.approve-all-pending');
     
     // Landlord Bonus Management Routes
     Route::resource('landlord-bonuses', \App\Http\Controllers\LandlordBonusController::class);

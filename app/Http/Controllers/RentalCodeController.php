@@ -2807,6 +2807,62 @@ public function generateCode()
     }
 
     /**
+     * Approve all pending rental codes (admin only)
+     */
+    public function approveAllPending(Request $request)
+    {
+        // Only admin users can approve all pending rentals
+        if (auth()->user()->role !== 'admin') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Only administrators can approve all pending rentals.',
+            ], 403);
+        }
+
+        try {
+            // Get all pending rental codes
+            $pendingRentalCodes = RentalCode::where('status', 'pending')->pluck('id')->toArray();
+            
+            if (empty($pendingRentalCodes)) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'No pending rental codes found.',
+                    'updated_count' => 0
+                ]);
+            }
+
+            // Update all pending rental codes to approved
+            $updatedCount = RentalCode::whereIn('id', $pendingRentalCodes)
+                ->update([
+                    'status' => 'approved',
+                    'updated_at' => now()
+                ]);
+
+            \Log::info('Approved all pending rental codes', [
+                'count' => $updatedCount,
+                'user_id' => auth()->id()
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => "Successfully approved {$updatedCount} pending rental code(s).",
+                'updated_count' => $updatedCount
+            ]);
+
+        } catch (\Exception $e) {
+            \Log::error('Failed to approve all pending rental codes', [
+                'error' => $e->getMessage(),
+                'user_id' => auth()->id()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to approve pending rental codes. Please try again.',
+            ], 500);
+        }
+    }
+
+    /**
      * Handle document removal for rental codes
      */
     private function handleDocumentRemoval(Request $request, RentalCode $rentalCode)

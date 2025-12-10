@@ -519,6 +519,14 @@ strong {
                     <p class="text-muted mb-0">Manage and track all rental code applications</p>
                 </div>
                 <div class="d-flex gap-2">
+                    @if(auth()->user()->role === 'admin')
+                    <button onclick="approveAllPendingRentals()" class="btn transition-colors"
+                       style="background: linear-gradient(135deg, #0891b2, #06b6d4); border: 2px solid #06b6d4; color: #ffffff; font-weight: 600; padding: 12px 24px; box-shadow: 0 4px 12px rgba(8, 145, 178, 0.3);"
+                       onmouseover="this.style.background='linear-gradient(135deg, #06b6d4, #0891b2)'; this.style.borderColor='#0891b2'; this.style.boxShadow='0 6px 16px rgba(8, 145, 178, 0.4)'; this.style.transform='translateY(-2px)';"
+                       onmouseout="this.style.background='linear-gradient(135deg, #0891b2, #06b6d4)'; this.style.borderColor='#06b6d4'; this.style.boxShadow='0 4px 12px rgba(8, 145, 178, 0.3)'; this.style.transform='translateY(0)';">
+                        <i class="fas fa-check-double me-2"></i> Approve All Rentals
+                    </button>
+                    @endif
                     <a href="{{ route('rental-codes.agent-earnings') }}" class="btn transition-colors"
                        style="background: linear-gradient(135deg, #fbbf24, #f59e0b); border: 2px solid #fbbf24; color: #1f2937; font-weight: 600; padding: 12px 24px; box-shadow: 0 4px 12px rgba(251, 191, 36, 0.3);"
                        onmouseover="this.style.background='linear-gradient(135deg, #f59e0b, #d97706)'; this.style.borderColor='#f59e0b'; this.style.boxShadow='0 6px 16px rgba(251, 191, 36, 0.4)'; this.style.transform='translateY(-2px)';"
@@ -1237,6 +1245,50 @@ function changeStatus(rentalCodeId, newStatus) {
     } else {
         // Reset to original value if user cancels
         event.target.value = event.target.getAttribute('data-original-value') || 'pending';
+    }
+}
+
+// Approve all pending rentals function
+function approveAllPendingRentals() {
+    if (confirm('Are you sure you want to approve ALL pending rental codes in the system? This will change their status to "approved".')) {
+        // Show loading state on the button
+        const approveAllButton = event.target.closest('button');
+        const originalHTML = approveAllButton.innerHTML;
+        approveAllButton.disabled = true;
+        approveAllButton.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Approving...';
+        
+        // Send request to approve all pending rentals
+        fetch('/admin/rental-codes/approve-all-pending', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                'Accept': 'application/json',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                if (data.updated_count > 0) {
+                    alert(`Successfully approved ${data.updated_count} pending rental code(s)!`);
+                    location.reload();
+                } else {
+                    alert('No pending rental codes found to approve.');
+                    approveAllButton.disabled = false;
+                    approveAllButton.innerHTML = originalHTML;
+                }
+            } else {
+                alert('Error: ' + (data.message || 'Failed to approve rental codes'));
+                approveAllButton.disabled = false;
+                approveAllButton.innerHTML = originalHTML;
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error approving rental codes. Please try again.');
+            approveAllButton.disabled = false;
+            approveAllButton.innerHTML = originalHTML;
+        });
     }
 }
 </script>
