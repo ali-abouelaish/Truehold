@@ -269,6 +269,16 @@ class RentalCodeController extends Controller
         // Set default status to pending for new rental codes
         $rentalCodeData['status'] = 'pending';
         
+        // Log marketing agent info for debugging
+        if (!empty($rentalCodeData['marketing_agent_id'])) {
+            \Log::info('Rental code created with marketing agent', [
+                'rental_code' => $rentalCodeData['rental_code'] ?? 'auto-generated',
+                'marketing_agent_id' => $rentalCodeData['marketing_agent_id'],
+                'client_count' => $rentalCodeData['client_count'],
+                'pasquale_marketing' => $request->has('pasquale_marketing') && $request->input('pasquale_marketing')
+            ]);
+        }
+        
         // Remove client fields from rental code data as they're now in the client record
         $clientFields = [
             'client_full_name', 'client_date_of_birth', 'client_phone_number',
@@ -1079,19 +1089,14 @@ public function generateCode()
             'agent_comparison' => array_slice($filteredAgents, 0, 10, true), // Top 10 agents
         ];
 
-        // Calculate cycle totals (11th -> 10th) - only for registered agent users with proper commission structure (ID-based only)
-        $monthlyTotals = []; // reuse key name for view compatibility
+        // Calculate monthly totals - group by month for all rental codes
+        $monthlyTotals = [];
         foreach ($rentalCodes as $code) {
             $totalFee = (float) ($code->consultation_fee ?? 0);
             $rentalDate = $code->rental_date ?? ($code->created_at ?? now());
-            // Determine cycle end for this record
-            $cycleEnd = $rentalDate->copy();
-            if ($cycleEnd->day <= 10) {
-                $cycleEnd = $cycleEnd->copy()->day(10);
-            } else {
-                $cycleEnd = $cycleEnd->copy()->addMonthNoOverflow()->day(10);
-            }
-            $monthKey = $cycleEnd->format('Y-m-10');
+            
+            // Group by month (Y-m format like "2025-12")
+            $monthKey = $rentalDate->format('Y-m');
             $paymentMethod = $code->payment_method ?? 'Cash';
             
             // Skip if no consultation fee
@@ -1105,25 +1110,23 @@ public function generateCode()
                 $baseCommission = $totalFee * 0.8;
             }
             
-            // Determine the agent strictly by rental_agent_id (registered users only)
-            $agentName = null;
-            $rentalAgentId = $code->rental_agent_id ?? null;
-            if (!empty($rentalAgentId) && in_array((int)$rentalAgentId, $agentUserIds)) {
-                $agentName = $agentUsers[(int)$rentalAgentId] ?? null;
-            } else {
-                continue;
+            // Add to monthly totals (aggregate all earnings for the month)
+            if (!isset($monthlyTotals[$monthKey])) {
+                $monthlyTotals[$monthKey] = 0;
             }
-            
-            // Add to cycle totals
-            if ($agentName) {
-                if (!isset($monthlyTotals[$monthKey])) {
-                    $monthlyTotals[$monthKey] = 0;
-                }
-                $monthlyTotals[$monthKey] += $baseCommission;
-            }
+            $monthlyTotals[$monthKey] += $baseCommission;
         }
         ksort($monthlyTotals);
-        $chartData['monthly_totals'] = $monthlyTotals;
+        
+        // Format labels for display (e.g., "2025-12" -> "Dec 2025")
+        $formattedMonthlyTotals = [];
+        foreach ($monthlyTotals as $monthKey => $total) {
+            $date = \Carbon\Carbon::createFromFormat('Y-m', $monthKey);
+            $formattedLabel = $date->format('M Y'); // e.g., "Dec 2025"
+            $formattedMonthlyTotals[$formattedLabel] = $total;
+        }
+        
+        $chartData['monthly_totals'] = $formattedMonthlyTotals;
 
         // Default behavior: show only agents with rental earnings (exclude marketing-only) unless explicitly requested
         if (empty($marketingAgentFilter)) {
@@ -2055,12 +2058,20 @@ public function generateCode()
 
         // Get ALL rentals where this agent is either rental agent OR marketing agent
         // This matches the logic used in the earnings leaderboard
+        // Include approved rentals OR unpaid rentals (regardless of status) so pending rentals show up
         $query = RentalCode::with(['client', 'client.agent', 'rentalAgent', 'marketingAgentUser'])
             ->where(function($q) use ($startDate, $endDate) {
                 $q->whereBetween('rental_date', [$startDate, $endDate])
                   ->orWhere('paid', false);
             })
-            ->where('status', 'approved')
+            ->where(function($q) {
+                $q->where('status', 'approved')
+                  ->orWhere(function($q2) {
+                      // Include pending rentals that are unpaid
+                      $q2->where('status', 'pending')
+                         ->where('paid', false);
+                  });
+            })
             ->where(function($q) use ($agentId) {
                 $q->where('rental_agent_id', $agentId)
                   ->orWhere('marketing_agent_id', $agentId);
