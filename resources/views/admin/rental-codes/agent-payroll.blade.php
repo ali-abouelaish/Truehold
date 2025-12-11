@@ -308,6 +308,23 @@
                     @if(count($agent['transactions']) > 0)
                         @php
                             $rt = $agent['rental_totals'] ?? ['count'=>0,'agent_cut'=>0,'paid'=>0,'entitled'=>0,'outstanding'=>0];
+                            $marketingEarnings = $agent['marketing_agent_earnings'] ?? 0;
+                            // Calculate total agent earnings: rental + marketing
+                            $totalAgentEarningsFromRentals = $rt['agent_cut'] + $marketingEarnings;
+                            // Calculate paid amounts including marketing
+                            $marketingPaid = 0;
+                            $marketingEntitled = 0;
+                            foreach ($agent['transactions'] ?? [] as $transaction) {
+                                if ($transaction['is_marketing_earnings'] ?? false) {
+                                    if ($transaction['paid'] ?? false) {
+                                        $marketingPaid += (float) ($transaction['agent_cut'] ?? 0);
+                                    } else {
+                                        $marketingEntitled += (float) ($transaction['agent_cut'] ?? 0);
+                                    }
+                                }
+                            }
+                            $totalPaid = $rt['paid'] + $marketingPaid;
+                            $totalEntitled = $rt['entitled'] + $marketingEntitled;
                         @endphp
                         <div class="row mb-3">
                             <div class="col-md-3">
@@ -316,15 +333,15 @@
                             </div>
                             <div class="col-md-3">
                                 <div class="text-muted" style="color: #ecf0f1 !important; font-weight: 600;">Agent Earnings</div>
-                                <div class="font-weight-bold text-success" style="color: #2ecc71 !important; font-size: 1.1rem;">£{{ number_format($rt['agent_cut'], 2) }}</div>
+                                <div class="font-weight-bold text-success" style="color: #2ecc71 !important; font-size: 1.1rem;">£{{ number_format($totalAgentEarningsFromRentals, 2) }}</div>
                             </div>
                             <div class="col-md-3">
                                 <div class="text-muted" style="color: #ecf0f1 !important; font-weight: 600;">Paid</div>
-                                <div class="font-weight-bold text-success" style="color: #10b981 !important; font-size: 1.1rem;">£{{ number_format($rt['paid'], 2) }}</div>
+                                <div class="font-weight-bold text-success" style="color: #10b981 !important; font-size: 1.1rem;">£{{ number_format($totalPaid, 2) }}</div>
                             </div>
                             <div class="col-md-3">
                                 <div class="text-muted" style="color: #ecf0f1 !important; font-weight: 600;">To Be Paid</div>
-                                <div class="font-weight-bold text-warning" style="color: #f59e0b !important; font-size: 1.1rem;">£{{ number_format($rt['entitled'], 2) }}</div>
+                                <div class="font-weight-bold text-warning" style="color: #f59e0b !important; font-size: 1.1rem;">£{{ number_format($totalEntitled, 2) }}</div>
                             </div>
                         </div>
                         @auth
