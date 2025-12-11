@@ -14,6 +14,16 @@
                         Agent Details: {{ $agentName }}
                     </h1>
                     <p class="text-muted">Detailed earnings and performance analysis</p>
+                    <!-- Date Range Indicator -->
+                    @if($startDate && $endDate)
+                        <div class="mt-2">
+                            <span class="badge bg-primary" style="font-size: 0.85rem; padding: 0.5rem 0.75rem;">
+                                <i class="fas fa-calendar-alt me-1"></i>
+                                {{ \Carbon\Carbon::parse($startDate)->format('d M Y') }} → {{ \Carbon\Carbon::parse($endDate)->format('d M Y') }}
+                                <span class="ms-2 opacity-75">({{ \Carbon\Carbon::parse($startDate)->diffInDays(\Carbon\Carbon::parse($endDate)) + 1 }} days)</span>
+                            </span>
+                        </div>
+                    @endif
                 </div>
                 <div>
                     <button class="btn btn-outline-info me-2" onclick="testJavaScript()">
@@ -99,10 +109,134 @@
         <div class="col-12">
             <div class="card shadow">
                 <div class="card-header">
-                    <h6 class="m-0 font-weight-bold text-primary">Filters</h6>
+                    <h6 class="m-0 font-weight-bold text-primary">Filters & Commission Cycles</h6>
                 </div>
                 <div class="card-body">
-                    <form method="GET" action="{{ route('rental-codes.agent-details', $agentName) }}" class="row g-3">
+                    <form method="GET" action="{{ route('rental-codes.agent-details', $agentName) }}" class="row g-3" id="filterForm">
+                        <!-- Quick Commission Cycle Selector -->
+                        <div class="col-12 mb-3">
+                            <div class="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-3">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <label class="form-label mb-0 text-sm font-weight-bold text-gray-700">
+                                        <i class="fas fa-calendar-check me-1"></i>Quick Select Commission Cycle (11th to 10th)
+                                    </label>
+                                    <span class="text-xs text-muted">Click to apply</span>
+                                </div>
+                                
+                                <!-- Commission Cycle Buttons -->
+                                <div class="row g-2 mb-2">
+                                    @php
+                                        $currentDate = now();
+                                        $cycles = [];
+                                        
+                                        // Generate last 8 commission cycles
+                                        for ($i = 0; $i < 8; $i++) {
+                                            $cycleDate = $currentDate->copy()->subMonths($i);
+                                            
+                                            if ($cycleDate->day <= 10) {
+                                                $cycleStart = $cycleDate->copy()->subMonthNoOverflow()->day(11);
+                                                $cycleEnd = $cycleDate->copy()->day(10);
+                                            } else {
+                                                $cycleStart = $cycleDate->copy()->day(11);
+                                                $cycleEnd = $cycleDate->copy()->addMonthNoOverflow()->day(10);
+                                            }
+                                            
+                                            // Check if this cycle matches current filter
+                                            $isSelected = ($startDate === $cycleStart->toDateString() && 
+                                                          $endDate === min($currentDate->toDateString(), $cycleEnd->toDateString()));
+                                            
+                                            $cycles[] = [
+                                                'start' => $cycleStart->toDateString(),
+                                                'end' => min($currentDate->toDateString(), $cycleEnd->toDateString()),
+                                                'label' => $cycleStart->format('d-M') . ' to ' . $cycleEnd->format('d-M Y'),
+                                                'shortLabel' => $cycleStart->format('M Y'),
+                                                'isCurrent' => $i === 0,
+                                                'isSelected' => $isSelected
+                                            ];
+                                        }
+                                    @endphp
+                                    
+                                    @foreach($cycles as $cycle)
+                                        <div class="col-6 col-md-3">
+                                            <button type="button" 
+                                                    onclick="selectCycle('{{ $cycle['start'] }}', '{{ $cycle['end'] }}')"
+                                                    class="btn w-100 btn-sm text-xs {{ $cycle['isSelected'] ? 'btn-success' : ($cycle['isCurrent'] ? 'btn-primary' : 'btn-outline-secondary') }}">
+                                                <div class="d-flex flex-column align-items-center">
+                                                    <div class="d-flex align-items-center">
+                                                        @if($cycle['isSelected'])
+                                                            <i class="fas fa-check-circle me-1"></i>
+                                                        @elseif($cycle['isCurrent'])
+                                                            <i class="fas fa-star me-1"></i>
+                                                        @endif
+                                                        <span class="fw-bold">{{ $cycle['shortLabel'] }}</span>
+                                                    </div>
+                                                    <span class="text-xs mt-1" style="font-size: 0.65rem;">{{ $cycle['label'] }}</span>
+                                                </div>
+                                            </button>
+                                        </div>
+                                    @endforeach
+                                </div>
+                                
+                                <!-- Quick Preset Buttons -->
+                                <div class="border-top border-secondary pt-2 mt-2">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <span class="text-xs fw-bold text-muted">Quick Presets:</span>
+                                    </div>
+                                    <div class="row g-2">
+                                        @php
+                                            // Last 3 months preset
+                                            $last3MonthsStart = $currentDate->copy()->subMonths(3);
+                                            $last3MonthsEnd = $currentDate->toDateString();
+                                            
+                                            // Last 6 months preset
+                                            $last6MonthsStart = $currentDate->copy()->subMonths(6);
+                                            $last6MonthsEnd = $currentDate->toDateString();
+                                            
+                                            // This year preset
+                                            $thisYearStart = $currentDate->copy()->startOfYear();
+                                            $thisYearEnd = $currentDate->toDateString();
+                                            
+                                            // Last year preset
+                                            $lastYearStart = $currentDate->copy()->subYear()->startOfYear();
+                                            $lastYearEnd = $currentDate->copy()->subYear()->endOfYear();
+                                        @endphp
+                                        
+                                        <div class="col-6 col-md-3">
+                                            <button type="button" 
+                                                    onclick="selectCycle('{{ $last3MonthsStart->toDateString() }}', '{{ $last3MonthsEnd }}')"
+                                                    class="btn btn-outline-primary btn-sm w-100 text-xs">
+                                                <i class="fas fa-calendar-week me-1"></i>Last 3 Months
+                                            </button>
+                                        </div>
+                                        
+                                        <div class="col-6 col-md-3">
+                                            <button type="button" 
+                                                    onclick="selectCycle('{{ $last6MonthsStart->toDateString() }}', '{{ $last6MonthsEnd }}')"
+                                                    class="btn btn-outline-primary btn-sm w-100 text-xs">
+                                                <i class="fas fa-calendar me-1"></i>Last 6 Months
+                                            </button>
+                                        </div>
+                                        
+                                        <div class="col-6 col-md-3">
+                                            <button type="button" 
+                                                    onclick="selectCycle('{{ $thisYearStart->toDateString() }}', '{{ $thisYearEnd }}')"
+                                                    class="btn btn-outline-success btn-sm w-100 text-xs">
+                                                <i class="fas fa-calendar-alt me-1"></i>This Year
+                                            </button>
+                                        </div>
+                                        
+                                        <div class="col-6 col-md-3">
+                                            <button type="button" 
+                                                    onclick="selectCycle('{{ $lastYearStart->toDateString() }}', '{{ $lastYearEnd->toDateString() }}')"
+                                                    class="btn btn-outline-warning btn-sm w-100 text-xs">
+                                                <i class="fas fa-history me-1"></i>Last Year
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
                         <div class="col-md-3">
                             <label for="start_date" class="form-label">Start Date</label>
                             <input type="date" class="form-control" id="start_date" name="start_date" value="{{ $startDate }}">
@@ -387,6 +521,16 @@ function testJavaScript() {
     if (csrfToken) {
     } else {
     }
+}
+
+// Commission cycle selection function
+function selectCycle(startDate, endDate) {
+    // Update the date inputs
+    document.getElementById('start_date').value = startDate;
+    document.getElementById('end_date').value = endDate;
+    
+    // Submit the form automatically
+    document.getElementById('filterForm').submit();
 }
 
 // Monthly Performance Chart
