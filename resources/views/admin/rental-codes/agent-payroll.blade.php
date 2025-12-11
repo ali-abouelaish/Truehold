@@ -27,16 +27,16 @@
     </div>
 
     <!-- Commission Cycle Selector -->
-    <div class="card shadow mb-4" style="background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%); border: 1px solid #60a5fa;">
+    <div class="card shadow mb-4">
         <div class="card-body">
             <form method="GET" id="cycleFilterForm">
                 <!-- Quick Commission Cycle Selector -->
                 <div class="mb-3">
                     <div class="d-flex justify-content-between align-items-center mb-3">
-                        <label class="font-weight-bold text-white mb-0">
+                        <label class="font-weight-bold text-primary mb-0">
                             <i class="fas fa-calendar-check mr-2"></i>Quick Select Commission Cycle (11th to 10th)
                         </label>
-                        <span class="text-white-50 small">Click to apply</span>
+                        <span class="text-muted small">Click to apply</span>
                     </div>
                     
                     <!-- Commission Cycle Buttons -->
@@ -76,7 +76,7 @@
                             <div class="col-md-3 col-sm-6 mb-2">
                                 <button type="button" 
                                         onclick="selectCycle('{{ $cycle['start'] }}', '{{ $cycle['end'] }}')"
-                                        class="btn btn-block text-white {{ $cycle['isSelected'] ? 'btn-success' : ($cycle['isCurrent'] ? 'btn-primary' : 'btn-outline-light') }}"
+                                        class="btn btn-block {{ $cycle['isSelected'] ? 'btn-success text-white' : ($cycle['isCurrent'] ? 'btn-primary text-white' : 'btn-outline-primary') }}"
                                         style="padding: 0.75rem; {{ $cycle['isSelected'] ? 'font-weight: bold;' : '' }}">
                                     <div>
                                         @if($cycle['isSelected'])
@@ -93,9 +93,9 @@
                     </div>
                     
                     <!-- Quick Preset Buttons -->
-                    <div class="border-top border-white-50 pt-3">
+                    <div class="border-top border-gray-200 pt-3 mt-3">
                         <div class="d-flex justify-content-between align-items-center mb-2">
-                            <span class="text-white-50 small font-weight-bold">Quick Presets:</span>
+                            <span class="text-muted small font-weight-bold">Quick Presets:</span>
                         </div>
                         <div class="row">
                             @php
@@ -119,7 +119,7 @@
                             <div class="col-md-3 col-sm-6 mb-2">
                                 <button type="button" 
                                         onclick="selectCycle('{{ $last3MonthsStart->toDateString() }}', '{{ $last3MonthsEnd }}')"
-                                        class="btn btn-outline-light btn-sm btn-block">
+                                        class="btn btn-outline-secondary btn-sm btn-block">
                                     <i class="fas fa-calendar-week mr-1"></i>Last 3 Months
                                 </button>
                             </div>
@@ -127,7 +127,7 @@
                             <div class="col-md-3 col-sm-6 mb-2">
                                 <button type="button" 
                                         onclick="selectCycle('{{ $last6MonthsStart->toDateString() }}', '{{ $last6MonthsEnd }}')"
-                                        class="btn btn-outline-light btn-sm btn-block">
+                                        class="btn btn-outline-secondary btn-sm btn-block">
                                     <i class="fas fa-calendar mr-1"></i>Last 6 Months
                                 </button>
                             </div>
@@ -135,7 +135,7 @@
                             <div class="col-md-3 col-sm-6 mb-2">
                                 <button type="button" 
                                         onclick="selectCycle('{{ $thisYearStart->toDateString() }}', '{{ $thisYearEnd }}')"
-                                        class="btn btn-outline-light btn-sm btn-block">
+                                        class="btn btn-outline-secondary btn-sm btn-block">
                                     <i class="fas fa-calendar-alt mr-1"></i>This Year
                                 </button>
                             </div>
@@ -143,7 +143,7 @@
                             <div class="col-md-3 col-sm-6 mb-2">
                                 <button type="button" 
                                         onclick="selectCycle('{{ $lastYearStart->toDateString() }}', '{{ $lastYearEnd->toDateString() }}')"
-                                        class="btn btn-outline-light btn-sm btn-block">
+                                        class="btn btn-outline-secondary btn-sm btn-block">
                                     <i class="fas fa-history mr-1"></i>Last Year
                                 </button>
                             </div>
