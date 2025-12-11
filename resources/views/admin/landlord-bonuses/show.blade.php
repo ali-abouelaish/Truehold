@@ -140,6 +140,7 @@
                                 @php
                                     $statusConfig = [
                                         'pending' => ['class' => 'warning', 'icon' => 'clock', 'text' => 'Pending'],
+                                        'sent' => ['class' => 'info', 'icon' => 'paper-plane', 'text' => 'Sent'],
                                         'paid' => ['class' => 'success', 'icon' => 'check-circle', 'text' => 'Paid'],
                                         'cancelled' => ['class' => 'danger', 'icon' => 'times-circle', 'text' => 'Cancelled']
                                     ];

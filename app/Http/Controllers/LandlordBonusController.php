@@ -79,7 +79,7 @@ class LandlordBonusController extends Controller
 
         $validated = $request->validate([
             'bonus_ids' => 'required|string',
-            'status' => 'required|in:pending,paid,cancelled',
+            'status' => 'required|in:pending,sent,paid,cancelled',
         ]);
 
         $bonusIds = json_decode($validated['bonus_ids'], true);
@@ -135,7 +135,7 @@ class LandlordBonusController extends Controller
     public function index()
     {
         $landlordBonuses = LandlordBonus::with(['agent', 'creator'])
-            ->orderBy('date', 'desc')
+            ->orderBy('bonus_code', 'desc')
             ->paginate(20);
         
         return view('admin.landlord-bonuses.index', compact('landlordBonuses'));
@@ -163,7 +163,7 @@ class LandlordBonusController extends Controller
             'client' => 'required|string|max:255',
             'commission' => 'required|numeric|min:0',
             'bonus_split' => 'required|in:55_45,100_0',
-            'status' => 'required|in:pending,paid,cancelled',
+            'status' => 'required|in:pending,sent,paid,cancelled',
             'notes' => 'nullable|string'
         ]);
 
@@ -216,7 +216,7 @@ class LandlordBonusController extends Controller
             'client' => 'required|string|max:255',
             'commission' => 'required|numeric|min:0',
             'bonus_split' => 'required|in:55_45,100_0',
-            'status' => 'required|in:pending,paid,cancelled',
+            'status' => 'required|in:pending,sent,paid,cancelled',
             'notes' => 'nullable|string'
         ]);
 
@@ -340,9 +340,9 @@ class LandlordBonusController extends Controller
             $invoice->calculateTotals();
             $invoice->save();
 
-            // Mark all bonuses as paid
+            // Mark all bonuses as sent (invoice generated)
             LandlordBonus::whereIn('id', $bonusIds)->update([
-                'status' => 'paid',
+                'status' => 'sent',
                 'updated_at' => now(),
             ]);
 
@@ -371,7 +371,7 @@ class LandlordBonusController extends Controller
         $query = LandlordBonus::with(['agent.user', 'creator']);
 
         // Get all landlord bonuses
-        $landlordBonuses = $query->orderBy('date', 'desc')->get();
+        $landlordBonuses = $query->orderBy('bonus_code', 'desc')->get();
 
         $filename = 'landlord_bonuses_export_' . date('Y-m-d_H-i-s') . '.csv';
         

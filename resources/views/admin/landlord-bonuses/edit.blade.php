@@ -127,6 +127,7 @@
                                 <select class="form-select @error('status') is-invalid @enderror" 
                                         id="status" name="status" required>
                                     <option value="pending" {{ old('status', $landlordBonus->status) == 'pending' ? 'selected' : '' }}>Pending</option>
+                                    <option value="sent" {{ old('status', $landlordBonus->status) == 'sent' ? 'selected' : '' }}>Sent</option>
                                     <option value="paid" {{ old('status', $landlordBonus->status) == 'paid' ? 'selected' : '' }}>Paid</option>
                                     <option value="cancelled" {{ old('status', $landlordBonus->status) == 'cancelled' ? 'selected' : '' }}>Cancelled</option>
                                 </select>

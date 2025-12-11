@@ -115,6 +115,7 @@
                                         @php
                                             $statusConfig = [
                                                 'pending' => ['class' => 'warning', 'icon' => 'clock', 'text' => 'Pending'],
+                                                'sent' => ['class' => 'info', 'icon' => 'paper-plane', 'text' => 'Sent'],
                                                 'paid' => ['class' => 'success', 'icon' => 'check-circle', 'text' => 'Paid'],
                                                 'cancelled' => ['class' => 'danger', 'icon' => 'times-circle', 'text' => 'Cancelled']
                                             ];
@@ -211,6 +212,9 @@
                             <option value="">-- Select Status --</option>
                             <option value="pending">
                                 <i class="fas fa-clock"></i> Pending
+                            </option>
+                            <option value="sent">
+                                <i class="fas fa-paper-plane"></i> Sent
                             </option>
                             <option value="paid">
                                 <i class="fas fa-check-circle"></i> Paid

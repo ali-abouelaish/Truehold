@@ -125,6 +125,7 @@
                                 <select class="form-select @error('status') is-invalid @enderror" 
                                         id="status" name="status" required>
                                     <option value="pending" {{ old('status', 'pending') == 'pending' ? 'selected' : '' }}>Pending</option>
+                                    <option value="sent" {{ old('status') == 'sent' ? 'selected' : '' }}>Sent</option>
                                     <option value="paid" {{ old('status') == 'paid' ? 'selected' : '' }}>Paid</option>
                                     <option value="cancelled" {{ old('status') == 'cancelled' ? 'selected' : '' }}>Cancelled</option>
                                 </select>
