@@ -99,9 +99,12 @@
                         <div class="flex items-start">
                             <i class="fas fa-info-circle text-blue-600 mt-1 mr-3"></i>
                             <div>
-                                <h4 class="text-sm font-medium text-blue-900">Payroll View</h4>
+                                <h4 class="text-sm font-medium text-blue-900">Commission File - Cycle View</h4>
                                 <p class="text-sm text-blue-700 mt-1">
-                                    This view shows only <strong>approved</strong> rentals that this agent participated in (as rental agent or marketing agent). Outstanding amounts show what the agent is owed from unpaid rentals.
+                                    This view shows only <strong>approved rentals from the selected commission cycle</strong> ({{ \Carbon\Carbon::parse($startDate)->format('d M Y') }} to {{ \Carbon\Carbon::parse($endDate)->format('d M Y') }}) that this agent participated in as rental agent or marketing agent.
+                                </p>
+                                <p class="text-sm text-blue-700 mt-2">
+                                    <strong>Note:</strong> Only transactions within the selected date range are shown. Use the quick cycle selector above to view different periods.
                                 </p>
                             </div>
                         </div>
@@ -374,12 +377,15 @@
         <!-- Charts Section -->
         @if(count($agentEarnings) > 0)
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-            <!-- Monthly Earnings Chart -->
+            <!-- Commission Cycle Earnings Chart -->
             <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-                <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                    <i class="fas fa-chart-line text-blue-600 mr-2"></i>
-                    Monthly Earnings Trend
-                </h3>
+                <div class="mb-4">
+                    <h3 class="text-lg font-semibold text-gray-900 flex items-center">
+                        <i class="fas fa-chart-line text-blue-600 mr-2"></i>
+                        Commission Cycle Earnings Trend
+                    </h3>
+                    <p class="text-xs text-gray-500 mt-1">Total agent earnings per cycle (11th to 10th)</p>
+                </div>
                 <div class="h-64 flex items-center justify-center">
                     <canvas id="monthlyChart" width="400" height="200"></canvas>
                 </div>
@@ -404,23 +410,31 @@
     <div class="px-6 py-4 border-b border-gray-200">
                 <div class="flex items-center justify-between">
                     <div>
-                        <h3 class="text-lg font-semibold text-gray-900">
-                            @if($agentSearch)
-                                {{ $agentSearch }} - Commission File
-                            @elseif($isPayrollView)
-                                @if(auth()->check() && auth()->user()->role === 'admin')
-                                    Commission File - {{ $agentSearch }}
+                        <div class="flex items-center justify-between">
+                            <h3 class="text-lg font-semibold text-gray-900">
+                                @if($agentSearch)
+                                    {{ $agentSearch }} - Commission File
+                                @elseif($isPayrollView)
+                                    @if(auth()->check() && auth()->user()->role === 'admin')
+                                        Commission File - {{ $agentSearch }}
+                                    @else
+                                        My Commission File
+                                    @endif
                                 @else
-                                    My Commission File
+                                    @if(auth()->check() && auth()->user()->role === 'admin')
+                                        Agent Earnings Breakdown
+                                    @else
+                                        Agent Leaderboard
+                                    @endif
                                 @endif
-                            @else
-                                @if(auth()->check() && auth()->user()->role === 'admin')
-                                    Agent Earnings Breakdown
-                                @else
-                                    Agent Leaderboard
-                                @endif
+                            </h3>
+                            @if($isPayrollView)
+                                <span class="inline-flex items-center px-3 py-1 bg-green-100 text-green-800 rounded-full text-xs font-medium">
+                                    <i class="fas fa-check-circle mr-1"></i>
+                                    Cycle View: Rentals Only
+                                </span>
                             @endif
-                        </h3>
+                        </div>
         <p class="text-sm text-gray-500 mt-1">
                             @if($agentSearch)
                                 Complete payroll breakdown for {{ $agentSearch }}
@@ -882,7 +896,7 @@
 Chart.defaults.font.family = 'Inter, sans-serif';
 Chart.defaults.color = '#6B7280';
 
-// Monthly earnings chart
+// Commission Cycle earnings chart (11th to 10th)
 @if(count($agentEarnings) > 0)
 const monthlyCtx = document.getElementById('monthlyChart').getContext('2d');
 const monthlyChart = new Chart(monthlyCtx, {
@@ -890,13 +904,18 @@ const monthlyChart = new Chart(monthlyCtx, {
     data: {
         labels: {!! json_encode(array_keys($chartData['monthly_totals'])) !!},
         datasets: [{
-            label: 'Monthly Earnings',
+            label: 'Agent Earnings per Cycle',
             data: {!! json_encode(array_values($chartData['monthly_totals'])) !!},
             borderColor: 'rgb(59, 130, 246)',
-            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+            backgroundColor: 'rgba(59, 130, 246, 0.2)',
             borderWidth: 3,
             fill: true,
-            tension: 0.4
+            tension: 0.4,
+            pointBackgroundColor: 'rgb(59, 130, 246)',
+            pointBorderColor: '#fff',
+            pointBorderWidth: 2,
+            pointRadius: 5,
+            pointHoverRadius: 7
         }]
     },
     options: {
@@ -904,16 +923,47 @@ const monthlyChart = new Chart(monthlyCtx, {
         maintainAspectRatio: false,
         plugins: {
             legend: {
-                display: false
+                display: true,
+                labels: {
+                    font: {
+                        size: 14,
+                        weight: 'bold'
+                    }
+                }
+            },
+            tooltip: {
+                callbacks: {
+                    title: function(context) {
+                        return 'Commission Cycle: ' + context[0].label;
+                    },
+                    label: function(context) {
+                        return 'Total Agent Earnings: £' + context.parsed.y.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+                    }
+                }
             }
         },
         scales: {
+            x: {
+                ticks: {
+                    maxRotation: 45,
+                    minRotation: 45,
+                    font: {
+                        size: 10
+                    }
+                },
+                grid: {
+                    display: false
+                }
+            },
             y: {
                 beginAtZero: true,
                 ticks: {
                     callback: function(value) {
                         return '£' + value.toLocaleString();
                     }
+                },
+                grid: {
+                    color: 'rgba(0, 0, 0, 0.05)'
                 }
             }
         }
