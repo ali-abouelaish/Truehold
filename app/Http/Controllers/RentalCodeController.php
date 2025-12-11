@@ -1971,6 +1971,13 @@ public function generateCode()
         if (!$agentUser) {
             abort(404, 'Agent not found');
         }
+        
+        // Debug logging for agent
+        \Log::info('Agent Payroll View - Agent Info', [
+            'agent_id' => $agentId,
+            'agent_name' => $agentUser->name,
+            'agent_role' => $agentUser->role,
+        ]);
 
         // Define commission cycle: 11th -> 10th; default to current cycle if not provided
         $today = now();
@@ -1992,31 +1999,18 @@ public function generateCode()
         $endDateTime = \Carbon\Carbon::parse($endDate)->endOfDay();
         $startDateTime = $startDate ? \Carbon\Carbon::parse($startDate)->startOfDay() : null;
 
-        // Rentals for this agent by foreign key; include date fallbacks
+        // Get ALL rentals where this agent is either rental agent OR marketing agent
+        // This matches the logic used in the earnings leaderboard
         $query = RentalCode::with(['client', 'client.agent', 'rentalAgent', 'marketingAgentUser'])
-            ->where('rental_agent_id', (int)$agentId)
-            ->where(function($q) use ($endDateTime) {
-                $q->where(function($q2) use ($endDateTime) {
-                    $q2->whereNotNull('rental_date')
-                       ->where('rental_date', '<=', $endDateTime->toDateString());
-                })->orWhere(function($q3) use ($endDateTime) {
-                    $q3->whereNull('rental_date')
-                       ->where('created_at', '<=', $endDateTime);
-                });
+            ->where(function($q) use ($startDate, $endDate) {
+                $q->whereBetween('rental_date', [$startDate, $endDate])
+                  ->orWhere('paid', false);
             })
-            ->where('status', 'approved');
-
-        if ($startDateTime) {
-            $query->where(function($q) use ($startDateTime) {
-                $q->where(function($q2) use ($startDateTime) {
-                    $q2->whereNotNull('rental_date')
-                       ->where('rental_date', '>=', $startDateTime->toDateString());
-                })->orWhere(function($q3) use ($startDateTime) {
-                    $q3->whereNull('rental_date')
-                       ->where('created_at', '>=', $startDateTime);
-                });
+            ->where('status', 'approved')
+            ->where(function($q) use ($agentId) {
+                $q->where('rental_agent_id', $agentId)
+                  ->orWhere('marketing_agent_id', $agentId);
             });
-        }
 
         if ($status) {
             $query->where('status', $status);
@@ -2057,27 +2051,42 @@ public function generateCode()
                 $baseCommission = $totalFee * 0.8;
             }
 
-            // Regular rental agent gets 55%; adjust if different marketing agent exists
-            $agencyCut = $baseCommission * 0.45;
-            $agentCut = $baseCommission * 0.55;
+            // Check if this agent is the rental agent or marketing agent
+            $isRentalAgent = (int)($code->rental_agent_id ?? 0) === (int)$agentId;
+            $isMarketingAgent = (int)($code->marketing_agent_id ?? 0) === (int)$agentId;
+            
+            $agencyCut = 0;
+            $agentCut = 0;
+            $isMarketingEarnings = false;
+            $marketingDeduction = 0;
 
-            $hasDifferentMarketingAgent = false;
-            if (!empty($code->marketing_agent_id) && !empty($code->rental_agent_id)) {
-                $hasDifferentMarketingAgent = (int) $code->marketing_agent_id !== (int) $code->rental_agent_id;
-            } else {
-                $rentAgentNameCheck = $code->rent_by_agent_name;
-                $marketingAgentNameCheck = $code->marketing_agent_name;
-                if ($marketingAgentNameCheck === 'N/A') { $marketingAgentNameCheck = null; }
-                if (!empty($marketingAgentNameCheck) && !empty($rentAgentNameCheck)) {
-                    $hasDifferentMarketingAgent = trim($marketingAgentNameCheck) !== trim($rentAgentNameCheck);
+            if ($isRentalAgent && !$isMarketingAgent) {
+                // Agent is the rental agent (not also marketing agent)
+                $agencyCut = $baseCommission * 0.45;
+                $agentCut = $baseCommission * 0.55;
+                
+                // Check if there's a different marketing agent
+                if (!empty($code->marketing_agent_id) && (int)$code->marketing_agent_id !== (int)$agentId) {
+                    $marketingDeduction = $clientCount >= 2 ? 40 : 30;
+                    $agentCut -= $marketingDeduction;
+                    $agentData['marketing_deductions'] += $marketingDeduction;
                 }
-            }
-
-            if ($hasDifferentMarketingAgent) {
-                $marketingDeduction = $clientCount >= 2 ? 40 : 30;
-                $agentCut -= $marketingDeduction;
-                $agentData['marketing_deductions'] += $marketingDeduction;
-                $agentData['marketing_agent_earnings'] += $marketingDeduction;
+                $isMarketingEarnings = false;
+            } elseif ($isMarketingAgent && !$isRentalAgent) {
+                // Agent is the marketing agent only (not rental agent)
+                $marketingCommission = $clientCount >= 2 ? 40 : 30;
+                $agencyCut = max(0, $baseCommission - $marketingCommission);
+                $agentCut = $marketingCommission;
+                $agentData['marketing_agent_earnings'] += $marketingCommission;
+                $isMarketingEarnings = true;
+            } elseif ($isRentalAgent && $isMarketingAgent) {
+                // Agent is both rental and marketing agent - they get full rental commission
+                $agencyCut = $baseCommission * 0.45;
+                $agentCut = $baseCommission * 0.55;
+                $isMarketingEarnings = false;
+            } else {
+                // This shouldn't happen based on our query, skip
+                continue;
             }
 
             $agentData['agency_earnings'] += $agencyCut;
@@ -2105,8 +2114,8 @@ public function generateCode()
                 'agency_cut' => $agencyCut,
                 'agent_cut' => $agentCut,
                 'vat_amount' => in_array($paymentMethod, ['Transfer', 'Card machine']) ? ($totalFee - $baseCommission) : 0,
-                'marketing_deduction' => $marketingDeduction ?? 0,
-                'marketing_agent' => $code->marketing_agent_name,
+                'marketing_deduction' => $marketingDeduction,
+                'marketing_agent' => $isMarketingEarnings ? $agentUser->name : ($code->marketing_agent_name ?? null),
                 'client_count' => $clientCount,
                 'paid' => $isPaid,
                 'paid_at' => $code->paid_at,
@@ -2114,111 +2123,7 @@ public function generateCode()
                 'code' => $code->rental_code ?? 'N/A',
                 'status' => $code->status ?? 'Unknown',
                 'payment_method' => $paymentMethod,
-                'is_marketing_earnings' => false,
-            ];
-        }
-
-        // Also include rentals where this agent acted as the marketing agent (not the rental agent)
-        $marketingQuery = RentalCode::with(['client', 'client.agent', 'rentalAgent', 'marketingAgentUser'])
-            ->where('marketing_agent_id', (int)$agentId)
-            ->where(function($q) use ($endDateTime) {
-                $q->where(function($q2) use ($endDateTime) {
-                    $q2->whereNotNull('rental_date')
-                       ->where('rental_date', '<=', $endDateTime->toDateString());
-                })->orWhere(function($q3) use ($endDateTime) {
-                    $q3->whereNull('rental_date')
-                       ->where('created_at', '<=', $endDateTime);
-                });
-            })
-            // ensure it's a different rental agent; no marketing commission if same person
-            ->where(function($q) use ($agentId) {
-                $q->whereNull('rental_agent_id')
-                  ->orWhere('rental_agent_id', '!=', (int)$agentId);
-            })
-            ->where('status', 'approved');
-
-        if ($startDateTime) {
-            $marketingQuery->where(function($q) use ($startDateTime) {
-                $q->where(function($q2) use ($startDateTime) {
-                    $q2->whereNotNull('rental_date')
-                       ->where('rental_date', '>=', $startDateTime->toDateString());
-                })->orWhere(function($q3) use ($startDateTime) {
-                    $q3->whereNull('rental_date')
-                       ->where('created_at', '>=', $startDateTime);
-                });
-            });
-        }
-
-        if ($status) {
-            $marketingQuery->where('status', $status);
-        }
-
-        if ($paymentMethod) {
-            $marketingQuery->where('payment_method', $paymentMethod);
-        }
-
-        $marketingCodes = $marketingQuery->get()->filter(function($code) use ($startDate, $endDate) {
-            $date = $code->rental_date ?? ($code->created_at ?? now());
-            $dateStr = $date instanceof \Carbon\Carbon ? $date->toDateString() : (string)$date;
-            $inCycle = $dateStr >= $startDate && $dateStr <= $endDate;
-            return $inCycle || !($code->paid ?? false);
-        });
-
-        foreach ($marketingCodes as $code) {
-            $totalFee = (float) ($code->consultation_fee ?? 0);
-            if ($totalFee <= 0) continue;
-
-            $rentalDate = $code->rental_date ?? ($code->created_at ?? now());
-            $paymentMethod = $code->payment_method ?? 'Cash';
-            $clientCount = $code->client_count ?? 1;
-
-            $baseCommission = $totalFee;
-            if (in_array($paymentMethod, ['Transfer', 'Card machine'])) {
-                $baseCommission = $totalFee * 0.8;
-            }
-
-            // Marketing agent gets fixed commission: £30 (1 client) or £40 (2+ clients)
-            $marketingCommission = $clientCount >= 2 ? 40 : 30;
-            $agencyCut = max(0, $baseCommission - $marketingCommission);
-            $agentCut = $marketingCommission;
-
-            // Totals
-            $agentData['agency_earnings'] += $agencyCut;
-            $agentData['agent_earnings'] += $agentCut;
-            $agentData['total_earnings'] += $baseCommission;
-            $agentData['transaction_count'] += 1;
-            $agentData['marketing_agent_earnings'] += $marketingCommission;
-
-            if (in_array($paymentMethod, ['Transfer', 'Card machine'])) {
-                $vatAmount = $totalFee - $baseCommission;
-                $agentData['vat_deductions'] += $vatAmount;
-            }
-
-            $isPaid = $code->paid ?? false;
-            if ($isPaid) {
-                $agentData['paid_amount'] += $agentCut;
-            } else {
-                $agentData['entitled_amount'] += $agentCut;
-            }
-            $agentData['outstanding_amount'] = max(0, $agentData['entitled_amount'] - $agentData['paid_amount']);
-
-            $agentData['transactions'][] = [
-                'id' => $code->id,
-                'total_fee' => $totalFee,
-                'base_commission' => $baseCommission,
-                'agency_cut' => $agencyCut,
-                'agent_cut' => $agentCut,
-                'vat_amount' => in_array($paymentMethod, ['Transfer', 'Card machine']) ? ($totalFee - $baseCommission) : 0,
-                'marketing_deduction' => 0,
-                'marketing_agent' => $agentUser->name,
-                'client_count' => $clientCount,
-                'paid' => $isPaid,
-                'paid_at' => $code->paid_at,
-                'date' => $rentalDate,
-                'code' => $code->rental_code ?? 'N/A',
-                'status' => $code->status ?? 'Unknown',
-                'payment_method' => $paymentMethod,
-                'is_marketing_earnings' => true,
+                'is_marketing_earnings' => $isMarketingEarnings,
             ];
         }
 
