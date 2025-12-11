@@ -384,7 +384,7 @@
                         <i class="fas fa-chart-line text-blue-600 mr-2"></i>
                         Commission Cycle Earnings Trend
                     </h3>
-                    <p class="text-xs text-gray-500 mt-1">Total agent earnings per cycle (11th to 10th)</p>
+                    <p class="text-xs text-gray-500 mt-1"></p>
                 </div>
                 <div class="h-64 flex items-center justify-center">
                     <canvas id="monthlyChart" width="400" height="200"></canvas>
@@ -896,7 +896,7 @@
 Chart.defaults.font.family = 'Inter, sans-serif';
 Chart.defaults.color = '#6B7280';
 
-// Commission Cycle earnings chart (11th to 10th)
+// Commission Cycle earnings chart (11th to 10th) - Total Earnings
 @if(count($agentEarnings) > 0)
 const monthlyCtx = document.getElementById('monthlyChart').getContext('2d');
 const monthlyChart = new Chart(monthlyCtx, {
@@ -904,7 +904,7 @@ const monthlyChart = new Chart(monthlyCtx, {
     data: {
         labels: {!! json_encode(array_keys($chartData['monthly_totals'])) !!},
         datasets: [{
-            label: 'Agent Earnings per Cycle',
+            label: 'Total Earnings per Cycle (Agency + Agent)',
             data: {!! json_encode(array_values($chartData['monthly_totals'])) !!},
             borderColor: 'rgb(59, 130, 246)',
             backgroundColor: 'rgba(59, 130, 246, 0.2)',
@@ -937,7 +937,7 @@ const monthlyChart = new Chart(monthlyCtx, {
                         return 'Commission Cycle: ' + context[0].label;
                     },
                     label: function(context) {
-                        return 'Total Agent Earnings: £' + context.parsed.y.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+                        return 'Total Earnings (100%): £' + context.parsed.y.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
                     }
                 }
             }

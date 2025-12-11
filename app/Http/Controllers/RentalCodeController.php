@@ -1035,7 +1035,7 @@ public function generateCode()
             'agent_comparison' => array_slice($filteredAgents, 0, 10, true), // Top 10 agents
         ];
 
-        // Calculate cycle totals (11th -> 10th) - show total agent earnings per cycle
+        // Calculate cycle totals (11th -> 10th) - show total earnings per cycle (100% commission)
         $monthlyTotals = []; // Commission cycle totals
         $cycleTotalsDetailed = []; // Store detailed info for better labels
         
@@ -1050,13 +1050,11 @@ public function generateCode()
             }
             
             // Calculate base commission after VAT (for Transfer and Card machine)
+            // This is the TOTAL earnings (100% - agency + agent combined)
             $baseCommission = $totalFee;
             if (in_array($paymentMethod, ['Transfer', 'Card machine'])) {
                 $baseCommission = $totalFee * 0.8;
             }
-            
-            // Calculate agent cut (55% of base commission)
-            $agentCut = $baseCommission * 0.55;
             
             // Determine cycle start and end for this record
             $cycleStart = $rentalDate->copy();
@@ -1075,24 +1073,10 @@ public function generateCode()
             // Create readable cycle key: "Nov 11 - Dec 10, 2025"
             $monthKey = $cycleStart->format('M d') . ' - ' . $cycleEnd->format('M d, Y');
             
-            // Check for marketing deduction
-            $marketingDeduction = 0;
-            $clientCount = $code->client_count ?? 1;
-            $hasDifferentMarketingAgent = false;
-            
-            if (!empty($code->marketing_agent_id) && !empty($code->rental_agent_id)) {
-                $hasDifferentMarketingAgent = (int) $code->marketing_agent_id !== (int) $code->rental_agent_id;
-            }
-            
-            if ($hasDifferentMarketingAgent) {
-                $marketingDeduction = $clientCount > 1 ? 40.0 : 30.0;
-                $agentCut -= $marketingDeduction;
-            }
-            
             // Determine the agent strictly by rental_agent_id (registered users only)
             $rentalAgentId = $code->rental_agent_id ?? null;
             if (!empty($rentalAgentId) && in_array((int)$rentalAgentId, $agentUserIds)) {
-                // Add rental agent earnings to cycle total
+                // Add total commission (base commission = 100%) to cycle total
                 if (!isset($monthlyTotals[$monthKey])) {
                     $monthlyTotals[$monthKey] = 0;
                     $cycleTotalsDetailed[$monthKey] = [
@@ -1101,13 +1085,8 @@ public function generateCode()
                         'label' => $monthKey
                     ];
                 }
-                $monthlyTotals[$monthKey] += $agentCut;
-                
-                // Add marketing agent earnings to the same cycle if applicable
-                if ($hasDifferentMarketingAgent && !empty($code->marketing_agent_id) && 
-                    in_array((int)$code->marketing_agent_id, $agentUserIds)) {
-                    $monthlyTotals[$monthKey] += $marketingDeduction;
-                }
+                // Add the full base commission (agency 45% + agent 55% combined)
+                $monthlyTotals[$monthKey] += $baseCommission;
             }
         }
         
@@ -1214,7 +1193,7 @@ public function generateCode()
                 'type' => 'landlord_bonus'
             ];
             
-            // Add landlord bonus to chart cycle totals
+            // Add landlord bonus to chart cycle totals (use full commission, not just agent portion)
             $bonusDate = \Carbon\Carbon::parse($bonus->date);
             $cycleStart = $bonusDate->copy();
             $cycleEnd = $bonusDate->copy();
@@ -1232,7 +1211,8 @@ public function generateCode()
             if (!isset($monthlyTotals[$monthKey])) {
                 $monthlyTotals[$monthKey] = 0;
             }
-            $monthlyTotals[$monthKey] += $bonusAmount;
+            // Add the full bonus commission (not just agent portion)
+            $monthlyTotals[$monthKey] += $bonus->commission;
         }
         
         // Re-sort monthly totals after adding landlord bonuses
@@ -1961,8 +1941,21 @@ public function generateCode()
             abort(404, 'Agent not found');
         }
 
-        $startDate = request('start_date');
-        $endDate = request('end_date') ?? now()->format('Y-m-d');
+        // Define commission cycle: 11th -> 10th; default to current cycle if not provided
+        $today = now();
+        if ($today->day <= 10) {
+            $cycleStart = $today->copy()->subMonthNoOverflow()->day(11);
+            $cycleEnd = $today->copy()->day(10);
+        } else {
+            $cycleStart = $today->copy()->day(11);
+            $cycleEnd = $today->copy()->addMonthNoOverflow()->day(10);
+        }
+        $cycleStartDate = $cycleStart->toDateString();
+        // Do not extend into the future beyond today
+        $cycleEndDate = min($today->toDateString(), $cycleEnd->toDateString());
+
+        $startDate = request('start_date') ?? $cycleStartDate;
+        $endDate = request('end_date') ?? $cycleEndDate;
         $status = request('status');
         $paymentMethod = request('payment_method');
 
@@ -2134,11 +2127,12 @@ public function generateCode()
             $marketingQuery->where('payment_method', $paymentMethod);
         }
 
+        // Strict filtering: only show marketing rentals from the selected cycle
         $marketingCodes = $marketingQuery->get()->filter(function($code) use ($startDate, $endDate) {
             $date = $code->rental_date ?? ($code->created_at ?? now());
             $dateStr = $date instanceof \Carbon\Carbon ? $date->toDateString() : (string)$date;
             $inCycle = $dateStr >= $startDate && $dateStr <= $endDate;
-            return $inCycle || !($code->paid ?? false);
+            return $inCycle; // Strict cycle filtering - no carry-over
         });
 
         foreach ($marketingCodes as $code) {
@@ -2199,12 +2193,9 @@ public function generateCode()
             ];
         }
 
-        // Landlord bonuses by agent user id
+        // Landlord bonuses by agent user id - strict cycle filtering
         $landlordBonuses = \App\Models\LandlordBonus::with(['agent.user'])
-            ->where(function($q) use ($startDate, $endDate) {
-                $q->whereBetween('date', [$startDate, $endDate])
-                  ->orWhere('status', '!=', 'paid');
-            })
+            ->whereBetween('date', [$startDate, $endDate]) // Strict cycle filtering - no carry-over
             ->get()
             ->filter(function($bonus) use ($agentId) {
                 return $bonus->agent && $bonus->agent->user && (int)$bonus->agent->user->id === (int)$agentId;

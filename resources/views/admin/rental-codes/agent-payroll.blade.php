@@ -9,11 +9,151 @@
         <div>
             <h1 class="h3 mb-0 text-white">{{ $agentName }} - Commission File</h1>
             <p class="text-white-50">Complete commission breakdown for {{ $agentName }}</p>
+            @if($startDate && $endDate)
+                <div class="mt-2">
+                    <span class="badge badge-primary" style="font-size: 0.9rem; padding: 0.5rem 1rem;">
+                        <i class="fas fa-calendar-alt mr-2"></i>
+                        {{ \Carbon\Carbon::parse($startDate)->format('d M Y') }} → {{ \Carbon\Carbon::parse($endDate)->format('d M Y') }}
+                        <span class="ml-2 text-white-50">({{ \Carbon\Carbon::parse($startDate)->diffInDays(\Carbon\Carbon::parse($endDate)) + 1 }} days)</span>
+                    </span>
+                </div>
+            @endif
         </div>
         <div>
             <a href="{{ route('rental-codes.agent-earnings') }}" class="btn btn-secondary">
                 <i class="fas fa-arrow-left mr-2"></i>Back to Commission Report
             </a>
+        </div>
+    </div>
+
+    <!-- Commission Cycle Selector -->
+    <div class="card shadow mb-4" style="background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%); border: 1px solid #60a5fa;">
+        <div class="card-body">
+            <form method="GET" id="cycleFilterForm">
+                <!-- Quick Commission Cycle Selector -->
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <label class="font-weight-bold text-white mb-0">
+                            <i class="fas fa-calendar-check mr-2"></i>Quick Select Commission Cycle (11th to 10th)
+                        </label>
+                        <span class="text-white-50 small">Click to apply</span>
+                    </div>
+                    
+                    <!-- Commission Cycle Buttons -->
+                    <div class="row mb-3">
+                        @php
+                            $currentDate = now();
+                            $cycles = [];
+                            
+                            // Generate last 8 commission cycles
+                            for ($i = 0; $i < 8; $i++) {
+                                $cycleDate = $currentDate->copy()->subMonths($i);
+                                
+                                if ($cycleDate->day <= 10) {
+                                    $cycleStart = $cycleDate->copy()->subMonthNoOverflow()->day(11);
+                                    $cycleEnd = $cycleDate->copy()->day(10);
+                                } else {
+                                    $cycleStart = $cycleDate->copy()->day(11);
+                                    $cycleEnd = $cycleDate->copy()->addMonthNoOverflow()->day(10);
+                                }
+                                
+                                // Check if this cycle matches current filter
+                                $isSelected = ($startDate === $cycleStart->toDateString() && 
+                                              $endDate === min($currentDate->toDateString(), $cycleEnd->toDateString()));
+                                
+                                $cycles[] = [
+                                    'start' => $cycleStart->toDateString(),
+                                    'end' => min($currentDate->toDateString(), $cycleEnd->toDateString()),
+                                    'label' => $cycleStart->format('d-M') . ' to ' . $cycleEnd->format('d-M Y'),
+                                    'shortLabel' => $cycleStart->format('M Y'),
+                                    'isCurrent' => $i === 0,
+                                    'isSelected' => $isSelected
+                                ];
+                            }
+                        @endphp
+                        
+                        @foreach($cycles as $cycle)
+                            <div class="col-md-3 col-sm-6 mb-2">
+                                <button type="button" 
+                                        onclick="selectCycle('{{ $cycle['start'] }}', '{{ $cycle['end'] }}')"
+                                        class="btn btn-block text-white {{ $cycle['isSelected'] ? 'btn-success' : ($cycle['isCurrent'] ? 'btn-primary' : 'btn-outline-light') }}"
+                                        style="padding: 0.75rem; {{ $cycle['isSelected'] ? 'font-weight: bold;' : '' }}">
+                                    <div>
+                                        @if($cycle['isSelected'])
+                                            <i class="fas fa-check-circle mr-1"></i>
+                                        @elseif($cycle['isCurrent'])
+                                            <i class="fas fa-star mr-1"></i>
+                                        @endif
+                                        <strong>{{ $cycle['shortLabel'] }}</strong>
+                                    </div>
+                                    <small class="d-block mt-1" style="opacity: 0.9;">{{ $cycle['label'] }}</small>
+                                </button>
+                            </div>
+                        @endforeach
+                    </div>
+                    
+                    <!-- Quick Preset Buttons -->
+                    <div class="border-top border-white-50 pt-3">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="text-white-50 small font-weight-bold">Quick Presets:</span>
+                        </div>
+                        <div class="row">
+                            @php
+                                // Last 3 months preset
+                                $last3MonthsStart = $currentDate->copy()->subMonths(3);
+                                $last3MonthsEnd = $currentDate->toDateString();
+                                
+                                // Last 6 months preset
+                                $last6MonthsStart = $currentDate->copy()->subMonths(6);
+                                $last6MonthsEnd = $currentDate->toDateString();
+                                
+                                // This year preset
+                                $thisYearStart = $currentDate->copy()->startOfYear();
+                                $thisYearEnd = $currentDate->toDateString();
+                                
+                                // Last year preset
+                                $lastYearStart = $currentDate->copy()->subYear()->startOfYear();
+                                $lastYearEnd = $currentDate->copy()->subYear()->endOfYear();
+                            @endphp
+                            
+                            <div class="col-md-3 col-sm-6 mb-2">
+                                <button type="button" 
+                                        onclick="selectCycle('{{ $last3MonthsStart->toDateString() }}', '{{ $last3MonthsEnd }}')"
+                                        class="btn btn-outline-light btn-sm btn-block">
+                                    <i class="fas fa-calendar-week mr-1"></i>Last 3 Months
+                                </button>
+                            </div>
+                            
+                            <div class="col-md-3 col-sm-6 mb-2">
+                                <button type="button" 
+                                        onclick="selectCycle('{{ $last6MonthsStart->toDateString() }}', '{{ $last6MonthsEnd }}')"
+                                        class="btn btn-outline-light btn-sm btn-block">
+                                    <i class="fas fa-calendar mr-1"></i>Last 6 Months
+                                </button>
+                            </div>
+                            
+                            <div class="col-md-3 col-sm-6 mb-2">
+                                <button type="button" 
+                                        onclick="selectCycle('{{ $thisYearStart->toDateString() }}', '{{ $thisYearEnd }}')"
+                                        class="btn btn-outline-light btn-sm btn-block">
+                                    <i class="fas fa-calendar-alt mr-1"></i>This Year
+                                </button>
+                            </div>
+                            
+                            <div class="col-md-3 col-sm-6 mb-2">
+                                <button type="button" 
+                                        onclick="selectCycle('{{ $lastYearStart->toDateString() }}', '{{ $lastYearEnd->toDateString() }}')"
+                                        class="btn btn-outline-light btn-sm btn-block">
+                                    <i class="fas fa-history mr-1"></i>Last Year
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <input type="hidden" name="start_date" id="start_date" value="{{ $startDate }}">
+                <input type="hidden" name="end_date" id="end_date" value="{{ $endDate }}">
+            </form>
         </div>
     </div>
 
@@ -118,9 +258,17 @@
             <div class="card shadow">
                 <div class="card-header py-3">
                     <div class="d-flex justify-content-between align-items-center">
-                        <h6 class="m-0 font-weight-bold text-primary">
-                        <i class="fas fa-file-contract mr-2"></i>Rental Codes ({{ count($agent['transactions']) }})
-                        </h6>
+                        <div class="d-flex align-items-center">
+                            <h6 class="m-0 font-weight-bold text-primary mr-3">
+                                <i class="fas fa-file-contract mr-2"></i>Rental Codes ({{ count($agent['transactions']) }})
+                            </h6>
+                            @if($startDate && $endDate)
+                                <span class="badge badge-info" style="font-size: 0.85rem; padding: 0.5rem 0.75rem;">
+                                    <i class="fas fa-calendar-check mr-1"></i>
+                                    Cycle: {{ \Carbon\Carbon::parse($startDate)->format('d-M') }} to {{ \Carbon\Carbon::parse($endDate)->format('d-M Y') }}
+                                </span>
+                            @endif
+                        </div>
                         @auth
                         @if(auth()->user()->role === 'admin' && count($agent['transactions']) > 0)
                         <form id="bulkPaidForm" method="POST" action="{{ route('rental-codes.bulk-mark-paid') }}" class="d-inline">
@@ -247,9 +395,17 @@
         <div class="col-12">
             <div class="card shadow">
                 <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-success">
-                        <i class="fas fa-gift mr-2"></i>Landlord Bonuses ({{ count($agent['landlord_bonuses'] ?? []) }})
-                    </h6>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h6 class="m-0 font-weight-bold text-success">
+                            <i class="fas fa-gift mr-2"></i>Landlord Bonuses ({{ count($agent['landlord_bonuses'] ?? []) }})
+                        </h6>
+                        @if($startDate && $endDate)
+                            <span class="badge badge-info" style="font-size: 0.85rem; padding: 0.5rem 0.75rem;">
+                                <i class="fas fa-calendar-check mr-1"></i>
+                                Cycle: {{ \Carbon\Carbon::parse($startDate)->format('d-M') }} to {{ \Carbon\Carbon::parse($endDate)->format('d-M Y') }}
+                            </span>
+                        @endif
+                    </div>
                 </div>
                 <div class="card-body">
                     @if(count($agent['landlord_bonuses'] ?? []) > 0)
@@ -433,6 +589,16 @@ function submitBonusesBulkPaid(e) {
     });
     form.submit();
     return true;
+}
+
+// Commission cycle selection function
+function selectCycle(startDate, endDate) {
+    // Update the hidden date inputs
+    document.getElementById('start_date').value = startDate;
+    document.getElementById('end_date').value = endDate;
+    
+    // Submit the form automatically
+    document.getElementById('cycleFilterForm').submit();
 }
 </script>
 @endpush
