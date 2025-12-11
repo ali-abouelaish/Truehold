@@ -1,0 +1,22 @@
+{
+  "key": {
+    "fromMe": false,
+    "cleanedParticipantPn": "1234567890",
+    "cleanedSenderPn": "1234567890",
+    "remoteJid": "1234567890@s.whatsapp.net",
+    "id": "3EB0C42F8F4A1234567890ABCDEF",
+    "participant": "1234567890@s.whatsapp.net"
+  },
+  "data": {
+    "messages": {
+      "messageBody": "Hello! This is a test message.",
+      "messageType": "text",
+      "messageTimestamp": 1702345678
+    },
+    "pushName": "John Doe",
+    "isGroup": false
+  },
+  "messageTimestamp": 1702345678,
+  "pushName": "John Doe"
+}
+

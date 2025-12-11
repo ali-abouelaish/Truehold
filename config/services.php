@@ -73,4 +73,10 @@ return [
 		'rental_code_webhook_url' => env('ZAPIER_RENTAL_CODE_WEBHOOK_URL'),
 	],
 
+    'wasender' => [
+        'key' => env('WASENDER_API_KEY'),
+        'base_url' => env('WASENDER_API_BASE', 'https://wasenderapi.com'),
+        'group_jid' => env('WASENDER_GROUP_JID'),
+    ],
+
 ];

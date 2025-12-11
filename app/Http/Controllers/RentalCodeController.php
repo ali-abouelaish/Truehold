@@ -1398,6 +1398,123 @@ public function generateCode()
             }
         }
 
+        // Process rental codes where the agent is the MARKETING agent (not rental agent)
+        // Get the agent user for filtering
+        $agentUser = User::where('role', 'agent')->where('name', $requestedAgentName)->first();
+        
+        if ($agentUser) {
+            // Query for codes where this agent is the marketing agent (but not the rental agent)
+            $marketingQuery = RentalCode::with(['client', 'client.agent'])
+                ->where('rental_date', '<=', $endDate)
+                ->where('status', 'approved')
+                ->where('marketing_agent_id', $agentUser->id)
+                ->where(function($q) use ($agentUser) {
+                    $q->where('rental_agent_id', '!=', $agentUser->id)
+                      ->orWhereNull('rental_agent_id');
+                });
+
+            if ($startDate) {
+                $marketingQuery->where('rental_date', '>=', $startDate);
+            }
+
+            if ($status) {
+                $marketingQuery->where('status', $status);
+            }
+
+            if ($paymentMethod) {
+                $marketingQuery->where('payment_method', $paymentMethod);
+            }
+
+            $marketingCodes = $marketingQuery->get()->filter(function($code) use ($startDate, $endDate) {
+                $date = $code->rental_date ?? ($code->created_at ?? now());
+                $dateStr = $date instanceof \Carbon\Carbon ? $date->toDateString() : (string)$date;
+                $inCycle = $dateStr >= $startDate && $dateStr <= $endDate;
+                return $inCycle || !($code->paid ?? false);
+            });
+
+            // Initialize agent data if not already set
+            if (!isset($byAgent[$requestedAgentName])) {
+                $byAgent[$requestedAgentName] = [
+                    'name' => $requestedAgentName,
+                    'agency_earnings' => 0.0,
+                    'agent_earnings' => 0.0,
+                    'total_earnings' => 0.0,
+                    'transaction_count' => 0,
+                    'transactions' => [],
+                    'monthly_earnings' => [],
+                    'avg_transaction_value' => 0.0,
+                    'last_transaction_date' => null,
+                    'vat_deductions' => 0.0,
+                    'marketing_deductions' => 0.0,
+                    'marketing_agent_earnings' => 0.0,
+                    'paid_amount' => 0.0,
+                    'entitled_amount' => 0.0,
+                    'outstanding_amount' => 0.0,
+                ];
+            }
+
+            // Process marketing earnings
+            foreach ($marketingCodes as $code) {
+                $totalFee = (float) ($code->consultation_fee ?? 0);
+                if ($totalFee <= 0) continue;
+
+                $rentalDate = $code->rental_date ?? ($code->created_at ?? now());
+                $paymentMethod = $code->payment_method ?? 'Cash';
+                $clientCount = $code->client_count ?? 1;
+
+                $baseCommission = $totalFee;
+                if (in_array($paymentMethod, ['Transfer', 'Card machine'])) {
+                    $baseCommission = $totalFee * 0.8;
+                }
+
+                // Marketing agent gets fixed commission: £30 (1 client) or £40 (2+ clients)
+                $marketingCommission = $clientCount >= 2 ? 40 : 30;
+                
+                // Add marketing earnings to agent totals
+                $byAgent[$requestedAgentName]['agent_earnings'] += $marketingCommission;
+                $byAgent[$requestedAgentName]['marketing_agent_earnings'] += $marketingCommission;
+                $byAgent[$requestedAgentName]['total_earnings'] += $marketingCommission;
+                $byAgent[$requestedAgentName]['transaction_count'] += 1;
+
+                // Track paid amounts for marketing agent
+                $isPaid = $code->paid ?? false;
+                if ($isPaid) {
+                    $byAgent[$requestedAgentName]['paid_amount'] += $marketingCommission;
+                } else {
+                    $byAgent[$requestedAgentName]['entitled_amount'] += $marketingCommission;
+                }
+
+                // Calculate outstanding amount
+                $byAgent[$requestedAgentName]['outstanding_amount'] = max(0, 
+                    $byAgent[$requestedAgentName]['entitled_amount'] - $byAgent[$requestedAgentName]['paid_amount']
+                );
+
+                // Add transaction record
+                $byAgent[$requestedAgentName]['transactions'][] = [
+                    'total_fee' => $totalFee,
+                    'base_commission' => $marketingCommission,
+                    'agency_cut' => 0,
+                    'agent_cut' => $marketingCommission,
+                    'vat_amount' => 0,
+                    'marketing_deduction' => 0,
+                    'marketing_agent' => $requestedAgentName,
+                    'client_count' => $clientCount,
+                    'paid' => $isPaid,
+                    'paid_at' => $code->paid_at,
+                    'date' => $rentalDate,
+                    'code' => $code->rental_code ?? 'N/A',
+                    'status' => $code->status ?? 'Unknown',
+                    'payment_method' => $paymentMethod,
+                    'is_marketing_earnings' => true,
+                ];
+
+                // Update last transaction date
+                if (!$byAgent[$requestedAgentName]['last_transaction_date'] || $rentalDate > $byAgent[$requestedAgentName]['last_transaction_date']) {
+                    $byAgent[$requestedAgentName]['last_transaction_date'] = $rentalDate;
+                }
+            }
+        }
+
         // Get landlord bonuses for this agent
         $landlordBonuses = \App\Models\LandlordBonus::with(['agent.user'])
             ->where(function($q) use ($startDate, $endDate) {
