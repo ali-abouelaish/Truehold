@@ -53,7 +53,19 @@
                     <div class="row no-gutters align-items-center">
                         <div class="col mr-2">
                             <div class="text-xs font-weight-bold text-white text-uppercase mb-1" style="letter-spacing: .04em; opacity:.9;">Agent Earnings</div>
-                            <div class="h3 mb-0 font-weight-bold text-white">£{{ number_format($agent['agent_earnings'], 2) }}</div>
+                            @php
+                                // Calculate total agent earnings from all transactions (rental + marketing)
+                                $totalAgentEarnings = 0;
+                                foreach ($agent['transactions'] ?? [] as $transaction) {
+                                    $totalAgentEarnings += (float) ($transaction['agent_cut'] ?? 0);
+                                }
+                                // Also include landlord bonuses
+                                foreach ($agent['landlord_bonuses'] ?? [] as $bonus) {
+                                    $totalAgentEarnings += (float) ($bonus['agent_commission'] ?? 0);
+                                }
+                            @endphp
+                            <div class="h3 mb-0 font-weight-bold text-white">£{{ number_format($totalAgentEarnings, 2) }}</div>
+                            <small class="text-white-50" style="font-size: 0.7rem;">Rental + Marketing</small>
                         </div>
                         <div class="col-auto">
                             <div style="background: rgba(255,255,255,0.12); border-radius: 10px; padding: 10px;">
