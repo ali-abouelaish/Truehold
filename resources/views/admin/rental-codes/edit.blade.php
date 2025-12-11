@@ -163,26 +163,15 @@
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="mb-3">
-                                    <label for="rent_by_agent" class="form-label">Assisted by <span class="text-danger">*</span></label>
-                                    <input type="text" class="form-control @error('rent_by_agent') is-invalid @enderror" 
-                                           id="rent_by_agent" name="rent_by_agent" 
-                                           value="{{ old('rent_by_agent', $rentalCode->rent_by_agent) }}" required>
-                                    @error('rent_by_agent')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label for="rental_agent_id" class="form-label">Rental Agent</label>
+                                    <label for="rental_agent_id" class="form-label">Rental Agent <span class="text-danger">*</span></label>
                                     <select class="form-select @error('rental_agent_id') is-invalid @enderror" 
-                                            id="rental_agent_id" name="rental_agent_id">
+                                            id="rental_agent_id" name="rental_agent_id" required>
                                         <option value="">Select rental agent</option>
                                         @foreach($agentUsers as $user)
                                             <option value="{{ $user->id }}" {{ old('rental_agent_id', $rentalCode->rental_agent_id) == $user->id ? 'selected' : '' }}>
                                                 {{ $user->name }}
                                                 @if($user->agent && $user->agent->company_name)
-                                                    ({{ $user->agent->company_name }})
+                                                    - {{ $user->agent->company_name }}
                                                 @endif
                                             </option>
                                         @endforeach
@@ -192,14 +181,12 @@
                                     @enderror
                                 </div>
                             </div>
-                        </div>
-                        <div class="row">
                             <div class="col-md-6">
                                 <div class="mb-3">
                                     <label for="marketing_agent_id" class="form-label">Marketing Agent</label>
                                     <select class="form-select @error('marketing_agent_id') is-invalid @enderror" 
                                             id="marketing_agent_id" name="marketing_agent_id">
-                                        <option value="">Select marketing agent</option>
+                                        <option value="">Select marketing agent (optional)</option>
                                         @foreach($marketingUsers as $user)
                                             <option value="{{ $user->id }}" {{ old('marketing_agent_id', $rentalCode->marketing_agent_id) == $user->id ? 'selected' : '' }}>
                                                 {{ $user->name }}
@@ -209,17 +196,40 @@
                                     @error('marketing_agent_id')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
+                                    
+                                    <!-- Pasquale Marketing Checkbox -->
+                                    <div class="form-check mt-2">
+                                        <input class="form-check-input" type="checkbox" 
+                                               id="pasquale_marketing" name="pasquale_marketing" 
+                                               value="1" {{ old('pasquale_marketing', ($rentalCode->client_count >= 2 && $rentalCode->marketing_agent_id) ? '1' : '') ? 'checked' : '' }}>
+                                        <label class="form-check-label" for="pasquale_marketing">
+                                            <strong>Pasquale marketing</strong> (Sets marketing fee to £40)
+                                        </label>
+                                    </div>
+                                    <small class="form-text text-muted">
+                                        When checked, automatically sets client count to 2+ to ensure marketing fee is £40
+                                    </small>
                                 </div>
                             </div>
+                        </div>
+                        <div class="row">
                             <div class="col-md-6">
                                 <div class="mb-3">
                                     <label for="client_count" class="form-label">Client Count <span class="text-danger">*</span></label>
-                                    <input type="number" min="1" max="10" class="form-control @error('client_count') is-invalid @enderror" 
-                                           id="client_count" name="client_count" 
-                                           value="{{ old('client_count', $rentalCode->client_count) }}" required>
+                                    <select class="form-select @error('client_count') is-invalid @enderror" 
+                                            id="client_count" name="client_count" required>
+                                        @for($i = 1; $i <= 10; $i++)
+                                            <option value="{{ $i }}" {{ old('client_count', $rentalCode->client_count) == $i ? 'selected' : '' }}>
+                                                {{ $i }} {{ $i == 1 ? 'Client' : 'Clients' }}
+                                            </option>
+                                        @endfor
+                                    </select>
                                     @error('client_count')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
+                                    <small class="form-text text-muted">
+                                        Multiple clients increase marketing commission to £40
+                                    </small>
                                 </div>
                             </div>
                         </div>
@@ -450,6 +460,38 @@ function resetForm() {
             }
         });
     }
+}
+
+// Pasquale marketing checkbox handler
+const pasqualeCheckbox = document.getElementById('pasquale_marketing');
+const clientCountSelect = document.getElementById('client_count');
+
+if (pasqualeCheckbox && clientCountSelect) {
+    pasqualeCheckbox.addEventListener('change', function() {
+        if (this.checked) {
+            // Set client count to at least 2 to ensure marketing fee is £40
+            const currentValue = parseInt(clientCountSelect.value);
+            if (currentValue < 2) {
+                clientCountSelect.value = 2;
+            }
+        }
+    });
+    
+    // Client count change handler
+    clientCountSelect.addEventListener('change', function() {
+        const currentValue = parseInt(this.value);
+        if (pasqualeCheckbox.checked) {
+            // If Pasquale marketing is checked, ensure client count is at least 2
+            if (currentValue < 2) {
+                this.value = 2;
+            }
+        } else {
+            // If client count is set to 1, uncheck Pasquale marketing (if it was somehow checked)
+            if (currentValue === 1 && pasqualeCheckbox.checked) {
+                pasqualeCheckbox.checked = false;
+            }
+        }
+    });
 }
 
 // Form submission with validation

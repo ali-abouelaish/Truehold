@@ -388,8 +388,7 @@ class RentalCodeController extends Controller
             'property' => 'nullable|string',
             'licensor' => 'nullable|string',
             'existing_client_id' => 'required|exists:clients,id',
-            'rent_by_agent' => 'required|string|max:255',
-            'rental_agent_id' => 'nullable|exists:users,id',
+            'rental_agent_id' => 'required|exists:users,id',
             'marketing_agent_id' => 'nullable|exists:users,id',
             'client_count' => 'required|integer|min:1|max:10',
             'notes' => 'nullable|string',
@@ -404,12 +403,31 @@ class RentalCodeController extends Controller
 
         $validated = $request->validate($validationRules);
 
+        // Handle Pasquale marketing checkbox - ensure client_count is at least 2
+        if ($request->has('pasquale_marketing') && $request->input('pasquale_marketing')) {
+            if ($validated['client_count'] < 2) {
+                $validated['client_count'] = 2;
+            }
+        }
+
         // Get the selected client
         $client = \App\Models\Client::findOrFail($validated['existing_client_id']);
 
         // Update rental code data
         $rentalCodeData = $validated;
         $rentalCodeData['client_id'] = $client->id;
+        
+        // Set the rent_by_agent display name for backward compatibility
+        $rentalAgent = User::find($rentalCodeData['rental_agent_id']);
+        if ($rentalAgent) {
+            if ($rentalAgent->agent && $rentalAgent->agent->company_name) {
+                $rentalCodeData['rent_by_agent'] = $rentalAgent->agent->company_name;
+            } else {
+                $rentalCodeData['rent_by_agent'] = $rentalAgent->name;
+            }
+        } else {
+            $rentalCodeData['rent_by_agent'] = 'Unknown Agent';
+        }
         
         // Remove client selection field from rental code data
         unset($rentalCodeData['existing_client_id']);
