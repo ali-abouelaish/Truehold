@@ -221,6 +221,13 @@ class RentalCodeController extends Controller
         
         $validated = $request->validate($validationRules, $customMessages);
 
+        // Handle Pasquale marketing checkbox - ensure client_count is at least 2
+        if ($request->has('pasquale_marketing') && $request->input('pasquale_marketing')) {
+            if ($validated['client_count'] < 2) {
+                $validated['client_count'] = 2;
+            }
+        }
+
         // Auto-generate rental code if not provided
         if (empty($validated['rental_code'])) {
             $validated['rental_code'] = RentalCode::generateRentalCode();
@@ -788,13 +795,28 @@ public function generateCode()
                 }
             }
             
-            // Determine the agent strictly by rental_agent_id (ID-based only)
+            // Determine the agent - check both rental agent and marketing agent
             $agentName = null;
+            $isMarketingOnly = false;
             $rentalAgentId = $code->rental_agent_id ?? null;
+            $marketingAgentId = $code->marketing_agent_id ?? null;
+            
+            // First check if there's a valid rental agent
             if (!empty($rentalAgentId) && in_array((int)$rentalAgentId, $agentUserIds)) {
                 $agentName = $agentUsers[(int)$rentalAgentId] ?? null;
-            } else {
-                // Skip records that do not have a valid registered rental agent id
+            }
+            
+            // If no rental agent OR rental agent is not registered, check marketing agent
+            if (!$agentName && !empty($marketingAgentId) && in_array((int)$marketingAgentId, $agentUserIds)) {
+                // Only count as marketing-only if there's no rental agent OR rental agent is different
+                if (empty($rentalAgentId) || (int)$rentalAgentId !== (int)$marketingAgentId) {
+                    $agentName = $agentUsers[(int)$marketingAgentId] ?? null;
+                    $isMarketingOnly = true;
+                }
+            }
+            
+            // Skip if no valid agent found
+            if (!$agentName) {
                 continue;
             }
             
@@ -819,6 +841,24 @@ public function generateCode()
                     ];
                 }
                 
+                // If this is a marketing-only transaction, recalculate commission
+                if ($isMarketingOnly) {
+                    // Marketing agent gets fixed commission: £30 (1 client) or £40 (2+ clients)
+                    $marketingCommission = $clientCount > 1 ? 40.0 : 30.0;
+                    $agencyCut = max(0, $baseCommission - $marketingCommission);
+                    $agentCut = $marketingCommission;
+                    $marketingDeduction = 0; // No deduction for marketing-only
+                    
+                    // Add marketing earnings
+                    $byAgent[$agentName]['marketing_agent_earnings'] += $marketingCommission;
+                } else {
+                    // Regular rental agent logic (already calculated above)
+                    // marketingDeduction is already set if there's a different marketing agent
+                    if ($marketingDeduction > 0) {
+                        $byAgent[$agentName]['marketing_deductions'] += $marketingDeduction;
+                    }
+                }
+                
                 // Add to agent totals
                 $byAgent[$agentName]['agency_earnings'] += $agencyCut;
                 $byAgent[$agentName]['agent_earnings'] += $agentCut;
@@ -829,11 +869,6 @@ public function generateCode()
                 if (in_array($paymentMethod, ['Transfer', 'Card machine'])) {
                     $vatAmount = $totalFee - $baseCommission;
                     $byAgent[$agentName]['vat_deductions'] += $vatAmount;
-                }
-                
-                // Track marketing deductions
-                if ($marketingDeduction > 0) {
-                    $byAgent[$agentName]['marketing_deductions'] += $marketingDeduction;
                 }
                 
                 // Track paid amounts and entitled amounts
@@ -864,6 +899,7 @@ public function generateCode()
                     'code' => $code->rental_code ?? 'N/A',
                     'status' => $code->status ?? 'Unknown',
                     'payment_method' => $paymentMethod,
+                    'is_marketing_earnings' => $isMarketingOnly,
                 ];
                 
                 // Track monthly earnings

@@ -343,6 +343,19 @@
                                 @error('marketing_agent_id')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
+                                
+                                <!-- Pasquale Marketing Checkbox -->
+                                <div class="form-check mt-2">
+                                    <input class="form-check-input" type="checkbox" 
+                                           id="pasquale_marketing" name="pasquale_marketing" 
+                                           value="1" {{ old('pasquale_marketing') ? 'checked' : '' }}>
+                                    <label class="form-check-label" for="pasquale_marketing">
+                                        <strong>Pasquale marketing</strong> (Sets marketing fee to £40)
+                                    </label>
+                                </div>
+                                <small class="form-text text-muted">
+                                    When checked, automatically sets client count to 2+ to ensure marketing fee is £40
+                                </small>
                             </div>
                             </div>
                     </div>
@@ -673,6 +686,44 @@ document.addEventListener('DOMContentLoaded', function() {
         clientCountSelect.addEventListener('change', function() {
             if (newClientRadio.checked) {
                 generateClientForms();
+            }
+            // Handle Pasquale marketing checkbox
+            const pasqualeCheckbox = document.getElementById('pasquale_marketing');
+            if (pasqualeCheckbox) {
+                const currentValue = parseInt(this.value);
+                if (pasqualeCheckbox.checked) {
+                    // If Pasquale marketing is checked, ensure client count is at least 2
+                    if (currentValue < 2) {
+                        this.value = 2;
+                        if (newClientRadio.checked) {
+                            generateClientForms();
+                        }
+                    }
+                } else {
+                    // If client count is set to 1, uncheck Pasquale marketing (if it was somehow checked)
+                    if (currentValue === 1 && pasqualeCheckbox.checked) {
+                        pasqualeCheckbox.checked = false;
+                    }
+                }
+            }
+        });
+    }
+    
+    // Pasquale marketing checkbox handler
+    const pasqualeCheckbox = document.getElementById('pasquale_marketing');
+    if (pasqualeCheckbox) {
+        pasqualeCheckbox.addEventListener('change', function() {
+            if (this.checked) {
+                // Set client count to at least 2 to ensure marketing fee is £40
+                if (clientCountSelect) {
+                    const currentValue = parseInt(clientCountSelect.value);
+                    if (currentValue < 2) {
+                        clientCountSelect.value = 2;
+                        if (newClientRadio && newClientRadio.checked) {
+                            generateClientForms();
+                        }
+                    }
+                }
             }
         });
     }
