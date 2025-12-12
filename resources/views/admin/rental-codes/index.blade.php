@@ -1330,19 +1330,48 @@ document.addEventListener('DOMContentLoaded', function() {
     const copyBtn = document.getElementById('copyAndOpenWhatsAppBtn');
     const whatsappLink = 'https://chat.whatsapp.com/IQyyjhLE8X03QnFyflfJLR?mode=hqrt3';
     
-    // Generate rental code details text
+    // Get payment method emoji
+    function getPaymentEmoji(paymentMethod) {
+        if (!paymentMethod) return '';
+        const method = paymentMethod.toLowerCase();
+        if (method.includes('card')) return '⚡';
+        if (method.includes('cash')) return '💵';
+        if (method.includes('transfer')) return '💳';
+        return '';
+    }
+    
+    // Generate rental code details text in WhatsApp format
     function generateRentalDetails() {
-        let details = `Rental Code: ${rentalData.code}\n`;
-        details += `Date: ${rentalData.date}\n`;
-        details += `Property: ${rentalData.property || 'N/A'}\n`;
-        details += `Client: ${rentalData.client_name}\n`;
-        details += `Client Count: ${rentalData.client_count}\n`;
-        details += `Consultation Fee: £${rentalData.fee}\n`;
-        details += `Payment Method: ${rentalData.payment_method || 'N/A'}\n`;
-        details += `Rental Agent: ${rentalData.rental_agent}\n`;
-        if (rentalData.marketing_agent && rentalData.marketing_agent !== 'N/A') {
-            details += `Marketing Agent: ${rentalData.marketing_agent}\n`;
+        const client = rentalData.client || {};
+        const paymentEmoji = getPaymentEmoji(rentalData.payment_method);
+        
+        let details = `*Client Code*\n\n`;
+        details += `*${rentalData.code}*\n\n`;
+        details += `*Date:* ${rentalData.date}\n`;
+        details += `*Consultation Fee:* £${rentalData.fee}\n`;
+        details += `*Payment:* ${rentalData.payment_method || 'N/A'} ${paymentEmoji}\n`;
+        details += `_______________________________\n\n`;
+        details += `*Personal Information*\n\n`;
+        details += `*Full Name:* ${client.name || rentalData.client_name || 'N/A'}\n`;
+        details += `*Phone Number:* ${client.phone || 'N/A'}\n`;
+        
+        // Age with age group
+        if (client.age !== null && client.age !== undefined) {
+            details += `*Age:* ${client.age} (${client.age_group || 'Unknown'})\n`;
+        } else {
+            details += `*Age:* N/A\n`;
         }
+        
+        details += `*Nationality:* ${client.nationality || 'N/A'}\n`;
+        details += `*Type:* ${client.type || 'Other'}\n`;
+        details += `*Position/Role:* ${client.position_role || 'N/A'}\n`;
+        details += `________________________________\n\n`;
+        details += `*Assisted by:* ${rentalData.rental_agent || 'N/A'}\n`;
+        
+        if (rentalData.marketing_agent && rentalData.marketing_agent !== 'N/A') {
+            details += `*Marketing Agent:* ${rentalData.marketing_agent}\n`;
+        }
+        
         return details;
     }
     

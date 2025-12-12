@@ -339,11 +339,26 @@ class RentalCodeController extends Controller
         // Reload rental code with relationships for modal
         $rentalCode->load(['client', 'rentalAgent', 'marketingAgentUser']);
         
+        // Prepare client data for WhatsApp message
+        $clientData = [];
+        if ($rentalCode->client) {
+            $client = $rentalCode->client;
+            $clientData = [
+                'name' => $client->full_name ?? 'N/A',
+                'phone' => $client->formatted_phone ?? ($client->phone_number ?? 'N/A'),
+                'age' => $client->age ?? null,
+                'age_group' => $client->age_group ?? 'Unknown',
+                'nationality' => $client->nationality ?? 'N/A',
+                'type' => $client->client_type ?? 'Other',
+                'position_role' => $client->position_role ?? 'N/A',
+            ];
+        }
+        
         return redirect()->route('rental-codes.index')
             ->with('success', 'Rental code created successfully and notifications sent!')
             ->with('new_rental_code', [
                 'code' => $rentalCode->rental_code,
-                'date' => $rentalCode->rental_date ? $rentalCode->rental_date->format('d M Y') : 'N/A',
+                'date' => $rentalCode->rental_date ? $rentalCode->rental_date->format('d/m/Y') : 'N/A',
                 'fee' => number_format($rentalCode->consultation_fee, 2),
                 'payment_method' => $rentalCode->payment_method,
                 'property' => $rentalCode->property,
@@ -351,6 +366,7 @@ class RentalCodeController extends Controller
                 'rental_agent' => $rentalCode->rentalAgent ? $rentalCode->rentalAgent->name : ($rentalCode->rent_by_agent ?? 'N/A'),
                 'marketing_agent' => $rentalCode->marketingAgentUser ? $rentalCode->marketingAgentUser->name : 'N/A',
                 'client_count' => $rentalCode->client_count ?? 1,
+                'client' => $clientData,
             ]);
     }
 
