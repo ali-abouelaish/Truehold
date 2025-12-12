@@ -336,8 +336,22 @@ class RentalCodeController extends Controller
             // Don't fail the request if Google Sheets fails
         }
 
+        // Reload rental code with relationships for modal
+        $rentalCode->load(['client', 'rentalAgent', 'marketingAgentUser']);
+        
         return redirect()->route('rental-codes.index')
-            ->with('success', 'Rental code created successfully and notifications sent!');
+            ->with('success', 'Rental code created successfully and notifications sent!')
+            ->with('new_rental_code', [
+                'code' => $rentalCode->rental_code,
+                'date' => $rentalCode->rental_date ? $rentalCode->rental_date->format('d M Y') : 'N/A',
+                'fee' => number_format($rentalCode->consultation_fee, 2),
+                'payment_method' => $rentalCode->payment_method,
+                'property' => $rentalCode->property,
+                'client_name' => $rentalCode->client ? $rentalCode->client->full_name : 'N/A',
+                'rental_agent' => $rentalCode->rentalAgent ? $rentalCode->rentalAgent->name : ($rentalCode->rent_by_agent ?? 'N/A'),
+                'marketing_agent' => $rentalCode->marketingAgentUser ? $rentalCode->marketingAgentUser->name : 'N/A',
+                'client_count' => $rentalCode->client_count ?? 1,
+            ]);
     }
 
     /**

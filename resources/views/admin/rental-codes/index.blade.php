@@ -639,6 +639,36 @@ strong {
                         </div>
                     @endif
 
+                    <!-- Rental Code Created Modal -->
+                    @if(session('new_rental_code'))
+                    <div class="modal fade" id="rentalCodeCreatedModal" tabindex="-1" aria-labelledby="rentalCodeCreatedModalLabel" aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered">
+                            <div class="modal-content" style="background-color: #1f2937; border-color: #374151;">
+                                <div class="modal-header" style="border-color: #4b5563;">
+                                    <h5 class="modal-title text-white" id="rentalCodeCreatedModalLabel">
+                                        <i class="fas fa-check-circle text-success me-2"></i>Rental Code Created
+                                    </h5>
+                                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body text-white">
+                                    <p class="mb-3">Your rental code has been created successfully!</p>
+                                    <div class="bg-dark p-3 rounded mb-3" style="background-color: #111827 !important;">
+                                        <small class="text-muted d-block mb-1">Rental Code:</small>
+                                        <strong>{{ session('new_rental_code.code') }}</strong>
+                                    </div>
+                                    <p class="mb-0">Click the button below to copy the rental details and open the WhatsApp group.</p>
+                                </div>
+                                <div class="modal-footer" style="border-color: #4b5563;">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                    <button type="button" class="btn btn-primary" id="copyAndOpenWhatsAppBtn">
+                                        <i class="fas fa-copy me-2"></i>Copy Details & Open WhatsApp
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    @endif
+
                     <!-- Search and Filter Bar (server-side filtering) -->
                     <form method="GET" action="{{ route('rental-codes.index') }}" class="row mb-3 g-2 align-items-end">
                         <div class="col-md-4">
@@ -1291,5 +1321,160 @@ function approveAllPendingRentals() {
         });
     }
 }
+
+// Handle rental code created modal - Copy details and open WhatsApp
+@if(session('new_rental_code'))
+document.addEventListener('DOMContentLoaded', function() {
+    const rentalData = @json(session('new_rental_code'));
+    const modal = document.getElementById('rentalCodeCreatedModal');
+    const copyBtn = document.getElementById('copyAndOpenWhatsAppBtn');
+    const whatsappLink = 'https://chat.whatsapp.com/IQyyjhLE8X03QnFyflfJLR?mode=hqrt3';
+    
+    // Generate rental code details text
+    function generateRentalDetails() {
+        let details = `Rental Code: ${rentalData.code}\n`;
+        details += `Date: ${rentalData.date}\n`;
+        details += `Property: ${rentalData.property || 'N/A'}\n`;
+        details += `Client: ${rentalData.client_name}\n`;
+        details += `Client Count: ${rentalData.client_count}\n`;
+        details += `Consultation Fee: £${rentalData.fee}\n`;
+        details += `Payment Method: ${rentalData.payment_method || 'N/A'}\n`;
+        details += `Rental Agent: ${rentalData.rental_agent}\n`;
+        if (rentalData.marketing_agent && rentalData.marketing_agent !== 'N/A') {
+            details += `Marketing Agent: ${rentalData.marketing_agent}\n`;
+        }
+        return details;
+    }
+    
+    // Handle copy and open WhatsApp button click
+    if (copyBtn) {
+        copyBtn.addEventListener('click', async function() {
+            const rentalDetails = generateRentalDetails();
+            
+            try {
+                // Copy to clipboard
+                await navigator.clipboard.writeText(rentalDetails);
+                
+                // Open WhatsApp in new tab
+                window.open(whatsappLink, '_blank');
+                
+                // Show success toast/notification
+                showToast('Rental details copied — paste them in the WhatsApp group', 'success');
+                
+                // Close modal after a short delay
+                setTimeout(() => {
+                    if (modal) {
+                        const bsModal = bootstrap.Modal.getInstance(modal);
+                        if (bsModal) {
+                            bsModal.hide();
+                        } else {
+                            modal.style.display = 'none';
+                            const backdrop = document.querySelector('.modal-backdrop');
+                            if (backdrop) backdrop.remove();
+                        }
+                    }
+                }, 500);
+            } catch (err) {
+                console.error('Failed to copy text: ', err);
+                // Fallback: try using execCommand for older browsers
+                try {
+                    const textArea = document.createElement('textarea');
+                    textArea.value = rentalDetails;
+                    textArea.style.position = 'fixed';
+                    textArea.style.left = '-999999px';
+                    document.body.appendChild(textArea);
+                    textArea.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(textArea);
+                    
+                    window.open(whatsappLink, '_blank');
+                    showToast('Rental details copied — paste them in the WhatsApp group', 'success');
+                    
+                    setTimeout(() => {
+                        if (modal) {
+                            const bsModal = bootstrap.Modal.getInstance(modal);
+                            if (bsModal) {
+                                bsModal.hide();
+                            } else {
+                                modal.style.display = 'none';
+                                const backdrop = document.querySelector('.modal-backdrop');
+                                if (backdrop) backdrop.remove();
+                            }
+                        }
+                    }, 500);
+                } catch (fallbackErr) {
+                    showToast('Failed to copy. Please copy manually.', 'error');
+                }
+            }
+        });
+    }
+    
+    // Auto-show modal if it exists
+    if (modal) {
+        // Wait for Bootstrap to be fully loaded
+        if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+            const bsModal = new bootstrap.Modal(modal, {
+                backdrop: true,
+                keyboard: true
+            });
+            bsModal.show();
+            
+            // Clean up backdrop when modal is hidden
+            modal.addEventListener('hidden.bs.modal', function() {
+                const backdrop = document.querySelector('.modal-backdrop');
+                if (backdrop) backdrop.remove();
+            });
+        } else {
+            // Fallback if Bootstrap isn't loaded yet
+            setTimeout(() => {
+                if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+                    const bsModal = new bootstrap.Modal(modal, {
+                        backdrop: true,
+                        keyboard: true
+                    });
+                    bsModal.show();
+                    
+                    // Clean up backdrop when modal is hidden
+                    modal.addEventListener('hidden.bs.modal', function() {
+                        const backdrop = document.querySelector('.modal-backdrop');
+                        if (backdrop) backdrop.remove();
+                    });
+                } else {
+                    // Last resort: show manually
+                    modal.style.display = 'block';
+                    modal.classList.add('show');
+                    const backdrop = document.createElement('div');
+                    backdrop.className = 'modal-backdrop fade show';
+                    document.body.appendChild(backdrop);
+                }
+            }, 100);
+        }
+    }
+});
+
+// Toast notification function
+function showToast(message, type = 'success') {
+    // Remove existing toasts
+    const existingToasts = document.querySelectorAll('.rental-toast');
+    existingToasts.forEach(toast => toast.remove());
+    
+    // Create toast element
+    const toast = document.createElement('div');
+    toast.className = `rental-toast alert alert-${type === 'success' ? 'success' : 'danger'} alert-dismissible fade show`;
+    toast.style.cssText = 'position: fixed; top: 20px; right: 20px; z-index: 9999; min-width: 300px; box-shadow: 0 4px 12px rgba(0,0,0,0.3);';
+    toast.innerHTML = `
+        <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'} me-2"></i>${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    document.body.appendChild(toast);
+    
+    // Auto-remove after 5 seconds
+    setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 300);
+    }, 5000);
+}
+@endif
 </script>
 @endsection
