@@ -7,10 +7,10 @@
 <div class="mb-6">
     <div class="flex items-center justify-between">
         <div>
-            <h2 class="text-2xl font-bold text-gray-900">Create New Property</h2>
-            <p class="text-gray-600">Add a new property listing to your portfolio</p>
+            <h2 class="text-2xl font-bold text-gray-900">Add New Property to Google Sheets</h2>
+            <p class="text-gray-600">Add a new property listing directly to the Google Sheets Properties worksheet</p>
         </div>
-        <a href="{{ route('admin.properties') }}" 
+        <a href="{{ route('properties.index') }}" 
            class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg font-medium">
             <i class="fas fa-arrow-left mr-2"></i>Back to Properties
         </a>
@@ -26,7 +26,7 @@
         <p class="text-sm text-gray-600 mt-1">Fill in the details below to create a new property listing</p>
     </div>
     
-    <form method="POST" action="{{ route('admin.properties.store') }}" class="p-8 space-y-8" enctype="multipart/form-data">
+    <form method="POST" action="{{ route('properties.store') }}" class="p-8 space-y-8">
         @csrf
         
         <!-- Basic Information -->
@@ -95,7 +95,7 @@
                 <input type="text" name="location" id="location" 
                        value="{{ old('location') }}" required
                        class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                       placeholder="e.g., London, Manchester, Birmingham">
+                       placeholder="e.g., Devons Road, London">
                 @error('location')
                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                 @enderror
@@ -364,40 +364,153 @@
             </div>
         </div>
         
-        <!-- Photos -->
+        <!-- Original URL -->
         <div>
-            <label for="photos" class="block text-sm font-medium text-gray-700 mb-2">
-                Property Photos
+            <label for="url" class="block text-sm font-medium text-gray-700 mb-2">
+                Original Listing URL
             </label>
-            <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
-                <i class="fas fa-cloud-upload-alt text-3xl text-gray-400 mb-4"></i>
-                <p class="text-sm text-gray-600 mb-2">Upload property photos</p>
-                <p class="text-xs text-gray-500 mb-4">PNG, JPG, GIF up to 10MB each</p>
-                <input type="file" name="photos[]" id="photos" multiple accept="image/*"
-                       class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
-            </div>
-            @error('photos')
+            <input type="url" name="url" id="url" 
+                   value="{{ old('url') }}"
+                   class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                   placeholder="https://example.com/property-listing">
+            @error('url')
                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
             @enderror
         </div>
         
-        <!-- Original URL -->
-        <div>
-            <label for="link" class="block text-sm font-medium text-gray-700 mb-2">
-                Original Listing URL
-            </label>
-            <input type="url" name="link" id="link" 
-                   value="{{ old('link') }}"
-                   class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                   placeholder="https://example.com/property-listing">
-            @error('link')
-                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-            @enderror
+        <!-- Additional Google Sheets Fields -->
+        <div class="bg-gray-50 rounded-lg p-6">
+            <h4 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                <i class="fas fa-cog mr-2 text-gray-600"></i>Additional Information
+            </h4>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label for="furnishings" class="block text-sm font-medium text-gray-700 mb-2">
+                        Furnishings
+                    </label>
+                    <select name="furnishings" id="furnishings" 
+                            class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                        <option value="">Select Option</option>
+                        <option value="furnished" {{ old('furnishings') == 'furnished' ? 'selected' : '' }}>Furnished</option>
+                        <option value="unfurnished" {{ old('furnishings') == 'unfurnished' ? 'selected' : '' }}>Unfurnished</option>
+                        <option value="partially_furnished" {{ old('furnishings') == 'partially_furnished' ? 'selected' : '' }}>Partially Furnished</option>
+                    </select>
+                </div>
+                
+                <div>
+                    <label for="garden" class="block text-sm font-medium text-gray-700 mb-2">
+                        Garden/Patio
+                    </label>
+                    <select name="garden" id="garden" 
+                            class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                        <option value="">Select Option</option>
+                        <option value="yes" {{ old('garden') == 'yes' ? 'selected' : '' }}>Yes</option>
+                        <option value="no" {{ old('garden') == 'no' ? 'selected' : '' }}>No</option>
+                    </select>
+                </div>
+                
+                <div>
+                    <label for="broadband" class="block text-sm font-medium text-gray-700 mb-2">
+                        Broadband Included
+                    </label>
+                    <select name="broadband" id="broadband" 
+                            class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                        <option value="">Select Option</option>
+                        <option value="yes" {{ old('broadband') == 'yes' ? 'selected' : '' }}>Yes</option>
+                        <option value="no" {{ old('broadband') == 'no' ? 'selected' : '' }}>No</option>
+                    </select>
+                </div>
+                
+                <div>
+                    <label for="total_rooms" class="block text-sm font-medium text-gray-700 mb-2">
+                        Total Rooms
+                    </label>
+                    <input type="text" name="total_rooms" id="total_rooms" 
+                           value="{{ old('total_rooms') }}"
+                           class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                           placeholder="e.g., 4">
+                </div>
+                
+                <div>
+                    <label for="management_company" class="block text-sm font-medium text-gray-700 mb-2">
+                        Management Company
+                    </label>
+                    <input type="text" name="management_company" id="management_company" 
+                           value="{{ old('management_company') }}"
+                           class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                           placeholder="e.g., Company Name">
+                </div>
+                
+                <div>
+                    <label for="contact_info" class="block text-sm font-medium text-gray-700 mb-2">
+                        Contact Information
+                    </label>
+                    <input type="text" name="contact_info" id="contact_info" 
+                           value="{{ old('contact_info') }}"
+                           class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                           placeholder="Phone or Email">
+                </div>
+                
+                <div>
+                    <label for="pets_ok" class="block text-sm font-medium text-gray-700 mb-2">
+                        Pets Allowed
+                    </label>
+                    <select name="pets_ok" id="pets_ok" 
+                            class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                        <option value="">Select Option</option>
+                        <option value="yes" {{ old('pets_ok') == 'yes' ? 'selected' : '' }}>Yes</option>
+                        <option value="no" {{ old('pets_ok') == 'no' ? 'selected' : '' }}>No</option>
+                    </select>
+                </div>
+                
+                <div>
+                    <label for="smoking_ok" class="block text-sm font-medium text-gray-700 mb-2">
+                        Smoking Allowed
+                    </label>
+                    <select name="smoking_ok" id="smoking_ok" 
+                            class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                        <option value="">Select Option</option>
+                        <option value="yes" {{ old('smoking_ok') == 'yes' ? 'selected' : '' }}>Yes</option>
+                        <option value="no" {{ old('smoking_ok') == 'no' ? 'selected' : '' }}>No</option>
+                    </select>
+                </div>
+                
+                <div>
+                    <label for="first_photo_url" class="block text-sm font-medium text-gray-700 mb-2">
+                        First Photo URL
+                    </label>
+                    <input type="url" name="first_photo_url" id="first_photo_url" 
+                           value="{{ old('first_photo_url') }}"
+                           class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                           placeholder="https://example.com/photo.jpg">
+                </div>
+                
+                <div>
+                    <label for="all_photos" class="block text-sm font-medium text-gray-700 mb-2">
+                        All Photos (comma-separated URLs)
+                    </label>
+                    <textarea name="all_photos" id="all_photos" rows="2"
+                              class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                              placeholder="https://example.com/photo1.jpg, https://example.com/photo2.jpg">{{ old('all_photos') }}</textarea>
+                </div>
+                
+                <div>
+                    <label for="paying" class="block text-sm font-medium text-gray-700 mb-2">
+                        Paying
+                    </label>
+                    <select name="paying" id="paying" 
+                            class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                        <option value="">Select Option</option>
+                        <option value="yes" {{ old('paying') == 'yes' ? 'selected' : '' }}>Yes</option>
+                        <option value="no" {{ old('paying') == 'no' ? 'selected' : '' }}>No</option>
+                    </select>
+                </div>
+            </div>
         </div>
         
         <!-- Form Actions -->
         <div class="flex justify-end space-x-3 pt-6 border-t border-gray-200">
-            <a href="{{ route('admin.properties') }}" 
+            <a href="{{ route('properties.index') }}" 
                class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-6 py-2 rounded-lg font-medium">
                 Cancel
             </a>

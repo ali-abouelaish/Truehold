@@ -8,6 +8,7 @@ use App\Models\PropertyFromSheet;
 use App\Models\Client;
 use App\Services\PropertyGoogleSheetsService;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\Validator;
 
 class PropertyController extends Controller
 {
@@ -595,5 +596,121 @@ class PropertyController extends Controller
         
         return redirect()->route('properties.index')
             ->with('success', 'Property deleted successfully!');
+    }
+
+    /**
+     * Show the form for creating a new property
+     */
+    public function create()
+    {
+        return view('admin.properties.create');
+    }
+
+    /**
+     * Store a newly created property in Google Sheets
+     */
+    public function store(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'title' => 'required|string|max:255',
+            'location' => 'required|string|max:255',
+            'price' => 'nullable|numeric|min:0',
+            'property_type' => 'nullable|string|max:255',
+            'description' => 'nullable|string',
+            'url' => 'nullable|url',
+            'latitude' => 'nullable|numeric|between:-90,90',
+            'longitude' => 'nullable|numeric|between:-180,180',
+            'available_date' => 'nullable|string',
+            'min_term' => 'nullable|string',
+            'max_term' => 'nullable|string',
+            'deposit' => 'nullable|string',
+            'bills_included' => 'nullable|string',
+            'furnishings' => 'nullable|string',
+            'parking' => 'nullable|string',
+            'garden' => 'nullable|string',
+            'broadband' => 'nullable|string',
+            'housemates' => 'nullable|string',
+            'total_rooms' => 'nullable|string',
+            'agent_name' => 'nullable|string|max:255',
+            'management_company' => 'nullable|string|max:255',
+            'contact_info' => 'nullable|string',
+            'couples_ok' => 'nullable|string',
+            'pets_ok' => 'nullable|string',
+            'smoking_ok' => 'nullable|string',
+            'min_age' => 'nullable|integer|min:0',
+            'max_age' => 'nullable|integer|min:0',
+            'occupation' => 'nullable|string',
+            'gender' => 'nullable|string',
+            'photo_count' => 'nullable|integer|min:0',
+            'first_photo_url' => 'nullable|url',
+            'all_photos' => 'nullable|string',
+            'paying' => 'nullable|string',
+        ]);
+
+        if ($validator->fails()) {
+            return redirect()->back()
+                ->withErrors($validator)
+                ->withInput();
+        }
+
+        // Prepare property data
+        $propertyData = [
+            'url' => $request->input('url'),
+            'title' => $request->input('title'),
+            'agent_name' => $request->input('agent_name'),
+            'location' => $request->input('location'),
+            'latitude' => $request->input('latitude'),
+            'longitude' => $request->input('longitude'),
+            'status' => 'available',
+            'price' => $request->input('price'),
+            'description' => $request->input('description'),
+            'property_type' => $request->input('property_type'),
+            'available_date' => $request->input('available_date'),
+            'min_term' => $request->input('min_term'),
+            'max_term' => $request->input('max_term'),
+            'deposit' => $request->input('deposit'),
+            'bills_included' => $request->input('bills_included'),
+            'furnishings' => $request->input('furnishings'),
+            'parking' => $request->input('parking'),
+            'garden' => $request->input('garden'),
+            'broadband' => $request->input('broadband'),
+            'housemates' => $request->input('housemates'),
+            'total_rooms' => $request->input('total_rooms'),
+            'smoker' => $request->input('smoker'),
+            'pets' => $request->input('pets'),
+            'occupation' => $request->input('occupation'),
+            'gender' => $request->input('gender'),
+            'couples_ok' => $request->input('couples_ok'),
+            'smoking_ok' => $request->input('smoking_ok'),
+            'pets_ok' => $request->input('pets_ok'),
+            'pref_occupation' => $request->input('pref_occupation'),
+            'references' => $request->input('references'),
+            'min_age' => $request->input('min_age'),
+            'max_age' => $request->input('max_age'),
+            'photo_count' => $request->input('photo_count', 0),
+            'first_photo_url' => $request->input('first_photo_url'),
+            'all_photos' => $request->input('all_photos'),
+            'photos' => $request->input('all_photos') ? json_encode(explode(',', $request->input('all_photos'))) : null,
+            'contact_info' => $request->input('contact_info'),
+            'management_company' => $request->input('management_company'),
+            'paying' => $request->input('paying'),
+        ];
+
+        // Remove empty values
+        $propertyData = array_filter($propertyData, function($value) {
+            return $value !== null && $value !== '';
+        });
+
+        // Append to Google Sheets
+        $success = $this->sheetsService->appendProperty($propertyData);
+
+        if ($success) {
+            return redirect()->route('properties.index')
+                ->with('success', 'Property added to Google Sheets successfully!');
+        } else {
+            return redirect()->back()
+                ->with('error', 'Failed to add property to Google Sheets. Please check the logs.')
+                ->withInput();
+        }
     }
 }

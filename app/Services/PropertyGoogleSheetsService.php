@@ -39,7 +39,11 @@ class PropertyGoogleSheetsService
         try {
             $this->client = new GoogleClient();
             $this->client->setApplicationName('Property Scraper App');
-            $this->client->setScopes([GoogleSheets::SPREADSHEETS_READONLY]);
+            // Allow both read and write operations
+            $this->client->setScopes([
+                GoogleSheets::SPREADSHEETS_READONLY,
+                GoogleSheets::SPREADSHEETS
+            ]);
             $this->client->setAccessType('offline');
 
             // Use service account credentials if available
@@ -713,5 +717,137 @@ class PropertyGoogleSheetsService
                 'agents_with_paying' => collect(),
             ];
         }
+    }
+
+    /**
+     * Append a property to Google Sheets
+     * 
+     * @param array $propertyData
+     * @return bool
+     */
+    public function appendProperty(array $propertyData): bool
+    {
+        if (!$this->spreadsheetId) {
+            Log::warning('Properties Google Sheets spreadsheet ID not configured');
+            return false;
+        }
+
+        if (!$this->service) {
+            Log::warning('Google Sheets service not initialized for properties');
+            return false;
+        }
+
+        try {
+            // Get headers from the sheet to determine column order
+            $headers = $this->getSheetHeaders();
+            
+            // If no headers exist, create them based on the standard property structure
+            if (empty($headers)) {
+                $headers = $this->createDefaultHeaders();
+            }
+
+            // Map property data to match header order
+            $rowData = [];
+            foreach ($headers as $header) {
+                $normalizedHeader = strtolower(trim($header));
+                $value = '';
+                
+                // Map common header variations to property fields
+                $fieldMap = $this->getHeaderMap();
+                $propertyField = $fieldMap[$normalizedHeader] ?? $normalizedHeader;
+                
+                // Get value from property data
+                if (isset($propertyData[$propertyField])) {
+                    $value = $propertyData[$propertyField];
+                } elseif (isset($propertyData[$normalizedHeader])) {
+                    $value = $propertyData[$normalizedHeader];
+                }
+                
+                // Handle null/empty values
+                if ($value === null || $value === 'N/A' || $value === '') {
+                    $value = '';
+                }
+                
+                // Convert arrays to JSON strings
+                if (is_array($value)) {
+                    $value = json_encode($value);
+                }
+                
+                $rowData[] = (string) $value;
+            }
+
+            // Append the row to the sheet
+            $range = $this->sheetName . '!A:ZZ';
+            $valueRange = new \Google\Service\Sheets\ValueRange();
+            $valueRange->setValues([$rowData]);
+            $valueRange->setMajorDimension('ROWS');
+
+            $options = ['valueInputOption' => 'USER_ENTERED'];
+            $this->service->spreadsheets_values->append(
+                $this->spreadsheetId,
+                $range,
+                $valueRange,
+                $options
+            );
+
+            Log::info('Property appended to Google Sheet', [
+                'property_title' => $propertyData['title'] ?? 'N/A',
+                'spreadsheet_id' => $this->spreadsheetId
+            ]);
+
+            // Clear cache after adding new property
+            $this->clearCache();
+
+            return true;
+        } catch (\Exception $e) {
+            Log::error('Failed to append property to Google Sheet', [
+                'property_title' => $propertyData['title'] ?? 'unknown',
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            return false;
+        }
+    }
+
+    /**
+     * Get headers from the Google Sheet
+     * 
+     * @return array
+     */
+    protected function getSheetHeaders(): array
+    {
+        try {
+            $range = $this->sheetName . '!A1:ZZ1';
+            $response = $this->service->spreadsheets_values->get($this->spreadsheetId, $range);
+            $values = $response->getValues();
+            
+            if (!empty($values) && !empty($values[0])) {
+                return $values[0];
+            }
+        } catch (\Exception $e) {
+            Log::warning('Could not read headers from Google Sheet', [
+                'error' => $e->getMessage()
+            ]);
+        }
+        
+        return [];
+    }
+
+    /**
+     * Create default headers based on standard property structure
+     * 
+     * @return array
+     */
+    protected function createDefaultHeaders(): array
+    {
+        return [
+            'url', 'title', 'agent_name', 'location', 'latitude', 'longitude',
+            'status', 'price', 'description', 'property_type', 'available_date',
+            'min_term', 'max_term', 'deposit', 'bills_included', 'furnishings',
+            'parking', 'garden', 'broadband', 'housemates', 'total_rooms',
+            'smoker', 'pets', 'occupation', 'gender', 'couples_ok', 'smoking_ok',
+            'pets_ok', 'pref_occupation', 'references', 'min_age', 'max_age',
+            'photo_count', 'first_photo_url', 'all_photos', 'photos', 'paying'
+        ];
     }
 }
