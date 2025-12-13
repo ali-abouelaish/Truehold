@@ -641,28 +641,47 @@ strong {
 
                     <!-- Rental Code Created Modal -->
                     @if(session('new_rental_code'))
-                    <div class="modal fade" id="rentalCodeCreatedModal" tabindex="-1" aria-labelledby="rentalCodeCreatedModalLabel" aria-hidden="true">
-                        <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal fade" id="rentalCodeCreatedModal" tabindex="-1" aria-labelledby="rentalCodeCreatedModalLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+                        <div class="modal-dialog modal-dialog-centered modal-lg">
                             <div class="modal-content" style="background-color: #1f2937; border-color: #374151;">
-                                <div class="modal-header" style="border-color: #4b5563;">
+                                <div class="modal-header" style="border-color: #4b5563; background: linear-gradient(135deg, #1f2937 0%, #111827 100%);">
                                     <h5 class="modal-title text-white" id="rentalCodeCreatedModalLabel">
-                                        <i class="fas fa-check-circle text-success me-2"></i>Rental Code Created
+                                        <i class="fas fa-check-circle text-success me-2"></i>Rental Code Created Successfully!
                                     </h5>
                                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                                 </div>
                                 <div class="modal-body text-white">
-                                    <p class="mb-3">Your rental code has been created successfully!</p>
-                                    <div class="bg-dark p-3 rounded mb-3" style="background-color: #111827 !important;">
-                                        <small class="text-muted d-block mb-1">Rental Code:</small>
-                                        <strong>{{ session('new_rental_code.code') }}</strong>
+                                    <div class="alert alert-success d-flex align-items-center mb-4" role="alert" style="background-color: #065f46; border-color: #10b981;">
+                                        <i class="fas fa-check-circle me-2"></i>
+                                        <div>Your rental code has been created and saved to the system.</div>
                                     </div>
-                                    <p class="mb-0">Click the button below to copy the rental details and open the WhatsApp group.</p>
+                                    
+                                    <div class="bg-dark p-3 rounded mb-4" style="background-color: #111827 !important; border: 1px solid #374151;">
+                                        <small class="text-muted d-block mb-1">Rental Code:</small>
+                                        <strong class="text-success fs-4">{{ session('new_rental_code.code') }}</strong>
+                                    </div>
+                                    
+                                    <div class="alert alert-info mb-4" style="background-color: #1e3a5f; border-color: #3b82f6;">
+                                        <div class="d-flex align-items-start">
+                                            <i class="fas fa-info-circle me-2 mt-1"></i>
+                                            <div>
+                                                <strong class="d-block mb-2">📱 Send to WhatsApp Group</strong>
+                                                <p class="mb-0">Please send the rental details to the WhatsApp group. The message has been prepared for you - just click the button below to open WhatsApp and send it.</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="d-grid gap-2">
+                                        <button type="button" class="btn btn-success btn-lg" id="sendToWhatsAppGroupBtn">
+                                            <i class="fab fa-whatsapp me-2"></i>Send Message to WhatsApp Group
+                                        </button>
+                                        <button type="button" class="btn btn-outline-primary" id="copyAndOpenWhatsAppBtn">
+                                            <i class="fas fa-copy me-2"></i>Copy Details & Open WhatsApp Manually
+                                        </button>
+                                    </div>
                                 </div>
                                 <div class="modal-footer" style="border-color: #4b5563;">
                                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                                    <button type="button" class="btn btn-primary" id="copyAndOpenWhatsAppBtn">
-                                        <i class="fas fa-copy me-2"></i>Copy Details & Open WhatsApp
-                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -1322,18 +1341,25 @@ function approveAllPendingRentals() {
     }
 }
 
-// Handle rental code created modal - Copy details and open WhatsApp
+// Handle rental code created modal - Send message to WhatsApp group
 @if(session('new_rental_code'))
 document.addEventListener('DOMContentLoaded', function() {
     const rentalData = @json(session('new_rental_code'));
     const modal = document.getElementById('rentalCodeCreatedModal');
+    const sendBtn = document.getElementById('sendToWhatsAppGroupBtn');
     const copyBtn = document.getElementById('copyAndOpenWhatsAppBtn');
-    const whatsappLink = 'https://chat.whatsapp.com/IQyyjhLE8X03QnFyflfJLR?mode=hqrt3';
+    const whatsappGroupLink = 'https://chat.whatsapp.com/L4QjGr4aZCmI1ExsNu4oE9';
+    
+    // Show modal automatically when page loads
+    if (modal) {
+        const bsModal = new bootstrap.Modal(modal);
+        bsModal.show();
+    }
     
     // Get payment method emoji
     function getPaymentEmoji(paymentMethod) {
         if (!paymentMethod) return '';
-        const method = paymentMethod;
+        const method = paymentMethod.toLowerCase();
         if (method.includes('card')) return '⚡';
         if (method.includes('cash')) return '💵';
         if (method.includes('transfer')) return '💳';
@@ -1375,7 +1401,79 @@ document.addEventListener('DOMContentLoaded', function() {
         return details;
     }
     
-    // Handle copy and open WhatsApp button click
+    // Handle "Send Message to WhatsApp Group" button click
+    if (sendBtn) {
+        sendBtn.addEventListener('click', async function() {
+            const rentalDetails = generateRentalDetails();
+            
+            // Encode the message for URL
+            const encodedMessage = encodeURIComponent(rentalDetails);
+            
+            // Create WhatsApp URL with pre-filled message
+            // Note: WhatsApp Web doesn't support text parameter for groups directly,
+            // but we can copy to clipboard and open the group
+            try {
+                // Copy message to clipboard
+                await navigator.clipboard.writeText(rentalDetails);
+                
+                // Open WhatsApp group in new tab
+                window.open(whatsappGroupLink, '_blank');
+                
+                // Show success toast
+                showToast('Message copied! WhatsApp group opened. Paste the message and send it.', 'success');
+                
+                // Update button to show success state
+                sendBtn.innerHTML = '<i class="fas fa-check me-2"></i>Message Copied - Paste in WhatsApp';
+                sendBtn.classList.remove('btn-success');
+                sendBtn.classList.add('btn-outline-success');
+                sendBtn.disabled = true;
+                
+                // Close modal after a delay
+                setTimeout(() => {
+                    if (modal) {
+                        const bsModal = bootstrap.Modal.getInstance(modal);
+                        if (bsModal) {
+                            bsModal.hide();
+                        }
+                    }
+                }, 2000);
+            } catch (err) {
+                console.error('Failed to copy text: ', err);
+                // Fallback: try using execCommand for older browsers
+                try {
+                    const textArea = document.createElement('textarea');
+                    textArea.value = rentalDetails;
+                    textArea.style.position = 'fixed';
+                    textArea.style.left = '-999999px';
+                    document.body.appendChild(textArea);
+                    textArea.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(textArea);
+                    
+                    window.open(whatsappGroupLink, '_blank');
+                    showToast('Message copied! WhatsApp group opened. Paste the message and send it.', 'success');
+                    
+                    sendBtn.innerHTML = '<i class="fas fa-check me-2"></i>Message Copied - Paste in WhatsApp';
+                    sendBtn.classList.remove('btn-success');
+                    sendBtn.classList.add('btn-outline-success');
+                    sendBtn.disabled = true;
+                    
+                    setTimeout(() => {
+                        if (modal) {
+                            const bsModal = bootstrap.Modal.getInstance(modal);
+                            if (bsModal) {
+                                bsModal.hide();
+                            }
+                        }
+                    }, 2000);
+                } catch (fallbackErr) {
+                    showToast('Failed to copy. Please copy manually.', 'error');
+                }
+            }
+        });
+    }
+    
+    // Handle "Copy Details & Open WhatsApp Manually" button click (fallback option)
     if (copyBtn) {
         copyBtn.addEventListener('click', async function() {
             const rentalDetails = generateRentalDetails();
@@ -1385,7 +1483,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 await navigator.clipboard.writeText(rentalDetails);
                 
                 // Open WhatsApp in new tab
-                window.open(whatsappLink, '_blank');
+                window.open(whatsappGroupLink, '_blank');
                 
                 // Show success toast/notification
                 showToast('Rental details copied — paste them in the WhatsApp group', 'success');
@@ -1416,7 +1514,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     document.execCommand('copy');
                     document.body.removeChild(textArea);
                     
-                    window.open(whatsappLink, '_blank');
+                    window.open(whatsappGroupLink, '_blank');
                     showToast('Rental details copied — paste them in the WhatsApp group', 'success');
                     
                     setTimeout(() => {
