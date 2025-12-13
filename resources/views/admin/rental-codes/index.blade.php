@@ -1333,7 +1333,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Get payment method emoji
     function getPaymentEmoji(paymentMethod) {
         if (!paymentMethod) return '';
-        const method = paymentMethod.toLowerCase();
+        const method = paymentMethod;
         if (method.includes('card')) return '⚡';
         if (method.includes('cash')) return '💵';
         if (method.includes('transfer')) return '💳';
@@ -1351,7 +1351,7 @@ document.addEventListener('DOMContentLoaded', function() {
         details += `*Consultation Fee:* £${rentalData.fee}\n`;
         details += `*Payment:* ${rentalData.payment_method || 'N/A'} ${paymentEmoji}\n`;
         details += `_______________________________\n\n`;
-        details += `*Personal Information*\n\n`;
+        details += `*Client Information*\n\n`;
         details += `*Full Name:* ${client.name || rentalData.client_name || 'N/A'}\n`;
         details += `*Phone Number:* ${client.phone || 'N/A'}\n`;
         

@@ -1942,19 +1942,37 @@
                 if (photosElement && photosElement.dataset.photos) {
                     const photosData = photosElement.dataset.photos;
                     propertyPhotos = JSON.parse(photosData);
+                    // Ensure it's an array and filter out any empty/null values
+                    if (Array.isArray(propertyPhotos)) {
+                        propertyPhotos = propertyPhotos.filter(photo => photo && photo.trim() !== '');
+                    } else {
+                        propertyPhotos = [];
+                    }
                     totalImages = propertyPhotos.length;
-                    console.log('Loaded photos:', totalImages, propertyPhotos);
+                    console.log('Loaded photos:', totalImages, 'Photos array:', propertyPhotos);
                 }
                 if (photosElement && photosElement.dataset.originalPhotos) {
                     originalPhotos = JSON.parse(photosElement.dataset.originalPhotos);
+                    if (Array.isArray(originalPhotos)) {
+                        originalPhotos = originalPhotos.filter(photo => photo && photo.trim() !== '');
+                    }
                 }
                 
                 // Fallback: if no photos from data attribute, try to get from thumbnails
-                if (totalImages === 0) {
+                if (totalImages === 0 || propertyPhotos.length === 0) {
                     const thumbnails = document.querySelectorAll('.thumbnail img');
-                    propertyPhotos = Array.from(thumbnails).map(img => img.src).filter(src => src && !src.includes('data:image/svg'));
+                    propertyPhotos = Array.from(thumbnails)
+                        .map(img => img.src)
+                        .filter(src => src && !src.includes('data:image/svg') && src.trim() !== '');
                     totalImages = propertyPhotos.length;
-                    console.log('Loaded photos from thumbnails:', totalImages);
+                    console.log('Loaded photos from thumbnails:', totalImages, 'Photos array:', propertyPhotos);
+                }
+                
+                // Final validation - ensure we have photos
+                if (propertyPhotos.length === 0) {
+                    console.warn('No photos found after initialization');
+                } else {
+                    console.log('Successfully initialized with', propertyPhotos.length, 'photos');
                 }
             } catch (error) {
                 console.error('Error parsing photos data:', error);
@@ -1970,8 +1988,9 @@
                 return;
             }
             
-            // Ensure index is within bounds
-            if (index < 0) index = totalImages - 1;
+            // Ensure index is within bounds and is a valid integer
+            index = parseInt(index, 10);
+            if (isNaN(index) || index < 0) index = totalImages - 1;
             if (index >= totalImages) index = 0;
             
             currentImageIndex = index;
@@ -1979,20 +1998,26 @@
             const currentImageSpan = document.getElementById('currentImage');
             
             if (mainImage && currentImageSpan) {
-                if (propertyPhotos && propertyPhotos.length > 0 && propertyPhotos[index]) {
-                    mainImage.src = propertyPhotos[index];
-                    currentImageSpan.textContent = index + 1;
-                
-                    // Update thumbnail selection
-                    document.querySelectorAll('.thumbnail').forEach((thumb, i) => {
-                        if (i === index) {
-                            thumb.classList.add('active');
-                        } else {
-                            thumb.classList.remove('active');
-                        }
-                    });
+                // Ensure we have a valid array and the index exists
+                if (propertyPhotos && Array.isArray(propertyPhotos) && propertyPhotos.length > 0) {
+                    // Make sure index is valid
+                    if (index >= 0 && index < propertyPhotos.length && propertyPhotos[index]) {
+                        mainImage.src = propertyPhotos[index];
+                        currentImageSpan.textContent = index + 1;
+                    
+                        // Update thumbnail selection
+                        document.querySelectorAll('.thumbnail').forEach((thumb, i) => {
+                            if (i === index) {
+                                thumb.classList.add('active');
+                            } else {
+                                thumb.classList.remove('active');
+                            }
+                        });
+                    } else {
+                        console.warn('Photo not found at index:', index, 'Array length:', propertyPhotos.length, 'Available indices:', Array.from({length: propertyPhotos.length}, (_, i) => i));
+                    }
                 } else {
-                    console.warn('Photo not found at index:', index, 'Total photos:', propertyPhotos.length);
+                    console.warn('Invalid photos array:', propertyPhotos);
                 }
             } else {
                 console.warn('Main image or counter element not found');
@@ -2000,20 +2025,42 @@
         }
 
         function nextImage() {
-            if (totalImages === 0) {
+            if (totalImages === 0 || !propertyPhotos || propertyPhotos.length === 0) {
                 console.warn('No photos to navigate');
                 return;
             }
-            currentImageIndex = (currentImageIndex + 1) % totalImages;
+            // Ensure we're using the actual array length, not totalImages
+            const actualLength = propertyPhotos.length;
+            let nextIndex = (currentImageIndex + 1) % actualLength;
+            
+            // Skip any undefined/null entries
+            let attempts = 0;
+            while (attempts < actualLength && (!propertyPhotos[nextIndex] || propertyPhotos[nextIndex].trim() === '')) {
+                nextIndex = (nextIndex + 1) % actualLength;
+                attempts++;
+            }
+            
+            currentImageIndex = nextIndex;
             showImage(currentImageIndex);
         }
 
         function previousImage() {
-            if (totalImages === 0) {
+            if (totalImages === 0 || !propertyPhotos || propertyPhotos.length === 0) {
                 console.warn('No photos to navigate');
                 return;
             }
-            currentImageIndex = (currentImageIndex - 1 + totalImages) % totalImages;
+            // Ensure we're using the actual array length, not totalImages
+            const actualLength = propertyPhotos.length;
+            let prevIndex = (currentImageIndex - 1 + actualLength) % actualLength;
+            
+            // Skip any undefined/null entries
+            let attempts = 0;
+            while (attempts < actualLength && (!propertyPhotos[prevIndex] || propertyPhotos[prevIndex].trim() === '')) {
+                prevIndex = (prevIndex - 1 + actualLength) % actualLength;
+                attempts++;
+            }
+            
+            currentImageIndex = prevIndex;
             showImage(currentImageIndex);
         }
 
