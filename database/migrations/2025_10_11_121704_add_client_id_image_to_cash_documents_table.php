@@ -11,9 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('cash_documents', function (Blueprint $table) {
-            $table->string('client_id_image')->nullable()->after('contact_images');
-        });
+        // Only add the column if it doesn't already exist to avoid duplicate column errors
+        if (! Schema::hasColumn('cash_documents', 'client_id_image')) {
+            Schema::table('cash_documents', function (Blueprint $table) {
+                $table->string('client_id_image')->nullable()->after('contact_images');
+            });
+        }
     }
 
     /**
@@ -21,8 +24,10 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('cash_documents', function (Blueprint $table) {
-            $table->dropColumn('client_id_image');
-        });
+        if (Schema::hasColumn('cash_documents', 'client_id_image')) {
+            Schema::table('cash_documents', function (Blueprint $table) {
+                $table->dropColumn('client_id_image');
+            });
+        }
     }
 };
