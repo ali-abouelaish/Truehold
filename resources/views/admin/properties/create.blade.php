@@ -28,7 +28,33 @@
     
     <form method="POST" action="{{ route('properties.store') }}" class="p-8 space-y-8">
         @csrf
-        
+
+        @if(session('error'))
+            <div class="mb-4 bg-red-50 border border-red-200 rounded-lg p-4">
+                <div class="flex">
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-exclamation-triangle text-red-400"></i>
+                    </div>
+                    <div class="ml-3">
+                        <p class="text-sm font-medium text-red-800">{{ session('error') }}</p>
+                    </div>
+                </div>
+            </div>
+        @endif
+
+        @if(session('success'))
+            <div class="mb-4 bg-green-50 border border-green-200 rounded-lg p-4">
+                <div class="flex">
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-check-circle text-green-400"></i>
+                    </div>
+                    <div class="ml-3">
+                        <p class="text-sm font-medium text-green-800">{{ session('success') }}</p>
+                    </div>
+                </div>
+            </div>
+        @endif
+
         <!-- Basic Information -->
         <div class="bg-gray-50 rounded-lg p-6">
             <h4 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">

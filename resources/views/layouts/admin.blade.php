@@ -601,7 +601,7 @@
                 <div class="px-4 mt-6 mb-4">
                     <span class="sidebar-text text-xs font-semibold uppercase tracking-wider" style="color: #fbbf24;">Properties</span>
                 </div>
-                
+
                 @php($apNewCount = 0)
                 @auth
                     @php(
@@ -618,6 +618,21 @@
                         </span>
                     @endif
                 </a>
+
+                {{-- Google Sheets Properties --}}
+                <a href="{{ route('properties.index') }}" 
+                   class="sidebar-item flex items-center px-4 py-3 text-gray-700 hover:text-blue-600 {{ request()->routeIs('properties.*') ? 'active' : '' }}">
+                    <i class="fas fa-table sidebar-icon mr-3 text-lg"></i>
+                    <span class="sidebar-text">Sheet Properties</span>
+                </a>
+
+                @if(auth()->user()->hasAdminPermission('properties', 'create'))
+                <a href="{{ route('properties.create') }}" 
+                   class="sidebar-item flex items-center px-4 py-3 text-gray-700 hover:text-blue-600 {{ request()->routeIs('properties.create') ? 'active' : '' }}">
+                    <i class="fas fa-plus-circle sidebar-icon mr-3 text-lg"></i>
+                    <span class="sidebar-text">Add Sheet Property</span>
+                </a>
+                @endif
                 @endif
                 @endauth
                 
