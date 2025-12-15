@@ -487,6 +487,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
+    // Global dashboard route (used by auth scaffolding and public views)
+    Route::get('/dashboard', [AgentProfileController::class, 'dashboard'])->name('dashboard');
     
     // Agent Profile Routes
     Route::prefix('agent')->name('agent.profile.')->group(function () {
@@ -497,13 +500,13 @@ Route::middleware('auth')->group(function () {
         Route::get('/clients', [AgentProfileController::class, 'clients'])->name('clients');
     });
     
-        // Scraper Routes
-        Route::get('/scraper', [ScraperController::class, 'index'])->name('admin.scraper.index');
-        Route::post('/scraper/add-profile', [ScraperController::class, 'addProfile'])->name('admin.scraper.add-profile');
-        Route::post('/scraper/remove-profile', [ScraperController::class, 'removeProfile'])->name('admin.scraper.remove-profile');
-        Route::post('/scraper/run', [ScraperController::class, 'runScraper'])->name('admin.scraper.run');
-        Route::post('/scraper/run-php', [PhpScraperController::class, 'runPhpScraper'])->name('admin.scraper.run-php');
-        Route::post('/scraper/import', [ScraperController::class, 'importData'])->name('admin.scraper.import');
+    // Scraper Routes
+    Route::get('/scraper', [ScraperController::class, 'index'])->name('admin.scraper.index');
+    Route::post('/scraper/add-profile', [ScraperController::class, 'addProfile'])->name('admin.scraper.add-profile');
+    Route::post('/scraper/remove-profile', [ScraperController::class, 'removeProfile'])->name('admin.scraper.remove-profile');
+    Route::post('/scraper/run', [ScraperController::class, 'runScraper'])->name('admin.scraper.run');
+    Route::post('/scraper/run-php', [PhpScraperController::class, 'runPhpScraper'])->name('admin.scraper.run-php');
+    Route::post('/scraper/import', [ScraperController::class, 'importData'])->name('admin.scraper.import');
 });
 
 // Logout route
