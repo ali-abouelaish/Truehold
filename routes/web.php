@@ -19,6 +19,7 @@ use App\Http\Controllers\PublicClientController;
 use App\Http\Controllers\ApPropertyController;
 use App\Http\Controllers\ApPublicPropertyController;
 use App\Http\Controllers\TwilioWebhookController;
+use App\Http\Controllers\PropertyManagementController;
 use Twilio\Rest\Client;
 
 
@@ -46,6 +47,7 @@ Route::get('/properties/create', [PropertyController::class, 'create'])->name('p
 Route::post('/properties', [PropertyController::class, 'store'])->name('properties.store');
 Route::get('/properties/map', [PropertyController::class, 'map'])->name('properties.map');
 Route::get('/properties/{property}', [PropertyController::class, 'show'])->name('properties.show');
+Route::get('/manage/properties', [PropertyManagementController::class, 'index'])->name('properties.manage');
 
 // Debug route for testing Google Sheets properties (remove in production)
 Route::get('/test-properties-sheets', [\App\Http\Controllers\PropertyDebugController::class, 'testSheets'])->name('test.properties.sheets');
