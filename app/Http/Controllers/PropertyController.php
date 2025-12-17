@@ -361,7 +361,7 @@ class PropertyController extends Controller
                     $propertyData['latitude'] = isset($propertyData['latitude']) ? (float) $propertyData['latitude'] : null;
                     $propertyData['longitude'] = isset($propertyData['longitude']) ? (float) $propertyData['longitude'] : null;
                     return $propertyData;
-                })->take(400);
+                })->take(400)->values()->all();
 
                 // Get filter values for dropdowns
                 $filterValues = $this->sheetsService->getFilterValues();
@@ -482,7 +482,7 @@ class PropertyController extends Controller
                 'first_photo_url' => $property->first_photo_url,
                 'high_quality_photos_array' => $property->high_quality_photos_array,
             ];
-        });
+        })->values()->all();
 
         \Log::info('Map query results (Database Fallback)', [
             'total_properties' => $properties->count(),
