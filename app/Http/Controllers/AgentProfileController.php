@@ -28,7 +28,7 @@ class AgentProfileController extends Controller
         $rentalCodes = RentalCode::with('client')
             ->where(function($query) use ($agent, $user) {
                 $query->where('rent_by_agent', $agent->company_name ?? $user->name)
-                      ->orWhere('marketing_agent', $user->name);
+                      ->orWhere('marketing_agent_id', $user->id);
             })
             ->orderBy('created_at', 'desc')
             ->paginate(10);
@@ -67,7 +67,7 @@ class AgentProfileController extends Controller
         $query = RentalCode::with('client')
             ->where(function($q) use ($agent, $user) {
                 $q->where('rent_by_agent', $agent->company_name ?? $user->name)
-                  ->orWhere('marketing_agent', $user->name);
+                  ->orWhere('marketing_agent_id', $user->id);
             });
 
         // Apply filters
@@ -183,7 +183,7 @@ class AgentProfileController extends Controller
     {
         $rentalCodes = RentalCode::where(function($q) use ($agent, $user) {
             $q->where('rent_by_agent', $agent->company_name ?? $user->name)
-              ->orWhere('marketing_agent', $user->name);
+              ->orWhere('marketing_agent_id', $user->id);
         })->get();
 
         $totalEarnings = 0;
@@ -255,7 +255,7 @@ class AgentProfileController extends Controller
     {
         $rentalCodes = RentalCode::where(function($q) use ($agent, $user) {
             $q->where('rent_by_agent', $agent->company_name ?? $user->name)
-              ->orWhere('marketing_agent', $user->name);
+              ->orWhere('marketing_agent_id', $user->id);
         })
         ->whereBetween('rental_date', [$startDate, $endDate])
         ->get();
@@ -334,7 +334,7 @@ class AgentProfileController extends Controller
         return RentalCode::with('client')
             ->where(function($q) use ($agent, $user) {
                 $q->where('rent_by_agent', $agent->company_name ?? $user->name)
-                  ->orWhere('marketing_agent', $user->name);
+                  ->orWhere('marketing_agent_id', $user->id);
             })
             ->orderBy('created_at', 'desc')
             ->limit(5)
@@ -355,7 +355,7 @@ class AgentProfileController extends Controller
             
             $monthlyCodes = RentalCode::where(function($q) use ($agent, $user) {
                 $q->where('rent_by_agent', $agent->company_name ?? $user->name)
-                  ->orWhere('marketing_agent', $user->name);
+                  ->orWhere('marketing_agent_id', $user->id);
             })
             ->whereBetween('rental_date', [$startOfMonth, $endOfMonth])
             ->get();
@@ -417,7 +417,7 @@ class AgentProfileController extends Controller
             
             $monthlyCodes = RentalCode::where(function($q) use ($agent, $user) {
                 $q->where('rent_by_agent', $agent->company_name ?? $user->name)
-                  ->orWhere('marketing_agent', $user->name);
+                  ->orWhere('marketing_agent_id', $user->id);
             })
             ->whereBetween('rental_date', [$startOfMonth, $endOfMonth])
             ->get();
@@ -443,7 +443,7 @@ class AgentProfileController extends Controller
         return RentalCode::with('client')
             ->where(function($q) use ($agent, $user) {
                 $q->where('rent_by_agent', $agent->company_name ?? $user->name)
-                  ->orWhere('marketing_agent', $user->name);
+                  ->orWhere('marketing_agent_id', $user->id);
             })
             ->whereBetween('rental_date', [$startDate, $endDate])
             ->where('paid', true)
@@ -458,7 +458,7 @@ class AgentProfileController extends Controller
     {
         $rentalCodes = RentalCode::where(function($q) use ($agent, $user) {
             $q->where('rent_by_agent', $agent->company_name ?? $user->name)
-              ->orWhere('marketing_agent', $user->name);
+              ->orWhere('marketing_agent_id', $user->id);
         })->get();
 
         $deductions = [
@@ -511,7 +511,7 @@ class AgentProfileController extends Controller
         $rentalCodes = RentalCode::with('client')
             ->where(function($q) use ($agent, $user) {
                 $q->where('rent_by_agent', $agent->company_name ?? $user->name)
-                  ->orWhere('marketing_agent', $user->name);
+                  ->orWhere('marketing_agent_id', $user->id);
             })
             ->orderBy('created_at', 'desc')
             ->get();
