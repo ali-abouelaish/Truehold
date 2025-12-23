@@ -800,7 +800,35 @@ public function generateCode()
         foreach ($rentalCodes as $code) {
             // Add null checks for all data
             $totalFee = (float) ($code->consultation_fee ?? 0);
-            $rentalDate = $code->rental_date ?? now();
+            
+            // Safely parse rental date
+            $rentalDate = null;
+            if ($code->rental_date) {
+                try {
+                    $rentalDate = \Carbon\Carbon::parse($code->rental_date);
+                } catch (\Exception $e) {
+                    \Log::warning('Invalid rental_date format in main loop', [
+                        'code' => $code->rental_code ?? 'N/A',
+                        'rental_date' => $code->rental_date,
+                        'error' => $e->getMessage()
+                    ]);
+                }
+            }
+            
+            // Fallback to created_at if rental_date is invalid
+            if (!$rentalDate) {
+                try {
+                    $rentalDate = $code->created_at ? \Carbon\Carbon::parse($code->created_at) : now();
+                } catch (\Exception $e) {
+                    $rentalDate = now();
+                }
+            }
+            
+            // Ensure we have a valid Carbon date
+            if (!($rentalDate instanceof \Carbon\Carbon)) {
+                $rentalDate = now();
+            }
+            
             $paymentMethod = $code->payment_method ?? 'Cash';
             
             // Skip if no consultation fee
@@ -1002,6 +1030,7 @@ public function generateCode()
                 
                 // Add marketing agent earnings
                 $byAgent[$marketingAgentName]['marketing_agent_earnings'] += $marketingDeduction;
+                $byAgent[$marketingAgentName]['agent_earnings'] += $marketingDeduction; // Also add to agent_earnings for consistency
                 $byAgent[$marketingAgentName]['total_earnings'] += $marketingDeduction;
                 
                 // Only increment transaction count if this is a different agent
@@ -1123,7 +1152,34 @@ public function generateCode()
         $monthlyTotals = [];
         foreach ($rentalCodes as $code) {
             $totalFee = (float) ($code->consultation_fee ?? 0);
-            $rentalDate = $code->rental_date ?? ($code->created_at ?? now());
+            
+            // Safely parse rental date
+            $rentalDate = null;
+            if ($code->rental_date) {
+                try {
+                    $rentalDate = \Carbon\Carbon::parse($code->rental_date);
+                } catch (\Exception $e) {
+                    \Log::warning('Invalid rental_date format', [
+                        'code' => $code->rental_code ?? 'N/A',
+                        'rental_date' => $code->rental_date,
+                        'error' => $e->getMessage()
+                    ]);
+                }
+            }
+            
+            // Fallback to created_at if rental_date is invalid
+            if (!$rentalDate) {
+                try {
+                    $rentalDate = $code->created_at ? \Carbon\Carbon::parse($code->created_at) : now();
+                } catch (\Exception $e) {
+                    $rentalDate = now();
+                }
+            }
+            
+            // Ensure we have a valid Carbon date
+            if (!($rentalDate instanceof \Carbon\Carbon)) {
+                $rentalDate = now();
+            }
             
             // Group by month (Y-m format like "2025-12")
             $monthKey = $rentalDate->format('Y-m');
@@ -1151,9 +1207,24 @@ public function generateCode()
         // Format labels for display (e.g., "2025-12" -> "Dec 2025")
         $formattedMonthlyTotals = [];
         foreach ($monthlyTotals as $monthKey => $total) {
-            $date = \Carbon\Carbon::createFromFormat('Y-m', $monthKey);
-            $formattedLabel = $date->format('M Y'); // e.g., "Dec 2025"
-            $formattedMonthlyTotals[$formattedLabel] = $total;
+            try {
+                $date = \Carbon\Carbon::createFromFormat('Y-m', $monthKey);
+                // Validate date is reasonable (between 2020 and 2030)
+                if ($date->year >= 2020 && $date->year <= 2030) {
+                    $formattedLabel = $date->format('M Y'); // e.g., "Dec 2025"
+                    $formattedMonthlyTotals[$formattedLabel] = $total;
+                } else {
+                    \Log::warning('Invalid date year in monthly totals', [
+                        'monthKey' => $monthKey,
+                        'year' => $date->year
+                    ]);
+                }
+            } catch (\Exception $e) {
+                \Log::warning('Failed to format monthly total date', [
+                    'monthKey' => $monthKey,
+                    'error' => $e->getMessage()
+                ]);
+            }
         }
         
         $chartData['monthly_totals'] = $formattedMonthlyTotals;
@@ -2614,7 +2685,35 @@ public function generateCode()
         // Monthly breakdown
         $monthlyBreakdown = [];
         foreach ($agentRentals as $code) {
-            $monthKey = $code->rental_date->format('Y-m');
+            // Safely parse rental date
+            $rentalDate = null;
+            if ($code->rental_date) {
+                try {
+                    $rentalDate = \Carbon\Carbon::parse($code->rental_date);
+                } catch (\Exception $e) {
+                    \Log::warning('Invalid rental_date format in monthly breakdown', [
+                        'code' => $code->rental_code ?? 'N/A',
+                        'rental_date' => $code->rental_date,
+                        'error' => $e->getMessage()
+                    ]);
+                }
+            }
+            
+            // Fallback to created_at if rental_date is invalid
+            if (!$rentalDate) {
+                try {
+                    $rentalDate = $code->created_at ? \Carbon\Carbon::parse($code->created_at) : now();
+                } catch (\Exception $e) {
+                    $rentalDate = now();
+                }
+            }
+            
+            // Ensure we have a valid Carbon date
+            if (!($rentalDate instanceof \Carbon\Carbon)) {
+                $rentalDate = now();
+            }
+            
+            $monthKey = $rentalDate->format('Y-m');
             if (!isset($monthlyBreakdown[$monthKey])) {
                 $monthlyBreakdown[$monthKey] = [
                     'month' => $monthKey,
