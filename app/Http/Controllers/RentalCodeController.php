@@ -1387,29 +1387,85 @@ public function generateCode()
         $paymentMethod = request('payment_method');
         $marketingAgentFilter = request('marketing_agent_filter');
 
-        // Get rental codes
-        $query = RentalCode::with(['client', 'client.agent'])
-            ->where('rental_date', '<=', $endDate)
-            // Payroll should only include approved rentals
-            ->where('status', 'approved');
+        // Get rental codes with proper date filtering
+        $query = RentalCode::with(['client', 'client.agent']);
 
-        if ($startDate) {
-            $query->where('rental_date', '>=', $startDate);
-        }
-
+        // Status filter: default to approved for payroll, but allow override
         if ($status) {
             $query->where('status', $status);
+        } else {
+            // Payroll should only include approved rentals by default
+            $query->where('status', 'approved');
         }
+
+        // Proper date filtering: handle null rental_date values
+        $query->where(function($q) use ($startDate, $endDate, $startDateTime, $endDateTime) {
+            // Include rentals where rental_date falls within range
+            $q->where(function($subQ) use ($startDate, $endDate, $startDateTime, $endDateTime) {
+                $subQ->whereNotNull('rental_date')
+                     ->where('rental_date', '<=', $endDate);
+                
+                if ($startDate) {
+                    $subQ->where('rental_date', '>=', $startDate);
+                }
+            })
+            // OR include rentals with null rental_date but created_at falls within range
+            ->orWhere(function($subQ) use ($startDate, $endDate, $startDateTime, $endDateTime) {
+                $subQ->whereNull('rental_date')
+                     ->where('created_at', '<=', $endDateTime);
+                
+                if ($startDateTime) {
+                    $subQ->where('created_at', '>=', $startDateTime);
+                }
+            })
+            // OR include unpaid rentals (carry over from previous cycles)
+            ->orWhere('paid', false);
+        });
 
         if ($paymentMethod) {
             $query->where('payment_method', $paymentMethod);
         }
 
-        $rentalCodes = $query->get()->filter(function($code) use ($startDate, $endDate) {
-            $date = $code->rental_date ?? ($code->created_at ?? now());
-            $dateStr = $date instanceof \Carbon\Carbon ? $date->toDateString() : (string)$date;
-            $inCycle = $dateStr >= $startDate && $dateStr <= $endDate;
-            return $inCycle || !($code->paid ?? false);
+        $rentalCodes = $query->get()->filter(function($code) use ($startDate, $endDate, $startDateTime, $endDateTime) {
+            // Safely parse rental date
+            $rentalDate = null;
+            if ($code->rental_date) {
+                try {
+                    $rentalDate = \Carbon\Carbon::parse($code->rental_date);
+                } catch (\Exception $e) {
+                    // If parsing fails, fall back to created_at
+                    $rentalDate = null;
+                }
+            }
+            
+            // Use created_at if rental_date is null or invalid
+            if (!$rentalDate) {
+                try {
+                    $rentalDate = $code->created_at ? \Carbon\Carbon::parse($code->created_at) : null;
+                } catch (\Exception $e) {
+                    $rentalDate = null;
+                }
+            }
+            
+            // If still no valid date, skip this rental
+            if (!$rentalDate) {
+                return false;
+            }
+            
+            // Check if rental falls within date range
+            $inDateRange = false;
+            if ($startDateTime && $endDateTime) {
+                $inDateRange = $rentalDate->between($startDateTime, $endDateTime);
+            } elseif ($startDateTime) {
+                $inDateRange = $rentalDate->gte($startDateTime);
+            } elseif ($endDateTime) {
+                $inDateRange = $rentalDate->lte($endDateTime);
+            } else {
+                $inDateRange = true; // No date filter, include all
+            }
+            
+            // Include if in date range OR unpaid (carry over)
+            return $inDateRange || !($code->paid ?? false);
         });
 
         // Get agent users
@@ -1425,7 +1481,35 @@ public function generateCode()
                 continue;
             }
             $totalFee = (float) ($code->consultation_fee ?? 0);
-            $rentalDate = $code->rental_date ?? now();
+            
+            // Safely parse rental date
+            $rentalDate = null;
+            if ($code->rental_date) {
+                try {
+                    $rentalDate = \Carbon\Carbon::parse($code->rental_date);
+                } catch (\Exception $e) {
+                    \Log::warning('Invalid rental_date format in agentPayroll loop', [
+                        'code' => $code->rental_code ?? 'N/A',
+                        'rental_date' => $code->rental_date,
+                        'error' => $e->getMessage()
+                    ]);
+                }
+            }
+            
+            // Fallback to created_at if rental_date is invalid
+            if (!$rentalDate) {
+                try {
+                    $rentalDate = $code->created_at ? \Carbon\Carbon::parse($code->created_at) : now();
+                } catch (\Exception $e) {
+                    $rentalDate = now();
+                }
+            }
+            
+            // Ensure we have a valid Carbon date
+            if (!($rentalDate instanceof \Carbon\Carbon)) {
+                $rentalDate = now();
+            }
+            
             $paymentMethod = $code->payment_method ?? 'Cash';
 
             if ($totalFee <= 0) continue;
