@@ -723,10 +723,29 @@ public function generateCode()
         // Build query with filters
         $query = RentalCode::with(['client', 'client.agent', 'rentalAgent', 'marketingAgentUser']);
 
-        // Current cycle rentals OR any unpaid rentals (carry over)
-        $query->where(function($q) use ($startDate, $endDate) {
-            $q->whereBetween('rental_date', [$startDate, $endDate])
-              ->orWhere('paid', false);
+        // STRICTLY filter by date range - handle null rental_date values
+        $endDateTime = \Carbon\Carbon::parse($endDate)->endOfDay();
+        $startDateTime = $startDate ? \Carbon\Carbon::parse($startDate)->startOfDay() : null;
+        
+        $query->where(function($q) use ($startDate, $endDate, $startDateTime, $endDateTime) {
+            // Include rentals where rental_date falls within range
+            $q->where(function($subQ) use ($startDate, $endDate) {
+                $subQ->whereNotNull('rental_date')
+                     ->where('rental_date', '<=', $endDate);
+                
+                if ($startDate) {
+                    $subQ->where('rental_date', '>=', $startDate);
+                }
+            })
+            // OR include rentals with null rental_date but created_at falls within range
+            ->orWhere(function($subQ) use ($startDateTime, $endDateTime) {
+                $subQ->whereNull('rental_date')
+                     ->where('created_at', '<=', $endDateTime);
+                
+                if ($startDateTime) {
+                    $subQ->where('created_at', '>=', $startDateTime);
+                }
+            });
         });
         
         // For payroll view, only show approved rentals for the specific agent
@@ -759,11 +778,50 @@ public function generateCode()
             $query->where('payment_method', $paymentMethod);
         }
 
-        $rentalCodes = $query->get()->filter(function($code) use ($startDate, $endDate) {
-            $date = $code->rental_date ?? ($code->created_at ?? now());
-            $dateStr = $date instanceof \Carbon\Carbon ? $date->toDateString() : (string)$date;
-            $inCycle = $dateStr >= $startDate && $dateStr <= $endDate;
-            return $inCycle || !($code->paid ?? false);
+        // STRICTLY filter by date range - no carry-over for unpaid rentals
+        $rentalCodes = $query->get()->filter(function($code) use ($startDate, $endDate, $startDateTime, $endDateTime) {
+            // Safely parse rental date
+            $rentalDate = null;
+            if ($code->rental_date) {
+                try {
+                    $rentalDate = $code->rental_date instanceof \Carbon\Carbon 
+                        ? $code->rental_date 
+                        : \Carbon\Carbon::parse($code->rental_date);
+                } catch (\Exception $e) {
+                    $rentalDate = null;
+                }
+            }
+            
+            // Use created_at if rental_date is null or invalid
+            if (!$rentalDate) {
+                try {
+                    $rentalDate = $code->created_at instanceof \Carbon\Carbon 
+                        ? $code->created_at 
+                        : ($code->created_at ? \Carbon\Carbon::parse($code->created_at) : null);
+                } catch (\Exception $e) {
+                    $rentalDate = null;
+                }
+            }
+            
+            // If still no valid date, skip this rental
+            if (!$rentalDate) {
+                return false;
+            }
+            
+            // Check if rental falls within date range - STRICTLY enforce date range
+            $inDateRange = false;
+            if ($startDateTime && $endDateTime) {
+                $inDateRange = $rentalDate->between($startDateTime, $endDateTime);
+            } elseif ($startDateTime) {
+                $inDateRange = $rentalDate->gte($startDateTime);
+            } elseif ($endDateTime) {
+                $inDateRange = $rentalDate->lte($endDateTime);
+            } else {
+                $inDateRange = true; // No date filter, include all
+            }
+            
+            // Only include if strictly within date range (paid or unpaid)
+            return $inDateRange;
         });
 
         // Get all agent users from the users table with null checks
