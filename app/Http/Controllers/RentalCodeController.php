@@ -800,7 +800,35 @@ public function generateCode()
         foreach ($rentalCodes as $code) {
             // Add null checks for all data
             $totalFee = (float) ($code->consultation_fee ?? 0);
-            $rentalDate = $code->rental_date ?? now();
+            
+            // Safely parse rental date - ensure it's a Carbon instance
+            $rentalDate = null;
+            if ($code->rental_date) {
+                try {
+                    $rentalDate = $code->rental_date instanceof \Carbon\Carbon 
+                        ? $code->rental_date 
+                        : \Carbon\Carbon::parse($code->rental_date);
+                } catch (\Exception $e) {
+                    $rentalDate = null;
+                }
+            }
+            
+            // Fallback to created_at if rental_date is null or invalid
+            if (!$rentalDate) {
+                try {
+                    $rentalDate = $code->created_at instanceof \Carbon\Carbon 
+                        ? $code->created_at 
+                        : ($code->created_at ? \Carbon\Carbon::parse($code->created_at) : now());
+                } catch (\Exception $e) {
+                    $rentalDate = now();
+                }
+            }
+            
+            // Ensure we have a valid Carbon date
+            if (!($rentalDate instanceof \Carbon\Carbon)) {
+                $rentalDate = now();
+            }
+            
             $paymentMethod = $code->payment_method ?? 'Cash';
             
             // Skip if no consultation fee
@@ -1121,18 +1149,53 @@ public function generateCode()
 
         // Calculate monthly totals - group by month for all rental codes
         $monthlyTotals = [];
+        $processedRentals = []; // Track processed rentals to avoid duplicates
+        
         foreach ($rentalCodes as $code) {
-            $totalFee = (float) ($code->consultation_fee ?? 0);
-            $rentalDate = $code->rental_date ?? ($code->created_at ?? now());
+            // Skip if already processed (avoid counting same rental multiple times)
+            $rentalId = $code->id ?? null;
+            if ($rentalId && isset($processedRentals[$rentalId])) {
+                continue;
+            }
             
-            // Group by month (Y-m format like "2025-12")
-            $monthKey = $rentalDate->format('Y-m');
-            $paymentMethod = $code->payment_method ?? 'Cash';
+            $totalFee = (float) ($code->consultation_fee ?? 0);
             
             // Skip if no consultation fee
             if ($totalFee <= 0) {
                 continue;
             }
+            
+            // Safely parse rental date - ensure it's a Carbon instance
+            $rentalDate = null;
+            if ($code->rental_date) {
+                try {
+                    $rentalDate = $code->rental_date instanceof \Carbon\Carbon 
+                        ? $code->rental_date 
+                        : \Carbon\Carbon::parse($code->rental_date);
+                } catch (\Exception $e) {
+                    $rentalDate = null;
+                }
+            }
+            
+            // Fallback to created_at if rental_date is null or invalid
+            if (!$rentalDate) {
+                try {
+                    $rentalDate = $code->created_at instanceof \Carbon\Carbon 
+                        ? $code->created_at 
+                        : ($code->created_at ? \Carbon\Carbon::parse($code->created_at) : now());
+                } catch (\Exception $e) {
+                    $rentalDate = now();
+                }
+            }
+            
+            // Ensure we have a valid Carbon date
+            if (!($rentalDate instanceof \Carbon\Carbon)) {
+                $rentalDate = now();
+            }
+            
+            // Group by month (Y-m format like "2025-12")
+            $monthKey = $rentalDate->format('Y-m');
+            $paymentMethod = $code->payment_method ?? 'Cash';
             
             // Calculate base commission after VAT (for Transfer and Card machine)
             $baseCommission = $totalFee;
@@ -1140,11 +1203,16 @@ public function generateCode()
                 $baseCommission = $totalFee * 0.8;
             }
             
-            // Add to monthly totals (aggregate all earnings for the month)
+            // Add to monthly totals (aggregate all earnings for the month) - only once per rental
             if (!isset($monthlyTotals[$monthKey])) {
                 $monthlyTotals[$monthKey] = 0;
             }
             $monthlyTotals[$monthKey] += $baseCommission;
+            
+            // Mark this rental as processed
+            if ($rentalId) {
+                $processedRentals[$rentalId] = true;
+            }
         }
         ksort($monthlyTotals);
         
