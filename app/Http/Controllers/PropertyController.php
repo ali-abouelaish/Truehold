@@ -374,17 +374,17 @@ class PropertyController extends Controller
                 // Log validation results for debugging
                 \Log::info('Map query results (Google Sheets)', [
                     'total_properties' => $propertyObjects->count(),
-                    'properties_with_coords' => $propertiesForJson->filter(function($p) {
+                    'properties_with_coords' => collect($propertiesForJson)->filter(function($p) {
                         return !empty($p['latitude']) && !empty($p['longitude']);
                     })->count(),
                     'filters_applied' => $filters,
-                    'sample_coords' => $propertiesForJson->take(3)->map(function($p) {
+                    'sample_coords' => collect($propertiesForJson)->take(3)->map(function($p) {
                         return [
                             'id' => $p['id'] ?? 'NO ID',
                             'lat' => $p['latitude'] ?? null,
                             'lng' => $p['longitude'] ?? null
                         ];
-                    })
+                    })->values()->all()
                 ]);
 
                 return view('properties.map', [
