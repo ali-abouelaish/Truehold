@@ -1398,7 +1398,7 @@ public function generateCode()
             $query->where('status', 'approved');
         }
 
-        // Proper date filtering: handle null rental_date values
+        // Proper date filtering: handle null rental_date values - STRICTLY within date range only
         $query->where(function($q) use ($startDate, $endDate, $startDateTime, $endDateTime) {
             // Include rentals where rental_date falls within range
             $q->where(function($subQ) use ($startDate, $endDate, $startDateTime, $endDateTime) {
@@ -1417,9 +1417,7 @@ public function generateCode()
                 if ($startDateTime) {
                     $subQ->where('created_at', '>=', $startDateTime);
                 }
-            })
-            // OR include unpaid rentals (carry over from previous cycles)
-            ->orWhere('paid', false);
+            });
         });
 
         if ($paymentMethod) {
@@ -1452,7 +1450,7 @@ public function generateCode()
                 return false;
             }
             
-            // Check if rental falls within date range
+            // Check if rental falls within date range - STRICTLY enforce date range
             $inDateRange = false;
             if ($startDateTime && $endDateTime) {
                 $inDateRange = $rentalDate->between($startDateTime, $endDateTime);
@@ -1464,8 +1462,8 @@ public function generateCode()
                 $inDateRange = true; // No date filter, include all
             }
             
-            // Include if in date range OR unpaid (carry over)
-            return $inDateRange || !($code->paid ?? false);
+            // Only include if strictly within date range (paid or unpaid)
+            return $inDateRange;
         });
 
         // Get agent users
