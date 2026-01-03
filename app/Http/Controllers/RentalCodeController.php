@@ -1218,49 +1218,111 @@ public function generateCode()
         $chartEndDate = \Carbon\Carbon::parse($endDate)->endOfDay();
         $monthlyTotals = [];
         
-        // Calculate monthly totals by summing agent transactions per month
-        // This ensures the graph matches the sum of agent total_earnings from the leaderboard
-        foreach ($filteredAgents as $agentName => $agentData) {
-            if (!isset($agentData['transactions']) || !is_array($agentData['transactions'])) {
+        // Get all rentals from October 10, 2025 to endDate for the chart (regardless of other filters)
+        $chartRentalCodes = RentalCode::with(['client', 'client.agent', 'rentalAgent', 'marketingAgentUser'])
+            ->where(function($q) use ($startDateForChart, $chartEndDate) {
+                // Include rentals where rental_date falls within chart range
+                $q->where(function($subQ) use ($startDateForChart, $chartEndDate) {
+                    $subQ->whereNotNull('rental_date')
+                         ->where('rental_date', '>=', $startDateForChart->toDateString())
+                         ->where('rental_date', '<=', $chartEndDate->toDateString());
+                })
+                // OR include rentals with null rental_date but created_at falls within range
+                ->orWhere(function($subQ) use ($startDateForChart, $chartEndDate) {
+                    $subQ->whereNull('rental_date')
+                         ->where('created_at', '>=', $startDateForChart)
+                         ->where('created_at', '<=', $chartEndDate);
+                });
+            })
+            ->where('status', '!=', 'cancelled')
+            ->get();
+        
+        $processedRentals = [];
+        foreach ($chartRentalCodes as $code) {
+            // Skip if already processed
+            $rentalId = $code->id ?? null;
+            if ($rentalId && isset($processedRentals[$rentalId])) {
                 continue;
             }
             
-            foreach ($agentData['transactions'] as $transaction) {
-                $transactionDate = $transaction['date'] ?? null;
-                if (!$transactionDate) {
-                    continue;
-                }
-                
-                // Parse transaction date
-                try {
-                    $date = $transactionDate instanceof \Carbon\Carbon 
-                        ? $transactionDate 
-                        : \Carbon\Carbon::parse($transactionDate);
-                } catch (\Exception $e) {
-                    continue;
-                }
-                
-                // Only include from October 10, 2025 onwards
-                if ($date->lt($startDateForChart) || $date->gt($chartEndDate)) {
-                    continue;
-                }
-                
-                $monthKey = $date->format('Y-m');
-                
-                // Only include months from October 2025 onwards
-                if ($date->lt(\Carbon\Carbon::parse('2025-10'))) {
-                    continue;
-                }
-                
-                if (!isset($monthlyTotals[$monthKey])) {
-                    $monthlyTotals[$monthKey] = 0;
-                }
-                
-                // Add agency + agent earnings for this transaction (matches leaderboard total_earnings)
-                $agencyCut = (float) ($transaction['agency_cut'] ?? 0);
-                $agentCut = (float) ($transaction['agent_cut'] ?? 0);
-                $monthlyTotals[$monthKey] += $agencyCut + $agentCut;
+            $totalFee = (float) ($code->consultation_fee ?? 0);
+            if ($totalFee <= 0) {
+                continue;
             }
+            
+            // Safely parse rental date
+            $rentalDate = null;
+            if ($code->rental_date) {
+                try {
+                    $rentalDate = $code->rental_date instanceof \Carbon\Carbon 
+                        ? $code->rental_date 
+                        : \Carbon\Carbon::parse($code->rental_date);
+                } catch (\Exception $e) {
+                    $rentalDate = null;
+                }
+            }
+            
+            if (!$rentalDate) {
+                try {
+                    $rentalDate = $code->created_at instanceof \Carbon\Carbon 
+                        ? $code->created_at 
+                        : ($code->created_at ? \Carbon\Carbon::parse($code->created_at) : now());
+                } catch (\Exception $e) {
+                    $rentalDate = now();
+                }
+            }
+            
+            if (!($rentalDate instanceof \Carbon\Carbon)) {
+                $rentalDate = now();
+            }
+            
+            // Only include from October 10, 2025 onwards
+            if ($rentalDate->lt($startDateForChart)) {
+                continue;
+            }
+            
+            $monthKey = $rentalDate->format('Y-m');
+            $paymentMethod = $code->payment_method ?? 'Cash';
+            $clientCount = $code->client_count ?? 1;
+            
+            // Calculate base commission
+            $baseCommission = $totalFee;
+            if (in_array($paymentMethod, ['Transfer', 'Card machine'])) {
+                $baseCommission = $totalFee * 0.8;
+            }
+            
+            // Calculate agency + agent earnings (matches leaderboard total_earnings)
+            $agencyCut = $baseCommission * 0.45;
+            $agentCut = $baseCommission * 0.55;
+            
+            // Check if there's a different marketing agent
+            $marketingAgentId = $code->marketing_agent_id ?? null;
+            $rentalAgentId = $code->rental_agent_id ?? null;
+            $hasDifferentMarketingAgent = false;
+            
+            if (!empty($marketingAgentId) && !empty($rentalAgentId)) {
+                $hasDifferentMarketingAgent = (int) $marketingAgentId !== (int) $rentalAgentId;
+            }
+            
+            if ($hasDifferentMarketingAgent) {
+                // Marketing deduction reduces the rental agent's cut
+                $marketingDeduction = $clientCount > 1 ? 40.0 : 30.0;
+                $agentCut -= $marketingDeduction;
+            }
+            
+            // Add agency + agent earnings to monthly totals (matches leaderboard)
+            if (!isset($monthlyTotals[$monthKey])) {
+                $monthlyTotals[$monthKey] = 0;
+            }
+            $monthlyTotals[$monthKey] += $agencyCut + $agentCut;
+            
+            // Also add marketing agent earnings if different agent
+            if ($hasDifferentMarketingAgent) {
+                $marketingCommission = $clientCount > 1 ? 40.0 : 30.0;
+                $monthlyTotals[$monthKey] += $marketingCommission;
+            }
+            
+            $processedRentals[$rentalId] = true;
         }
         
         // Ensure we have all months from October 2025 to current month (even if no earnings)
@@ -1277,50 +1339,26 @@ public function generateCode()
             $current->addMonth();
         }
         
-        // Add landlord bonuses to monthly totals from agent data
-        // Bonuses are already included in agent transactions, but we need to add them separately
-        // since they're tracked in landlord_bonuses array, not transactions
-        foreach ($filteredAgents as $agentName => $agentData) {
-            if (!isset($agentData['landlord_bonuses']) || !is_array($agentData['landlord_bonuses'])) {
-                continue;
-            }
+        // Add landlord bonuses to monthly totals
+        // Get all bonuses from October 10, 2025 to endDate
+        $landlordBonusesForChart = \App\Models\LandlordBonus::with(['agent.user'])
+            ->where('date', '>=', $startDateForChart->toDateString())
+            ->where('date', '<=', $chartEndDate->toDateString())
+            ->get();
+        
+        foreach ($landlordBonusesForChart as $bonus) {
+            $bonusDate = \Carbon\Carbon::parse($bonus->date);
+            $monthKey = $bonusDate->format('Y-m');
             
-            foreach ($agentData['landlord_bonuses'] as $bonus) {
-                $bonusDate = $bonus['date'] ?? null;
-                if (!$bonusDate) {
-                    continue;
-                }
-                
-                // Parse bonus date
-                try {
-                    $date = $bonusDate instanceof \Carbon\Carbon 
-                        ? $bonusDate 
-                        : \Carbon\Carbon::parse($bonusDate);
-                } catch (\Exception $e) {
-                    continue;
-                }
-                
-                // Only include from October 10, 2025 onwards
-                if ($date->lt($startDateForChart) || $date->gt($chartEndDate)) {
-                    continue;
-                }
-                
-                $monthKey = $date->format('Y-m');
-                
-                // Only include months from October 2025 onwards
-                if ($date->lt(\Carbon\Carbon::parse('2025-10'))) {
-                    continue;
-                }
-                
+            // Only include months from October 2025 onwards
+            if ($bonusDate->gte(\Carbon\Carbon::parse('2025-10'))) {
                 if (!isset($monthlyTotals[$monthKey])) {
                     $monthlyTotals[$monthKey] = 0;
                 }
                 
-                // Add agency + agent commission for bonus (matches leaderboard total_earnings)
-                // Bonuses have agent_commission which is the agent's portion
-                // We need to add both agency and agent portions to match total_earnings
-                $bonusCommission = (float) ($bonus['commission'] ?? 0);
-                $agentCommission = (float) ($bonus['agent_commission'] ?? 0);
+                // Add agency + agent commission (matches leaderboard total_earnings)
+                $bonusCommission = (float) ($bonus->commission ?? 0);
+                $agentCommission = (float) ($bonus->agent_commission ?? 0);
                 $agencyCommission = $bonusCommission - $agentCommission;
                 
                 // Add agency + agent (matches how leaderboard calculates total_earnings)
