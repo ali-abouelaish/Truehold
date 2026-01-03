@@ -1211,96 +1211,116 @@ public function generateCode()
             'agent_comparison' => array_slice($filteredAgents, 0, 10, true), // Top 10 agents
         ];
 
-        // Calculate monthly totals from agent transactions - this matches leaderboard exactly
-        // Use the same $byAgent data that the leaderboard uses, but process all rentals from Oct 10, 2025
+        // Calculate monthly totals directly from $byAgent transactions
+        // This ensures the graph matches exactly what the leaderboard shows
         $startDateForChart = \Carbon\Carbon::parse('2025-10-10');
         $chartEndDate = \Carbon\Carbon::parse($endDate)->endOfDay();
         $monthlyTotals = [];
         
-        // Get agent user IDs (should already be defined above, but ensure it's available)
-        if (!isset($agentUserIds)) {
-            $agentUserIds = User::where('role', 'agent')->pluck('id')->toArray();
+        // First, calculate from existing $byAgent (for the selected date range)
+        foreach ($byAgent as $agentName => $agentData) {
+            if (!isset($agentData['transactions']) || !is_array($agentData['transactions'])) {
+                continue;
+            }
+            
+            foreach ($agentData['transactions'] as $transaction) {
+                $transactionDate = $transaction['date'] ?? null;
+                if (!$transactionDate) {
+                    continue;
+                }
+                
+                try {
+                    $date = $transactionDate instanceof \Carbon\Carbon 
+                        ? $transactionDate 
+                        : \Carbon\Carbon::parse($transactionDate);
+                } catch (\Exception $e) {
+                    continue;
+                }
+                
+                // Only include from October 10, 2025 onwards and within endDate
+                if ($date->lt($startDateForChart) || $date->gt($chartEndDate)) {
+                    continue;
+                }
+                
+                $monthKey = $date->format('Y-m');
+                if ($date->lt(\Carbon\Carbon::parse('2025-10'))) {
+                    continue;
+                }
+                
+                if (!isset($monthlyTotals[$monthKey])) {
+                    $monthlyTotals[$monthKey] = 0;
+                }
+                
+                // Add agency + agent earnings (matches leaderboard total_earnings exactly)
+                $agencyCut = (float) ($transaction['agency_cut'] ?? 0);
+                $agentCut = (float) ($transaction['agent_cut'] ?? 0);
+                $monthlyTotals[$monthKey] += $agencyCut + $agentCut;
+            }
         }
         
-        // Process transactions from $byAgent (which is built from $rentalCodes)
-        // But we need to get ALL rentals from Oct 10, 2025 for the chart
-        // So we'll rebuild the agent data for chart purposes
-        $chartRentalCodes = RentalCode::with(['client', 'client.agent', 'rentalAgent', 'marketingAgentUser'])
-            ->where(function($q) use ($startDateForChart, $chartEndDate) {
-                $q->where(function($subQ) use ($startDateForChart, $chartEndDate) {
-                    $subQ->whereNotNull('rental_date')
-                         ->where('rental_date', '>=', $startDateForChart->toDateString())
-                         ->where('rental_date', '<=', $chartEndDate->toDateString());
+        // If the selected date range doesn't include Oct 10, 2025 onwards, get additional rentals for chart
+        // This ensures October and November show data even if not in selected range
+        if ($startDate > $startDateForChart->toDateString()) {
+            // Get additional rentals from Oct 10 to startDate for the chart
+            $additionalRentals = RentalCode::with(['client', 'client.agent', 'rentalAgent', 'marketingAgentUser'])
+                ->where(function($q) use ($startDateForChart, $startDate) {
+                    $q->where(function($subQ) use ($startDateForChart, $startDate) {
+                        $subQ->whereNotNull('rental_date')
+                             ->where('rental_date', '>=', $startDateForChart->toDateString())
+                             ->where('rental_date', '<', $startDate);
+                    })
+                    ->orWhere(function($subQ) use ($startDateForChart, $startDate) {
+                        $subQ->whereNull('rental_date')
+                             ->where('created_at', '>=', $startDateForChart)
+                             ->where('created_at', '<', \Carbon\Carbon::parse($startDate)->startOfDay());
+                    });
                 })
-                ->orWhere(function($subQ) use ($startDateForChart, $chartEndDate) {
-                    $subQ->whereNull('rental_date')
-                         ->where('created_at', '>=', $startDateForChart)
-                         ->where('created_at', '<=', $chartEndDate);
-                });
-            })
-            ->where('status', '!=', 'cancelled')
-            ->get();
-        
-        // Process each rental and calculate monthly totals the same way leaderboard does
-        foreach ($chartRentalCodes as $code) {
-            $totalFee = (float) ($code->consultation_fee ?? 0);
-            if ($totalFee <= 0) continue;
+                ->where('status', '!=', 'cancelled')
+                ->get();
             
-            // Parse rental date
-            $rentalDate = null;
-            if ($code->rental_date) {
+            // Process additional rentals the same way as leaderboard
+            foreach ($additionalRentals as $code) {
+                $totalFee = (float) ($code->consultation_fee ?? 0);
+                if ($totalFee <= 0) continue;
+                
+                $rentalDate = $code->rental_date ?? ($code->created_at ?? now());
                 try {
-                    $rentalDate = $code->rental_date instanceof \Carbon\Carbon 
-                        ? $code->rental_date 
-                        : \Carbon\Carbon::parse($code->rental_date);
+                    $date = $rentalDate instanceof \Carbon\Carbon ? $rentalDate : \Carbon\Carbon::parse($rentalDate);
                 } catch (\Exception $e) {
-                    $rentalDate = null;
+                    continue;
                 }
-            }
-            if (!$rentalDate) {
-                try {
-                    $rentalDate = $code->created_at instanceof \Carbon\Carbon 
-                        ? $code->created_at 
-                        : ($code->created_at ? \Carbon\Carbon::parse($code->created_at) : now());
-                } catch (\Exception $e) {
-                    $rentalDate = now();
+                
+                if ($date->lt($startDateForChart)) continue;
+                
+                $monthKey = $date->format('Y-m');
+                if ($date->lt(\Carbon\Carbon::parse('2025-10'))) continue;
+                
+                $paymentMethod = $code->payment_method ?? 'Cash';
+                $baseCommission = $totalFee;
+                if (in_array($paymentMethod, ['Transfer', 'Card machine'])) {
+                    $baseCommission = $totalFee * 0.8;
                 }
-            }
-            if (!($rentalDate instanceof \Carbon\Carbon)) {
-                $rentalDate = now();
-            }
-            
-            $monthKey = $rentalDate->format('Y-m');
-            $paymentMethod = $code->payment_method ?? 'Cash';
-            $clientCount = $code->client_count ?? 1;
-            
-            $baseCommission = $totalFee;
-            if (in_array($paymentMethod, ['Transfer', 'Card machine'])) {
-                $baseCommission = $totalFee * 0.8;
-            }
-            
-            // Calculate the same way leaderboard does
-            $agencyCut = $baseCommission * 0.45;
-            $agentCut = $baseCommission * 0.55;
-            
-            $marketingAgentId = $code->marketing_agent_id ?? null;
-            $rentalAgentId = $code->rental_agent_id ?? null;
-            $marketingDeduction = 0;
-            
-            if (!empty($marketingAgentId) && !empty($rentalAgentId) && (int)$marketingAgentId !== (int)$rentalAgentId) {
-                $marketingDeduction = $clientCount > 1 ? 40.0 : 30.0;
-                $agentCut -= $marketingDeduction;
-            }
-            
-            // Add rental agent's total_earnings (agency + agent)
-            if (!isset($monthlyTotals[$monthKey])) {
-                $monthlyTotals[$monthKey] = 0;
-            }
-            $monthlyTotals[$monthKey] += $agencyCut + $agentCut;
-            
-            // Add marketing agent's total_earnings (0 agency + marketing agent_earnings)
-            if ($marketingDeduction > 0 && !empty($marketingAgentId) && in_array((int)$marketingAgentId, $agentUserIds)) {
-                $monthlyTotals[$monthKey] += $marketingDeduction;
+                
+                $agencyCut = $baseCommission * 0.45;
+                $agentCut = $baseCommission * 0.55;
+                
+                $marketingAgentId = $code->marketing_agent_id ?? null;
+                $rentalAgentId = $code->rental_agent_id ?? null;
+                
+                if (!empty($marketingAgentId) && !empty($rentalAgentId) && (int)$marketingAgentId !== (int)$rentalAgentId) {
+                    $marketingDeduction = ($code->client_count ?? 1) > 1 ? 40.0 : 30.0;
+                    $agentCut -= $marketingDeduction;
+                }
+                
+                if (!isset($monthlyTotals[$monthKey])) {
+                    $monthlyTotals[$monthKey] = 0;
+                }
+                $monthlyTotals[$monthKey] += $agencyCut + $agentCut;
+                
+                // Add marketing agent earnings if different agent
+                if (isset($marketingDeduction) && $marketingDeduction > 0 && !empty($marketingAgentId) && in_array((int)$marketingAgentId, $agentUserIds)) {
+                    $monthlyTotals[$monthKey] += $marketingDeduction;
+                }
             }
         }
         
