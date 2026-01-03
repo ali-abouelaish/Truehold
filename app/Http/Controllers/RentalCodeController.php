@@ -1211,99 +1211,55 @@ public function generateCode()
             'agent_comparison' => array_slice($filteredAgents, 0, 10, true), // Top 10 agents
         ];
 
-        // Calculate monthly totals - group by month for all rental codes
+        // Calculate monthly totals - sum of agent total_earnings (agency + agent) per month
+        // This matches what you see when summing agent total_earnings from the leaderboard
         // Start from October 10, 2025, but respect the endDate filter
         $startDateForChart = \Carbon\Carbon::parse('2025-10-10');
         $chartEndDate = \Carbon\Carbon::parse($endDate)->endOfDay();
         $monthlyTotals = [];
-        $processedRentals = []; // Track processed rentals to avoid duplicates
         
-        // Get all rentals from October 10, 2025 to endDate for the chart (regardless of other filters)
-        $chartRentalCodes = RentalCode::with(['client', 'client.agent', 'rentalAgent', 'marketingAgentUser'])
-            ->where(function($q) use ($startDateForChart, $chartEndDate) {
-                // Include rentals where rental_date falls within chart range
-                $q->where(function($subQ) use ($startDateForChart, $chartEndDate) {
-                    $subQ->whereNotNull('rental_date')
-                         ->where('rental_date', '>=', $startDateForChart->toDateString())
-                         ->where('rental_date', '<=', $chartEndDate->toDateString());
-                })
-                // OR include rentals with null rental_date but created_at falls within range
-                ->orWhere(function($subQ) use ($startDateForChart, $chartEndDate) {
-                    $subQ->whereNull('rental_date')
-                         ->where('created_at', '>=', $startDateForChart)
-                         ->where('created_at', '<=', $chartEndDate);
-                });
-            })
-            ->where('status', '!=', 'cancelled')
-            ->get();
-        
-        foreach ($chartRentalCodes as $code) {
-            // Skip if already processed (avoid counting same rental multiple times)
-            $rentalId = $code->id ?? null;
-            if ($rentalId && isset($processedRentals[$rentalId])) {
+        // Calculate monthly totals by summing agent transactions per month
+        // This ensures the graph matches the sum of agent total_earnings from the leaderboard
+        foreach ($filteredAgents as $agentName => $agentData) {
+            if (!isset($agentData['transactions']) || !is_array($agentData['transactions'])) {
                 continue;
             }
             
-            $totalFee = (float) ($code->consultation_fee ?? 0);
-            
-            // Skip if no consultation fee
-            if ($totalFee <= 0) {
-                continue;
-            }
-            
-            // Safely parse rental date - ensure it's a Carbon instance
-            $rentalDate = null;
-            if ($code->rental_date) {
-                try {
-                    $rentalDate = $code->rental_date instanceof \Carbon\Carbon 
-                        ? $code->rental_date 
-                        : \Carbon\Carbon::parse($code->rental_date);
-                } catch (\Exception $e) {
-                    $rentalDate = null;
+            foreach ($agentData['transactions'] as $transaction) {
+                $transactionDate = $transaction['date'] ?? null;
+                if (!$transactionDate) {
+                    continue;
                 }
-            }
-            
-            // Fallback to created_at if rental_date is null or invalid
-            if (!$rentalDate) {
+                
+                // Parse transaction date
                 try {
-                    $rentalDate = $code->created_at instanceof \Carbon\Carbon 
-                        ? $code->created_at 
-                        : ($code->created_at ? \Carbon\Carbon::parse($code->created_at) : now());
+                    $date = $transactionDate instanceof \Carbon\Carbon 
+                        ? $transactionDate 
+                        : \Carbon\Carbon::parse($transactionDate);
                 } catch (\Exception $e) {
-                    $rentalDate = now();
+                    continue;
                 }
-            }
-            
-            // Ensure we have a valid Carbon date
-            if (!($rentalDate instanceof \Carbon\Carbon)) {
-                $rentalDate = now();
-            }
-            
-            // Filter: Only include rentals from October 10, 2025 onwards
-            if ($rentalDate->lt($startDateForChart)) {
-                continue;
-            }
-            
-            // Group by month (Y-m format like "2025-12")
-            $monthKey = $rentalDate->format('Y-m');
-            $paymentMethod = $code->payment_method ?? 'Cash';
-            
-            // Calculate base commission after VAT (for Transfer and Card machine)
-            // This represents total earnings (agency + agent + marketing)
-            $baseCommission = $totalFee;
-            if (in_array($paymentMethod, ['Transfer', 'Card machine'])) {
-                $baseCommission = $totalFee * 0.8;
-            }
-            
-            // Add to monthly totals (aggregate total earnings for the month) - only once per rental
-            if (!isset($monthlyTotals[$monthKey])) {
-                $monthlyTotals[$monthKey] = 0;
-            }
-            $monthlyTotals[$monthKey] += $baseCommission;
-            
-            // Mark this rental as processed
-            if ($rentalId) {
-                $processedRentals[$rentalId] = true;
+                
+                // Only include from October 10, 2025 onwards
+                if ($date->lt($startDateForChart) || $date->gt($chartEndDate)) {
+                    continue;
+                }
+                
+                $monthKey = $date->format('Y-m');
+                
+                // Only include months from October 2025 onwards
+                if ($date->lt(\Carbon\Carbon::parse('2025-10'))) {
+                    continue;
+                }
+                
+                if (!isset($monthlyTotals[$monthKey])) {
+                    $monthlyTotals[$monthKey] = 0;
+                }
+                
+                // Add agency + agent earnings for this transaction (matches leaderboard total_earnings)
+                $agencyCut = (float) ($transaction['agency_cut'] ?? 0);
+                $agentCut = (float) ($transaction['agent_cut'] ?? 0);
+                $monthlyTotals[$monthKey] += $agencyCut + $agentCut;
             }
         }
         
@@ -1321,74 +1277,55 @@ public function generateCode()
             $current->addMonth();
         }
         
-        // Add landlord bonuses to monthly totals
-        // Get all bonuses from October 10, 2025 to endDate
-        $landlordBonusesForChart = \App\Models\LandlordBonus::with(['agent.user'])
-            ->where('date', '>=', $startDateForChart->toDateString())
-            ->where('date', '<=', $chartEndDate->toDateString())
-            ->get();
-        
-        $bonusDebug = [];
-        foreach ($landlordBonusesForChart as $bonus) {
-            $bonusDate = \Carbon\Carbon::parse($bonus->date);
-            $monthKey = $bonusDate->format('Y-m');
+        // Add landlord bonuses to monthly totals from agent data
+        // Bonuses are already included in agent transactions, but we need to add them separately
+        // since they're tracked in landlord_bonuses array, not transactions
+        foreach ($filteredAgents as $agentName => $agentData) {
+            if (!isset($agentData['landlord_bonuses']) || !is_array($agentData['landlord_bonuses'])) {
+                continue;
+            }
             
-            // Only include if month is October 2025 or later
-            if ($bonusDate->gte($chartStartMonth)) {
+            foreach ($agentData['landlord_bonuses'] as $bonus) {
+                $bonusDate = $bonus['date'] ?? null;
+                if (!$bonusDate) {
+                    continue;
+                }
+                
+                // Parse bonus date
+                try {
+                    $date = $bonusDate instanceof \Carbon\Carbon 
+                        ? $bonusDate 
+                        : \Carbon\Carbon::parse($bonusDate);
+                } catch (\Exception $e) {
+                    continue;
+                }
+                
+                // Only include from October 10, 2025 onwards
+                if ($date->lt($startDateForChart) || $date->gt($chartEndDate)) {
+                    continue;
+                }
+                
+                $monthKey = $date->format('Y-m');
+                
+                // Only include months from October 2025 onwards
+                if ($date->lt(\Carbon\Carbon::parse('2025-10'))) {
+                    continue;
+                }
+                
                 if (!isset($monthlyTotals[$monthKey])) {
                     $monthlyTotals[$monthKey] = 0;
                 }
-                $bonusAmount = (float) ($bonus->commission ?? 0);
-                $monthlyTotals[$monthKey] += $bonusAmount;
                 
-                // Debug logging for December
-                if ($monthKey === '2025-12') {
-                    $bonusDebug[] = [
-                        'id' => $bonus->id,
-                        'date' => $bonus->date,
-                        'commission' => $bonusAmount,
-                        'bonus_code' => $bonus->bonus_code ?? 'N/A'
-                    ];
-                }
+                // Add agency + agent commission for bonus (matches leaderboard total_earnings)
+                // Bonuses have agent_commission which is the agent's portion
+                // We need to add both agency and agent portions to match total_earnings
+                $bonusCommission = (float) ($bonus['commission'] ?? 0);
+                $agentCommission = (float) ($bonus['agent_commission'] ?? 0);
+                $agencyCommission = $bonusCommission - $agentCommission;
+                
+                // Add agency + agent (matches how leaderboard calculates total_earnings)
+                $monthlyTotals[$monthKey] += $agencyCommission + $agentCommission;
             }
-        }
-        
-        // Debug logging for December totals
-        if (isset($monthlyTotals['2025-12'])) {
-            \Log::info('December 2025 Monthly Totals Breakdown', [
-                'total' => $monthlyTotals['2025-12'],
-                'rentals_count' => $chartRentalCodes->where(function($code) {
-                    $date = $code->rental_date ?? $code->created_at;
-                    if ($date) {
-                        $carbonDate = $date instanceof \Carbon\Carbon ? $date : \Carbon\Carbon::parse($date);
-                        return $carbonDate->format('Y-m') === '2025-12';
-                    }
-                    return false;
-                })->count(),
-                'bonuses_count' => count($bonusDebug),
-                'bonuses_detail' => $bonusDebug,
-                'rentals_detail' => $chartRentalCodes->filter(function($code) {
-                    $date = $code->rental_date ?? $code->created_at;
-                    if ($date) {
-                        $carbonDate = $date instanceof \Carbon\Carbon ? $date : \Carbon\Carbon::parse($date);
-                        return $carbonDate->format('Y-m') === '2025-12';
-                    }
-                    return false;
-                })->map(function($code) {
-                    $paymentMethod = $code->payment_method ?? 'Cash';
-                    $totalFee = (float) ($code->consultation_fee ?? 0);
-                    $baseCommission = in_array($paymentMethod, ['Transfer', 'Card machine']) ? $totalFee * 0.8 : $totalFee;
-                    return [
-                        'id' => $code->id,
-                        'rental_code' => $code->rental_code ?? 'N/A',
-                        'consultation_fee' => $totalFee,
-                        'payment_method' => $paymentMethod,
-                        'base_commission' => $baseCommission,
-                        'rental_date' => $code->rental_date,
-                        'created_at' => $code->created_at
-                    ];
-                })->values()->all()
-            ]);
         }
         
         ksort($monthlyTotals);
