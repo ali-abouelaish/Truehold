@@ -1316,7 +1316,6 @@ public function generateCode()
             'total_rental_codes' => $rentalCodes->count(),
             'agents_found' => count($filteredAgents),
             'agent_names' => array_keys($filteredAgents),
-            'monthly_totals' => $monthlyTotals
         ]);
 
         // Add landlord bonuses to agent earnings
