@@ -1173,9 +1173,9 @@ public function generateCode()
                 return $b['date'] <=> $a['date'];
             });
             
-            // Recalculate total_earnings as the sum of agent_earnings + marketing_agent_earnings
-            // This ensures total_earnings represents the agent's actual total earnings
-            $agentData['total_earnings'] = ($agentData['agent_earnings'] ?? 0) + ($agentData['marketing_agent_earnings'] ?? 0);
+            // Recalculate total_earnings as the sum of agency_earnings + agent_earnings
+            // This ensures total_earnings represents agency + agent earnings for leaderboard
+            $agentData['total_earnings'] = ($agentData['agency_earnings'] ?? 0) + ($agentData['agent_earnings'] ?? 0);
             
             $filteredAgents[$agentName] = $agentData;
         }
@@ -1212,12 +1212,32 @@ public function generateCode()
         ];
 
         // Calculate monthly totals - group by month for all rental codes
-        // Start from October 10, 2025
+        // Start from October 10, 2025, but respect the endDate filter
         $startDateForChart = \Carbon\Carbon::parse('2025-10-10');
+        $chartEndDate = \Carbon\Carbon::parse($endDate)->endOfDay();
         $monthlyTotals = [];
         $processedRentals = []; // Track processed rentals to avoid duplicates
         
-        foreach ($rentalCodes as $code) {
+        // Get all rentals from October 10, 2025 to endDate for the chart (regardless of other filters)
+        $chartRentalCodes = RentalCode::with(['client', 'client.agent', 'rentalAgent', 'marketingAgentUser'])
+            ->where(function($q) use ($startDateForChart, $chartEndDate) {
+                // Include rentals where rental_date falls within chart range
+                $q->where(function($subQ) use ($startDateForChart, $chartEndDate) {
+                    $subQ->whereNotNull('rental_date')
+                         ->where('rental_date', '>=', $startDateForChart->toDateString())
+                         ->where('rental_date', '<=', $chartEndDate->toDateString());
+                })
+                // OR include rentals with null rental_date but created_at falls within range
+                ->orWhere(function($subQ) use ($startDateForChart, $chartEndDate) {
+                    $subQ->whereNull('rental_date')
+                         ->where('created_at', '>=', $startDateForChart)
+                         ->where('created_at', '<=', $chartEndDate);
+                });
+            })
+            ->where('status', '!=', 'cancelled')
+            ->get();
+        
+        foreach ($chartRentalCodes as $code) {
             // Skip if already processed (avoid counting same rental multiple times)
             $rentalId = $code->id ?? null;
             if ($rentalId && isset($processedRentals[$rentalId])) {
@@ -1299,6 +1319,26 @@ public function generateCode()
                 $monthlyTotals[$monthKey] = 0;
             }
             $current->addMonth();
+        }
+        
+        // Add landlord bonuses to monthly totals
+        // Get all bonuses from October 10, 2025 onwards
+        $landlordBonusesForChart = \App\Models\LandlordBonus::with(['agent.user'])
+            ->where('date', '>=', $startDateForChart->toDateString())
+            ->get();
+        
+        foreach ($landlordBonusesForChart as $bonus) {
+            $bonusDate = \Carbon\Carbon::parse($bonus->date);
+            $monthKey = $bonusDate->format('Y-m');
+            
+            // Only include if month is October 2025 or later
+            if ($bonusDate->gte($chartStartMonth)) {
+                if (!isset($monthlyTotals[$monthKey])) {
+                    $monthlyTotals[$monthKey] = 0;
+                }
+                // Add the full commission (agency + agent) to monthly totals
+                $monthlyTotals[$monthKey] += (float) ($bonus->commission ?? 0);
+            }
         }
         
         ksort($monthlyTotals);
@@ -1404,9 +1444,9 @@ public function generateCode()
         }
 
         // Recalculate total_earnings for all agents after adding landlord bonuses
-        // This ensures total_earnings = agent_earnings + marketing_agent_earnings (including bonuses)
+        // Total earnings should be agency_earnings + agent_earnings (for leaderboard)
         foreach ($filteredAgents as $agentName => &$agentData) {
-            $agentData['total_earnings'] = ($agentData['agent_earnings'] ?? 0) + ($agentData['marketing_agent_earnings'] ?? 0);
+            $agentData['total_earnings'] = ($agentData['agency_earnings'] ?? 0) + ($agentData['agent_earnings'] ?? 0);
         }
         unset($agentData); // Unset reference
 
