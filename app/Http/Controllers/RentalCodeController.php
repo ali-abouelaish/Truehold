@@ -1322,11 +1322,13 @@ public function generateCode()
         }
         
         // Add landlord bonuses to monthly totals
-        // Get all bonuses from October 10, 2025 onwards
+        // Get all bonuses from October 10, 2025 to endDate
         $landlordBonusesForChart = \App\Models\LandlordBonus::with(['agent.user'])
             ->where('date', '>=', $startDateForChart->toDateString())
+            ->where('date', '<=', $chartEndDate->toDateString())
             ->get();
         
+        $bonusDebug = [];
         foreach ($landlordBonusesForChart as $bonus) {
             $bonusDate = \Carbon\Carbon::parse($bonus->date);
             $monthKey = $bonusDate->format('Y-m');
@@ -1336,9 +1338,57 @@ public function generateCode()
                 if (!isset($monthlyTotals[$monthKey])) {
                     $monthlyTotals[$monthKey] = 0;
                 }
-                // Add the full commission (agency + agent) to monthly totals
-                $monthlyTotals[$monthKey] += (float) ($bonus->commission ?? 0);
+                $bonusAmount = (float) ($bonus->commission ?? 0);
+                $monthlyTotals[$monthKey] += $bonusAmount;
+                
+                // Debug logging for December
+                if ($monthKey === '2025-12') {
+                    $bonusDebug[] = [
+                        'id' => $bonus->id,
+                        'date' => $bonus->date,
+                        'commission' => $bonusAmount,
+                        'bonus_code' => $bonus->bonus_code ?? 'N/A'
+                    ];
+                }
             }
+        }
+        
+        // Debug logging for December totals
+        if (isset($monthlyTotals['2025-12'])) {
+            \Log::info('December 2025 Monthly Totals Breakdown', [
+                'total' => $monthlyTotals['2025-12'],
+                'rentals_count' => $chartRentalCodes->where(function($code) {
+                    $date = $code->rental_date ?? $code->created_at;
+                    if ($date) {
+                        $carbonDate = $date instanceof \Carbon\Carbon ? $date : \Carbon\Carbon::parse($date);
+                        return $carbonDate->format('Y-m') === '2025-12';
+                    }
+                    return false;
+                })->count(),
+                'bonuses_count' => count($bonusDebug),
+                'bonuses_detail' => $bonusDebug,
+                'rentals_detail' => $chartRentalCodes->filter(function($code) {
+                    $date = $code->rental_date ?? $code->created_at;
+                    if ($date) {
+                        $carbonDate = $date instanceof \Carbon\Carbon ? $date : \Carbon\Carbon::parse($date);
+                        return $carbonDate->format('Y-m') === '2025-12';
+                    }
+                    return false;
+                })->map(function($code) {
+                    $paymentMethod = $code->payment_method ?? 'Cash';
+                    $totalFee = (float) ($code->consultation_fee ?? 0);
+                    $baseCommission = in_array($paymentMethod, ['Transfer', 'Card machine']) ? $totalFee * 0.8 : $totalFee;
+                    return [
+                        'id' => $code->id,
+                        'rental_code' => $code->rental_code ?? 'N/A',
+                        'consultation_fee' => $totalFee,
+                        'payment_method' => $paymentMethod,
+                        'base_commission' => $baseCommission,
+                        'rental_date' => $code->rental_date,
+                        'created_at' => $code->created_at
+                    ];
+                })->values()->all()
+            ]);
         }
         
         ksort($monthlyTotals);
