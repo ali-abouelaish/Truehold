@@ -1630,11 +1630,19 @@ public function generateCode()
         }
         
         // Add landlord bonuses (no date filter except Oct 10, 2025 onwards)
+        // Track processed bonuses to ensure each is only counted once
+        $processedBonuses = [];
         $landlordBonusesForChart = \App\Models\LandlordBonus::with(['agent.user'])
             ->where('date', '>=', $startDateForChart->toDateString())
             ->get();
         
         foreach ($landlordBonusesForChart as $bonus) {
+            // Ensure each bonus is only counted once
+            $bonusId = $bonus->id ?? null;
+            if ($bonusId && isset($processedBonuses[$bonusId])) {
+                continue;
+            }
+            
             $bonusDate = \Carbon\Carbon::parse($bonus->date);
             $monthKey = $bonusDate->format('Y-m');
             
@@ -1649,6 +1657,11 @@ public function generateCode()
                 $agentCommission = (float) ($bonus->agent_commission ?? 0);
                 $agencyCommission = $bonusCommission - $agentCommission;
                 $monthlyTotals[$monthKey] += $agencyCommission + $agentCommission;
+                
+                // Mark this bonus as processed
+                if ($bonusId) {
+                    $processedBonuses[$bonusId] = true;
+                }
             }
         }
         
