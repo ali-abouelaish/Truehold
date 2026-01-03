@@ -1514,36 +1514,25 @@ public function generateCode()
                 $baseCommission = $totalFee * 0.8;
             }
             
+            // For graph: use full baseCommission (agency + agent) before any deductions
+            // This shows total earnings before marketing deductions
             $agencyCut = $baseCommission * 0.45;
             $agentCut = $baseCommission * 0.55;
             
-            $marketingAgentId = $code->marketing_agent_id ?? null;
-            $rentalAgentId = $code->rental_agent_id ?? null;
-            $marketingDeduction = 0;
-            
-            if (!empty($marketingAgentId) && !empty($rentalAgentId) && (int)$marketingAgentId !== (int)$rentalAgentId) {
-                $marketingDeduction = $clientCount > 1 ? 40.0 : 30.0;
-                $agentCut -= $marketingDeduction;
-            }
-            
-            // Add to monthly totals (agency + agent for rental agent)
+            // Add to monthly totals - full earnings before deductions
             if (!isset($monthlyTotals[$monthKey])) {
                 $monthlyTotals[$monthKey] = 0;
             }
+            // Add full agency + agent earnings (before marketing deductions)
             $monthlyTotals[$monthKey] += $agencyCut + $agentCut;
-            
-            // Add marketing agent earnings if different agent
-            if ($marketingDeduction > 0 && !empty($marketingAgentId) && in_array((int)$marketingAgentId, $agentUserIds)) {
-                $monthlyTotals[$monthKey] += $marketingDeduction;
-            }
             
             $processedRentals[$rentalId] = true;
         }
         
-        // Add landlord bonuses (no date filter except Oct 10, 2025 onwards)
+        // Add landlord bonuses - use created_at date (when bonus was created) for the period
         $processedBonuses = [];
         $landlordBonusesForChart = \App\Models\LandlordBonus::with(['agent.user'])
-            ->where('date', '>=', $startDateForChart->toDateString())
+            ->where('created_at', '>=', $startDateForChart)
             ->get();
         
         foreach ($landlordBonusesForChart as $bonus) {
@@ -1552,13 +1541,16 @@ public function generateCode()
                 continue;
             }
             
+            // Use created_at date to determine which month the bonus belongs to
             try {
-                $bonusDate = \Carbon\Carbon::parse($bonus->date);
+                $bonusCreatedDate = $bonus->created_at instanceof \Carbon\Carbon 
+                    ? $bonus->created_at 
+                    : \Carbon\Carbon::parse($bonus->created_at);
                 // Validate date
-                if ($bonusDate->year < 2020 || $bonusDate->year > 2100) {
-                    \Log::warning('Invalid bonus date, skipping', [
-                        'date' => $bonus->date,
-                        'year' => $bonusDate->year
+                if ($bonusCreatedDate->year < 2020 || $bonusCreatedDate->year > 2100) {
+                    \Log::warning('Invalid bonus created_at date, skipping', [
+                        'created_at' => $bonus->created_at,
+                        'year' => $bonusCreatedDate->year
                     ]);
                     continue;
                 }
@@ -1566,12 +1558,18 @@ public function generateCode()
                 continue;
             }
             
-            $monthKey = $bonusDate->format('Y-m');
-            if ($bonusDate->gte($chartStartMonth)) {
+            // Only include bonuses created from October 10, 2025 onwards
+            if ($bonusCreatedDate->lt($startDateForChart)) {
+                continue;
+            }
+            
+            $monthKey = $bonusCreatedDate->format('Y-m');
+            if ($bonusCreatedDate->gte($chartStartMonth)) {
                 if (!isset($monthlyTotals[$monthKey])) {
                     $monthlyTotals[$monthKey] = 0;
                 }
                 
+                // Add full bonus commission (agency + agent)
                 $bonusCommission = (float) ($bonus->commission ?? 0);
                 $agentCommission = (float) ($bonus->agent_commission ?? 0);
                 $agencyCommission = $bonusCommission - $agentCommission;
