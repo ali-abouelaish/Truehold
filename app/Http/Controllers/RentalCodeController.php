@@ -1211,24 +1211,27 @@ public function generateCode()
             'agent_comparison' => array_slice($filteredAgents, 0, 10, true), // Top 10 agents
         ];
 
-        // Calculate monthly totals - sum of agent total_earnings (agency + agent) per month
-        // This matches what you see when summing agent total_earnings from the leaderboard
-        // Start from October 10, 2025, but respect the endDate filter
+        // Calculate monthly totals from agent transactions - this matches leaderboard exactly
+        // Use the same $byAgent data that the leaderboard uses, but process all rentals from Oct 10, 2025
         $startDateForChart = \Carbon\Carbon::parse('2025-10-10');
         $chartEndDate = \Carbon\Carbon::parse($endDate)->endOfDay();
         $monthlyTotals = [];
         
-        // Get ALL rentals from October 10, 2025 to endDate for the chart (regardless of date filter)
-        // This ensures October and November show data even if not in the selected date range
+        // Get agent user IDs (should already be defined above, but ensure it's available)
+        if (!isset($agentUserIds)) {
+            $agentUserIds = User::where('role', 'agent')->pluck('id')->toArray();
+        }
+        
+        // Process transactions from $byAgent (which is built from $rentalCodes)
+        // But we need to get ALL rentals from Oct 10, 2025 for the chart
+        // So we'll rebuild the agent data for chart purposes
         $chartRentalCodes = RentalCode::with(['client', 'client.agent', 'rentalAgent', 'marketingAgentUser'])
             ->where(function($q) use ($startDateForChart, $chartEndDate) {
-                // Include rentals where rental_date falls within chart range
                 $q->where(function($subQ) use ($startDateForChart, $chartEndDate) {
                     $subQ->whereNotNull('rental_date')
                          ->where('rental_date', '>=', $startDateForChart->toDateString())
                          ->where('rental_date', '<=', $chartEndDate->toDateString());
                 })
-                // OR include rentals with null rental_date but created_at falls within range
                 ->orWhere(function($subQ) use ($startDateForChart, $chartEndDate) {
                     $subQ->whereNull('rental_date')
                          ->where('created_at', '>=', $startDateForChart)
@@ -1238,24 +1241,12 @@ public function generateCode()
             ->where('status', '!=', 'cancelled')
             ->get();
         
-        // Get agent users for processing
-        $agentUsers = User::where('role', 'agent')->pluck('name', 'id')->toArray();
-        $agentUserIds = User::where('role', 'agent')->pluck('id')->toArray();
-        
-        $processedRentals = [];
+        // Process each rental and calculate monthly totals the same way leaderboard does
         foreach ($chartRentalCodes as $code) {
-            // Skip if already processed
-            $rentalId = $code->id ?? null;
-            if ($rentalId && isset($processedRentals[$rentalId])) {
-                continue;
-            }
-            
             $totalFee = (float) ($code->consultation_fee ?? 0);
-            if ($totalFee <= 0) {
-                continue;
-            }
+            if ($totalFee <= 0) continue;
             
-            // Safely parse rental date
+            // Parse rental date
             $rentalDate = null;
             if ($code->rental_date) {
                 try {
@@ -1266,7 +1257,6 @@ public function generateCode()
                     $rentalDate = null;
                 }
             }
-            
             if (!$rentalDate) {
                 try {
                     $rentalDate = $code->created_at instanceof \Carbon\Carbon 
@@ -1276,58 +1266,42 @@ public function generateCode()
                     $rentalDate = now();
                 }
             }
-            
             if (!($rentalDate instanceof \Carbon\Carbon)) {
                 $rentalDate = now();
-            }
-            
-            // Only include from October 10, 2025 onwards
-            if ($rentalDate->lt($startDateForChart)) {
-                continue;
             }
             
             $monthKey = $rentalDate->format('Y-m');
             $paymentMethod = $code->payment_method ?? 'Cash';
             $clientCount = $code->client_count ?? 1;
             
-            // Calculate base commission
             $baseCommission = $totalFee;
             if (in_array($paymentMethod, ['Transfer', 'Card machine'])) {
                 $baseCommission = $totalFee * 0.8;
             }
             
-            // Calculate agency + agent earnings (matches leaderboard total_earnings)
+            // Calculate the same way leaderboard does
             $agencyCut = $baseCommission * 0.45;
             $agentCut = $baseCommission * 0.55;
             
-            // Check if there's a different marketing agent
             $marketingAgentId = $code->marketing_agent_id ?? null;
             $rentalAgentId = $code->rental_agent_id ?? null;
-            $hasDifferentMarketingAgent = false;
+            $marketingDeduction = 0;
             
-            if (!empty($marketingAgentId) && !empty($rentalAgentId)) {
-                $hasDifferentMarketingAgent = (int) $marketingAgentId !== (int) $rentalAgentId;
-            }
-            
-            if ($hasDifferentMarketingAgent) {
-                // Marketing deduction reduces the rental agent's cut
+            if (!empty($marketingAgentId) && !empty($rentalAgentId) && (int)$marketingAgentId !== (int)$rentalAgentId) {
                 $marketingDeduction = $clientCount > 1 ? 40.0 : 30.0;
                 $agentCut -= $marketingDeduction;
             }
             
-            // Add agency + agent earnings to monthly totals (matches leaderboard)
+            // Add rental agent's total_earnings (agency + agent)
             if (!isset($monthlyTotals[$monthKey])) {
                 $monthlyTotals[$monthKey] = 0;
             }
             $monthlyTotals[$monthKey] += $agencyCut + $agentCut;
             
-            // Also add marketing agent earnings if different agent
-            if ($hasDifferentMarketingAgent) {
-                $marketingCommission = $clientCount > 1 ? 40.0 : 30.0;
-                $monthlyTotals[$monthKey] += $marketingCommission;
+            // Add marketing agent's total_earnings (0 agency + marketing agent_earnings)
+            if ($marketingDeduction > 0 && !empty($marketingAgentId) && in_array((int)$marketingAgentId, $agentUserIds)) {
+                $monthlyTotals[$monthKey] += $marketingDeduction;
             }
-            
-            $processedRentals[$rentalId] = true;
         }
         
         // Ensure we have all months from October 2025 to current month (even if no earnings)
