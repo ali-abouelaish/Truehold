@@ -1006,7 +1006,9 @@ public function generateCode()
                 // Add to agent totals
                 $byAgent[$agentName]['agency_earnings'] += $agencyCut;
                 $byAgent[$agentName]['agent_earnings'] += $agentCut;
-                $byAgent[$agentName]['total_earnings'] += $baseCommission;
+                // Total earnings should be the agent's actual earnings (agent_earnings + marketing_agent_earnings)
+                // We'll recalculate this at the end to ensure accuracy
+                $byAgent[$agentName]['total_earnings'] += $agentCut;
                 $byAgent[$agentName]['transaction_count'] += 1;
                 
                 // Track VAT deductions
@@ -1171,6 +1173,10 @@ public function generateCode()
                 return $b['date'] <=> $a['date'];
             });
             
+            // Recalculate total_earnings as the sum of agent_earnings + marketing_agent_earnings
+            // This ensures total_earnings represents the agent's actual total earnings
+            $agentData['total_earnings'] = ($agentData['agent_earnings'] ?? 0) + ($agentData['marketing_agent_earnings'] ?? 0);
+            
             $filteredAgents[$agentName] = $agentData;
         }
 
@@ -1206,6 +1212,8 @@ public function generateCode()
         ];
 
         // Calculate monthly totals - group by month for all rental codes
+        // Start from October 10, 2025
+        $startDateForChart = \Carbon\Carbon::parse('2025-10-10');
         $monthlyTotals = [];
         $processedRentals = []; // Track processed rentals to avoid duplicates
         
@@ -1251,17 +1259,23 @@ public function generateCode()
                 $rentalDate = now();
             }
             
+            // Filter: Only include rentals from October 10, 2025 onwards
+            if ($rentalDate->lt($startDateForChart)) {
+                continue;
+            }
+            
             // Group by month (Y-m format like "2025-12")
             $monthKey = $rentalDate->format('Y-m');
             $paymentMethod = $code->payment_method ?? 'Cash';
             
             // Calculate base commission after VAT (for Transfer and Card machine)
+            // This represents total earnings (agency + agent + marketing)
             $baseCommission = $totalFee;
             if (in_array($paymentMethod, ['Transfer', 'Card machine'])) {
                 $baseCommission = $totalFee * 0.8;
             }
             
-            // Add to monthly totals (aggregate all earnings for the month) - only once per rental
+            // Add to monthly totals (aggregate total earnings for the month) - only once per rental
             if (!isset($monthlyTotals[$monthKey])) {
                 $monthlyTotals[$monthKey] = 0;
             }
@@ -1272,14 +1286,33 @@ public function generateCode()
                 $processedRentals[$rentalId] = true;
             }
         }
+        
+        // Ensure we have all months from October 2025 to current month (even if no earnings)
+        $currentMonth = now();
+        $chartStartMonth = \Carbon\Carbon::parse('2025-10');
+        $monthsToInclude = [];
+        
+        $current = $chartStartMonth->copy();
+        while ($current->lte($currentMonth)) {
+            $monthKey = $current->format('Y-m');
+            if (!isset($monthlyTotals[$monthKey])) {
+                $monthlyTotals[$monthKey] = 0;
+            }
+            $current->addMonth();
+        }
+        
         ksort($monthlyTotals);
         
         // Format labels for display (e.g., "2025-12" -> "Dec 2025")
+        // Only include months from October 2025 onwards
         $formattedMonthlyTotals = [];
         foreach ($monthlyTotals as $monthKey => $total) {
             $date = \Carbon\Carbon::createFromFormat('Y-m', $monthKey);
-            $formattedLabel = $date->format('M Y'); // e.g., "Dec 2025"
-            $formattedMonthlyTotals[$formattedLabel] = $total;
+            // Only include months from October 2025 onwards
+            if ($date->gte($chartStartMonth)) {
+                $formattedLabel = $date->format('M Y'); // e.g., "Dec 2025"
+                $formattedMonthlyTotals[$formattedLabel] = $total;
+            }
         }
         
         $chartData['monthly_totals'] = $formattedMonthlyTotals;
@@ -1369,6 +1402,18 @@ public function generateCode()
                 'type' => 'landlord_bonus'
             ];
         }
+
+        // Recalculate total_earnings for all agents after adding landlord bonuses
+        // This ensures total_earnings = agent_earnings + marketing_agent_earnings (including bonuses)
+        foreach ($filteredAgents as $agentName => &$agentData) {
+            $agentData['total_earnings'] = ($agentData['agent_earnings'] ?? 0) + ($agentData['marketing_agent_earnings'] ?? 0);
+        }
+        unset($agentData); // Unset reference
+
+        // Re-sort by total earnings desc after adding landlord bonuses
+        uasort($filteredAgents, function ($a, $b) {
+            return $b['total_earnings'] <=> $a['total_earnings'];
+        });
 
         // Recalculate summary statistics after adding landlord bonuses
         $summary = [

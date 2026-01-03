@@ -374,11 +374,11 @@
         <!-- Charts Section -->
         @if(count($agentEarnings) > 0)
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-            <!-- Monthly Earnings Chart -->
+            <!-- Total Earnings Over Time Chart -->
             <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
                 <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
                     <i class="fas fa-chart-line text-blue-600 mr-2"></i>
-                    Monthly Earnings Trend
+                    Total Earnings Over Time (Monthly)
                 </h3>
                 <div class="h-64 flex items-center justify-center">
                     <canvas id="monthlyChart" width="400" height="200"></canvas>
@@ -890,7 +890,7 @@ const monthlyChart = new Chart(monthlyCtx, {
     data: {
         labels: {!! json_encode(array_keys($chartData['monthly_totals'])) !!},
         datasets: [{
-            label: 'Monthly Earnings',
+            label: 'Total Earnings',
             data: {!! json_encode(array_values($chartData['monthly_totals'])) !!},
             borderColor: 'rgb(59, 130, 246)',
             backgroundColor: 'rgba(59, 130, 246, 0.1)',
