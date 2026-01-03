@@ -1181,6 +1181,97 @@ public function generateCode()
             $filteredAgents[$agentName] = $agentData;
         }
 
+        // Combine all N/A agents into a single entry
+        $naAgents = [];
+        $naCombined = null;
+        foreach ($filteredAgents as $agentName => $agentData) {
+            // Check if agent name contains "N/A" (case-insensitive)
+            if (stripos($agentName, 'N/A') !== false || $agentName === 'N/A' || trim($agentName) === '') {
+                $naAgents[] = $agentName;
+                if ($naCombined === null) {
+                    $naCombined = [
+                        'name' => 'N/A',
+                        'agency_earnings' => 0.0,
+                        'agent_earnings' => 0.0,
+                        'total_earnings' => 0.0,
+                        'transaction_count' => 0,
+                        'transactions' => [],
+                        'monthly_earnings' => [],
+                        'avg_transaction_value' => 0.0,
+                        'last_transaction_date' => null,
+                        'vat_deductions' => 0.0,
+                        'marketing_deductions' => 0.0,
+                        'marketing_agent_earnings' => 0.0,
+                        'paid_amount' => 0.0,
+                        'entitled_amount' => 0.0,
+                        'outstanding_amount' => 0.0,
+                        'landlord_bonuses' => [],
+                    ];
+                }
+                // Combine all N/A agent data
+                $naCombined['agency_earnings'] += $agentData['agency_earnings'] ?? 0;
+                $naCombined['agent_earnings'] += $agentData['agent_earnings'] ?? 0;
+                $naCombined['total_earnings'] += $agentData['total_earnings'] ?? 0;
+                $naCombined['transaction_count'] += $agentData['transaction_count'] ?? 0;
+                $naCombined['vat_deductions'] += $agentData['vat_deductions'] ?? 0;
+                $naCombined['marketing_deductions'] += $agentData['marketing_deductions'] ?? 0;
+                $naCombined['marketing_agent_earnings'] += $agentData['marketing_agent_earnings'] ?? 0;
+                $naCombined['paid_amount'] += $agentData['paid_amount'] ?? 0;
+                $naCombined['entitled_amount'] += $agentData['entitled_amount'] ?? 0;
+                $naCombined['outstanding_amount'] = max(0, $naCombined['entitled_amount'] - $naCombined['paid_amount']);
+                
+                // Combine transactions
+                if (isset($agentData['transactions']) && is_array($agentData['transactions'])) {
+                    $naCombined['transactions'] = array_merge($naCombined['transactions'], $agentData['transactions']);
+                }
+                
+                // Combine monthly earnings
+                if (isset($agentData['monthly_earnings']) && is_array($agentData['monthly_earnings'])) {
+                    foreach ($agentData['monthly_earnings'] as $monthKey => $amount) {
+                        if (!isset($naCombined['monthly_earnings'][$monthKey])) {
+                            $naCombined['monthly_earnings'][$monthKey] = 0;
+                        }
+                        $naCombined['monthly_earnings'][$monthKey] += $amount;
+                    }
+                }
+                
+                // Combine landlord bonuses
+                if (isset($agentData['landlord_bonuses']) && is_array($agentData['landlord_bonuses'])) {
+                    $naCombined['landlord_bonuses'] = array_merge($naCombined['landlord_bonuses'], $agentData['landlord_bonuses']);
+                }
+                
+                // Update last transaction date
+                if (isset($agentData['last_transaction_date']) && $agentData['last_transaction_date']) {
+                    $lastDate = $agentData['last_transaction_date'] instanceof \Carbon\Carbon 
+                        ? $agentData['last_transaction_date'] 
+                        : \Carbon\Carbon::parse($agentData['last_transaction_date']);
+                    if (!$naCombined['last_transaction_date'] || $lastDate > $naCombined['last_transaction_date']) {
+                        $naCombined['last_transaction_date'] = $lastDate;
+                    }
+                }
+            }
+        }
+        
+        // Remove N/A agents from filteredAgents and add combined entry
+        foreach ($naAgents as $naAgentName) {
+            unset($filteredAgents[$naAgentName]);
+        }
+        
+        // Add combined N/A entry if it exists
+        if ($naCombined !== null && ($naCombined['total_earnings'] > 0 || $naCombined['transaction_count'] > 0)) {
+            // Calculate average transaction value
+            $naCombined['avg_transaction_value'] = $naCombined['transaction_count'] > 0 
+                ? $naCombined['total_earnings'] / $naCombined['transaction_count'] 
+                : 0.0;
+            
+            // Sort transactions by date
+            usort($naCombined['transactions'], function($a, $b) {
+                return $b['date'] <=> $a['date'];
+            });
+            
+            $filteredAgents['N/A'] = $naCombined;
+        }
+
         // Sort by total earnings desc
         uasort($filteredAgents, function ($a, $b) {
             return $b['total_earnings'] <=> $a['total_earnings'];
