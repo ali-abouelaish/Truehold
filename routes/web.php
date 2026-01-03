@@ -502,13 +502,13 @@ Route::middleware('auth')->group(function () {
         Route::get('/clients', [AgentProfileController::class, 'clients'])->name('clients');
     });
     
-    // Scraper Routes
-    Route::get('/scraper', [ScraperController::class, 'index'])->name('admin.scraper.index');
-    Route::post('/scraper/add-profile', [ScraperController::class, 'addProfile'])->name('admin.scraper.add-profile');
-    Route::post('/scraper/remove-profile', [ScraperController::class, 'removeProfile'])->name('admin.scraper.remove-profile');
-    Route::post('/scraper/run', [ScraperController::class, 'runScraper'])->name('admin.scraper.run');
-    Route::post('/scraper/run-php', [PhpScraperController::class, 'runPhpScraper'])->name('admin.scraper.run-php');
-    Route::post('/scraper/import', [ScraperController::class, 'importData'])->name('admin.scraper.import');
+        // Scraper Routes
+        Route::get('/scraper', [ScraperController::class, 'index'])->name('admin.scraper.index');
+        Route::post('/scraper/add-profile', [ScraperController::class, 'addProfile'])->name('admin.scraper.add-profile');
+        Route::post('/scraper/remove-profile', [ScraperController::class, 'removeProfile'])->name('admin.scraper.remove-profile');
+        Route::post('/scraper/run', [ScraperController::class, 'runScraper'])->name('admin.scraper.run');
+        Route::post('/scraper/run-php', [PhpScraperController::class, 'runPhpScraper'])->name('admin.scraper.run-php');
+        Route::post('/scraper/import', [ScraperController::class, 'importData'])->name('admin.scraper.import');
 });
 
 // Logout route

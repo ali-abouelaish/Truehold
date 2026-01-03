@@ -601,7 +601,7 @@
                 <div class="px-4 mt-6 mb-4">
                     <span class="sidebar-text text-xs font-semibold uppercase tracking-wider" style="color: #fbbf24;">Properties</span>
                 </div>
-
+                
                 @php($apNewCount = 0)
                 @auth
                     @php(

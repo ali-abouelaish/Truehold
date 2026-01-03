@@ -54,7 +54,7 @@
                 </div>
             </div>
         @endif
-
+        
         <!-- Basic Information -->
         <div class="bg-gray-50 rounded-lg p-6">
             <h4 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">

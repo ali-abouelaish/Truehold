@@ -1218,7 +1218,8 @@ public function generateCode()
         $chartEndDate = \Carbon\Carbon::parse($endDate)->endOfDay();
         $monthlyTotals = [];
         
-        // Get all rentals from October 10, 2025 to endDate for the chart (regardless of other filters)
+        // Get ALL rentals from October 10, 2025 to endDate for the chart (regardless of date filter)
+        // This ensures October and November show data even if not in the selected date range
         $chartRentalCodes = RentalCode::with(['client', 'client.agent', 'rentalAgent', 'marketingAgentUser'])
             ->where(function($q) use ($startDateForChart, $chartEndDate) {
                 // Include rentals where rental_date falls within chart range
@@ -1236,6 +1237,10 @@ public function generateCode()
             })
             ->where('status', '!=', 'cancelled')
             ->get();
+        
+        // Get agent users for processing
+        $agentUsers = User::where('role', 'agent')->pluck('name', 'id')->toArray();
+        $agentUserIds = User::where('role', 'agent')->pluck('id')->toArray();
         
         $processedRentals = [];
         foreach ($chartRentalCodes as $code) {
@@ -1356,7 +1361,7 @@ public function generateCode()
                     $monthlyTotals[$monthKey] = 0;
                 }
                 
-                // Add agency + agent commission (matches leaderboard total_earnings)
+                // Add agency + agent commission for bonus (matches leaderboard total_earnings)
                 $bonusCommission = (float) ($bonus->commission ?? 0);
                 $agentCommission = (float) ($bonus->agent_commission ?? 0);
                 $agencyCommission = $bonusCommission - $agentCommission;
