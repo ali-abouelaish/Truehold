@@ -373,7 +373,7 @@
 
         <!-- Charts Section -->
         @if(count($agentEarnings) > 0)
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+        <div class="mb-8">
             <!-- Total Earnings Over Time Chart -->
             <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
                 <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
@@ -382,17 +382,6 @@
                 </h3>
                 <div class="h-64 flex items-center justify-center">
                     <canvas id="monthlyChart" width="400" height="200"></canvas>
-                </div>
-            </div>
-
-            <!-- Top Agents Chart -->
-            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-                <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                    <i class="fas fa-trophy text-yellow-600 mr-2"></i>
-                    Top 10 Agents by Earnings
-                </h3>
-                <div class="h-64 flex items-center justify-center">
-                    <canvas id="agentsChart" width="400" height="200"></canvas>
                 </div>
             </div>
         </div>
@@ -897,53 +886,6 @@ const monthlyChart = new Chart(monthlyCtx, {
             borderWidth: 3,
             fill: true,
             tension: 0.4
-        }]
-    },
-    options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-            legend: {
-                display: false
-            }
-        },
-        scales: {
-            y: {
-                beginAtZero: true,
-                ticks: {
-                    callback: function(value) {
-                        return '£' + value.toLocaleString();
-                    }
-                }
-            }
-        }
-    }
-});
-
-// Top agents chart
-const agentsCtx = document.getElementById('agentsChart').getContext('2d');
-const agentsChart = new Chart(agentsCtx, {
-    type: 'bar',
-    data: {
-        labels: {!! json_encode(array_slice(array_keys($chartData['agent_comparison']), 0, 5)) !!},
-        datasets: [{
-            label: 'Earnings',
-            data: {!! json_encode(array_slice(array_map(fn($x) => $x['total_earnings'], $chartData['agent_comparison']), 0, 5)) !!},
-            backgroundColor: [
-                'rgba(59, 130, 246, 0.8)',
-                'rgba(16, 185, 129, 0.8)',
-                'rgba(245, 158, 11, 0.8)',
-                'rgba(239, 68, 68, 0.8)',
-                'rgba(139, 92, 246, 0.8)'
-            ],
-            borderColor: [
-                'rgb(59, 130, 246)',
-                'rgb(16, 185, 129)',
-                'rgb(245, 158, 11)',
-                'rgb(239, 68, 68)',
-                'rgb(139, 92, 246)'
-            ],
-            borderWidth: 2
         }]
     },
     options: {
