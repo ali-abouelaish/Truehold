@@ -2,1041 +2,1049 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Property Map - TRUEHOLD</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <meta name="description" content="Browse properties on an interactive map - TrueHold Premium Property Listings">
+    <meta name="theme-color" content="#1e3a5f">
+    <title>Map View - TrueHold</title>
     
     <!-- Favicon -->
     <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
     <link rel="icon" type="image/jpeg" href="{{ asset('images/truehold-logo.jpg') }}">
     <link rel="apple-touch-icon" href="{{ asset('images/truehold-logo.jpg') }}">
+    
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    @vite(['resources/css/app.css'])
     
     <style>
-        /* Admin Dashboard Dark Mode Styling */
-        body {
-            background-color: #111827 !important;
-            color: #f9fafb !important;
-            font-family: 'Inter', sans-serif;
-            margin: 0;
-            padding: 0;
-        }
-        
-        html {
-            background-color: #111827 !important;
-        }
-        
-        .main-content {
-            background-color: #111827 !important;
-        }
-        
-        /* Dark mode overrides */
-        .bg-white {
-            background-color: #1f2937 !important;
-            border-color: #374151 !important;
-        }
-        
-        .text-gray-900 {
-            color: #d1d5db !important;
-        }
-        
-        .text-gray-700 {
-            color: #9ca3af !important;
-        }
-        
-        .text-gray-500 {
-            color: #6b7280 !important;
-        }
-        
-        /* Lighter placeholders */
-        input::placeholder, textarea::placeholder, select::placeholder {
-            color: #9ca3af !important;
-        }
-        
-        /* Form inputs dark mode */
-        input, textarea, select {
-            background-color: #374151 !important;
-            border-color: #4b5563 !important;
-            color: #d1d5db !important;
-        }
-        
-        input:focus, textarea:focus, select:focus {
-            border-color: #fbbf24 !important;
-            box-shadow: 0 0 0 1px #fbbf24 !important;
-        }
-        
-        /* All labels lighter - comprehensive coverage */
-        label, .form-label, .label, .field-label, .control-label, .input-label,
-        .col-form-label, .custom-control-label, .form-check-label, .radio-label,
-        .checkbox-label, .switch-label, .toggle-label, .btn-label,
-        .nav-label, .menu-label, .sidebar-label, .card-label,
-        .table-label, .list-label, .item-label, .section-label {
-            color: #d1d5db !important;
-        }
-        
-        /* Field labels and descriptions */
-        .field-label, .field-description, .help-text {
-            color: #d1d5db !important;
-        }
-        
-        /* Required field indicators */
-        .required, .asterisk {
-            color: #fbbf24 !important;
-        }
-        
-        /* Form groups and containers */
-        .form-group, .form-control-group {
-            margin-bottom: 1rem;
-        }
-        
-        /* Input groups */
-        .input-group-text {
-            background-color: #374151 !important;
-            border-color: #4b5563 !important;
-            color: #d1d5db !important;
-        }
-        
-        /* Form validation */
-        .is-invalid {
-            border-color: #ef4444 !important;
-        }
-        
-        .invalid-feedback {
-            color: #ef4444 !important;
-        }
-        
-        .is-valid {
-            border-color: #10b981 !important;
-        }
-        
-        /* Form sections and headers */
-        .form-section, .card-header h3, .card-header h4, .card-header h5, .card-header h6 {
-            color: #d1d5db !important;
-        }
-        
-        /* Help text and descriptions */
-        .form-text, .help-block, .field-help {
-            color: #9ca3af !important;
-        }
-        
-        /* Specific form elements */
-        .form-control, .form-select, .form-check-input {
-            background-color: #374151 !important;
-            border-color: #4b5563 !important;
-            color: #d1d5db !important;
-        }
-        
-        .form-control:focus, .form-select:focus {
-            background-color: #374151 !important;
-            border-color: #fbbf24 !important;
-            box-shadow: 0 0 0 0.2rem rgba(251, 191, 36, 0.25) !important;
-            color: #d1d5db !important;
-        }
-        
-        /* Checkboxes and radio buttons */
-        .form-check-label {
-            color: #d1d5db !important;
-        }
-        
-        .form-check-input:checked {
-            background-color: #fbbf24 !important;
-            border-color: #fbbf24 !important;
-        }
-        
-        /* Select dropdowns */
-        select option {
-            background-color: #374151 !important;
-            color: #d1d5db !important;
-        }
-        
-        /* Text areas */
-        textarea.form-control {
-            background-color: #374151 !important;
-            border-color: #4b5563 !important;
-            color: #d1d5db !important;
-        }
-        
-        /* Admin panel specific labels */
-        .admin-label, .panel-label, .dashboard-label, .content-label,
-        .widget-label, .component-label, .module-label, .feature-label,
-        .setting-label, .option-label, .config-label, .preference-label {
-            color: #d1d5db !important;
-        }
-        
-        /* Table and list labels */
-        th, .table-header, .list-header, .group-header {
-            color: #d1d5db !important;
-        }
-        
-        /* Navigation labels */
-        .nav-link, .menu-item, .sidebar-link {
-            color: #d1d5db !important;
-        }
-        
-        /* Card and widget labels */
-        .card-title, .widget-title, .panel-title, .section-title {
-            color: #d1d5db !important;
-        }
-        
-        /* Button labels */
-        .btn-text, .button-text, .link-text {
-            color: #d1d5db !important;
-        }
-        
-        /* Catch-all for any remaining labels */
-        [class*="label"], [class*="title"], [class*="header"] {
-            color: #d1d5db !important;
-        }
-        
-        /* Override any white text that should be lighter */
-        .text-white {
-            color: #d1d5db !important;
-        }
-        
-        /* Ensure all form-related text is lighter */
-        .form-text, .form-description, .field-description {
-            color: #9ca3af !important;
-        }
-        
-        .border-gray-200 {
-            border-color: #374151 !important;
-        }
-        
-        .bg-gray-50 {
-            background-color: #374151 !important;
-        }
-        
-        .bg-gray-100 {
-            background-color: #4b5563 !important;
-        }
-        
-        /* Gold accent colors */
-        .text-blue-600, .text-green-600, .text-purple-600, .text-orange-600, .text-red-600, .text-indigo-600, .text-teal-600, .text-yellow-600 {
-            color: #fbbf24 !important;
-        }
-        
-        .border-blue-200, .border-green-200, .border-purple-200, .border-orange-200, .border-red-200, .border-indigo-200, .border-teal-200, .border-yellow-200 {
-            border-color: #fbbf24 !important;
-        }
-        
-        /* Tables dark mode */
-        table {
-            background-color: #1f2937 !important;
-            color: #d1d5db !important;
-        }
-        
-        th {
-            background-color: #374151 !important;
-            color: #d1d5db !important;
-            border-color: #4b5563 !important;
-        }
-        
-        td {
-            background-color: #1f2937 !important;
-            color: #d1d5db !important;
-            border-color: #4b5563 !important;
-        }
-        
-        tr:hover td {
-            background-color: #374151 !important;
-        }
-        
-        /* Cards dark mode */
-        .card, .bg-white {
-            background-color: #1f2937 !important;
-            border-color: #374151 !important;
-        }
-        
-        /* Standardized button styles */
-        .btn, button, input[type="submit"], input[type="button"], input[type="reset"] {
-            background: linear-gradient(135deg, #374151, #4b5563) !important;
-            border: 1px solid #6b7280 !important;
-            color: #d1d5db !important;
-            padding: 0.5rem 1rem !important;
-            border-radius: 0.375rem !important;
-            font-weight: 500 !important;
-            transition: all 0.3s ease !important;
-            text-decoration: none !important;
-            display: inline-flex !important;
-            align-items: center !important;
-            justify-content: center !important;
-            cursor: pointer !important;
-        }
-        
-        .btn:hover, button:hover, input[type="submit"]:hover, input[type="button"]:hover, input[type="reset"]:hover {
-            background: linear-gradient(135deg, #4b5563, #6b7280) !important;
-            border-color: #fbbf24 !important;
-            color: #f9fafb !important;
-            transform: translateY(-1px) !important;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
-        }
-        
-        .btn:active, button:active, input[type="submit"]:active, input[type="button"]:active, input[type="reset"]:active {
-            transform: translateY(0) !important;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2) !important;
-        }
-        
-        /* Primary buttons (gold accent) */
-        .btn-primary, .btn-success, .btn-warning, .btn-info {
-            background: linear-gradient(135deg, #fbbf24, #f59e0b) !important;
-            border-color: #f59e0b !important;
-            color: #111827 !important;
-        }
-        
-        .btn-primary:hover, .btn-success:hover, .btn-warning:hover, .btn-info:hover {
-            background: linear-gradient(135deg, #f59e0b, #d97706) !important;
-            border-color: #d97706 !important;
-            color: #111827 !important;
-        }
-        
-        /* Danger buttons (red) */
-        .btn-danger, .btn-delete, .btn-remove {
-            background: linear-gradient(135deg, #ef4444, #dc2626) !important;
-            border-color: #dc2626 !important;
-            color: #ffffff !important;
-        }
-        
-        .btn-danger:hover, .btn-delete:hover, .btn-remove:hover {
-            background: linear-gradient(135deg, #dc2626, #b91c1c) !important;
-            border-color: #b91c1c !important;
-            color: #ffffff !important;
-        }
-        
-        /* Secondary buttons (dark gray) */
-        .btn-secondary, .btn-outline, .btn-cancel {
-            background: linear-gradient(135deg, #374151, #4b5563) !important;
-            border-color: #6b7280 !important;
-            color: #d1d5db !important;
-        }
-        
-        .btn-secondary:hover, .btn-outline:hover, .btn-cancel:hover {
-            background: linear-gradient(135deg, #4b5563, #6b7280) !important;
-            border-color: #9ca3af !important;
-            color: #f9fafb !important;
-        }
-        
-        /* Button sizes */
-        .btn-sm {
-            padding: 0.25rem 0.5rem !important;
-            font-size: 0.875rem !important;
-        }
-        
-        .btn-lg {
-            padding: 0.75rem 1.5rem !important;
-            font-size: 1.125rem !important;
-        }
-        
-        /* Button states */
-        .btn:disabled, button:disabled, input[type="submit"]:disabled, input[type="button"]:disabled, input[type="reset"]:disabled {
-            opacity: 0.5 !important;
-            cursor: not-allowed !important;
-            transform: none !important;
-        }
-        
-        /* Remove all white backgrounds */
-        .bg-white, .bg-gray-50, .bg-gray-100, .bg-gray-200, .bg-gray-300, .bg-gray-400, .bg-gray-500, .bg-gray-600, .bg-gray-700, .bg-gray-800, .bg-gray-900 {
-            background-color: #1f2937 !important;
-        }
-        
-        /* Make all text light */
-        .text-gray-900, .text-gray-800, .text-gray-700, .text-gray-600, .text-gray-500, .text-gray-400, .text-gray-300, .text-gray-200, .text-gray-100, .text-gray-50 {
-            color: #d1d5db !important;
-        }
-        
-        /* Map-specific styling */
-        .gradient-header {
-            background: linear-gradient(135deg, #1f2937 0%, #374151 100%);
-            position: relative;
-            overflow: hidden;
-            border-bottom: 1px solid #374151;
-        }
-        
-        .gradient-header::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(135deg, rgba(31, 41, 55, 0.9) 0%, rgba(55, 65, 81, 0.9) 100%);
-            z-index: 1;
-        }
-        
-        .header-content {
-            position: relative;
-            z-index: 2;
-        }
-        
-        .glass-card {
-            background: rgba(31, 41, 55, 0.95);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(75, 85, 99, 0.3);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-            color: #d1d5db;
-        }
-        
-        .glass-card:hover {
-            background: rgba(55, 65, 81, 0.98);
-            border-color: rgba(251, 191, 36, 0.4);
-            color: #f9fafb;
-            transform: scale(1.05);
-        }
-        
-        .filters-section {
-            background: linear-gradient(135deg, #1f2937 0%, #374151 100%);
-            border-bottom: 1px solid rgba(75, 85, 99, 0.5);
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-        }
-        
-        .action-button {
-            background: linear-gradient(135deg, #374151, #4b5563) !important;
-            border: 1px solid #6b7280 !important;
-            color: #d1d5db !important;
-            padding: 0.5rem 1rem !important;
-            border-radius: 0.375rem !important;
-            font-weight: 500 !important;
-            transition: all 0.3s ease !important;
-            text-decoration: none !important;
-            display: inline-flex !important;
-            align-items: center !important;
-            justify-content: center !important;
-            cursor: pointer !important;
-        }
-        
-        .action-button:hover {
-            background: linear-gradient(135deg, #4b5563, #6b7280) !important;
-            border-color: #fbbf24 !important;
-            color: #f9fafb !important;
-            transform: translateY(-1px) !important;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
-        }
-        
-        .secondary-button {
-            background: linear-gradient(135deg, #374151, #4b5563) !important;
-            border: 1px solid #6b7280 !important;
-            color: #d1d5db !important;
-            padding: 0.5rem 1rem !important;
-            border-radius: 0.375rem !important;
-            font-weight: 500 !important;
-            transition: all 0.3s ease !important;
-            text-decoration: none !important;
-            display: inline-flex !important;
-            align-items: center !important;
-            justify-content: center !important;
-            cursor: pointer !important;
-        }
-        
-        .secondary-button:hover {
-            background: linear-gradient(135deg, #4b5563, #6b7280) !important;
-            border-color: #9ca3af !important;
-            color: #f9fafb !important;
-            transform: translateY(-1px) !important;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
-        }
-        
-        .search-button {
-            background: linear-gradient(135deg, #fbbf24, #f59e0b) !important;
-            border-color: #f59e0b !important;
-            color: #111827 !important;
-            padding: 0.5rem 1rem !important;
-            border-radius: 0.375rem !important;
-            font-weight: 500 !important;
-            transition: all 0.3s ease !important;
-            text-decoration: none !important;
-            display: inline-flex !important;
-            align-items: center !important;
-            justify-content: center !important;
-            cursor: pointer !important;
-        }
-        
-        .search-button:hover {
-            background: linear-gradient(135deg, #f59e0b, #d97706) !important;
-            border-color: #d97706 !important;
-            color: #111827 !important;
-            transform: translateY(-1px) !important;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
-        }
-        
-        .filter-input {
-            background-color: #374151 !important;
-            border-color: #4b5563 !important;
-            color: #d1d5db !important;
-            border-radius: 0.375rem !important;
-            padding: 0.5rem 1rem !important;
-            transition: all 0.3s ease !important;
-        }
-        
-        .filter-input:focus {
-            outline: none !important;
-            border-color: #fbbf24 !important;
-            box-shadow: 0 0 0 1px #fbbf24 !important;
-        }
-        
-        .filter-label {
-            font-weight: 600;
-            color: #d1d5db !important;
-            margin-bottom: 0.5rem;
-            display: block;
-        }
-        
-        .filter-badge {
-            background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
-            border: 1px solid #3b82f6;
-            color: #1e40af;
-            padding: 0.5rem 1rem;
-            border-radius: 50px;
-            font-weight: 600;
-            box-shadow: 0 2px 10px rgba(59, 130, 246, 0.2);
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            margin: 0.25rem;
-        }
-        
-        .results-summary {
-            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
-            border: 1px solid #0ea5e9;
-            border-radius: 16px;
-            padding: 1.5rem;
-            box-shadow: 0 4px 15px rgba(14, 165, 233, 0.1);
-        }
-        
-        .success-message {
-            background: linear-gradient(135deg, #1f2937 0%, #374151 100%);
-            border: 1px solid #fbbf24;
-            color: #d1d5db;
-            padding: 1.5rem;
-            border-radius: 16px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-            margin-bottom: 2rem;
-        }
-        
-        .animate-fade-in {
-            animation: fadeIn 0.6s ease-out;
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        
-        /* Filter toggle button */
-        .filter-toggle {
-            display: block;
-            width: 100%;
-            padding: 16px 20px;
-            background: linear-gradient(135deg, #374151, #4b5563);
-            border: 2px solid #6b7280;
-            border-radius: 12px;
-            text-align: center;
-            font-weight: 600;
-            color: #d1d5db;
-            margin-bottom: 20px;
-            transition: all 0.3s ease;
-            cursor: pointer;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-        }
-        
-        .filter-toggle:hover {
-            background: linear-gradient(135deg, #4b5563, #6b7280);
-            border-color: #fbbf24;
-            color: #f9fafb;
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
-        }
-        
-        .filter-toggle:active {
-            transform: translateY(0);
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-        }
-        
-        .filters-content {
-            display: none;
-            opacity: 0;
-            max-height: 0;
-            overflow: hidden;
-            transition: all 0.3s ease;
-        }
-        
-        .filters-content.show {
-            display: block;
-            opacity: 1;
-            max-height: 2000px;
-        }
-        
-        /* Remove bottom margin when collapsed to prevent white space */
-        .filters-collapsed .filters-section {
-            margin-bottom: 0;
-            padding-bottom: 1rem;
-        }
-        
-        .filters-collapsed .filters-content {
-            margin-bottom: 0;
-        }
-        
-        /* Mobile-first responsive design */
-        @media (max-width: 767px) {
-            .action-button, .secondary-button, .search-button {
-                padding: 0.75rem 1rem;
-                font-size: 0.875rem;
-                min-height: 44px;
-            }
-            
-            .filter-input {
-                padding: 0.75rem;
-                font-size: 1rem;
-                min-height: 44px;
-            }
-            
-            .filters-section {
-                padding: 1.5rem 1rem;
-            }
-            
-            .filters-section .max-w-7xl {
-                padding-left: 1rem;
-                padding-right: 1rem;
-            }
-        }
-        
-        /* Touch-friendly improvements */
-        @media (max-width: 767px) {
-            button, select, input, a {
-                min-height: 44px;
-                min-width: 44px;
-            }
-        }
-        
-        #map {
-            height: calc(100vh - 200px);
-            width: 100%;
-            min-height: 400px;
-            transition: height 0.3s ease;
-            position: relative;
-        }
-        
-        /* Responsive map height */
-        @media (max-width: 768px) {
-            #map {
-                height: calc(100vh - 150px);
-                min-height: 300px;
-            }
-        }
-        
-        /* When filters are collapsed, expand map */
-        .filters-collapsed #map {
-            height: calc(100vh - 120px);
-        }
-        
-        @media (max-width: 768px) {
-            .filters-collapsed #map {
-                height: calc(100vh - 100px);
-            }
-        }
-        
-        
-        
-        .loading {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: #1f2937;
-            color: #d1d5db;
-            padding: 30px;
-            border-radius: 15px;
-            border: 1px solid #374151;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-            text-align: center;
-            z-index: 1000;
-        }
-        
-        .error-message {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: #fee2e2;
-            color: #dc2626;
-            padding: 30px;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-            text-align: center;
-            z-index: 1000;
-            max-width: 400px;
-        }
-        
-        .info-window {
-            max-width: 280px;
-            padding: 0;
-            border-radius: 16px;
-            overflow: hidden;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.12);
-            border: 1px solid rgba(229, 231, 235, 0.5);
-        }
+/* ==========================================
+   TRUEHOLD - Map View
+   Color Palette: White, Navy Blue, Gold
+   ========================================== */
 
-        /* Remove Google Maps InfoWindow default white background only */
-        .gm-style-iw {
-            background: transparent !important;
-        }
+/* CSS Variables */
+:root {
+    --primary-navy: #1e3a5f;
+    --navy-dark: #152a45;
+    --navy-light: #2d5280;
+    --gold: #d4af37;
+    --gold-light: #e8c55c;
+    --gold-dark: #b8941f;
+    --white: #ffffff;
+    --off-white: #f8f9fa;
+    --light-gray: #e9ecef;
+    --gray: #6c757d;
+    --text-dark: #212529;
+    --shadow-sm: 0 2px 4px rgba(30, 58, 95, 0.08);
+    --shadow-md: 0 4px 12px rgba(30, 58, 95, 0.12);
+    --shadow-lg: 0 8px 24px rgba(30, 58, 95, 0.15);
+    --transition: all 0.3s ease;
+}
 
-        .gm-style-iw-d {
-            background: transparent !important;
-        }
+/* Reset & Base Styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
 
-        .gm-style-iw-c {
-            background: transparent !important;
-        }
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    color: var(--text-dark);
+    background-color: var(--off-white);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow: hidden;
+}
 
-        /* Hide default Google Maps InfoWindow close button */
-        .gm-style .gm-ui-hover-effect {
-            display: none !important;
-        }
+.map-page {
+    overflow: hidden;
+}
 
-        .property-card {
-            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-            border-radius: 12px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), 0 2px 8px rgba(0, 0, 0, 0.2);
-            border: 1px solid rgba(71, 85, 105, 0.6);
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            overflow: hidden;
-            backdrop-filter: blur(10px);
-            position: relative;
-        }
-        
-        .property-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%);
-            border-radius: inherit;
-            pointer-events: none;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-        
-        .property-card:hover {
-            transform: translateY(-4px) scale(1.01);
-            box-shadow: 0 16px 48px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(59, 130, 246, 0.2);
-            border-color: rgba(59, 130, 246, 0.3);
-        }
-        
-        .property-card:hover::before {
-            opacity: 1;
-        }
-        
-        .property-image {
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        
-        .property-card:hover .property-image {
-            transform: scale(1.05);
-        }
-        
-        .line-clamp-2 {
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-        }
-        
-        
-        .back-button {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            z-index: 1000;
-            background: white;
-            color: #374151;
-            border: none;
-            padding: 12px 20px;
-            border-radius: 10px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            cursor: pointer;
-            font-weight: 600;
-            transition: all 0.3s ease;
-        }
-        
-        .back-button:hover {
-            background: #f9fafb;
-            transform: translateY(-2px);
-        }
-        
-        
-        .filters-panel {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            z-index: 1000;
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            min-width: 250px;
-            max-height: 80vh;
-                overflow-y: auto;
-            }
-            
-        .filters-panel h3 {
-            margin: 0 0 15px 0;
-            font-size: 18px;
-            font-weight: 600;
-            color: #1f2937;
-        }
-        
-        .filter-group {
-            margin-bottom: 15px;
-        }
-        
-        .filter-label {
-            display: block;
-                font-size: 14px;
-            font-weight: 600;
-            color: #374151;
-            margin-bottom: 5px;
-        }
-        
-        .filter-input {
-            width: 100%;
-            padding: 8px 12px;
-            border: 2px solid #e5e7eb;
-            border-radius: 6px;
-                font-size: 14px;
-            transition: border-color 0.2s;
-        }
-        
-        .filter-input:focus {
-            outline: none;
-            border-color: #3b82f6;
-        }
-        
-        .filter-button {
-            background: #3b82f6;
-            color: white;
-            border: none;
-            padding: 10px 15px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: 600;
-            width: 100%;
-            margin: 5px 0;
-            transition: background-color 0.2s;
-        }
-        
-        .filter-button:hover {
-            background: #2563eb;
-        }
-        
-        .filter-button.secondary {
-            background: #6b7280;
-        }
-        
-        .filter-button.secondary:hover {
-            background: #4b5563;
-        }
-        
-        .toggle-panel {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            z-index: 1001;
-            background: #3b82f6;
-            color: white;
-            border: none;
-            padding: 12px 16px;
-            border-radius: 8px;
-            cursor: pointer;
-                font-weight: 600;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-        }
-        
-        .toggle-panel:hover {
-            background: #2563eb;
-        }
-        
-        .panel-hidden {
-            display: none;
-        }
+/* ==========================================
+   NAVIGATION
+   ========================================== */
+
+.navbar {
+    background: rgba(255, 255, 255, 0.98);
+    backdrop-filter: blur(20px);
+    box-shadow: 0 4px 30px rgba(30, 58, 95, 0.08);
+    position: sticky;
+    top: 0;
+    z-index: 1001;
+    border-bottom: 1px solid rgba(30, 58, 95, 0.06);
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 24px;
+}
+
+.nav-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 0;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    font-weight: 700;
+    font-size: 22px;
+    color: var(--primary-navy);
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.logo:hover {
+    transform: translateX(2px);
+}
+
+.logo-icon {
+    width: 46px;
+    height: 46px;
+    background: linear-gradient(135deg, var(--primary-navy), var(--navy-light));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    box-shadow: 0 4px 16px rgba(30, 58, 95, 0.2);
+    transition: var(--transition);
+}
+
+.logo-icon svg {
+    stroke: var(--gold);
+    stroke-width: 2.5;
+}
+
+.logo:hover .logo-icon {
+    transform: rotate(-5deg) scale(1.05);
+    box-shadow: 0 6px 20px rgba(30, 58, 95, 0.3);
+}
+
+.logo-text {
+    letter-spacing: 1px;
+}
+
+.nav-links {
+    display: flex;
+    list-style: none;
+    gap: 8px;
+    align-items: center;
+}
+
+.nav-link {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--gray);
+    font-weight: 500;
+    font-size: 15px;
+    padding: 12px 20px;
+    border-radius: 10px;
+    position: relative;
+    transition: var(--transition);
+}
+
+.nav-link svg {
+    stroke-width: 2;
+    transition: var(--transition);
+}
+
+.nav-link:hover {
+    color: var(--primary-navy);
+    background-color: rgba(30, 58, 95, 0.05);
+}
+
+.nav-link.active {
+    color: var(--primary-navy);
+    background-color: rgba(30, 58, 95, 0.08);
+    font-weight: 600;
+}
+
+.nav-link.active svg {
+    stroke: var(--gold);
+}
+
+.btn-agent {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: linear-gradient(135deg, var(--gold), var(--gold-light));
+    color: var(--white);
+    padding: 12px 24px;
+    border-radius: 10px;
+    font-weight: 600;
+    box-shadow: 0 4px 16px rgba(212, 175, 55, 0.3);
+    margin-left: 8px;
+}
+
+.btn-agent:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 24px rgba(212, 175, 55, 0.4);
+}
+
+/* ==========================================
+   MAP HEADER
+   ========================================== */
+
+.map-header {
+    background: linear-gradient(135deg, var(--primary-navy) 0%, var(--navy-light) 100%);
+    color: var(--white);
+    padding: 24px 0;
+    box-shadow: 0 4px 16px rgba(30, 58, 95, 0.15);
+}
+
+.map-header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+}
+
+.map-title-section {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+}
+
+.map-title {
+    font-size: 32px;
+    font-weight: 700;
+    margin: 0;
+}
+
+.properties-loaded {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 50px;
+    font-size: 15px;
+    font-weight: 600;
+    backdrop-filter: blur(10px);
+}
+
+.properties-loaded svg {
+    color: var(--gold);
+}
+
+.map-header-actions {
+    display: flex;
+    gap: 12px;
+}
+
+.btn-list-view {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 24px;
+    background: linear-gradient(135deg, var(--gold), var(--gold-light));
+    color: var(--white);
+    border: none;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 15px;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.btn-list-view:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(212, 175, 55, 0.4);
+}
+
+/* ==========================================
+   FILTERS BAR
+   ========================================== */
+
+.map-filters-bar {
+    background-color: var(--white);
+    padding: 16px 0;
+    border-bottom: 1px solid var(--light-gray);
+}
+
+.map-filters-toggle {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 20px;
+    background-color: var(--white);
+    border: 2px solid var(--light-gray);
+    border-radius: 8px;
+    color: var(--primary-navy);
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.map-filters-toggle:hover {
+    border-color: var(--primary-navy);
+    background-color: var(--off-white);
+}
+
+.map-filters-toggle svg:first-child {
+    color: var(--gold);
+}
+
+.map-filters-toggle .chevron {
+    margin-left: 8px;
+    transition: transform 0.3s ease;
+}
+
+.map-filters-content {
+    display: none;
+    margin-top: 16px;
+    padding: 32px;
+    background: linear-gradient(135deg, #475569 0%, #3f4a5c 100%);
+    border-radius: 16px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+}
+
+.map-filters-content.active {
+    display: block;
+}
+
+.filters-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.filters-header svg {
+    color: var(--gold);
+    font-size: 24px;
+}
+
+.filters-header h3 {
+    color: var(--white);
+    font-size: 20px;
+    font-weight: 700;
+    margin: 0;
+}
+
+.filter-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    margin-bottom: 24px;
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.filter-label {
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+}
+
+.filter-input {
+    padding: 14px 16px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.95);
+    background-color: rgba(30, 41, 59, 0.5);
+    transition: var(--transition);
+}
+
+.filter-input::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.filter-input:focus {
+    outline: none;
+    border-color: var(--gold);
+    background-color: rgba(30, 41, 59, 0.7);
+    box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.1);
+}
+
+select.filter-input {
+    cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L6 6L11 1' stroke='rgba(255,255,255,0.7)' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 36px;
+}
+
+select.filter-input option {
+    background-color: #1e293b;
+    color: var(--white);
+}
+
+.filter-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+    padding-top: 16px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.filter-btn-apply {
+    padding: 12px 32px;
+    background: linear-gradient(135deg, var(--gold), var(--gold-light));
+    color: var(--white);
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.filter-btn-apply:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(212, 175, 55, 0.4);
+}
+
+.filter-btn-clear {
+    padding: 12px 24px;
+    background-color: transparent;
+    color: rgba(255, 255, 255, 0.9);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.filter-btn-clear:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.5);
+}
+
+/* ==========================================
+   MAP CONTROLS
+   ========================================== */
+
+.map-controls {
+    position: absolute;
+    top: 160px;
+    left: 24px;
+    z-index: 1000;
+    display: flex;
+    gap: 8px;
+    background: var(--white);
+    padding: 6px;
+    border-radius: 10px;
+    box-shadow: var(--shadow-md);
+}
+
+.map-control-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    background-color: var(--white);
+    border: 2px solid transparent;
+    border-radius: 8px;
+    color: var(--text-dark);
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.map-control-btn:hover {
+    background-color: var(--off-white);
+}
+
+.map-control-btn.active {
+    background-color: var(--primary-navy);
+    color: var(--white);
+    border-color: var(--primary-navy);
+}
+
+.map-control-btn.active svg {
+    stroke: var(--gold);
+}
+
+/* ==========================================
+   MAP CONTAINER
+   ========================================== */
+
+.map-container {
+    position: fixed;
+    top: 200px;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: var(--light-gray);
+}
+
+#map {
+    width: 100%;
+    height: 100%;
+}
+
+.map-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    background: linear-gradient(135deg, #e6f2ff 0%, #f0f7ff 100%);
+    color: var(--primary-navy);
+}
+
+.map-placeholder svg {
+    stroke: var(--primary-navy);
+    opacity: 0.3;
+}
+
+.map-placeholder p {
+    font-size: 24px;
+    font-weight: 700;
+    margin: 0;
+}
+
+.map-placeholder small {
+    font-size: 14px;
+    color: var(--gray);
+    max-width: 300px;
+    text-align: center;
+}
+
+/* Loading Screen */
+.loading-screen {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.95);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+}
+
+.loading-spinner {
+    width: 50px;
+    height: 50px;
+    border: 4px solid var(--light-gray);
+    border-top-color: var(--gold);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.loading-text {
+    margin-top: 20px;
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--primary-navy);
+}
+
+/* Info Window Styling */
+.gm-style .gm-style-iw-c {
+    border-radius: 16px;
+    padding: 0;
+    max-width: 380px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+    overflow: hidden;
+}
+
+.gm-style .gm-style-iw-d {
+    overflow: hidden !important;
+    padding: 0;
+}
+
+.gm-style .gm-style-iw-t::after {
+    background: linear-gradient(45deg, var(--white) 50%, transparent 51%, transparent);
+    box-shadow: -2px 2px 2px 0 rgba(0, 0, 0, 0.1);
+}
+
+.info-window-card {
+    background: var(--white);
+    overflow: hidden;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    animation: fadeInUp 0.3s ease;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.info-window-image {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    background: linear-gradient(135deg, #f5f5f5 0%, #e8e8e8 100%);
+    display: block;
+}
+
+.info-window-content {
+    padding: 20px;
+}
+
+.info-window-header {
+    margin-bottom: 16px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.info-window-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--primary-navy);
+    margin-bottom: 8px;
+    line-height: 1.3;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.info-window-price {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--gold);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.info-window-price svg {
+    width: 20px;
+    height: 20px;
+}
+
+.info-window-details {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 16px;
+}
+
+.info-window-detail-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+    color: var(--gray);
+}
+
+.info-window-detail-item svg {
+    width: 16px;
+    height: 16px;
+    color: var(--gold);
+    flex-shrink: 0;
+}
+
+.info-window-detail-item strong {
+    color: var(--text-dark);
+    font-weight: 600;
+}
+
+.info-window-footer {
+    padding-top: 16px;
+    border-top: 1px solid #e5e7eb;
+}
+
+.info-window-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    padding: 12px 24px;
+    background: linear-gradient(135deg, var(--gold), var(--gold-light));
+    color: var(--white);
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 14px;
+    text-decoration: none;
+    transition: var(--transition);
+    box-shadow: 0 4px 12px rgba(212, 175, 55, 0.3);
+}
+
+.info-window-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(212, 175, 55, 0.4);
+}
+
+.info-window-btn svg {
+    width: 16px;
+    height: 16px;
+}
+
+/* Close button styling */
+.gm-style-iw button {
+    width: 32px !important;
+    height: 32px !important;
+    border-radius: 50% !important;
+    background: var(--white) !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15) !important;
+    opacity: 1 !important;
+    top: 10px !important;
+    right: 10px !important;
+}
+
+.gm-style-iw button:hover {
+    background: var(--off-white) !important;
+}
+
+.gm-style-iw button img {
+    margin: 0 !important;
+}
+
+/* Adjust close button position */
+.gm-style .gm-style-iw-tc {
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+}
+
+/* ==========================================
+   RESPONSIVE DESIGN
+   ========================================== */
+
+@media (max-width: 768px) {
+    .map-header {
+        padding: 16px 0;
+    }
+    
+    .map-header-content {
+        flex-wrap: wrap;
+    }
+    
+    .map-title {
+        font-size: 24px;
+    }
+    
+    .properties-loaded {
+        font-size: 14px;
+    }
+    
+    .map-controls {
+        top: 150px;
+        left: 16px;
+    }
+    
+    .map-control-btn {
+        padding: 9px 14px;
+        font-size: 13px;
+    }
+    
+    .map-container {
+        top: 190px;
+    }
+    
+    .nav-links {
+        gap: 4px;
+    }
+    
+    .nav-link {
+        padding: 10px 12px;
+        font-size: 13px;
+    }
+    
+    .filter-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .map-filters-content {
+        padding: 24px 20px;
+    }
+    
+    .filter-actions {
+        flex-direction: column;
+    }
+    
+    .filter-btn-apply,
+    .filter-btn-clear {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    /* Info window responsive adjustments */
+    .gm-style .gm-style-iw-c {
+        max-width: 320px !important;
+    }
+    
+    .info-window-image {
+        height: 160px;
+    }
+    
+    .info-window-content {
+        padding: 16px;
+    }
+    
+    .info-window-title {
+        font-size: 16px;
+    }
+    
+    .info-window-price {
+        font-size: 20px;
+    }
+    
+    .info-window-detail-item {
+        font-size: 13px;
+    }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+    .filter-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 480px) {
+    .container {
+        padding: 0 16px;
+    }
+    
+    .map-title-section {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+    
+    .logo-text {
+        font-size: 16px;
+    }
+}
     </style>
 </head>
-<body class="bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen">
-    @include('layouts.properties-navigation')
-    <div class="min-h-screen">
-
-        <!-- Property Map Header -->
-        <div class="bg-white border-b border-gray-200 shadow-sm">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
-                <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between space-y-3 sm:space-y-0">
-                    <div class="flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-4">
-                        <h1 class="text-xl sm:text-2xl font-bold text-gray-900">Property Map</h1>
-                        <div class="hidden sm:block h-6 w-px bg-gray-300"></div>
-                        <div class="text-sm sm:text-base text-gray-600">
-                            <i class="fas fa-map-marked-alt mr-2"></i><span id="propertyCount">Loading properties...</span>
-                        </div>
+<body class="map-page">
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-content">
+                <a href="{{ route('properties.index') }}" class="logo">
+                    <div class="logo-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" stroke-width="2"/>
+                            <path d="M9 22V12h6v10" stroke-width="2"/>
+                        </svg>
                     </div>
-                    <div class="flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-4 w-full sm:w-auto">
-                        @auth
-                        @else
-                        <a href="{{ route('login') }}" class="text-gray-600 hover:text-gray-800 font-medium transition-colors duration-200 text-sm sm:text-base">
-                            <i class="fas fa-sign-in-alt mr-2"></i>Login
-                        </a>
-                        @endauth
-                        <a href="{{ route('properties.index') }}" class="bg-blue-600 hover:bg-blue-700 text-white px-3 sm:px-4 py-2 rounded-lg font-medium transition-colors text-sm sm:text-base">
-                            <i class="fas fa-list mr-2"></i>List View
-                        </a>
-                </div>
-            </div>
+                    <span class="logo-text">TRUEHOLD</span>
+                </a>
+                <ul class="nav-links">
+                    <li><a href="{{ route('properties.index') }}" class="nav-link">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" stroke-width="2"/>
+                        </svg>
+                        Properties
+                    </a></li>
+                    <li><a href="{{ route('properties.map') }}" class="nav-link active">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <path d="M1 6v16l7-4 8 4 7-4V2l-7 4-8-4-7 4z" stroke-width="2"/>
+                        </svg>
+                        Map View
+                    </a></li>
+                    @auth
+                    <li><a href="{{ route('dashboard') }}" class="btn-agent">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                        </svg>
+                        Dashboard
+                    </a></li>
+                    @else
+                    <li><a href="{{ route('login', ['redirect' => url()->current()]) }}" class="btn-agent">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                        </svg>
+                        Agent Login
+                    </a></li>
+                    @endauth
+                </ul>
             </div>
         </div>
+    </nav>
 
-        <!-- Success Messages -->
-        @if(session('success'))
-            <div class="max-w-7xl mx-auto px-6 lg:px-8 py-4">
-                <div class="success-message animate-fade-in">
-                    <div class="flex items-center space-x-3">
-                        <i class="fas fa-check-circle text-2xl"></i>
-                        <span class="text-lg font-semibold">{{ session('success') }}</span>
+    <!-- Map Header -->
+    <div class="map-header">
+        <div class="container">
+            <div class="map-header-content">
+                <div class="map-title-section">
+                    <h1 class="map-title">Property Map</h1>
+                    <div class="properties-loaded">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>
+                        </svg>
+                        <span id="propertyCount">{{ $properties->count() }} properties loaded</span>
                     </div>
+                </div>
+                <div class="map-header-actions">
+                    <a href="{{ route('properties.index') }}" class="btn-list-view">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
+                        List View
+                    </a>
                 </div>
             </div>
-        @endif
+        </div>
+    </div>
 
-        <!-- Enhanced Filters -->
-        <div class="filters-section">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
-                <!-- Filter toggle button -->
-                <button type="button" class="filter-toggle w-full mb-4" onclick="toggleFilters()">
-                    <i class="fas fa-filter mr-2"></i>
-                    <span id="filterToggleText">Show Filters</span>
-                    <i class="fas fa-chevron-down ml-2" id="filterToggleIcon"></i>
-                </button>
-                
-                <div class="filters-content" id="filtersContent">
-                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 sm:mb-8 space-y-4 sm:space-y-0">
-                        <h2 class="text-xl sm:text-2xl font-bold text-gray-800 flex items-center space-x-2 sm:space-x-3">
-                            <div class="bg-blue-100 p-2 sm:p-3 rounded-full">
-                                <i class="fas fa-filter text-blue-600 text-lg sm:text-xl"></i>
-                            </div>
-                            <span>Search Filters</span>
-                        </h2>
-                        <div class="flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-4 w-full sm:w-auto">
-                            <a href="{{ route('properties.map') }}" class="text-gray-600 hover:text-gray-800 font-medium transition-colors duration-300 text-sm sm:text-base">
-                            <i class="fas fa-times mr-2"></i>Clear Filters
-                        </a>
-                            <a href="{{ route('properties.index') }}" class="text-blue-600 hover:text-blue-800 font-medium transition-colors duration-300 text-sm sm:text-base">
-                                <i class="fas fa-list mr-2"></i>Switch to List View
-                        </a>
-                    </div>
+    <!-- Filters Bar -->
+    <div class="map-filters-bar">
+        <div class="container">
+            <button class="map-filters-toggle" onclick="toggleMapFilters()">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M10 18h4v-2h-4v2zM3 6v2h18V6H3zm3 7h12v-2H6v2z"/>
+                </svg>
+                <span id="filterToggleText">Show Filters</span>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" class="chevron" id="filterChevron">
+                    <path d="M6 9l6 6 6-6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </button>
+            
+            <!-- Filters Content -->
+            <div class="map-filters-content" id="mapFiltersContent">
+                <div class="filters-header">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M10 18h4v-2h-4v2zM3 6v2h18V6H3zm3 7h12v-2H6v2z"/>
+                    </svg>
+                    <h3>Search Filters</h3>
                 </div>
                 
-                
-                    <!-- Combined filters form -->
-                    <form id="filterForm" class="space-y-4 sm:space-y-6">
-                        <!-- First row of filters -->
-                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-                        <div>
-                                <label class="filter-label text-sm sm:text-base">Location</label>
-                                <select id="locationFilter" class="filter-input w-full text-sm sm:text-base">
-                                <option value="">All Locations</option>
-                                @foreach($locations as $location)
-                                    <option value="{{ $location }}" {{ request('location') == $location ? 'selected' : '' }}>
-                                        {{ $location }}
-                                    </option>
-                                @endforeach
-                            </select>
-                        </div>
-                        
-                        <div>
-                                <label class="filter-label text-sm sm:text-base">Property Type</label>
-                                <select id="propertyTypeFilter" class="filter-input w-full text-sm sm:text-base">
-                                <option value="">All Types</option>
-                                @foreach($propertyTypes as $type)
-                                    <option value="{{ $type }}" {{ request('property_type') == $type ? 'selected' : '' }}>
-                                        {{ $type }}
-                                    </option>
-                                @endforeach
-                            </select>
-                        </div>
-                        
-                        @auth
-                        <div>
-                                <label class="filter-label text-sm sm:text-base">Agent Name</label>
-                                <select id="agentFilter" class="filter-input w-full text-sm sm:text-base">
-                                <option value="">All Agents</option>
-                                @foreach($agentNames as $agent)
-                                    <option value="{{ $agent }}" {{ request('agent_name') == $agent ? 'selected' : '' }}>
-                                        {{ $agent }}@if(isset($agentsWithPaying[$agent]) && $agentsWithPaying[$agent]) ⚡@endif
-                                    </option>
-                                @endforeach
-                            </select>
-                        </div>
-                        @endauth
-                        
-                        </div>
-                        
-                        <!-- Second row of filters -->
-                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-                        <div>
-                                <label class="filter-label text-sm sm:text-base">Min Price</label>
-                                <input type="number" id="minPriceFilter" value="{{ request('min_price') }}" 
-                                       placeholder="£0" class="filter-input w-full text-sm sm:text-base">
-                        </div>
+                <div class="filter-grid">
+                    <div class="filter-group">
+                        <label class="filter-label">Location</label>
+                        <select id="filterLocation" class="filter-input">
+                            <option value="">All Locations</option>
+                            @foreach($locations ?? [] as $location)
+                                @if($location && $location !== 'N/A')
+                                    <option value="{{ $location }}">{{ $location }}</option>
+                                @endif
+                            @endforeach
+                        </select>
+                    </div>
                     
-                        <div>
-                                <label class="filter-label text-sm sm:text-base">Max Price</label>
-                                <input type="number" id="maxPriceFilter" value="{{ request('max_price') }}" 
-                                       placeholder="£5000" class="filter-input w-full text-sm sm:text-base">
-                        </div>
-                        
-                        <div>
-                                <label class="filter-label text-sm sm:text-base">Couples Allowed</label>
-                                <select id="couplesAllowedFilter" class="filter-input w-full text-sm sm:text-base">
-                                    <option value="">All Properties</option>
-                                    <option value="yes" {{ request('couples_allowed') == 'yes' ? 'selected' : '' }}>Couples Welcome</option>
-                                    <option value="no" {{ request('couples_allowed') == 'no' ? 'selected' : '' }}>Singles Only</option>
-                                </select>
-                        </div>
-                        
-                            <div class="flex flex-col sm:flex-row items-end space-y-2 sm:space-y-0 sm:space-x-3">
-                                <button type="button" onclick="applyFilters()" class="search-button w-full text-sm sm:text-base">
-                                    <i class="fas fa-search mr-2"></i>Search Properties
-                            </button>
-                                <button type="button" onclick="clearFilters()" class="secondary-button text-sm sm:text-base">
-                                <i class="fas fa-times mr-2"></i>Clear
-                                </button>
-                            </div>
-                        </div>
-                    </form>
+                    <div class="filter-group">
+                        <label class="filter-label">Property Type</label>
+                        <select id="filterPropertyType" class="filter-input">
+                            <option value="">All Types</option>
+                            @foreach($propertyTypes ?? [] as $type)
+                                @if($type && $type !== 'N/A')
+                                    <option value="{{ $type }}">{{ $type }}</option>
+                                @endif
+                            @endforeach
+                        </select>
+                    </div>
+                    
+                    @auth
+                    <div class="filter-group">
+                        <label class="filter-label">Agent Name</label>
+                        <select id="filterAgentName" class="filter-input">
+                            <option value="">All Agents</option>
+                            @foreach($agentNames ?? [] as $agentName)
+                                @if($agentName && $agentName !== 'N/A')
+                                    <option value="{{ $agentName }}">
+                                        {{ $agentName }}
+                                        @if(in_array($agentName, $agentsWithPaying ?? []))
+                                            ⚡
+                                        @endif
+                                    </option>
+                                @endif
+                            @endforeach
+                        </select>
+                    </div>
+                    @endif
+                    
+                    <div class="filter-group">
+                        <label class="filter-label">Min Price</label>
+                        <input type="number" id="filterMinPrice" class="filter-input" placeholder="£0" min="0">
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label class="filter-label">Max Price</label>
+                        <input type="number" id="filterMaxPrice" class="filter-input" placeholder="£5000" min="0">
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label class="filter-label">Couples Allowed</label>
+                        <select id="filterCouplesAllowed" class="filter-input">
+                            <option value="">All Properties</option>
+                            <option value="Yes">Yes</option>
+                            <option value="No">No</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="filter-actions">
+                    <button type="button" onclick="clearMapFilters()" class="filter-btn-clear">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
+                        Clear Filters
+                    </button>
+                    <button type="button" onclick="applyMapFilters()" class="filter-btn-apply">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <circle cx="11" cy="11" r="8" stroke-width="2"/>
+                            <path d="M21 21l-4.35-4.35" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
+                        Apply Filters
+                    </button>
                 </div>
             </div>
         </div>
+    </div>
 
-
-
-    <!-- Loading Screen -->
-    <div class="loading" id="loadingScreen">
-        <i class="fas fa-spinner fa-spin text-3xl text-blue-600 mb-3"></i>
-        <div class="text-lg font-semibold text-gray-800">Loading Map...</div>
-        <div class="text-sm text-gray-600">Please wait while we load the properties</div>
-                </div>
-                
-    <!-- Error Screen -->
-    <div class="error-message" id="errorScreen" style="display: none;">
-        <i class="fas fa-exclamation-triangle text-3xl text-red-600 mb-3"></i>
-        <div class="text-lg font-semibold text-gray-800">Map Error</div>
-        <div class="text-sm text-gray-600" id="errorMessage">Something went wrong loading the map</div>
-        <button class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors mt-3" onclick="location.reload()">
-            <i class="fas fa-refresh mr-2"></i>Retry
+    <!-- Map Controls -->
+    <div class="map-controls">
+        <button class="map-control-btn active" id="mapViewBtn" onclick="toggleMapView('roadmap')">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path d="M1 6v16l7-4 8 4 7-4V2l-7 4-8-4-7 4z" stroke-width="2"/>
+            </svg>
+            Map
+        </button>
+        <button class="map-control-btn" id="satelliteViewBtn" onclick="toggleMapView('hybrid')">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <circle cx="12" cy="12" r="10" stroke-width="2"/>
+                <path d="M12 2v20M2 12h20" stroke-width="2"/>
+            </svg>
+            Satellite
         </button>
     </div>
 
-    <!-- Map Container -->
-    <div id="map"></div>
+    <!-- Loading Screen -->
+    <div class="loading-screen" id="loadingScreen">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">Loading properties...</div>
+    </div>
 
-    <!-- Properties Data -->
+    <!-- Map Container -->
+    <div class="map-container">
+        <div id="map"></div>
+    </div>
+
+    <!-- Properties Data (hidden) -->
     <div id="properties-data" style="display: none;">{!! json_encode($propertiesForJson ?? $properties->map(fn($p) => $p->toArray())) !!}</div>
 
     <!-- Google Maps API -->
@@ -1044,57 +1052,50 @@
         <script src="https://maps.googleapis.com/maps/api/js?key={{ config('services.google.maps_api_key') }}&libraries=places&callback=initMap&v=weekly&loading=async"></script>
     @else
         <script>
-            // Show API key error immediately
             document.addEventListener('DOMContentLoaded', function() {
-                showError('Google Maps API key not configured. Please add GOOGLE_MAPS_API_KEY to your .env file. See GOOGLE_MAPS_SETUP.md for instructions.');
+                document.getElementById('loadingScreen').innerHTML = '<div style="text-align: center;"><i class="fas fa-exclamation-triangle" style="font-size: 48px; color: #ef4444; margin-bottom: 16px;"></i><div class="loading-text" style="color: #ef4444;">Google Maps API key not configured</div><p style="color: #6b7280; margin-top: 8px;">Please add GOOGLE_MAPS_API_KEY to your .env file</p></div>';
             });
         </script>
     @endif
-    
 
     <script>
-        // Global variables
         let map;
         let markers = [];
         let infoWindow;
         let properties = [];
-        let filteredProperties = [];
-        let agentStats = {};
-        let agentColors = {};
-        let showOthersOnly = false;
 
-        // Initialize map when Google Maps API loads
         function initMap() {
             try {
                 console.log('🗺️ Initializing map...');
                 
-                // Hide loading screen
-                document.getElementById('loadingScreen').style.display = 'none';
-                
-                // Create map with satellite (hybrid) view
+                // Create map
                 map = new google.maps.Map(document.getElementById('map'), {
                     center: { lat: 51.5074, lng: -0.1278 }, // London center
                     zoom: 12,
-                    mapTypeId: google.maps.MapTypeId.HYBRID,
-                    mapTypeControl: true
+                    mapTypeId: google.maps.MapTypeId.ROADMAP,
+                    mapTypeControl: false,
+                    fullscreenControl: true,
+                    streetViewControl: true,
+                    zoomControl: true
                 });
                 
                 // Create info window
                 infoWindow = new google.maps.InfoWindow();
-
-
+                
                 // Load properties
                 loadProperties();
                 
+                // Hide loading screen
+                document.getElementById('loadingScreen').style.display = 'none';
+                
                 console.log('✅ Map initialized successfully');
                 
-                } catch (error) {
+            } catch (error) {
                 console.error('❌ Map initialization failed:', error);
-                showError('Failed to initialize map: ' + error.message);
+                document.getElementById('loadingScreen').innerHTML = '<div style="text-align: center;"><i class="fas fa-exclamation-triangle" style="font-size: 48px; color: #ef4444; margin-bottom: 16px;"></i><div class="loading-text" style="color: #ef4444;">Map initialization failed</div><p style="color: #6b7280; margin-top: 8px;">' + error.message + '</p></div>';
             }
         }
 
-        // Load properties from data attribute
         function loadProperties() {
             try {
                 const propertiesData = document.getElementById('properties-data');
@@ -1122,619 +1123,292 @@
                 console.log(`📍 Found ${validProperties.length} properties with valid coordinates`);
 
                 if (validProperties.length === 0) {
-                    showError('No properties with valid coordinates found');
+                    alert('No properties with valid coordinates found');
                     return;
                 }
+                
+                // Store all properties globally for filtering
+                window.allProperties = validProperties;
                 
                 // Update property count
                 document.getElementById('propertyCount').textContent = 
                     `${validProperties.length} properties loaded`;
 
-                // Initialize agent colors
-                initializeAgentColors(validProperties);
-
-                // Initialize filters from URL
-                initializeFiltersFromURL();
-
-                // Add event listeners for real-time filtering
-                addFilterEventListeners();
-
                 // Create markers
                 createMarkers(validProperties);
-
 
                 // Fit map to bounds
                 fitMapToProperties(validProperties);
 
-                    } catch (error) {
-                console.error('❌ Error loading properties:', error);
-                showError('Failed to load properties: ' + error.message);
-            }
-        }
-
-        // Create markers for properties
-        function createMarkers(properties) {
-            try {
-                // Clear existing markers
-                clearMarkers();
-
-                    const bounds = new google.maps.LatLngBounds();
-
-                properties.forEach((property, index) => {
-                    const lat = parseFloat(property.latitude);
-                    const lng = parseFloat(property.longitude);
-                    const agentColor = getAgentColor(property.agent_name);
-                    
-                    console.log(`🎨 Property "${property.title}" (Agent: "${property.agent_name}") gets color:`, agentColor);
-
-                    // Create marker
-                        const marker = new google.maps.Marker({
-                        position: { lat, lng },
-                        map: map,
-                            title: property.title || 'Property',
-                            icon: {
-                                path: google.maps.SymbolPath.CIRCLE,
-                                scale: 8,
-                            fillColor: agentColor.fill,
-                                fillOpacity: 1,
-                            strokeColor: agentColor.stroke,
-                                strokeWeight: 2
-                            }
-                        });
-                        
-                    // Add click listener
-                    marker.addListener('click', () => {
-                        showPropertyInfo(property, marker);
-                    });
-
-                    // Add to markers array
-                                markers.push(marker);
-                    bounds.extend({ lat, lng });
-                });
-
-
-                console.log(`✅ Created ${markers.length} markers`);
-
-                            } catch (error) {
-                console.error('❌ Error creating markers:', error);
-                showError('Failed to create markers: ' + error.message);
-            }
-        }
-
-        // Show property info in info window
-        function showPropertyInfo(property, marker) {
-            try {
-                const content = createInfoWindowContent(property);
-                infoWindow.setContent(content);
-                infoWindow.open(map, marker);
             } catch (error) {
-                console.error('❌ Error showing property info:', error);
+                console.error('❌ Error loading properties:', error);
+                alert('Failed to load properties: ' + error.message);
             }
         }
 
-        // Create modern info window content with enhanced design
-        function createInfoWindowContent(property) {
-            const title = property.title || 'Untitled Property';
-            const location = property.location || 'Location not specified';
-            const price = property.formatted_price || property.price || 'Price on request';
-            const propertyType = property.property_type || 'Unknown type';
-            const description = property.description || 'No description available';
-            const bedrooms = property.bedrooms || 'N/A';
-            const bathrooms = property.bathrooms || 'N/A';
-            const availableDate = property.available_date || 'N/A';
-            const propertyId = property.id || '';
-            const photoCount = property.photo_count || 0;
-            const allPhotos = property.all_photos_array || [];
-
-            // Get first image with fallback
-            let imageHtml = '';
-            if (property.high_quality_photos_array && property.high_quality_photos_array.length > 0) {
-                imageHtml = `<img src="${property.high_quality_photos_array[0]}" alt="${title}" class="property-image w-full h-32 object-cover group-hover:scale-110 transition-transform duration-500" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />`;
-            } else if (property.first_photo_url && property.first_photo_url !== 'N/A') {
-                imageHtml = `<img src="${property.first_photo_url}" alt="${title}" class="property-image w-full h-32 object-cover group-hover:scale-110 transition-transform duration-500" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />`;
-            } else if (property.photos && property.photos.length > 0) {
-                imageHtml = `<img src="${property.photos[0]}" alt="${title}" class="property-image w-full h-32 object-cover group-hover:scale-110 transition-transform duration-500" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />`;
-            }
-
-            // Add placeholder if no image
-            if (!imageHtml) {
-                imageHtml = `<div class="flex items-center justify-center h-24 bg-gradient-to-br from-slate-800 via-slate-700 to-slate-600"><i class="fas fa-home text-3xl text-slate-500"></i></div>`;
-            } else {
-                imageHtml += `<div class="flex items-center justify-center h-24 bg-gradient-to-br from-slate-800 via-slate-700 to-slate-600" style="display: none;"><i class="fas fa-home text-3xl text-slate-500"></i></div>`;
-            }
-
-            // Photo count badge with dark design
-            let photoBadgeHtml = '';
-            if ((allPhotos && allPhotos.length > 0) || photoCount > 0) {
-                const count = allPhotos.length > 0 ? allPhotos.length : photoCount;
-                photoBadgeHtml = `
-                    <div class="absolute top-2 right-2 bg-slate-800/90 backdrop-blur-md border border-slate-600/50 text-slate-300 px-2 py-1 rounded-full font-semibold text-xs shadow-lg">
-                        <i class="fas fa-camera mr-1"></i>
-                        ${count}
-                    </div>
-                `;
-            }
-
-            // Property type badge
-            const propertyTypeBadge = `
-                <div class="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-semibold bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-700 border border-blue-200">
-                    <i class="fas fa-home mr-1.5"></i>
-                    ${propertyType}
-                </div>
-            `;
-
-            // Bedrooms and bathrooms info
-            const propertyInfo = (bedrooms !== 'N/A' || bathrooms !== 'N/A') ? `
-                <div class="flex items-center space-x-3 text-slate-600">
-                    ${bedrooms !== 'N/A' ? `
-                        <div class="flex items-center">
-                            <i class="fas fa-bed text-blue-500 mr-1.5"></i>
-                            <span class="text-sm font-medium">${bedrooms}</span>
-                        </div>
-                    ` : ''}
-                    ${bathrooms !== 'N/A' ? `
-                        <div class="flex items-center">
-                            <i class="fas fa-bath text-blue-500 mr-1.5"></i>
-                            <span class="text-sm font-medium">${bathrooms}</span>
-                        </div>
-                    ` : ''}
-                </div>
-            ` : '';
-
-            return `
-                <div class="property-card w-64 max-w-64 bg-slate-900 rounded-xl shadow-2xl border border-slate-700 overflow-hidden cursor-pointer group hover:shadow-3xl hover:-translate-y-1 transition-all duration-300 transform backdrop-blur-sm relative" onclick="window.open('/properties/${propertyId}', '_blank')" style="box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.4);">
-                    <!-- Close Button -->
-                    <button class="absolute top-2 right-2 z-10 bg-slate-800/80 hover:bg-slate-700/90 text-slate-300 hover:text-white rounded-full p-1.5 transition-all duration-200 opacity-0 group-hover:opacity-100" onclick="event.stopPropagation(); infoWindow.close();">
-                        <i class="fas fa-times text-xs"></i>
-                    </button>
-                    
-                    <!-- Property Image with Dark Overlay -->
-                    <div class="relative h-24 bg-gradient-to-br from-slate-800 to-slate-900 overflow-hidden">
-                        ${imageHtml}
-                        ${photoBadgeHtml}
-                        
-                        <!-- Dark Gradient Overlay -->
-                        <div class="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent"></div>
-                        
-                        <!-- Dark Price Badge -->
-                        <div class="absolute bottom-2 left-2 right-2">
-                            <div class="bg-gradient-to-r from-emerald-600 via-emerald-700 to-green-700 text-white rounded-lg px-3 py-1.5 shadow-lg backdrop-blur-sm">
-                                <div class="text-xs font-bold text-center tracking-wide">${price}</div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Property Details with Dark Theme -->
-                    <div class="p-3 bg-gradient-to-b from-slate-900 to-slate-800">
-                        <!-- Title and Location -->
-                        <div class="mb-2">
-                            <h3 class="font-bold text-xs text-slate-100 line-clamp-2 leading-tight group-hover:text-blue-400 transition-colors duration-300 mb-1">
-                                ${title.length > 30 ? title.substring(0, 30) + '...' : title}
-                            </h3>
-                            <div class="flex items-center text-slate-400 text-xs">
-                                <i class="fas fa-map-marker-alt text-red-400 mr-1.5"></i>
-                                <span class="truncate">${location.length > 20 ? location.substring(0, 20) + '...' : location}</span>
-                            </div>
-                        </div>
-                        
-                        <!-- Property Type Badge (Dark) -->
-                        <div class="mb-2">
-                            <div class="inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold bg-slate-700 text-slate-300 border border-slate-600">
-                                <i class="fas fa-home mr-1"></i>
-                                ${propertyType}
-                            </div>
-                        </div>
-                        
-                        <!-- Property Info (Bedrooms/Bathrooms) - Dark -->
-                        ${propertyInfo ? `
-                            <div class="flex items-center space-x-2 text-slate-400 mb-2">
-                                ${bedrooms !== 'N/A' ? `
-                                    <div class="flex items-center">
-                                        <i class="fas fa-bed text-blue-400 mr-1"></i>
-                                        <span class="text-xs font-medium">${bedrooms}</span>
-                                    </div>
-                                ` : ''}
-                                ${bathrooms !== 'N/A' ? `
-                                    <div class="flex items-center">
-                                        <i class="fas fa-bath text-blue-400 mr-1"></i>
-                                        <span class="text-xs font-medium">${bathrooms}</span>
-                                    </div>
-                                ` : ''}
-                            </div>
-                        ` : ''}
-                        
-                        <!-- Action Button with Dark Design -->
-                        <div class="space-y-1">
-                            <button class="w-full bg-gradient-to-r from-blue-600 via-blue-700 to-indigo-700 hover:from-blue-700 hover:via-blue-800 hover:to-indigo-800 text-white px-3 py-2 rounded-lg font-semibold text-xs transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-xl flex items-center justify-center group">
-                                <i class="fas fa-eye mr-1.5 group-hover:scale-110 transition-transform duration-200"></i>
-                                View Details
-                            </button>
-                            
-                            ${availableDate && availableDate !== 'N/A' ? `
-                                <div class="flex items-center justify-center text-xs text-emerald-400 bg-emerald-900/30 px-2 py-1 rounded-md font-medium border border-emerald-700">
-                                    <i class="fas fa-calendar mr-1.5"></i>
-                                    ${availableDate}
-                                </div>
-                            ` : ''}
-                        </div>
-                    </div>
-                </div>
-            `;
-        }
-
-        // Generate colors for property managers
-        let companyColors = {};
-        let colorPalette = [
-            '#ef4444', '#10b981', '#f59e0b', '#8b5cf6', '#06b6d4', '#84cc16', '#f97316', '#6366f1',
-            '#ec4899', '#14b8a6', '#f43f5e', '#8b5a2b', '#7c3aed', '#059669', '#dc2626', '#0891b2',
-            '#be185d', '#7c2d12', '#1e40af', '#e11d48', '#0d9488', '#ca8a04', '#9333ea', '#0891b2',
-            '#dc2626', '#059669', '#7c3aed', '#8b5a2b', '#f43f5e', '#14b8a6', '#ec4899', '#6366f1',
-            '#f97316', '#84cc16', '#06b6d4', '#8b5cf6', '#f59e0b', '#10b981', '#ef4444', '#e11d48',
-            '#0d9488', '#ca8a04', '#9333ea', '#0891b2', '#dc2626', '#059669', '#7c3aed', '#8b5a2b'
-        ];
-
-        // Initialize agent colors based on unique agent names
-        function initializeAgentColors(properties) {
-            const uniqueAgents = [...new Set(properties.map(p => p.agent_name).filter(a => a && a !== 'N/A' && a !== '' && a !== null))];
-            
-            console.log('🎨 Found unique agents:', uniqueAgents);
-            
-            uniqueAgents.forEach((agent, index) => {
-                const colorIndex = index % colorPalette.length;
-                agentColors[agent] = {
-                    fill: colorPalette[colorIndex],
-                    stroke: '#ffffff'
-                };
-                console.log(`🎨 Agent "${agent}" gets color: ${colorPalette[colorIndex]}`);
-            });
-
-            // Add Others category for null/empty values
-            agentColors['Others'] = { fill: '#6b7280', stroke: '#ffffff' };
-            agentColors['default'] = { fill: '#3b82f6', stroke: '#ffffff' };
-
-            console.log('🎨 Initialized colors for agents:', Object.keys(agentColors));
-        }
-
-        // Get agent color for markers
-        function getAgentColor(agent) {
-            if (!agent || agent === 'N/A' || agent === '' || agent === null) {
-                return agentColors['Others'] || agentColors['default'];
-            }
-
-            // Check for exact match first
-            if (agentColors[agent]) {
-                return agentColors[agent];
-            }
-
-            // Check for partial matches
-            for (const [key, color] of Object.entries(agentColors)) {
-                if (key !== 'default' && key !== 'Others' && key !== 'N/A' && key !== '') {
-                    if (agent.toLowerCase().includes(key.toLowerCase()) || 
-                        key.toLowerCase().includes(agent.toLowerCase())) {
-                        return color;
-                    }
-                }
-            }
-
-            // Generate a new color for unknown agents
-            const colorIndex = Object.keys(agentColors).length % colorPalette.length;
-            const newColor = {
-                fill: colorPalette[colorIndex],
-                stroke: '#ffffff'
-            };
-            agentColors[agent] = newColor;
-            return newColor;
-        }
-
-        // Clear all markers
-        function clearMarkers() {
+        function createMarkers(properties) {
+            // Clear existing markers
             markers.forEach(marker => marker.setMap(null));
             markers = [];
+            window.markers = markers;
+
+            properties.forEach(property => {
+                const lat = parseFloat(property.latitude);
+                const lng = parseFloat(property.longitude);
+
+                const marker = new google.maps.Marker({
+                    position: { lat, lng },
+                    map: map,
+                    title: property.title,
+                    animation: google.maps.Animation.DROP,
+                    icon: {
+                        path: google.maps.SymbolPath.CIRCLE,
+                        scale: 10,
+                        fillColor: '#d4af37',
+                        fillOpacity: 1,
+                        strokeColor: '#1e3a5f',
+                        strokeWeight: 3
+                    }
+                });
+                
+                // Add hover effect
+                marker.addListener('mouseover', function() {
+                    this.setIcon({
+                        path: google.maps.SymbolPath.CIRCLE,
+                        scale: 12,
+                        fillColor: '#e8c547',
+                        fillOpacity: 1,
+                        strokeColor: '#1e3a5f',
+                        strokeWeight: 3
+                    });
+                });
+                
+                marker.addListener('mouseout', function() {
+                    this.setIcon({
+                        path: google.maps.SymbolPath.CIRCLE,
+                        scale: 10,
+                        fillColor: '#d4af37',
+                        fillOpacity: 1,
+                        strokeColor: '#1e3a5f',
+                        strokeWeight: 3
+                    });
+                });
+
+                marker.addListener('click', () => {
+                    // Get the first image or use a placeholder
+                    const imageUrl = property.first_photo_url || 
+                                   (property.high_quality_photos_array && property.high_quality_photos_array[0]) || 
+                                   'https://via.placeholder.com/380x200/1e3a5f/d4af37?text=No+Image';
+                    
+                    const content = `
+                        <div class="info-window-card">
+                            <img src="${imageUrl}" alt="${property.title || 'Property'}" class="info-window-image" onerror="this.src='https://via.placeholder.com/380x200/1e3a5f/d4af37?text=No+Image'">
+                            <div class="info-window-content">
+                                <div class="info-window-header">
+                                    <h3 class="info-window-title">${property.title || 'Property Details'}</h3>
+                                    <div class="info-window-price">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <circle cx="12" cy="12" r="10"/>
+                                            <path d="M12 6v12M15 9H9.5a2.5 2.5 0 0 0 0 5h5a2.5 2.5 0 0 1 0 5H9"/>
+                                        </svg>
+                                        ${property.formatted_price || property.price || 'Price not available'}
+                                    </div>
+                                </div>
+                                <div class="info-window-details">
+                                    ${property.location ? `
+                                        <div class="info-window-detail-item">
+                                            <svg viewBox="0 0 24 24" fill="currentColor">
+                                                <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+                                            </svg>
+                                            <span><strong>Location:</strong> ${property.location}</span>
+                                        </div>
+                                    ` : ''}
+                                    ${property.property_type ? `
+                                        <div class="info-window-detail-item">
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/>
+                                                <path d="M9 22V12h6v10"/>
+                                            </svg>
+                                            <span><strong>Type:</strong> ${property.property_type}</span>
+                                        </div>
+                                    ` : ''}
+                                    ${property.agent_name && property.agent_name !== 'N/A' ? `
+                                        <div class="info-window-detail-item">
+                                            <svg viewBox="0 0 24 24" fill="currentColor">
+                                                <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                                            </svg>
+                                            <span><strong>Agent:</strong> ${property.agent_name}</span>
+                                        </div>
+                                    ` : ''}
+                                    ${property.couples_allowed ? `
+                                        <div class="info-window-detail-item">
+                                            <svg viewBox="0 0 24 24" fill="currentColor">
+                                                <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/>
+                                            </svg>
+                                            <span><strong>Couples:</strong> ${property.couples_allowed === 'Yes' ? '✓ Allowed' : '✗ Not Allowed'}</span>
+                                        </div>
+                                    ` : ''}
+                                </div>
+                                <div class="info-window-footer">
+                                    <a href="/properties/${property.id}" class="info-window-btn">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                                            <circle cx="12" cy="12" r="3"/>
+                                        </svg>
+                                        View Full Details
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    infoWindow.setContent(content);
+                    infoWindow.open(map, marker);
+                });
+
+                markers.push(marker);
+            });
             
+            // Update global markers reference
+            window.markers = markers;
         }
 
-        // Fit map to all properties
         function fitMapToProperties(properties) {
             if (properties.length === 0) return;
 
             const bounds = new google.maps.LatLngBounds();
             properties.forEach(property => {
-                bounds.extend({
-                    lat: parseFloat(property.latitude),
-                    lng: parseFloat(property.longitude)
-                });
-            });
-
-            if (properties.length === 1) {
-                map.setCenter(bounds.getCenter());
-                map.setZoom(15);
-                        } else {
-                map.fitBounds(bounds);
-            }
-        }
-
-
-        // Fit map to bounds
-        function fitToBounds() {
-            if (properties.length === 0) return;
-            
-            const validProperties = properties.filter(property => {
                 const lat = parseFloat(property.latitude);
                 const lng = parseFloat(property.longitude);
-                return !isNaN(lat) && !isNaN(lng);
-            });
-            
-            fitMapToProperties(validProperties);
-        }
-
-        // Reset map view
-        function resetMap() {
-            map.setCenter({ lat: 51.5074, lng: -0.1278 });
-            map.setZoom(12);
-        }
-
-        // Show error message
-        function showError(message) {
-            document.getElementById('loadingScreen').style.display = 'none';
-            document.getElementById('errorScreen').style.display = 'block';
-            document.getElementById('errorMessage').textContent = message;
-        }
-
-        // Handle Google Maps API errors
-        window.gm_authFailure = function() {
-            showError('Google Maps API authentication failed. Please check your API key in the .env file.');
-        };
-
-        // Handle window errors
-        window.addEventListener('error', function(event) {
-            console.error('❌ JavaScript error:', event.error);
-            if (event.error && event.error.message.includes('Google Maps')) {
-                showError('Google Maps API error: ' + event.error.message);
-            }
-        });
-
-        // Handle unhandled promise rejections
-        window.addEventListener('unhandledrejection', function(event) {
-            console.error('❌ Unhandled promise rejection:', event.reason);
-            if (event.reason && event.reason.message && event.reason.message.includes('Google Maps')) {
-                showError('Google Maps API error: ' + event.reason.message);
-            }
-        });
-
-        // Filter properties based on current filter values
-        function filterProperties() {
-            const location = document.getElementById('locationFilter').value;
-            const propertyType = document.getElementById('propertyTypeFilter').value;
-            const agentElement = document.getElementById('agentFilter');
-            const agent = agentElement ? agentElement.value : '';
-            const minPrice = parseFloat(document.getElementById('minPriceFilter').value) || 0;
-            const maxPrice = parseFloat(document.getElementById('maxPriceFilter').value) || Infinity;
-            const couplesAllowed = document.getElementById('couplesAllowedFilter').value;
-
-            filteredProperties = properties.filter(property => {
-                // Location filter
-                if (location && property.location !== location) {
-                    return false;
-                }
-
-                // Property type filter
-                if (propertyType && property.property_type !== propertyType) {
-                    return false;
-                }
-
-                // Agent filter
-                if (agent && property.agent_name !== agent) {
-                    return false;
-                }
-
-                // Handle "Others" category filter
-                if (showOthersOnly) {
-                    const hasAgent = property.agent_name && 
-                                   property.agent_name !== 'N/A' && 
-                                   property.agent_name !== '' && 
-                                   property.agent_name !== null;
-                    if (hasAgent) {
-                        return false;
-                    }
-                }
-
-                // Price filters
-                const price = parseFloat(property.price) || 0;
-                if (price < minPrice || price > maxPrice) {
-                    return false;
-                }
-
-                // Couples allowed filter
-                if (couplesAllowed) {
-                    const propertyCouplesOk = property.couples_ok;
-                    const propertyCouplesAllowed = property.couples_allowed;
-                    
-                    if (couplesAllowed === 'yes') {
-                        // Check if couples are welcome
-                        const isCouplesWelcome = (propertyCouplesOk && propertyCouplesOk.toString().toLowerCase().includes('yes')) ||
-                                              (propertyCouplesAllowed && propertyCouplesAllowed.toString().toLowerCase().includes('yes')) ||
-                                              (propertyCouplesAllowed && propertyCouplesAllowed.toString().toLowerCase().includes('welcome'));
-                        if (!isCouplesWelcome) {
-                            return false;
-                        }
-                    }
-                    if (couplesAllowed === 'no') {
-                        // Check if singles only
-                        const isSinglesOnly = (propertyCouplesOk && propertyCouplesOk.toString().toLowerCase().includes('no')) ||
-                                            (propertyCouplesAllowed && propertyCouplesAllowed.toString().toLowerCase().includes('no')) ||
-                                            (propertyCouplesAllowed && propertyCouplesAllowed.toString().toLowerCase().includes('singles'));
-                        if (!isSinglesOnly) {
-                            return false;
-                        }
-                    }
-                }
-
-                return true;
+                bounds.extend({ lat, lng });
             });
 
-            console.log(`🔍 Filtered to ${filteredProperties.length} properties`);
-            return filteredProperties;
-        }
-
-        // Apply filters and update map
-        function applyFilters() {
-            console.log('🔍 Applying filters...');
+            map.fitBounds(bounds);
             
-            const validProperties = filterProperties().filter(property => {
-                const lat = parseFloat(property.latitude);
-                const lng = parseFloat(property.longitude);
-                return !isNaN(lat) && !isNaN(lng) && 
-                       lat >= -90 && lat <= 90 && 
-                       lng >= -180 && lng <= 180;
+            // Don't zoom in too much for single property
+            const listener = google.maps.event.addListener(map, "idle", function() {
+                if (map.getZoom() > 16) map.setZoom(16);
+                google.maps.event.removeListener(listener);
             });
-
-            console.log(`📍 Filtered to ${validProperties.length} valid properties`);
-
-            // Update property count
-            document.getElementById('propertyCount').textContent = 
-                `${validProperties.length} properties (${properties.length} total)`;
-
-            // Recreate markers with filtered data
-            createMarkers(validProperties);
-            
-
-            // Fit map to filtered properties
-            if (validProperties.length > 0) {
-                fitMapToProperties(validProperties);
-            }
         }
 
-        // Clear all filters
-        function clearFilters() {
-            document.getElementById('locationFilter').value = '';
-            document.getElementById('propertyTypeFilter').value = '';
-            const agentFilter = document.getElementById('agentFilter');
-            if (agentFilter) {
-                agentFilter.value = '';
-            }
-            document.getElementById('minPriceFilter').value = '';
-            document.getElementById('maxPriceFilter').value = '';
-            document.getElementById('couplesAllowedFilter').value = '';
+        function toggleMapView(mapType) {
+            map.setMapTypeId(mapType);
             
-            // Reset flags
-            showOthersOnly = false;
+            // Update button states
+            const mapBtn = document.getElementById('mapViewBtn');
+            const satBtn = document.getElementById('satelliteViewBtn');
             
-            // Reset to show all properties
-            filteredProperties = properties;
-            applyFilters();
-        }
-
-        // Toggle filters panel
-        function toggleFiltersPanel() {
-            const panel = document.getElementById('filtersPanel');
-            const button = document.getElementById('togglePanelBtn');
-            
-            if (panel.classList.contains('panel-hidden')) {
-                panel.classList.remove('panel-hidden');
-                button.innerHTML = '<i class="fas fa-times mr-2"></i>Close';
+            if (mapType === 'roadmap') {
+                mapBtn.classList.add('active');
+                satBtn.classList.remove('active');
             } else {
-                panel.classList.add('panel-hidden');
-                button.innerHTML = '<i class="fas fa-filter mr-2"></i>Filters';
+                satBtn.classList.add('active');
+                mapBtn.classList.remove('active');
             }
         }
 
-
-        // Initialize filters from URL parameters
-        function initializeFiltersFromURL() {
-            const urlParams = new URLSearchParams(window.location.search);
+        function toggleMapFilters() {
+            const text = document.getElementById('filterToggleText');
+            const chevron = document.getElementById('filterChevron');
+            const filtersContent = document.getElementById('mapFiltersContent');
             
-            if (urlParams.get('location')) {
-                document.getElementById('locationFilter').value = urlParams.get('location');
-            }
-            if (urlParams.get('property_type')) {
-                document.getElementById('propertyTypeFilter').value = urlParams.get('property_type');
-            }
-            if (urlParams.get('agent_name')) {
-                const agentFilter = document.getElementById('agentFilter');
-                if (agentFilter) {
-                    agentFilter.value = urlParams.get('agent_name');
-                }
-            }
-            if (urlParams.get('min_price')) {
-                document.getElementById('minPriceFilter').value = urlParams.get('min_price');
-            }
-            if (urlParams.get('max_price')) {
-                document.getElementById('maxPriceFilter').value = urlParams.get('max_price');
-            }
-            if (urlParams.get('couples_allowed')) {
-                document.getElementById('couplesAllowedFilter').value = urlParams.get('couples_allowed');
-            }
-        }
-
-        // Add event listeners for real-time filtering
-        function addFilterEventListeners() {
-            // Select filters with immediate effect
-            const selectFilters = [
-                'locationFilter',
-                'propertyTypeFilter', 
-                'couplesAllowedFilter'
-            ];
-
-            // Add agent filter only if it exists (when user is authenticated)
-            const agentFilter = document.getElementById('agentFilter');
-            if (agentFilter) {
-                selectFilters.push('agentFilter');
-            }
-
-            selectFilters.forEach(filterId => {
-                const element = document.getElementById(filterId);
-                if (element) {
-                    element.addEventListener('change', applyFilters);
-                }
-            });
-
-            // Price filters with debounce
-            let searchTimeout;
-            const priceFilters = ['minPriceFilter', 'maxPriceFilter'];
-            priceFilters.forEach(filterId => {
-                const element = document.getElementById(filterId);
-                if (element) {
-                    element.addEventListener('input', function() {
-                        clearTimeout(searchTimeout);
-                        searchTimeout = setTimeout(() => {
-                            applyFilters();
-                        }, 500);
-                    });
-                }
-            });
-        }
-
-        // Toggle mobile filters
-        function toggleFilters() {
-            const filtersContent = document.getElementById('filtersContent');
-            const filterToggleText = document.getElementById('filterToggleText');
-            const filterToggleIcon = document.getElementById('filterToggleIcon');
-            
-            if (filtersContent.classList.contains('show')) {
-                filtersContent.classList.remove('show');
-                filterToggleText.textContent = 'Show Filters';
-                filterToggleIcon.classList.remove('fa-chevron-up');
-                filterToggleIcon.classList.add('fa-chevron-down');
-                // Add collapsed class to body for responsive map
-                document.body.classList.add('filters-collapsed');
+            if (text.textContent === 'Show Filters') {
+                text.textContent = 'Hide Filters';
+                chevron.style.transform = 'rotate(180deg)';
+                filtersContent.classList.add('active');
             } else {
-                filtersContent.classList.add('show');
-                filterToggleText.textContent = 'Hide Filters';
-                filterToggleIcon.classList.remove('fa-chevron-down');
-                filterToggleIcon.classList.add('fa-chevron-up');
-                // Remove collapsed class from body
-                document.body.classList.remove('filters-collapsed');
+                text.textContent = 'Show Filters';
+                chevron.style.transform = 'rotate(0deg)';
+                filtersContent.classList.remove('active');
             }
-            
-            // Trigger map resize after transition
-            setTimeout(() => {
-                if (typeof google !== 'undefined' && google.maps) {
-                    google.maps.event.trigger(map, 'resize');
-                }
-            }, 350);
         }
         
-
+        function applyMapFilters() {
+            const location = document.getElementById('filterLocation').value.toLowerCase();
+            const propertyType = document.getElementById('filterPropertyType').value.toLowerCase();
+            const minPrice = parseFloat(document.getElementById('filterMinPrice').value) || 0;
+            const maxPrice = parseFloat(document.getElementById('filterMaxPrice').value) || Infinity;
+            const couplesAllowed = document.getElementById('filterCouplesAllowed').value.toLowerCase();
+            @auth
+            const agentName = document.getElementById('filterAgentName')?.value.toLowerCase() || '';
+            @endauth
+            
+            let visibleCount = 0;
+            
+            // Filter markers
+            if (window.markers) {
+                window.markers.forEach((marker, index) => {
+                    const property = window.allProperties[index];
+                    if (!property) return;
+                    
+                    let visible = true;
+                    
+                    // Location filter
+                    if (location && property.location?.toLowerCase() !== location) {
+                        visible = false;
+                    }
+                    
+                    // Property type filter
+                    if (propertyType && property.property_type?.toLowerCase() !== propertyType) {
+                        visible = false;
+                    }
+                    
+                    // Price filter
+                    const price = parseFloat(property.price) || 0;
+                    if (price < minPrice || price > maxPrice) {
+                        visible = false;
+                    }
+                    
+                    // Couples allowed filter
+                    if (couplesAllowed && property.couples_allowed?.toLowerCase() !== couplesAllowed) {
+                        visible = false;
+                    }
+                    
+                    @auth
+                    // Agent name filter (only for authenticated users)
+                    if (agentName && property.agent_name?.toLowerCase() !== agentName) {
+                        visible = false;
+                    }
+                    @endauth
+                    
+                    marker.setVisible(visible);
+                    if (visible) visibleCount++;
+                });
+            }
+            
+            // Update property count
+            const countElement = document.getElementById('propertyCount');
+            if (countElement) {
+                countElement.textContent = `${visibleCount} properties visible`;
+            }
+            
+            // Optionally close the filters after applying
+            toggleMapFilters();
+        }
+        
+        function clearMapFilters() {
+            // Reset all filter inputs
+            document.getElementById('filterLocation').value = '';
+            document.getElementById('filterPropertyType').value = '';
+            document.getElementById('filterMinPrice').value = '';
+            document.getElementById('filterMaxPrice').value = '';
+            document.getElementById('filterCouplesAllowed').value = '';
+            @auth
+            const agentFilter = document.getElementById('filterAgentName');
+            if (agentFilter) agentFilter.value = '';
+            @endauth
+            
+            // Show all markers
+            if (window.markers) {
+                window.markers.forEach(marker => marker.setVisible(true));
+            }
+            
+            // Update property count
+            const countElement = document.getElementById('propertyCount');
+            if (countElement && window.allProperties) {
+                countElement.textContent = `${window.allProperties.length} properties loaded`;
+            }
+        }
     </script>
 </body>
 </html>

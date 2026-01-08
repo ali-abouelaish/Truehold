@@ -316,7 +316,11 @@ Route::middleware('auth')->get('/admin/test-rental-template', function (\Illumin
 
 // Authentication routes
 Route::middleware('guest')->group(function () {
-    Route::get('/login', function () {
+    Route::get('/login', function (Request $request) {
+        // Store the intended URL if provided
+        if ($request->has('redirect')) {
+            session(['url.intended' => $request->get('redirect')]);
+        }
         return view('auth.login');
     })->name('login');
     
@@ -328,6 +332,8 @@ Route::middleware('guest')->group(function () {
 
         if (Auth::attempt($credentials)) {
             $request->session()->regenerate();
+            
+            // Redirect to the intended URL, or default to /admin
             return redirect()->intended('/admin');
         }
 

@@ -229,6 +229,87 @@
             </div>
         </div>
         
+        <!-- Property Flag/Badge -->
+        <div class="bg-gradient-to-r from-yellow-50 to-amber-50 rounded-lg p-6 border-2 border-yellow-200">
+            <h4 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                <i class="fas fa-flag mr-2 text-yellow-600"></i>Property Flag/Badge
+            </h4>
+            <p class="text-sm text-gray-600 mb-4">Add a promotional flag or badge to highlight this property (e.g., "Premium", "Hot Deal", "Discount", "New")</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label for="flag" class="block text-sm font-medium text-gray-700 mb-2">
+                        Flag Text
+                    </label>
+                    <input type="text" name="flag" id="flag" 
+                           value="{{ old('flag', $property->flag) }}"
+                           class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-yellow-500 focus:border-yellow-500"
+                           placeholder="e.g., Premium, Hot Deal, Sale, Discount">
+                    <p class="mt-1 text-xs text-gray-500">Leave empty to remove the flag</p>
+                    @error('flag')
+                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                    @enderror
+                </div>
+                
+                <div>
+                    <label for="flag_color" class="block text-sm font-medium text-gray-700 mb-2">
+                        Flag Color
+                    </label>
+                    <div class="flex gap-3 items-center">
+                        <select name="flag_color" id="flag_color" onchange="updateFlagPreview()"
+                                class="flex-1 border-gray-300 rounded-lg shadow-sm focus:ring-yellow-500 focus:border-yellow-500">
+                            <option value="">Default (Gold)</option>
+                            <option value="linear-gradient(135deg, #f59e0b, #d97706)" {{ old('flag_color', $property->flag_color) == 'linear-gradient(135deg, #f59e0b, #d97706)' ? 'selected' : '' }}>🟠 Orange</option>
+                            <option value="linear-gradient(135deg, #ef4444, #dc2626)" {{ old('flag_color', $property->flag_color) == 'linear-gradient(135deg, #ef4444, #dc2626)' ? 'selected' : '' }}>🔴 Red</option>
+                            <option value="linear-gradient(135deg, #10b981, #059669)" {{ old('flag_color', $property->flag_color) == 'linear-gradient(135deg, #10b981, #059669)' ? 'selected' : '' }}>🟢 Green</option>
+                            <option value="linear-gradient(135deg, #3b82f6, #2563eb)" {{ old('flag_color', $property->flag_color) == 'linear-gradient(135deg, #3b82f6, #2563eb)' ? 'selected' : '' }}>🔵 Blue</option>
+                            <option value="linear-gradient(135deg, #8b5cf6, #7c3aed)" {{ old('flag_color', $property->flag_color) == 'linear-gradient(135deg, #8b5cf6, #7c3aed)' ? 'selected' : '' }}>🟣 Purple</option>
+                            <option value="linear-gradient(135deg, #ec4899, #db2777)" {{ old('flag_color', $property->flag_color) == 'linear-gradient(135deg, #ec4899, #db2777)' ? 'selected' : '' }}>🌸 Pink</option>
+                            <option value="linear-gradient(135deg, #14b8a6, #0d9488)" {{ old('flag_color', $property->flag_color) == 'linear-gradient(135deg, #14b8a6, #0d9488)' ? 'selected' : '' }}>🩵 Teal</option>
+                            <option value="linear-gradient(135deg, #d4af37, #b8941f)" {{ old('flag_color', $property->flag_color) == 'linear-gradient(135deg, #d4af37, #b8941f)' ? 'selected' : '' }}>⭐ Gold</option>
+                        </select>
+                        <div id="flagPreview" class="px-4 py-2 text-white text-xs font-bold rounded shadow" style="background: {{ $property->flag_color ?: 'linear-gradient(135deg, #d4af37, #b8941f)' }}">
+                            PREVIEW
+                        </div>
+                    </div>
+                    <p class="mt-1 text-xs text-gray-500">Choose a color for the flag badge</p>
+                    @error('flag_color')
+                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                    @enderror
+                </div>
+            </div>
+            
+            <!-- Flag Preview -->
+            <div class="mt-4 p-4 bg-white rounded-lg border border-yellow-300">
+                <p class="text-xs font-medium text-gray-700 mb-2">Live Preview:</p>
+                <div class="relative inline-block">
+                    <div class="w-64 h-40 bg-gray-200 rounded-lg overflow-hidden">
+                        <img src="{{ $property->first_photo_url ?: 'https://via.placeholder.com/300x200' }}" alt="Preview" class="w-full h-full object-cover">
+                    </div>
+                    <span id="flagLivePreview" class="absolute top-2 right-0 px-4 py-2 text-xs font-bold text-white shadow-lg" 
+                          style="background: {{ $property->flag_color ?: 'linear-gradient(135deg, #d4af37, #b8941f)' }}; clip-path: polygon(0 0, 100% 0, 100% 100%, 8px 100%, 0 calc(100% - 8px)); display: {{ $property->flag ? 'block' : 'none' }};">
+                        {{ $property->flag ?: 'SAMPLE' }}
+                    </span>
+                </div>
+            </div>
+        </div>
+        
+        <script>
+            function updateFlagPreview() {
+                const flagText = document.getElementById('flag').value || 'SAMPLE';
+                const flagColor = document.getElementById('flag_color').value || 'linear-gradient(135deg, #d4af37, #b8941f)';
+                const flagPreview = document.getElementById('flagPreview');
+                const flagLivePreview = document.getElementById('flagLivePreview');
+                
+                flagPreview.style.background = flagColor;
+                flagLivePreview.style.background = flagColor;
+                flagLivePreview.textContent = flagText;
+                flagLivePreview.style.display = flagText ? 'block' : 'none';
+            }
+            
+            document.getElementById('flag').addEventListener('input', updateFlagPreview);
+            document.getElementById('flag_color').addEventListener('change', updateFlagPreview);
+        </script>
+        
         <!-- Property Terms -->
         <div class="bg-gray-50 rounded-lg p-6">
             <h4 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">

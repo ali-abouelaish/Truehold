@@ -3,2217 +3,2072 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="default">
-    <title>{{ $property->title ?: 'Property Details' }} - TRUEHOLD</title>
+    <meta name="description" content="View detailed information about {{ $property->title }} on TrueHold.">
+    <meta name="theme-color" content="#1e3a5f">
+    <title>{{ $property->title ?: 'Property Details' }} - TrueHold</title>
     
     <!-- Favicon -->
     <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
     <link rel="icon" type="image/jpeg" href="{{ asset('images/truehold-logo.jpg') }}">
     <link rel="apple-touch-icon" href="{{ asset('images/truehold-logo.jpg') }}">
-    <script src="https://cdn.tailwindcss.com"></script>
+    
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     
     <style>
-        /* Clean Dark Mode - Simple and Effective */
-        * {
-            background-color: #1a1a1a !important;
-            color: #ffffff !important;
-        }
-        
-        html, body {
-            background-color: #1a1a1a !important;
-            color: #ffffff !important;
-            min-height: 100vh;
-        }
-        
-        .property-card, .image-gallery, .card {
-            background-color: #2d2d2d !important;
-            border: 1px solid #444444 !important;
-            color: #ffffff !important;
-        }
-        
-        .action-button, .success-button, .secondary-button {
-            background-color: #3d3d3d !important;
-            border: 1px solid #555555 !important;
-            color: #ffffff !important;
-        }
-        
-        .action-button:hover, .success-button:hover, .secondary-button:hover {
-            background-color: #4d4d4d !important;
-            border-color: #666666 !important;
-        }
-        
-        .bg-white, .bg-gray-50, .bg-gray-100, .bg-gray-200, .bg-gray-300, .bg-gray-400, .bg-gray-500, .bg-gray-600, .bg-gray-700, .bg-gray-800, .bg-gray-900 {
-            background-color: #1a1a1a !important;
-        }
-        
-        .text-gray-900, .text-gray-800, .text-gray-700, .text-gray-600, .text-gray-500, .text-gray-400, .text-gray-300, .text-gray-200, .text-gray-100, .text-gray-50 {
-            color: #ffffff !important;
-        }
-        
-        /* Ensure main container and all sections are dark */
-        main, .min-h-screen, .max-w-7xl, .mx-auto, .px-4, .sm\\:px-6, .lg\\:px-8, .py-4, .sm\\:py-8 {
-            background-color: #1a1a1a !important;
-        }
-        
-        /* Ensure all divs and sections are dark */
-        div, section, article, aside, header, footer, nav {
-            background-color: #1a1a1a !important;
-        }
-        
-        /* Remove any remaining white backgrounds */
-        .bg-white, .bg-gray-50, .bg-gray-100, .bg-gray-200, .bg-gray-300, .bg-gray-400, .bg-gray-500, .bg-gray-600, .bg-gray-700, .bg-gray-800, .bg-gray-900 {
-            background-color: #1a1a1a !important;
-        }
-        
-        .action-button, .success-button, .secondary-button {
-            background-color: #3d3d3d !important;
-            border: 1px solid #555555 !important;
-            color: #ffffff !important;
-        }
-        
-        .action-button:hover, .success-button:hover, .secondary-button:hover {
-            background-color: #4d4d4d !important;
-            border-color: #666666 !important;
-        }
-        
-        /* Remove all white backgrounds */
-        .bg-white, .bg-gray-50, .bg-gray-100, .bg-gray-200, .bg-gray-300, .bg-gray-400, .bg-gray-500, .bg-gray-600, .bg-gray-700, .bg-gray-800, .bg-gray-900 {
-            background-color: #1a1a1a !important;
-        }
-        
-        /* Override any remaining white elements */
-        .bg-white, [class*="bg-white"], [class*="bg-gray-50"], [class*="bg-gray-100"], [class*="bg-gray-200"] {
-            background-color: #343E4E !important;
-        }
-        
-        /* Target specific elements that might be white */
-        .property-header, .property-overview, .image-gallery, .property-description, .property-details, .contact-info, .location-info, .quick-actions {
-            background-color: #343E4E !important;
-        }
-        
-        /* Override any card backgrounds */
-        .card, .glass-card, .property-card, .info-card, .detail-card, .feature-card, .location-card {
-            background: linear-gradient(135deg, #1f2937 0%, #374151 100%) !important;
-        }
-        
-        /* Override header section specifically */
-        .bg-white.border-b.border-gray-200.shadow-sm {
-            background-color: #343E4E !important;
-            border-color: #4b5563 !important;
-        }
-        
-        /* Override any remaining white elements with high specificity */
-        .max-w-7xl, .mx-auto, .px-4, .sm\\:px-6, .lg\\:px-8, .py-4, .sm\\:py-8 {
-            background-color: #343E4E !important;
-        }
-        
-        /* Override flex containers */
-        .flex, .flex-col, .sm\\:flex-row, .items-start, .sm\\:items-center, .justify-between, .space-y-3, .sm\\:space-y-0 {
-            background-color: #343E4E !important;
-        }
-        
-        /* Override any remaining white backgrounds */
-        .bg-white, .bg-gray-50, .bg-gray-100, .bg-gray-200, .bg-gray-300, .bg-gray-400, .bg-gray-500, .bg-gray-600, .bg-gray-700, .bg-gray-800, .bg-gray-900 {
-            background-color: #343E4E !important;
-        }
-        
-        /* Override any remaining white elements */
-        .bg-white, [class*="bg-white"], [class*="bg-gray-50"], [class*="bg-gray-100"], [class*="bg-gray-200"] {
-            background-color: #343E4E !important;
-        }
-        
-        /* Override any remaining white elements */
-        .bg-white, [class*="bg-white"], [class*="bg-gray-50"], [class*="bg-gray-100"], [class*="bg-gray-200"] {
-            background-color: #343E4E !important;
-        }
-        
-        html {
-            background-color: #343E4E !important;
-        }
-        
-        /* Ultra-aggressive overrides for any remaining white elements */
-        div, section, article, aside, header, main, footer, nav, ul, ol, li, p, span, a, button, input, textarea, select, form, fieldset, legend, label, table, thead, tbody, tr, td, th, h1, h2, h3, h4, h5, h6 {
-            background-color: #343E4E !important;
-        }
-        
-        /* Override any remaining white elements with maximum specificity */
-        .bg-white, .bg-gray-50, .bg-gray-100, .bg-gray-200, .bg-gray-300, .bg-gray-400, .bg-gray-500, .bg-gray-600, .bg-gray-700, .bg-gray-800, .bg-gray-900 {
-            background-color: #343E4E !important;
-        }
-        
-        /* Override any remaining white elements */
-        .bg-white, [class*="bg-white"], [class*="bg-gray-50"], [class*="bg-gray-100"], [class*="bg-gray-200"] {
-            background-color: #343E4E !important;
-        }
-        
-        /* Override any remaining white elements */
-        .bg-white, [class*="bg-white"], [class*="bg-gray-50"], [class*="bg-gray-100"], [class*="bg-gray-200"] {
-            background-color: #343E4E !important;
-        }
-        
-        .min-h-screen {
-            background-color: #343E4E !important;
-        }
-        
-        /* Force dark background on min-h-screen with maximum specificity */
-        .min-h-screen {
-            background-color: #343E4E !important;
-        }
-        
-        /* Force dark background on min-h-screen with maximum specificity */
-        .min-h-screen {
-            background-color: #343E4E !important;
-        }
-        
-        /* Force dark background on min-h-screen with maximum specificity */
-        .min-h-screen {
-            background-color: #343E4E !important;
-        }
-        
-        /* Force dark background on min-h-screen with maximum specificity */
-        .min-h-screen {
-            background-color: #343E4E !important;
-        }
-        
-        /* Force dark background on min-h-screen with maximum specificity */
-        .min-h-screen {
-            background-color: #343E4E !important;
-        }
-        
-        .gradient-header {
-            background: linear-gradient(135deg, #1f2937 0%, #374151 100%);
-            position: relative;
+/* ==========================================
+   TRUEHOLD - Property Details
+   Color Palette: White, Navy Blue, Gold
+   ========================================== */
+
+/* CSS Variables */
+:root {
+    --primary-navy: #1e3a5f;
+    --navy-dark: #152a45;
+    --navy-light: #2d5280;
+    --gold: #d4af37;
+    --gold-light: #e8c55c;
+    --gold-dark: #b8941f;
+    --white: #ffffff;
+    --off-white: #f8f9fa;
+    --light-gray: #e9ecef;
+    --gray: #6c757d;
+    --text-dark: #212529;
+    --shadow-sm: 0 2px 4px rgba(30, 58, 95, 0.08);
+    --shadow-md: 0 4px 12px rgba(30, 58, 95, 0.12);
+    --shadow-lg: 0 8px 24px rgba(30, 58, 95, 0.15);
+    --transition: all 0.3s ease;
+}
+
+/* Reset & Base Styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    color: var(--text-dark);
+    background-color: var(--off-white);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+    transition: var(--transition);
+    -webkit-tap-highlight-color: transparent;
+}
+
+button {
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+    transition: var(--transition);
+    -webkit-tap-highlight-color: transparent;
+}
+
+input,
+textarea {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+}
+
+/* Smooth Scrolling */
+html {
+    scroll-behavior: smooth;
+}
+
+/* Container */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 24px;
+}
+
+/* ==========================================
+   NAVIGATION
+   ========================================== */
+
+.navbar {
+    background: rgba(255, 255, 255, 0.98);
+    backdrop-filter: blur(20px);
+    box-shadow: 0 4px 30px rgba(30, 58, 95, 0.08);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    border-bottom: 1px solid rgba(30, 58, 95, 0.06);
+}
+
+.nav-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 0;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    font-weight: 700;
+    font-size: 22px;
+    color: var(--primary-navy);
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.logo:hover {
+    transform: translateX(2px);
+}
+
+.logo-icon {
+    width: 46px;
+    height: 46px;
+    background: linear-gradient(135deg, var(--primary-navy), var(--navy-light));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    box-shadow: 0 4px 16px rgba(30, 58, 95, 0.2);
+    transition: var(--transition);
+}
+
+.logo-icon svg {
+    stroke: var(--gold);
+    stroke-width: 2.5;
+}
+
+.logo:hover .logo-icon {
+    transform: rotate(-5deg) scale(1.05);
+    box-shadow: 0 6px 20px rgba(30, 58, 95, 0.3);
+}
+
+.logo-text {
+    letter-spacing: 1px;
+}
+
+.nav-links {
+    display: flex;
+    list-style: none;
+    gap: 8px;
+    align-items: center;
+}
+
+.nav-link {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--gray);
+    font-weight: 500;
+    font-size: 15px;
+    padding: 12px 20px;
+    border-radius: 10px;
+    position: relative;
+    transition: var(--transition);
+}
+
+.nav-link svg {
+    stroke-width: 2;
+    transition: var(--transition);
+}
+
+.nav-link:hover {
+    color: var(--primary-navy);
+    background-color: rgba(30, 58, 95, 0.05);
+}
+
+.nav-link:hover svg {
+    transform: translateY(-2px);
+}
+
+.btn-agent {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: linear-gradient(135deg, var(--gold), var(--gold-light));
+    color: var(--white);
+    padding: 12px 24px;
+    border-radius: 10px;
+    font-weight: 600;
+    box-shadow: 0 4px 16px rgba(212, 175, 55, 0.3);
+    margin-left: 8px;
+}
+
+.btn-agent:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 24px rgba(212, 175, 55, 0.4);
+}
+
+/* ==========================================
+   BACK BUTTON SECTION
+   ========================================== */
+
+.back-section {
+    padding: 24px 0;
+}
+
+.back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--primary-navy);
+    font-weight: 600;
+    font-size: 15px;
+    transition: var(--transition);
+}
+
+.back-link:hover {
+    color: var(--navy-light);
+}
+
+.back-link svg {
+    transition: var(--transition);
+}
+
+.back-link:hover svg {
+    transform: translateX(-4px);
+}
+
+/* ==========================================
+   PROPERTY DETAILS LAYOUT
+   ========================================== */
+
+.property-details-section {
+    padding: 24px 0 48px;
+}
+
+.details-layout {
+    display: grid;
+    grid-template-columns: 1fr 380px;
+    gap: 32px;
+}
+
+.details-main {
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+}
+
+/* ==========================================
+   IMAGE GALLERY
+   ========================================== */
+
+.image-gallery {
+    background-color: var(--white);
+    border-radius: 16px;
             overflow: hidden;
-            border-bottom: 1px solid #374151;
+    box-shadow: var(--shadow-sm);
+}
+
+.gallery-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 24px;
+    border-bottom: 2px solid var(--light-gray);
+}
+
+.gallery-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--primary-navy);
+}
+
+.gallery-title svg {
+    color: var(--gold);
+}
+
+.gallery-counter {
+    background-color: var(--off-white);
+    color: var(--text-dark);
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.main-image {
+    position: relative;
+    background-color: var(--light-gray);
+}
+
+.gallery-image {
+    width: 100%;
+    height: auto;
+    display: block;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+}
+
+.gallery-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(255, 255, 255, 0.95);
+    color: var(--primary-navy);
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(10px);
+    box-shadow: var(--shadow-md);
+    transition: var(--transition);
+}
+
+.gallery-prev {
+    left: 16px;
+}
+
+.gallery-next {
+    right: 16px;
+}
+
+.gallery-nav:hover {
+    background: var(--primary-navy);
+    color: var(--white);
+}
+
+.fullscreen-btn {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    background: rgba(255, 255, 255, 0.95);
+    color: var(--primary-navy);
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(10px);
+    transition: var(--transition);
+}
+
+.fullscreen-btn:hover {
+    background: var(--primary-navy);
+    color: var(--white);
+}
+
+.thumbnail-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    padding: 8px;
+    background-color: var(--off-white);
+}
+
+.thumbnail {
+    width: 100%;
+    height: 80px;
+    object-fit: cover;
+    cursor: pointer;
+    transition: var(--transition);
+    border-radius: 8px;
+    border: 3px solid transparent;
+}
+
+.thumbnail:hover {
+    opacity: 0.8;
+    border-color: var(--gold);
+}
+
+.thumbnail.active {
+    border-color: var(--primary-navy);
+}
+
+/* ==========================================
+   LIGHTBOX MODAL
+   ========================================== */
+
+.lightbox {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.95);
+    z-index: 9999;
+    animation: fadeIn 0.3s ease;
+}
+
+.lightbox.active {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+.lightbox-content {
+    position: relative;
+    max-width: 90%;
+    max-height: 90vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.lightbox-image {
+    max-width: 100%;
+    max-height: 90vh;
+    object-fit: contain;
+    border-radius: 8px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+    animation: zoomIn 0.3s ease;
+}
+
+@keyframes zoomIn {
+    from {
+        transform: scale(0.8);
+        opacity: 0;
+    }
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.lightbox-close {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    width: 50px;
+    height: 50px;
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(10px);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    color: var(--white);
+    font-size: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: var(--transition);
+    z-index: 10;
+}
+
+.lightbox-close:hover {
+    background: var(--white);
+    color: var(--primary-navy);
+    border-color: var(--white);
+    transform: rotate(90deg);
+}
+
+.lightbox-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 60px;
+    height: 60px;
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(10px);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    color: var(--white);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: var(--transition);
+    z-index: 10;
+}
+
+.lightbox-nav:hover {
+    background: var(--gold);
+    border-color: var(--gold);
+    transform: translateY(-50%) scale(1.1);
+}
+
+.lightbox-nav svg {
+    width: 28px;
+    height: 28px;
+}
+
+.lightbox-prev {
+    left: 40px;
+}
+
+.lightbox-next {
+    right: 40px;
+}
+
+.lightbox-counter {
+    position: absolute;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(10px);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    padding: 12px 24px;
+            border-radius: 50px;
+    color: var(--white);
+    font-size: 16px;
+            font-weight: 600;
+    z-index: 10;
+}
+
+.lightbox-zoom-hint {
+    position: absolute;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(212, 175, 55, 0.9);
+    backdrop-filter: blur(10px);
+    padding: 8px 16px;
+            border-radius: 50px;
+    color: var(--white);
+    font-size: 13px;
+            font-weight: 600;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Add cursor pointer to main image */
+.gallery-image {
+    cursor: zoom-in;
+    position: relative;
+}
+
+/* Expand icon overlay on main image */
+.main-image {
+            position: relative;
         }
         
-        .gradient-header::before {
+.main-image::after {
             content: '';
             position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(135deg, rgba(31, 41, 55, 0.9) 0%, rgba(55, 65, 81, 0.9) 100%);
-            z-index: 1;
-        }
-        
-        .header-content {
-            position: relative;
-            z-index: 2;
-        }
-        
-        .glass-card {
-            background: rgba(31, 41, 55, 0.95);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(75, 85, 99, 0.3);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-            color: #d1d5db;
-        }
-        
-        .glass-card:hover {
-            background: rgba(55, 65, 81, 0.98);
-            border-color: rgba(251, 191, 36, 0.4);
-            color: #f9fafb;
-            transform: scale(1.05);
-        }
-        
-        /* Dark mode overrides for all elements */
-        .bg-white { background-color: #1f2937 !important; }
-        .bg-gray-50 { background-color: #343E4E !important; }
-        .bg-gray-100 { background-color: #1f2937 !important; }
-        .bg-gray-200 { background-color: #374151 !important; }
-        .bg-gray-300 { background-color: #4b5563 !important; }
-        .bg-gray-400 { background-color: #6b7280 !important; }
-        .bg-gray-500 { background-color: #9ca3af !important; }
-        .bg-gray-600 { background-color: #d1d5db !important; }
-        .bg-gray-700 { background-color: #f3f4f6 !important; }
-        .bg-gray-800 { background-color: #f9fafb !important; }
-        .bg-gray-900 { background-color: #ffffff !important; }
-        
-        .text-gray-900 { color: #f9fafb !important; }
-        .text-gray-800 { color: #f3f4f6 !important; }
-        .text-gray-700 { color: #d1d5db !important; }
-        .text-gray-600 { color: #9ca3af !important; }
-        .text-gray-500 { color: #6b7280 !important; }
-        .text-gray-400 { color: #4b5563 !important; }
-        .text-gray-300 { color: #374151 !important; }
-        .text-gray-200 { color: #1f2937 !important; }
-        .text-gray-100 { color: #111827 !important; }
-        
-        .border-gray-200 { border-color: #374151 !important; }
-        .border-gray-300 { border-color: #4b5563 !important; }
-        .border-gray-400 { border-color: #6b7280 !important; }
-        .border-gray-500 { border-color: #9ca3af !important; }
-        
-        /* Form elements */
-        input, select, textarea {
-            background-color: #374151 !important;
-            border-color: #4b5563 !important;
-            color: #d1d5db !important;
-        }
-        
-        input::placeholder, textarea::placeholder, select::placeholder {
-            color: #9ca3af !important;
-        }
-        
-        input:focus, select:focus, textarea:focus {
-            border-color: #fbbf24 !important;
-            box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.1) !important;
-        }
-        
-        /* Cards and containers */
-        .card, .glass-card {
-            background-color: #1f2937 !important;
-            border-color: #374151 !important;
-            color: #d1d5db !important;
-        }
-        
-        /* Buttons */
-        .btn, .button {
-            background: linear-gradient(135deg, #374151, #4b5563) !important;
-            border: 1px solid #6b7280 !important;
-            color: #d1d5db !important;
-        }
-        
-        .btn:hover, .button:hover {
-            background: linear-gradient(135deg, #4b5563, #6b7280) !important;
-            border-color: #fbbf24 !important;
-            color: #f9fafb !important;
-        }
-        
-        /* Links */
-        a {
-            color: #d1d5db !important;
-        }
-        
-        a:hover {
-            color: #fbbf24 !important;
-        }
-        
-        /* Headers */
-        h1, h2, h3, h4, h5, h6 {
-            color: #f9fafb !important;
-        }
-        
-        /* Text elements */
-        p, div, span {
-            color: #d1d5db !important;
-        }
-        
-        small {
-            color: #9ca3af !important;
-        }
-        
-        strong {
-            color: #ffffff !important;
-        }
-        
-        /* Navigation */
-        nav {
-            background-color: #1f2937 !important;
-            border-bottom-color: #374151 !important;
-        }
-        
-        /* Footer */
-        footer {
-            background-color: #343E4E !important;
-            border-top-color: #374151 !important;
-        }
-        
-        /* Main content areas */
-        .container, .max-w-7xl, .max-w-6xl, .max-w-5xl, .max-w-4xl {
-            background-color: #343E4E !important;
-        }
-        
-        /* Sections and divs */
-        section, div, main, article, aside {
-            background-color: transparent !important;
-        }
-        
-        /* Override any remaining light backgrounds */
-        [class*="bg-"]:not([class*="bg-gray-9"]):not([class*="bg-gray-8"]):not([class*="bg-gray-7"]) {
-            background-color: #1f2937 !important;
-        }
-        
-        /* Force dark background everywhere */
-        * {
-            background-color: inherit !important;
-        }
-        
-        body, html, .min-h-screen, .bg-white, .bg-gray-50, .bg-gray-100 {
-            background-color: #343E4E !important;
-        }
-        
-        /* Override any white or light backgrounds */
-        .bg-white, .bg-gray-50, .bg-gray-100, .bg-gray-200 {
-            background-color: #1f2937 !important;
-        }
-        
-        /* Ensure all main elements have dark background */
-        main, section, article, aside, div:not([class*="bg-"]) {
-            background-color: transparent !important;
-        }
-        
-        /* Override any remaining white backgrounds */
-        [style*="background-color: white"], [style*="background-color: #fff"], [style*="background-color: #ffffff"] {
-            background-color: #343E4E !important;
-        }
-        
-        .property-card {
-            background: linear-gradient(135deg, #1f2937 0%, #374151 100%);
-            border-radius: 20px;
-            box-shadow: 0 8px 32px rgba(251, 191, 36, 0.12), 0 4px 16px rgba(0, 0, 0, 0.3);
-            border: 2px solid rgba(251, 191, 36, 0.4);
-            color: #d1d5db;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            overflow: hidden;
-        }
-        
-        .property-card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 12px 48px rgba(251, 191, 36, 0.25), 0 8px 24px rgba(0, 0, 0, 0.4);
-            border-color: #fbbf24;
-        }
-        
-        /* All cards and containers dark mode with gold accents */
-        .card, .glass-card, .property-card, .info-card, .detail-card, .feature-card {
-            background: linear-gradient(135deg, #1f2937 0%, #374151 100%) !important;
-            border: 2px solid rgba(251, 191, 36, 0.4) !important;
-            color: #d1d5db !important;
-            box-shadow: 0 8px 32px rgba(251, 191, 36, 0.12), 0 4px 16px rgba(0, 0, 0, 0.3) !important;
-            border-radius: 12px !important;
-        }
-        
-        .card:hover, .glass-card:hover, .property-card:hover, .info-card:hover, .detail-card:hover, .feature-card:hover {
-            border-color: #fbbf24 !important;
-            box-shadow: 0 12px 48px rgba(251, 191, 36, 0.25), 0 8px 24px rgba(0, 0, 0, 0.4) !important;
-            transform: translateY(-2px) !important;
-        }
-        
-        /* Container backgrounds with gold accents */
-        .container, .max-w-7xl, .max-w-6xl, .max-w-5xl, .max-w-4xl, .max-w-3xl, .max-w-2xl {
-            background: linear-gradient(135deg, #2d3748 0%, #4a5568 100%) !important;
-            border: 2px solid rgba(251, 191, 36, 0.5) !important;
-            box-shadow: 0 8px 32px rgba(251, 191, 36, 0.15), 0 4px 16px rgba(0, 0, 0, 0.3) !important;
-            border-radius: 12px !important;
-        }
-        
-        .container:hover, .max-w-7xl:hover, .max-w-6xl:hover, .max-w-5xl:hover, .max-w-4xl:hover, .max-w-3xl:hover, .max-w-2xl:hover {
-            border-color: #fbbf24 !important;
-            box-shadow: 0 12px 48px rgba(251, 191, 36, 0.25), 0 8px 24px rgba(0, 0, 0, 0.4) !important;
-        }
-        
-        /* Section backgrounds */
-        section, .section, .content-section, .main-section {
-            background-color: transparent !important;
-        }
-        
-        /* Div backgrounds */
-        div:not([class*="bg-"]) {
-            background-color: transparent !important;
-        }
-        
-        .feature-badge {
-            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
-            color: white;
-            padding: 0.75rem 1.5rem;
-            border-radius: 50px;
-            font-weight: 600;
-            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
-            transition: all 0.3s ease;
-        }
-        
-        .feature-badge:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(59, 130, 246, 0.4);
-        }
-        
-        .status-badge {
-            padding: 0.75rem 1.5rem;
-            border-radius: 50px;
-            font-weight: 600;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-            transition: all 0.3s ease;
-        }
-        
-        .status-available {
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-            color: white;
-            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
-        }
-        
-        .status-rented {
-            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
-            color: white;
-            box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);
-        }
-        
-        .status-unavailable {
-            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-            color: white;
-            box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
-        }
-        
-        .status-on_hold {
-            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
-            color: white;
-            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
-        }
-        
-        .price-display {
-            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
-            color: white;
-            padding: 2rem;
-            border-radius: 20px;
-            text-align: center;
-            box-shadow: 0 10px 40px rgba(59, 130, 246, 0.3);
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .price-display::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
-            transform: rotate(45deg);
-            animation: shine 3s infinite;
-        }
-        
-        @keyframes shine {
-            0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
-            100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
-        }
-        
-        .action-button {
-            background: linear-gradient(135deg, #374151 0%, #4b5563 100%);
-            color: #d1d5db;
-            padding: 1rem 2rem;
-            border-radius: 12px;
-            font-weight: 600;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 0 4px 15px rgba(251, 191, 36, 0.1), 0 2px 8px rgba(0, 0, 0, 0.3);
-            border: 2px solid rgba(251, 191, 36, 0.3);
-            cursor: pointer;
-            display: inline-flex;
+    bottom: 16px;
+    right: 16px;
+    width: 44px;
+    height: 44px;
+    background: rgba(212, 175, 55, 0.95);
+    backdrop-filter: blur(10px);
+    border-radius: 50%;
+    display: flex;
             align-items: center;
             justify-content: center;
-            gap: 0.5rem;
-        }
-        
-        .action-button:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 25px rgba(251, 191, 36, 0.2), 0 4px 12px rgba(0, 0, 0, 0.4);
-            background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
-            border-color: #fbbf24;
-            color: #1f2937;
-        }
-        
-        .secondary-button {
-            background: linear-gradient(135deg, #1f2937 0%, #374151 100%);
-            color: #9ca3af;
-            padding: 1rem 2rem;
-            border-radius: 12px;
-            font-weight: 600;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.06);
-            border: 1px solid #e5e7eb;
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-            text-decoration: none;
-        }
-        
-        .secondary-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
-            background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
-            border-color: #d1d5db;
-            color: #1f2937;
-        }
-        
-        .success-button {
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-            color: #ffffff;
-            padding: 1rem 2rem;
-            border-radius: 12px;
-            font-weight: 600;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.2), 0 2px 8px rgba(0, 0, 0, 0.3);
-            border: 2px solid rgba(16, 185, 129, 0.4);
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-            text-decoration: none;
-        }
-        
-        .success-button:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 25px rgba(16, 185, 129, 0.3), 0 4px 12px rgba(0, 0, 0, 0.4);
-            background: linear-gradient(135deg, #059669 0%, #047857 100%);
-            border-color: #10b981;
-            color: #ffffff;
-        }
-        
-        .image-gallery {
-            background: linear-gradient(135deg, #1f2937 0%, #374151 100%);
-            border-radius: 20px;
-            padding: 2rem;
-            box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.3);
-            border: 2px solid rgba(251, 191, 36, 0.4);
-        }
-        
-        /* Gallery header dark mode */
-        .image-gallery h2 {
-            color: #d1d5db !important;
-        }
-        
-        .image-gallery .bg-blue-100 {
-            background-color: transparent !important;
-            border: none !important;
-            padding: 0 !important;
-        }
-        
-        .image-gallery .text-blue-600 {
-            color: #fbbf24 !important;
-        }
-        
-        /* Gallery counter dark mode */
-        .image-gallery .bg-white {
-            background-color: #1f2937 !important;
-            border: 1px solid #374151 !important;
-        }
-        
-        .image-gallery .text-gray-700 {
-            color: #d1d5db !important;
-        }
-        
-        /* Thumbnail grid dark mode */
-        .thumbnail-grid {
-            background-color: #1f2937 !important;
-            border: 1px solid #374151 !important;
-            border-radius: 12px;
-            padding: 1rem;
-        }
-        
-        .thumbnail {
-            background-color: #374151 !important;
-            border: 1px solid #4b5563 !important;
+    pointer-events: none;
+    opacity: 0;
+    transition: var(--transition);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='M21 21l-4.35-4.35'/%3E%3Cpath d='M11 8v6M8 11h6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 24px 24px;
+}
+
+.main-image:hover::after {
+    opacity: 1;
+}
+
+/* ==========================================
+   PROPERTY INFO
+   ========================================== */
+
+.property-info {
+    background-color: var(--white);
+    border-radius: 16px;
+    padding: 32px;
+    box-shadow: var(--shadow-sm);
+}
+
+.info-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 24px;
+    padding-bottom: 24px;
+    border-bottom: 2px solid var(--light-gray);
+    margin-bottom: 24px;
+}
+
+.property-title-large {
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--primary-navy);
+    line-height: 1.3;
+    margin-bottom: 12px;
+}
+
+.property-location-large {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--gray);
+    font-size: 16px;
+}
+
+.property-location-large svg {
+    color: var(--gold);
+}
+
+.price-large {
+    font-size: 36px;
+    font-weight: 700;
+    color: var(--primary-navy);
+    white-space: nowrap;
+}
+
+.price-large span {
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--gray);
+}
+
+.availability-status {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 32px;
+    flex-wrap: wrap;
+}
+
+.status-badge {
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.status-available {
+    background: linear-gradient(135deg, rgba(212, 175, 55, 0.2), rgba(232, 197, 92, 0.2));
+    color: var(--gold-dark);
+}
+
+.property-type {
+    padding: 10px 20px;
             border-radius: 8px;
-            transition: all 0.3s ease;
-        }
-        
-        .thumbnail:hover {
-            border-color: #fbbf24 !important;
-            transform: translateY(-2px);
-        }
-        
-        .thumbnail.active {
-            border-color: #fbbf24 !important;
-            box-shadow: 0 4px 12px rgba(251, 191, 36, 0.3);
-        }
-        
-        /* Gallery navigation buttons dark mode */
-        .gallery-nav-button {
-            background-color: #1f2937 !important;
-            border: 1px solid #374151 !important;
-            color: #d1d5db !important;
-        }
-        
-        .gallery-nav-button:hover {
-            background-color: #374151 !important;
-            border-color: #fbbf24 !important;
-            color: #fbbf24 !important;
-        }
-        
-        /* Remove all icon backgrounds and text highlights */
-        .bg-blue-100, .bg-green-100, .bg-orange-100, .bg-indigo-100, .bg-purple-100, .bg-pink-100, .bg-red-100, .bg-yellow-100 {
-            background-color: transparent !important;
-            border: none !important;
-            padding: 0 !important;
-        }
-        
-        /* Remove text highlights */
-        .text-blue-600, .text-green-600, .text-orange-600, .text-indigo-600, .text-purple-600, .text-pink-600, .text-red-600, .text-yellow-600 {
-            color: #d1d5db !important;
-        }
-        
-        /* Remove all background highlights */
-        .bg-blue-50, .bg-green-50, .bg-orange-50, .bg-indigo-50, .bg-purple-50, .bg-pink-50, .bg-red-50, .bg-yellow-50 {
-            background-color: transparent !important;
-        }
-        
-        /* Remove all colored backgrounds */
-        .bg-blue-200, .bg-green-200, .bg-orange-200, .bg-indigo-200, .bg-purple-200, .bg-pink-200, .bg-red-200, .bg-yellow-200 {
-            background-color: transparent !important;
-        }
-        
-        /* Remove all colored borders */
-        .border-blue-200, .border-green-200, .border-orange-200, .border-indigo-200, .border-purple-200, .border-pink-200, .border-red-200, .border-yellow-200 {
-            border-color: transparent !important;
-        }
-        
-        /* Remove all colored text */
-        .text-blue-500, .text-green-500, .text-orange-500, .text-indigo-500, .text-purple-500, .text-pink-500, .text-red-500, .text-yellow-500 {
-            color: #d1d5db !important;
-        }
-        
-        /* Remove all colored backgrounds with higher specificity */
-        .bg-blue-300, .bg-green-300, .bg-orange-300, .bg-indigo-300, .bg-purple-300, .bg-pink-300, .bg-red-300, .bg-yellow-300 {
-            background-color: transparent !important;
-        }
-        
-        /* Remove all colored backgrounds with even higher specificity */
-        .bg-blue-400, .bg-green-400, .bg-orange-400, .bg-indigo-400, .bg-purple-400, .bg-pink-400, .bg-red-400, .bg-yellow-400 {
-            background-color: transparent !important;
-        }
-        
-        /* Remove all colored backgrounds with maximum specificity */
-        .bg-blue-500, .bg-green-500, .bg-orange-500, .bg-indigo-500, .bg-purple-500, .bg-pink-500, .bg-red-500, .bg-yellow-500 {
-            background-color: transparent !important;
-        }
-        
-        /* Remove all colored backgrounds with maximum specificity */
-        .bg-blue-600, .bg-green-600, .bg-orange-600, .bg-indigo-600, .bg-purple-600, .bg-pink-600, .bg-red-600, .bg-yellow-600 {
-            background-color: transparent !important;
-        }
-        
-        /* Remove all colored backgrounds with maximum specificity */
-        .bg-blue-700, .bg-green-700, .bg-orange-700, .bg-indigo-700, .bg-purple-700, .bg-pink-700, .bg-red-700, .bg-yellow-700 {
-            background-color: transparent !important;
-        }
-        
-        /* Remove all colored backgrounds with maximum specificity */
-        .bg-blue-800, .bg-green-800, .bg-orange-800, .bg-indigo-800, .bg-purple-800, .bg-pink-800, .bg-red-800, .bg-yellow-800 {
-            background-color: transparent !important;
-        }
-        
-        /* Remove all colored backgrounds with maximum specificity */
-        .bg-blue-900, .bg-green-900, .bg-orange-900, .bg-indigo-900, .bg-purple-900, .bg-pink-900, .bg-red-900, .bg-yellow-900 {
-            background-color: transparent !important;
-        }
-        
-        /* Remove faint grey highlights from specific sections */
-        .bg-gray-50, .bg-gray-100, .bg-gray-200, .bg-gray-300, .bg-gray-400, .bg-gray-500 {
-            background-color: transparent !important;
-        }
-        
-        /* Remove grey highlights from cards and containers */
-        .property-card, .info-card, .detail-card, .feature-card, .location-card {
-            background: linear-gradient(135deg, #1f2937 0%, #374151 100%) !important;
-        }
-        
-        /* Remove grey highlights from form elements */
-        .bg-gray-50, .bg-gray-100, .bg-gray-200, .bg-gray-300, .bg-gray-400, .bg-gray-500 {
-            background-color: transparent !important;
-        }
-        
-        /* Remove grey highlights from specific elements */
-        .bg-gray-50, .bg-gray-100, .bg-gray-200, .bg-gray-300, .bg-gray-400, .bg-gray-500 {
-            background-color: transparent !important;
-        }
-        
-        /* Remove grey highlights from all possible grey backgrounds */
-        .bg-gray-50, .bg-gray-100, .bg-gray-200, .bg-gray-300, .bg-gray-400, .bg-gray-500 {
-            background-color: transparent !important;
-        }
-        
-        /* Remove grey highlights from all possible grey backgrounds */
-        .bg-gray-50, .bg-gray-100, .bg-gray-200, .bg-gray-300, .bg-gray-400, .bg-gray-500 {
-            background-color: transparent !important;
-        }
-        
-        /* Remove all faint grey highlights from all sections */
-        .bg-gray-50, .bg-gray-100, .bg-gray-200, .bg-gray-300, .bg-gray-400, .bg-gray-500 {
-            background-color: transparent !important;
-        }
-        
-        /* Remove grey highlights from all possible grey backgrounds */
-        .bg-gray-50, .bg-gray-100, .bg-gray-200, .bg-gray-300, .bg-gray-400, .bg-gray-500 {
-            background-color: transparent !important;
-        }
-        
-        /* Remove grey highlights from all possible grey backgrounds */
-        .bg-gray-50, .bg-gray-100, .bg-gray-200, .bg-gray-300, .bg-gray-400, .bg-gray-500 {
-            background-color: transparent !important;
-        }
-        
-        /* Remove grey highlights from all possible grey backgrounds */
-        .bg-gray-50, .bg-gray-100, .bg-gray-200, .bg-gray-300, .bg-gray-400, .bg-gray-500 {
-            background-color: transparent !important;
-        }
-        
-        /* Remove grey highlights from all possible grey backgrounds */
-        .bg-gray-50, .bg-gray-100, .bg-gray-200, .bg-gray-300, .bg-gray-400, .bg-gray-500 {
-            background-color: transparent !important;
-        }
-        
-        /* Remove grey highlights from all possible grey backgrounds */
-        .bg-gray-50, .bg-gray-100, .bg-gray-200, .bg-gray-300, .bg-gray-400, .bg-gray-500 {
-            background-color: transparent !important;
-        }
-        
-        /* Force dark background on main container and all its children */
-        .max-w-7xl, .mx-auto, .px-4, .sm\\:px-6, .lg\\:px-8, .py-4, .sm\\:py-8 {
-            background-color: #343E4E !important;
-        }
-        
-        /* Force dark background on all container elements */
-        .container, .max-w-7xl, .max-w-6xl, .max-w-5xl, .max-w-4xl, .max-w-3xl, .max-w-2xl {
-            background-color: #343E4E !important;
-        }
-        
-        /* Force dark background on all main content areas */
-        main, section, article, aside, header, footer, nav, div {
-            background-color: #343E4E !important;
-        }
-        
-        /* Force dark background on all possible white elements */
-        .bg-white, .bg-gray-50, .bg-gray-100, .bg-gray-200, .bg-gray-300, .bg-gray-400, .bg-gray-500, .bg-gray-600, .bg-gray-700, .bg-gray-800, .bg-gray-900 {
-            background-color: #343E4E !important;
-        }
-        
-        /* Force dark background on all possible white elements */
-        .bg-white, .bg-gray-50, .bg-gray-100, .bg-gray-200, .bg-gray-300, .bg-gray-400, .bg-gray-500, .bg-gray-600, .bg-gray-700, .bg-gray-800, .bg-gray-900 {
-            background-color: #343E4E !important;
-        }
-        
-        /* Force dark background on all possible white elements */
-        .bg-white, .bg-gray-50, .bg-gray-100, .bg-gray-200, .bg-gray-300, .bg-gray-400, .bg-gray-500, .bg-gray-600, .bg-gray-700, .bg-gray-800, .bg-gray-900 {
-            background-color: #343E4E !important;
-        }
-        
-        .main-image-container {
-            position: relative;
-            border-radius: 16px;
-            overflow: hidden;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
-        }
-        
-        /* Ultra-aggressive overrides for main container background */
-        .max-w-7xl, .mx-auto, .px-4, .sm\\:px-6, .lg\\:px-8, .py-4, .sm\\:py-8 {
-            background-color: #343E4E !important;
-        }
-        
-        /* Ultra-aggressive overrides for main container background */
-        .max-w-7xl, .mx-auto, .px-4, .sm\\:px-6, .lg\\:px-8, .py-4, .sm\\:py-8 {
-            background-color: #343E4E !important;
-        }
-        
-        /* Ultra-aggressive overrides for main container background */
-        .max-w-7xl, .mx-auto, .px-4, .sm\\:px-6, .lg\\:px-8, .py-4, .sm\\:py-8 {
-            background-color: #343E4E !important;
-        }
-        
-        /* Ultra-aggressive overrides for main container background */
-        .max-w-7xl, .mx-auto, .px-4, .sm\\:px-6, .lg\\:px-8, .py-4, .sm\\:py-8 {
-            background-color: #343E4E !important;
-        }
-        
-        /* Ultra-aggressive overrides for main container background */
-        .max-w-7xl, .mx-auto, .px-4, .sm\\:px-6, .lg\\:px-8, .py-4, .sm\\:py-8 {
-            background-color: #343E4E !important;
-        }
-        
-        /* Remove all text backgrounds */
-        span, p, h1, h2, h3, h4, h5, h6, div, a, button, label, strong, em, small, b, i, u, mark, code, pre, blockquote, cite, abbr, acronym, address, del, ins, s, strike, sub, sup, tt, var, kbd, samp, dfn, q, s, u, mark, code, pre, blockquote, cite, abbr, acronym, address, del, ins, s, strike, sub, sup, tt, var, kbd, samp, dfn, q {
-            background-color: transparent !important;
-            background: none !important;
-        }
-        
-        /* Remove all text backgrounds with higher specificity */
-        .text-gray-900, .text-gray-800, .text-gray-700, .text-gray-600, .text-gray-500, .text-gray-400, .text-gray-300, .text-gray-200, .text-gray-100, .text-gray-50 {
-            background-color: transparent !important;
-            background: none !important;
-        }
-        
-        /* Remove all text backgrounds with maximum specificity */
-        .text-blue-600, .text-green-600, .text-orange-600, .text-indigo-600, .text-purple-600, .text-pink-600, .text-red-600, .text-yellow-600 {
-            background-color: transparent !important;
-            background: none !important;
-        }
-        
-        /* Remove all text backgrounds with maximum specificity */
-        .text-blue-500, .text-green-500, .text-orange-500, .text-indigo-500, .text-purple-500, .text-pink-500, .text-red-500, .text-yellow-500 {
-            background-color: transparent !important;
-            background: none !important;
-        }
-        
-        /* Remove all text backgrounds with maximum specificity */
-        .text-blue-400, .text-green-400, .text-orange-400, .text-indigo-400, .text-purple-400, .text-pink-400, .text-red-400, .text-yellow-400 {
-            background-color: transparent !important;
-            background: none !important;
-        }
-        
-        /* Remove all text backgrounds with maximum specificity */
-        .text-blue-300, .text-green-300, .text-orange-300, .text-indigo-300, .text-purple-300, .text-pink-300, .text-red-300, .text-yellow-300 {
-            background-color: transparent !important;
-            background: none !important;
-        }
-        
-        /* Remove all text backgrounds with maximum specificity */
-        .text-blue-200, .text-green-200, .text-orange-200, .text-indigo-200, .text-purple-200, .text-pink-200, .text-red-200, .text-yellow-200 {
-            background-color: transparent !important;
-            background: none !important;
-        }
-        
-        /* Remove all text backgrounds with maximum specificity */
-        .text-blue-100, .text-green-100, .text-orange-100, .text-indigo-100, .text-purple-100, .text-pink-100, .text-red-100, .text-yellow-100 {
-            background-color: transparent !important;
-            background: none !important;
-        }
-        
-        .gallery-nav-button {
-            background: rgba(0, 0, 0, 0.7);
-            color: white;
-            border: none;
-            padding: 1rem;
-            border-radius: 50%;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            backdrop-filter: blur(10px);
-        }
-        
-        /* Ultra-aggressive overrides for min-h-screen */
-        .min-h-screen {
-            background-color: #343E4E !important;
-        }
-        
-        /* Ultra-aggressive overrides for min-h-screen */
-        .min-h-screen {
-            background-color: #343E4E !important;
-        }
-        
-        /* Ultra-aggressive overrides for min-h-screen */
-        .min-h-screen {
-            background-color: #343E4E !important;
-        }
-        
-        /* Ultra-aggressive overrides for min-h-screen */
-        .min-h-screen {
-            background-color: #343E4E !important;
-        }
-        
-        /* Ultra-aggressive overrides for min-h-screen */
-        .min-h-screen {
-            background-color: #343E4E !important;
-        }
-        
-        /* Ultra-aggressive overrides for min-h-screen */
-        .min-h-screen {
-            background-color: #343E4E !important;
-        }
-        
-        /* Ultra-aggressive overrides for min-h-screen */
-        .min-h-screen {
-            background-color: #343E4E !important;
-        }
-        
-        /* Ultra-aggressive overrides for min-h-screen */
-        .min-h-screen {
-            background-color: #343E4E !important;
-        }
-        
-        /* Ultra-aggressive overrides for min-h-screen */
-        .min-h-screen {
-            background-color: #343E4E !important;
-        }
-        
-        /* Ultra-aggressive overrides for min-h-screen */
-        .min-h-screen {
-            background-color: #343E4E !important;
-        }
-        
-        /* Force dark background on ALL elements with maximum specificity */
-        *, *::before, *::after {
-            background-color: #343E4E !important;
-        }
-        
-        /* Force dark background on ALL elements with maximum specificity */
-        *, *::before, *::after {
-            background-color: #343E4E !important;
-        }
-        
-        /* Force dark background on ALL elements with maximum specificity */
-        *, *::before, *::after {
-            background-color: #343E4E !important;
-        }
-        
-        /* Force dark background on ALL elements with maximum specificity */
-        *, *::before, *::after {
-            background-color: #343E4E !important;
-        }
-        
-        /* Force dark background on ALL elements with maximum specificity */
-        *, *::before, *::after {
-            background-color: #343E4E !important;
-        }
-        
-        /* Force dark background on body and html specifically */
-        html, body {
-            background-color: #343E4E !important;
-        }
-        
-        /* Force dark background on body and html specifically */
-        html, body {
-            background-color: #343E4E !important;
-        }
-        
-        /* Force dark background on body and html specifically */
-        html, body {
-            background-color: #343E4E !important;
-        }
-        
-        /* Force dark background on body and html specifically */
-        html, body {
-            background-color: #343E4E !important;
-        }
-        
-        /* Force dark background on body and html specifically */
-        html, body {
-            background-color: #343E4E !important;
-        }
-        
-        /* Force dark background on main container specifically */
-        main.max-w-7xl.mx-auto.px-4.sm\\:px-6.lg\\:px-8.py-4.sm\\:py-8 {
-            background-color: #343E4E !important;
-        }
-        
-        /* Force dark background on main container specifically */
-        main.max-w-7xl.mx-auto.px-4.sm\\:px-6.lg\\:px-8.py-4.sm\\:py-8 {
-            background-color: #343E4E !important;
-        }
-        
-        /* Force dark background on main container specifically */
-        main.max-w-7xl.mx-auto.px-4.sm\\:px-6.lg\\:px-8.py-4.sm\\:py-8 {
-            background-color: #343E4E !important;
-        }
-        
-        /* Force dark background on main container specifically */
-        main.max-w-7xl.mx-auto.px-4.sm\\:px-6.lg\\:px-8.py-4.sm\\:py-8 {
-            background-color: #343E4E !important;
-        }
-        
-        /* Force dark background on main container specifically */
-        main.max-w-7xl.mx-auto.px-4.sm\\:px-6.lg\\:px-8.py-4.sm\\:py-8 {
-            background-color: #343E4E !important;
-        }
-        
-        .gallery-nav-button:hover {
-            background: rgba(0, 0, 0, 0.9);
-            transform: scale(1.1);
+    background-color: rgba(30, 58, 95, 0.1);
+    color: var(--primary-navy);
+    font-weight: 600;
+    font-size: 14px;
+}
+
+/* Sections */
+.section-title {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--primary-navy);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.section-title svg {
+    color: var(--gold);
+}
+
+.description-section {
+    margin-bottom: 32px;
+}
+
+.address-block {
+    background-color: var(--off-white);
+    padding: 16px 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    font-size: 15px;
+    color: var(--text-dark);
+    border-left: 4px solid var(--gold);
+}
+
+.address-block strong {
+    color: var(--primary-navy);
+}
+
+.description-text {
+    color: var(--text-dark);
+    font-size: 15px;
+    line-height: 1.8;
+    margin-bottom: 16px;
+}
+
+.description-text:last-child {
+    margin-bottom: 0;
+}
+
+.offer-section {
+    margin-top: 32px;
+    padding: 24px;
+    background-color: var(--off-white);
+    border-radius: 12px;
+}
+
+.offer-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--primary-navy);
+    margin-bottom: 20px;
+}
+
+.offer-list {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.offer-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--text-dark);
+}
+
+.offer-item svg {
+    color: #2ecc71;
+    flex-shrink: 0;
+    background-color: rgba(46, 204, 113, 0.1);
+    padding: 2px;
+    border-radius: 4px;
+}
+
+/* ==========================================
+   SIDEBAR
+   ========================================== */
+
+.details-sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.manager-card,
+.location-card,
+.clients-card,
+.actions-card {
+    background-color: var(--white);
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: var(--shadow-sm);
+    border: 2px solid var(--light-gray);
+}
+
+.card-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--primary-navy);
+    margin-bottom: 20px;
+}
+
+.card-title svg {
+    color: var(--gold);
+}
+
+.locked-content {
+    text-align: center;
+    padding: 32px 20px;
+    background: linear-gradient(135deg, rgba(30, 58, 95, 0.05), rgba(30, 58, 95, 0.02));
+    border-radius: 12px;
+}
+
+.locked-content svg {
+    color: var(--gray);
+    opacity: 0.4;
+    margin-bottom: 16px;
+}
+
+.locked-text {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-dark);
+    margin-bottom: 8px;
+    line-height: 1.5;
+}
+
+.locked-subtext {
+    font-size: 13px;
+    color: var(--gray);
+}
+
+.client-count {
+    font-size: 14px;
+    color: var(--primary-navy);
+    font-weight: 600;
+    margin: 8px 0;
+}
+
+.map-placeholder {
+    background: linear-gradient(135deg, rgba(30, 58, 95, 0.08), rgba(30, 58, 95, 0.03));
+    border: 2px dashed var(--light-gray);
+    border-radius: 12px;
+    padding: 32px 20px;
+    text-align: center;
+    margin-bottom: 16px;
+}
+
+.map-placeholder svg {
+    color: var(--primary-navy);
+    margin-bottom: 12px;
+}
+
+.coordinates {
+    margin-top: 12px;
+}
+
+.coordinates-label {
+    font-size: 13px;
+    color: var(--gray);
+    margin-bottom: 4px;
+}
+
+.coordinates-value {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--primary-navy);
+    font-family: 'Courier New', monospace;
+}
+
+.btn-maps {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 14px;
+    background: linear-gradient(135deg, var(--primary-navy), var(--navy-light));
+    color: var(--white);
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 15px;
+    transition: var(--transition);
+}
+
+.btn-maps:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.btn-maps svg {
+    flex-shrink: 0;
+}
+
+.action-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.btn-action,
+.btn-action-secondary {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 14px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 15px;
+    transition: var(--transition);
+}
+
+.btn-action {
+    background: linear-gradient(135deg, var(--gold), var(--gold-light));
+    color: var(--white);
+}
+
+.btn-action:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.btn-action svg {
+    flex-shrink: 0;
+}
+
+.btn-action-secondary {
+    background-color: var(--white);
+    border: 2px solid var(--primary-navy);
+    color: var(--primary-navy);
+}
+
+.btn-action-secondary:hover {
+    background-color: var(--primary-navy);
+    color: var(--white);
+}
+
+.btn-action-secondary svg {
+    flex-shrink: 0;
+}
+
+/* Success Alert */
+.success-alert {
+    background: linear-gradient(135deg, #d1fae5, #a7f3d0);
+    border: 2px solid #10b981;
+    color: #065f46;
+    padding: 16px 24px;
+    border-radius: 12px;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-weight: 600;
+}
+
+/* ==========================================
+   FOOTER
+   ========================================== */
+
+.footer {
+    background: linear-gradient(135deg, var(--primary-navy) 0%, var(--navy-dark) 100%);
+    color: var(--white);
+    padding: 48px 0;
+    margin-top: 48px;
+}
+
+.footer-content {
+    text-align: center;
+}
+
+.footer-logo {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+    font-size: 24px;
+}
+
+.footer-text {
+    color: rgba(255, 255, 255, 0.8);
+    margin-bottom: 8px;
+}
+
+.footer-copyright {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 14px;
+}
+
+/* ==========================================
+   RESPONSIVE DESIGN
+   ========================================== */
+
+@media (max-width: 1024px) {
+    .details-layout {
+        grid-template-columns: 1fr;
+    }
+    
+    .details-sidebar {
+        order: -1;
+    }
+}
+
+@media (max-width: 768px) {
+    .container {
+        padding: 0 16px;
+    }
+    
+    /* Navigation */
+    .navbar {
+        padding: 12px 0;
+    }
+    
+    .logo-text {
+        font-size: 18px;
+    }
+    
+    .logo-icon svg {
+        width: 20px;
+        height: 20px;
+    }
+    
+    .nav-links {
+        gap: 4px;
+        flex-wrap: wrap;
+    }
+    
+    .nav-link {
+        padding: 8px 10px;
+        font-size: 12px;
+    }
+    
+    .nav-link svg {
+        width: 14px;
+        height: 14px;
+    }
+    
+    .btn-agent {
+        padding: 8px 12px;
+        font-size: 12px;
+    }
+    
+    .btn-agent svg {
+        width: 14px;
+        height: 14px;
+    }
+    
+    /* Back Button */
+    .back-section {
+        padding: 16px 0;
+    }
+    
+    .back-link {
+        padding: 10px 16px;
+        font-size: 14px;
+    }
+    
+    /* Property Details Layout */
+    .property-details-section {
+        padding: 24px 0;
+    }
+    
+    .details-layout {
+        flex-direction: column;
+        gap: 24px;
+    }
+    
+    .details-main {
+        width: 100%;
+    }
+    
+    .details-sidebar {
+        width: 100%;
+    }
+    
+    /* Image Gallery */
+    .gallery-header {
+        padding: 12px 16px;
+    }
+    
+    .gallery-title {
+        font-size: 16px;
+    }
+    
+    .gallery-title svg {
+        width: 20px;
+        height: 20px;
+    }
+    
+    .gallery-counter {
+        font-size: 12px;
+    }
+    
+    .main-image {
+        height: 280px;
+    }
+    
+    .gallery-image {
+        height: 280px;
+    }
+    
+    .gallery-nav {
+        width: 36px;
+        height: 36px;
+    }
+    
+    .gallery-nav svg {
+        width: 18px;
+        height: 18px;
         }
         
         .thumbnail-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
-            gap: 0.75rem;
-            margin-top: 1.5rem;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 6px;
+        padding: 8px;
         }
         
         .thumbnail {
-            border-radius: 12px;
-            overflow: hidden;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            border: 3px solid transparent;
-        }
-        
-        .thumbnail:hover {
-            transform: scale(1.05);
-            border-color: #3b82f6;
-        }
-        
-        .thumbnail.active {
-            border-color: #3b82f6;
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
-        }
-        
-        .info-section {
-            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-            border-radius: 16px;
-            padding: 1.5rem;
-            margin-bottom: 1rem;
-        }
-        
-        .info-label {
-            font-weight: 600;
-            color: #374151;
-            margin-bottom: 0.5rem;
-            display: block;
-        }
-        
-        .info-value {
-            color: #6b7280;
-            line-height: 1.6;
-        }
-        
-        .section-divider {
-            height: 1px;
-            background: linear-gradient(90deg, transparent, #e5e7eb, transparent);
-            margin: 2rem 0;
-        }
-        
-        .floating-action {
-            position: fixed;
-            bottom: 2rem;
-            right: 2rem;
-            z-index: 1000;
-        }
-        
-        .modal-overlay {
-            background: rgba(0, 0, 0, 0.95);
-            backdrop-filter: blur(20px);
-        }
-        
-        .modal-content {
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        
-        .description-text {
-            white-space: pre-wrap;
-            word-wrap: break-word;
-            line-height: 1.8;
-            color: #374151;
-        }
-        
-        .success-message {
-            background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
-            border: 1px solid #10b981;
-            color: #065f46;
-            padding: 1.5rem;
-            border-radius: 16px;
-            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.2);
-            margin-bottom: 2rem;
-        }
-        
-        .location-card {
-            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
-            border: 1px solid #f59e0b;
-            border-radius: 16px;
-            padding: 1.5rem;
-            text-align: center;
-            box-shadow: 0 4px 15px rgba(245, 158, 11, 0.2);
-        }
-        
-        .maps-button {
-            background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
-            color: #1e3a8a;
-            padding: 1rem 2rem;
-            border-radius: 12px;
-            font-weight: 600;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.15);
-            text-decoration: none;
-            display: block;
-            text-align: center;
-            border: 1px solid #bfdbfe;
-        }
-        
-        .maps-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(59, 130, 246, 0.2);
-            background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
-            border-color: #93c5fd;
-            color: #1e40af;
-        }
-        
-        .responsive-grid {
-            display: grid;
-            gap: 2rem;
-        }
-        
-        @media (min-width: 1024px) {
-            .responsive-grid {
-                grid-template-columns: 2fr 1fr;
-            }
-        }
-        
-        .animate-fade-in {
-            animation: fadeIn 0.6s ease-out;
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        
-        .animate-slide-up {
-            animation: slideUp 0.8s ease-out;
-        }
-        
-        @keyframes slideUp {
-            from { opacity: 0; transform: translateY(40px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        
-        /* Mobile-first responsive design */
-        @media (max-width: 767px) {
-            .property-card {
-                border-radius: 16px;
-                margin-bottom: 1rem;
-            }
-            
-            .property-card .p-8 {
-                padding: 1.5rem;
-            }
-            
-            .price-display {
-                padding: 1.5rem;
-                border-radius: 16px;
-            }
-            
-            .price-display .text-6xl {
-                font-size: 2.5rem;
-            }
-            
-            .feature-badge, .status-badge {
-                padding: 0.5rem 1rem;
-                font-size: 0.875rem;
-            }
-            
-            .action-button, .secondary-button, .success-button {
-                padding: 0.75rem 1rem;
-                font-size: 0.875rem;
-                min-height: 44px;
-                width: 100%;
-                justify-content: center;
-            }
-            
-            .grid.grid-cols-1.lg\\:grid-cols-3 {
-                gap: 1.5rem;
-            }
-            
-            .space-y-6 > * + * {
-                margin-top: 1.5rem;
-            }
-        }
-        
-        /* Small screens */
-        @media (max-width: 640px) {
-            .property-card .p-8 {
-                padding: 1rem;
-            }
-            
-            .price-display {
-                padding: 1rem;
-            }
-            
-            .price-display .text-6xl {
-                font-size: 2rem;
-            }
-            
-            .feature-badge, .status-badge {
-                padding: 0.5rem 0.75rem;
-                font-size: 0.8rem;
-            }
-            
-            .text-2xl {
-                font-size: 1.25rem;
-            }
-            
-            .text-3xl {
-                font-size: 1.5rem;
-            }
-        }
-        
-        /* Very small screens */
-        @media (max-width: 375px) {
-            .property-card .p-8 {
-                padding: 0.75rem;
-            }
-            
-            .price-display {
-                padding: 0.75rem;
-            }
-            
-            .price-display .text-6xl {
-                font-size: 1.75rem;
-            }
-        }
-        
-        /* Touch-friendly improvements */
-        @media (max-width: 767px) {
-            button, select, input, a {
-                min-height: 44px;
-                min-width: 44px;
-            }
-            
-            .property-card {
-                -webkit-tap-highlight-color: transparent;
-            }
-            
-            .property-card:active {
-                transform: scale(0.98);
-            }
-            
-            .grid.gap-8 {
-                gap: 1.5rem;
-            }
-        }
-        
-        /* High DPI displays */
-        @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
-            .property-image {
-                image-rendering: -webkit-optimize-contrast;
-                image-rendering: crisp-edges;
-            }
-        }
-        
-        /* Ultra-aggressive overrides for any remaining white backgrounds */
-        .bg-white, .bg-gray-50, .bg-gray-100, .bg-gray-200, .bg-gray-300, .bg-gray-400, .bg-gray-500, .bg-gray-600, .bg-gray-700, .bg-gray-800, .bg-gray-900 {
-            background-color: #343E4E !important;
-        }
-        
-        /* Override any inline styles that might be white */
-        [style*="background-color: white"], [style*="background-color: #fff"], [style*="background-color: #ffffff"], [style*="background-color: #f9fafb"], [style*="background-color: #f8fafc"] {
-            background-color: #343E4E !important;
-        }
-        
-        /* Force dark on all possible elements */
-        html, body, div, section, main, article, aside, header, footer, nav, ul, ol, li, p, span, a, button, input, textarea, select, form, fieldset, legend, label, table, thead, tbody, tr, td, th, h1, h2, h3, h4, h5, h6 {
-            background-color: #343E4E !important;
-        }
-        
-        /* Remove ALL text backgrounds including icons and numbers */
-        span, p, h1, h2, h3, h4, h5, h6, div, a, button, label, strong, em, small, b, i, u, mark, code, pre, blockquote, cite, abbr, acronym, address, del, ins, s, strike, sub, sup, tt, var, kbd, samp, dfn, q, s, u, mark, code, pre, blockquote, cite, abbr, acronym, address, del, ins, s, strike, sub, sup, tt, var, kbd, samp, dfn, q {
-            background-color: transparent !important;
-            background: none !important;
-        }
-        
-        /* Remove text backgrounds from all Tailwind text classes */
-        .text-gray-900, .text-gray-800, .text-gray-700, .text-gray-600, .text-gray-500, .text-gray-400, .text-gray-300, .text-gray-200, .text-gray-100, .text-gray-50 {
-            background-color: transparent !important;
-            background: none !important;
-        }
-        
-        /* Remove text backgrounds from colored text classes */
-        .text-blue-600, .text-green-600, .text-orange-600, .text-indigo-600, .text-purple-600, .text-pink-600, .text-red-600, .text-yellow-600 {
-            background-color: transparent !important;
-            background: none !important;
-        }
-        
-        .text-blue-500, .text-green-500, .text-orange-500, .text-indigo-500, .text-purple-500, .text-pink-500, .text-red-500, .text-yellow-500 {
-            background-color: transparent !important;
-            background: none !important;
-        }
-        
-        .text-blue-400, .text-green-400, .text-orange-400, .text-indigo-400, .text-purple-400, .text-pink-400, .text-red-400, .text-yellow-400 {
-            background-color: transparent !important;
-            background: none !important;
-        }
-        
-        .text-blue-300, .text-green-300, .text-orange-300, .text-indigo-300, .text-purple-300, .text-pink-300, .text-red-300, .text-yellow-300 {
-            background-color: transparent !important;
-            background: none !important;
-        }
-        
-        .text-blue-200, .text-green-200, .text-orange-200, .text-indigo-200, .text-purple-200, .text-pink-200, .text-red-200, .text-yellow-200 {
-            background-color: transparent !important;
-            background: none !important;
-        }
-        
-        .text-blue-100, .text-green-100, .text-orange-100, .text-indigo-100, .text-purple-100, .text-pink-100, .text-red-100, .text-yellow-100 {
-            background-color: transparent !important;
-            background: none !important;
-        }
-        
-        /* Remove backgrounds from all icon containers */
-        .bg-blue-100, .bg-green-100, .bg-orange-100, .bg-indigo-100, .bg-purple-100, .bg-pink-100, .bg-red-100, .bg-yellow-100 {
-            background-color: transparent !important;
-            border: none !important;
-            padding: 0 !important;
-        }
-        
-        /* Remove backgrounds from all colored backgrounds */
-        .bg-blue-50, .bg-green-50, .bg-orange-50, .bg-indigo-50, .bg-purple-50, .bg-pink-50, .bg-red-50, .bg-yellow-50 {
-            background-color: transparent !important;
-        }
-        
-        .bg-blue-200, .bg-green-200, .bg-orange-200, .bg-indigo-200, .bg-purple-200, .bg-pink-200, .bg-red-200, .bg-yellow-200 {
-            background-color: transparent !important;
-        }
-        
-        .bg-blue-300, .bg-green-300, .bg-orange-300, .bg-indigo-300, .bg-purple-300, .bg-pink-300, .bg-red-300, .bg-yellow-300 {
-            background-color: transparent !important;
-        }
-        
-        .bg-blue-400, .bg-green-400, .bg-orange-400, .bg-indigo-400, .bg-purple-400, .bg-pink-400, .bg-red-400, .bg-yellow-400 {
-            background-color: transparent !important;
-        }
-        
-        .bg-blue-500, .bg-green-500, .bg-orange-500, .bg-indigo-500, .bg-purple-500, .bg-pink-500, .bg-red-500, .bg-yellow-500 {
-            background-color: transparent !important;
-        }
-        
-        .bg-blue-600, .bg-green-600, .bg-orange-600, .bg-indigo-600, .bg-purple-600, .bg-pink-600, .bg-red-600, .bg-yellow-600 {
-            background-color: transparent !important;
-        }
-        
-        .bg-blue-700, .bg-green-700, .bg-orange-700, .bg-indigo-700, .bg-purple-700, .bg-pink-700, .bg-red-700, .bg-yellow-700 {
-            background-color: transparent !important;
-        }
-        
-        .bg-blue-800, .bg-green-800, .bg-orange-800, .bg-indigo-800, .bg-purple-800, .bg-pink-800, .bg-red-800, .bg-yellow-800 {
-            background-color: transparent !important;
-        }
-        
-        .bg-blue-900, .bg-green-900, .bg-orange-900, .bg-indigo-900, .bg-purple-900, .bg-pink-900, .bg-red-900, .bg-yellow-900 {
-            background-color: transparent !important;
-        }
-        
-        /* Remove all borders from colored elements */
-        .border-blue-200, .border-green-200, .border-orange-200, .border-indigo-200, .border-purple-200, .border-pink-200, .border-red-200, .border-yellow-200 {
-            border-color: transparent !important;
-        }
-        
-        /* Remove all colored text */
-        .text-blue-500, .text-green-500, .text-orange-500, .text-indigo-500, .text-purple-500, .text-pink-500, .text-red-500, .text-yellow-500 {
-            color: #d1d5db !important;
-        }
-        
-        /* Remove all colored text with higher specificity */
-        .text-blue-600, .text-green-600, .text-orange-600, .text-indigo-600, .text-purple-600, .text-pink-600, .text-red-600, .text-yellow-600 {
-            color: #d1d5db !important;
-        }
-        
-        /* Remove all colored text with maximum specificity */
-        .text-blue-700, .text-green-700, .text-orange-700, .text-indigo-700, .text-purple-700, .text-pink-700, .text-red-700, .text-yellow-700 {
-            color: #d1d5db !important;
-        }
-        
-        /* Remove all colored text with maximum specificity */
-        .text-blue-800, .text-green-800, .text-orange-800, .text-indigo-800, .text-purple-800, .text-pink-800, .text-red-800, .text-yellow-800 {
-            color: #d1d5db !important;
-        }
-        
-        /* Remove all colored text with maximum specificity */
-        .text-blue-900, .text-green-900, .text-orange-900, .text-indigo-900, .text-purple-900, .text-pink-900, .text-red-900, .text-yellow-900 {
-            color: #d1d5db !important;
-        }
-        
-        /* Remove all colored text with maximum specificity */
-        .text-blue-100, .text-green-100, .text-orange-100, .text-indigo-100, .text-purple-100, .text-pink-100, .text-red-100, .text-yellow-100 {
-            color: #d1d5db !important;
-        }
-        
-        /* Remove all colored text with maximum specificity */
-        .text-blue-200, .text-green-200, .text-orange-200, .text-indigo-200, .text-purple-200, .text-pink-200, .text-red-200, .text-yellow-200 {
-            color: #d1d5db !important;
-        }
-        
-        /* Remove all colored text with maximum specificity */
-        .text-blue-300, .text-green-300, .text-orange-300, .text-indigo-300, .text-purple-300, .text-pink-300, .text-red-300, .text-yellow-300 {
-            color: #d1d5db !important;
-        }
-        
-        /* Remove all colored text with maximum specificity */
-        .text-blue-400, .text-green-400, .text-orange-400, .text-indigo-400, .text-purple-400, .text-pink-400, .text-red-400, .text-yellow-400 {
-            color: #d1d5db !important;
-        }
+        height: 70px;
+        border-width: 2px;
+    }
+    
+    /* Property Info */
+    .property-info {
+        padding: 20px 16px;
+    }
+    
+    .info-header {
+        flex-direction: column;
+        gap: 12px;
+        align-items: flex-start;
+        margin-bottom: 20px;
+    }
+    
+    .property-title-large {
+        font-size: 22px;
+        line-height: 1.3;
+    }
+    
+    .property-location-large {
+        font-size: 14px;
+    }
+    
+    .property-location-large svg {
+        width: 16px;
+        height: 16px;
+    }
+    
+    .price-large {
+        font-size: 26px;
+        align-self: flex-start;
+    }
+    
+    .price-large span {
+        font-size: 14px;
+    }
+    
+    .availability-status {
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+    
+    .status-badge {
+        padding: 6px 12px;
+        font-size: 12px;
+    }
+    
+    .property-type {
+        padding: 6px 12px;
+        font-size: 12px;
+    }
+    
+    .section-title {
+        font-size: 16px;
+        margin-bottom: 12px;
+    }
+    
+    .section-title svg {
+        width: 18px;
+        height: 18px;
+    }
+    
+    .description-text {
+        font-size: 14px;
+        line-height: 1.6;
+    }
+    
+    .address-block {
+        padding: 12px;
+        font-size: 13px;
+    }
+    
+    .offer-title {
+        font-size: 14px;
+    }
+    
+    .offer-list {
+        gap: 10px;
+    }
+    
+    .offer-item {
+        font-size: 13px;
+    }
+    
+    .offer-item svg {
+        width: 16px;
+        height: 16px;
+    }
+    
+    .details-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+    
+    .detail-item {
+        padding: 12px;
+    }
+    
+    .detail-label {
+        font-size: 12px;
+    }
+    
+    .detail-value {
+        font-size: 14px;
+    }
+    
+    .detail-value svg {
+        width: 16px;
+        height: 16px;
+    }
+    
+    /* Sidebar Cards */
+    .manager-card,
+    .location-card,
+    .clients-card,
+    .actions-card {
+        padding: 16px;
+    }
+    
+    .card-title {
+        font-size: 15px;
+        margin-bottom: 12px;
+    }
+    
+    .card-title svg {
+        width: 18px;
+        height: 18px;
+    }
+    
+    .locked-content svg {
+        width: 36px;
+        height: 36px;
+    }
+    
+    .locked-text {
+        font-size: 13px;
+    }
+    
+    .locked-subtext {
+        font-size: 12px;
+    }
+    
+    .map-placeholder svg {
+        width: 36px;
+        height: 36px;
+    }
+    
+    .coordinates-label {
+        font-size: 12px;
+    }
+    
+    .coordinates-value {
+        font-size: 13px;
+    }
+    
+    .btn-maps {
+        padding: 12px;
+        font-size: 14px;
+    }
+    
+    .btn-maps svg {
+        width: 18px;
+        height: 18px;
+    }
+    
+    .client-item {
+        padding: 12px;
+    }
+    
+    .client-name {
+        font-size: 14px;
+    }
+    
+    .client-phone,
+    .client-email {
+        font-size: 12px;
+    }
+    
+    .action-buttons {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .btn-action,
+    .btn-action-secondary {
+        width: 100%;
+        justify-content: center;
+        padding: 12px 20px;
+        font-size: 14px;
+    }
+    
+    .btn-action svg,
+    .btn-action-secondary svg {
+        width: 18px;
+        height: 18px;
+    }
+    
+    /* Footer */
+    .footer {
+        padding: 32px 0;
+    }
+    
+    .footer-logo {
+        margin-bottom: 12px;
+    }
+    
+    .logo-icon {
+        width: 32px;
+        height: 32px;
+        font-size: 20px;
+    }
+    
+    .footer-text {
+        font-size: 13px;
+    }
+    
+    .footer-copyright {
+        font-size: 12px;
+    }
+    
+    /* Lightbox Mobile */
+    .lightbox-nav {
+        width: 48px;
+        height: 48px;
+    }
+    
+    .lightbox-nav svg {
+        width: 24px;
+        height: 24px;
+    }
+    
+    .lightbox-prev {
+        left: 8px;
+    }
+    
+    .lightbox-next {
+        right: 8px;
+    }
+    
+    .lightbox-close {
+        top: 8px;
+        right: 8px;
+        width: 42px;
+        height: 42px;
+        font-size: 24px;
+    }
+    
+    .lightbox-counter {
+        bottom: 16px;
+        font-size: 13px;
+        padding: 8px 16px;
+    }
+    
+    .lightbox-zoom-hint {
+        font-size: 11px;
+        padding: 6px 12px;
+        top: 8px;
+    }
+    
+    .lightbox-zoom-hint svg {
+        width: 14px;
+        height: 14px;
+    }
+    
+    .lightbox-content {
+        max-width: 95%;
+    }
+    
+    .lightbox-image {
+        max-height: 80vh;
+    }
+}
+
+@media (max-width: 480px) {
+    .container {
+        padding: 0 12px;
+    }
+    
+    /* Navigation - Extra Small */
+    .logo-text {
+        font-size: 16px;
+    }
+    
+    .nav-links {
+        gap: 2px;
+    }
+    
+    .nav-link {
+        padding: 6px 8px;
+        font-size: 11px;
+    }
+    
+    .btn-agent {
+        padding: 6px 10px;
+        font-size: 11px;
+    }
+    
+    /* Image Gallery - Extra Small */
+    .main-image {
+        height: 240px;
+    }
+    
+    .gallery-image {
+        height: 240px;
+    }
+    
+    .gallery-title {
+        font-size: 14px;
+    }
+    
+    .gallery-counter {
+        font-size: 11px;
+    }
+    
+    .gallery-nav {
+        width: 32px;
+        height: 32px;
+    }
+    
+    .gallery-nav svg {
+        width: 16px;
+        height: 16px;
+    }
+    
+    .thumbnail-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 4px;
+        padding: 6px;
+    }
+    
+    .thumbnail {
+        height: 60px;
+    }
+    
+    /* Property Info - Extra Small */
+    .property-info {
+        padding: 16px 12px;
+    }
+    
+    .property-title-large {
+        font-size: 20px;
+    }
+    
+    .property-location-large {
+        font-size: 13px;
+    }
+    
+    .price-large {
+        font-size: 24px;
+    }
+    
+    .status-badge {
+        padding: 5px 10px;
+        font-size: 11px;
+    }
+    
+    .section-title {
+        font-size: 15px;
+    }
+    
+    .description-text {
+        font-size: 13px;
+    }
+    
+    .details-grid {
+        gap: 10px;
+    }
+    
+    .detail-item {
+        padding: 10px;
+    }
+    
+    .detail-label {
+        font-size: 11px;
+    }
+    
+    .detail-value {
+        font-size: 13px;
+    }
+    
+    /* Sidebar Cards - Extra Small */
+    .manager-card,
+    .location-card,
+    .clients-card,
+    .actions-card {
+        padding: 14px 12px;
+    }
+    
+    .card-title {
+        font-size: 14px;
+    }
+    
+    .locked-content svg {
+        width: 32px;
+        height: 32px;
+    }
+    
+    .locked-text {
+        font-size: 12px;
+    }
+    
+    .btn-action,
+    .btn-action-secondary {
+        padding: 10px 16px;
+        font-size: 13px;
+    }
+    
+    /* Lightbox - Extra Small */
+    .lightbox-nav {
+        width: 40px;
+        height: 40px;
+    }
+    
+    .lightbox-nav svg {
+        width: 20px;
+        height: 20px;
+    }
+    
+    .lightbox-prev {
+        left: 4px;
+    }
+    
+    .lightbox-next {
+        right: 4px;
+    }
+    
+    .lightbox-close {
+        top: 4px;
+        right: 4px;
+        width: 38px;
+        height: 38px;
+        font-size: 22px;
+    }
+    
+    .lightbox-counter {
+        bottom: 12px;
+        font-size: 12px;
+        padding: 6px 12px;
+    }
+    
+    .lightbox-zoom-hint {
+        font-size: 10px;
+        padding: 4px 10px;
+    }
+    
+    .lightbox-image {
+        max-height: 75vh;
+    }
+}
     </style>
-</head>
-<body class="min-h-screen" style="background-color: #343E4E !important;">
-    @include('layouts.properties-navigation')
-    <div class="min-h-screen">
-
-
-        <!-- Property Header Section -->
-        <div class="border-b border-gray-200 shadow-sm" style="background-color: #1f2937 !important; border-color: #374151 !important;">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
-                <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between space-y-3 sm:space-y-0">
-                    <div class="flex items-center space-x-3 sm:space-x-4">
-                        <a href="{{ route('properties.index') }}" 
-                           class="text-gray-500 hover:text-gray-700 transition-colors duration-200">
-                            <i class="fas fa-arrow-left text-lg sm:text-xl"></i>
-                        </a>
-                        <div class="hidden sm:block h-8 w-px bg-gray-300"></div>
-                        <h1 class="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">
-                            {{ Str::limit($property->title ?: 'Property Details', 50) }}
-                        </h1>
-                    </div>
-                    @if($property->status)
-                        <div class="status-badge status-{{ $property->status === 'available' ? 'available' : 'rented' }} text-sm sm:text-base">
-                            <i class="fas fa-{{ $property->status === 'available' ? 'check-circle' : 'clock' }} mr-2"></i>
-                            {{ ucfirst($property->status) }}
-                        </div>
-                    @endif
-                </div>
-            </div>
-        </div>
-
-        <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
-            @if(session('success'))
-                <div class="success-message animate-fade-in">
-                    <div class="flex items-center space-x-3">
-                        <i class="fas fa-check-circle text-xl sm:text-2xl"></i>
-                        <span class="text-base sm:text-lg font-semibold">{{ session('success') }}</span>
-                    </div>
-                </div>
-            @endif
+    
+    <script>
+        // Image gallery functionality
+        let currentImageIndex = 0;
+        let images = [];
+        
+        function initGallery() {
+            images = Array.from(document.querySelectorAll('.thumbnail'));
+            const mainImage = document.querySelector('.gallery-image');
+            const counter = document.querySelector('.gallery-counter');
             
-            <!-- Property Overview Card -->
-            <div class="property-card p-4 sm:p-6 lg:p-8 mb-6 sm:mb-8 animate-slide-up">
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
-                    <div class="lg:col-span-2 space-y-4 sm:space-y-6">
-                        <div class="flex items-center space-x-3 sm:space-x-4">
-                            <i class="fas fa-map-marker-alt text-red-500 text-xl sm:text-2xl"></i>
-                            @if($property->latitude && $property->longitude && $property->latitude !== 'N/A' && $property->longitude !== 'N/A')
-                                <a href="https://www.google.com/maps?q={{ $property->latitude }},{{ $property->longitude }}" 
-                                   target="_blank" 
-                                   class="text-lg sm:text-xl lg:text-2xl font-semibold text-gray-700 hover:text-blue-600 transition-colors duration-300 hover:underline">
-                                    {{ $property->location ?: 'Location not specified' }}
-                                    <i class="fas fa-external-link-alt ml-2 sm:ml-3 text-base sm:text-lg opacity-75"></i>
-                                </a>
-                            @else
-                                <span class="text-lg sm:text-xl lg:text-2xl font-semibold text-gray-700">{{ $property->location ?: 'Location not specified' }}</span>
-                            @endif
-                        </div>
-                        
-                        @if($property->property_type)
-                            <div class="feature-badge inline-block text-sm sm:text-base">
-                                <i class="fas fa-home mr-2"></i>
-                                {{ $property->property_type }}
-                            </div>
-                        @endif
-                        
-                        @auth
-                        <div class="pt-4">
-                            @if($property instanceof \App\Models\PropertyFromSheet)
-                                <span class="text-sm text-gray-500">Properties from Google Sheets cannot be edited through the admin panel.</span>
-                            @else
-                                <a href="{{ route('admin.properties.edit', $property->id) }}" class="action-button w-full sm:w-auto">
-                                    <i class="fas fa-edit"></i>
-                                    Edit Property
-                                </a>
-                            @endif
-                        </div>
-                        @endauth
+            if (images.length === 0) return;
+            
+            images.forEach((thumb, index) => {
+                thumb.addEventListener('click', () => {
+                    currentImageIndex = index;
+                    updateGallery();
+                });
+            });
+            
+            document.querySelector('.gallery-prev')?.addEventListener('click', () => {
+                currentImageIndex = (currentImageIndex - 1 + images.length) % images.length;
+                updateGallery();
+            });
+            
+            document.querySelector('.gallery-next')?.addEventListener('click', () => {
+                currentImageIndex = (currentImageIndex + 1) % images.length;
+                updateGallery();
+            });
+            
+            function updateGallery() {
+                mainImage.src = images[currentImageIndex].src.replace('w=300', 'w=1200');
+                images.forEach((thumb, index) => {
+                    thumb.classList.toggle('active', index === currentImageIndex);
+                });
+                counter.textContent = `${currentImageIndex + 1} of ${images.length}`;
+            }
+        }
+        
+        // Initialize on load
+        document.addEventListener('DOMContentLoaded', initGallery);
+    </script>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-content">
+                <a href="{{ route('properties.index') }}" class="logo">
+                    <div class="logo-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" stroke-width="2"/>
+                            <path d="M9 22V12h6v10" stroke-width="2"/>
+                        </svg>
                     </div>
-                    
-                    <div class="space-y-4 sm:space-y-6">
-                        <div class="price-display">
-                            <div class="text-4xl sm:text-5xl lg:text-6xl font-bold mb-2 leading-none">
-                                {{ $property->formatted_price }}
-                            </div>
+                    <span class="logo-text">TRUEHOLD</span>
+                </a>
+                <ul class="nav-links">
+                    <li><a href="{{ route('properties.index') }}" class="nav-link">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" stroke-width="2"/>
+                        </svg>
+                        Properties
+                    </a></li>
+                    <li><a href="{{ route('properties.map') }}" class="nav-link">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <path d="M1 6v16l7-4 8 4 7-4V2l-7 4-8-4-7 4z" stroke-width="2"/>
+                        </svg>
+                        Map View
+                    </a></li>
+                    @auth
+                    <li><a href="{{ route('dashboard') }}" class="btn-agent">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                        </svg>
+                        Dashboard
+                    </a></li>
+                            @else
+                    <li><a href="{{ route('login', ['redirect' => url()->current()]) }}" class="btn-agent">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                        </svg>
+                        Agent Login
+                    </a></li>
+                    @endauth
+                </ul>
                         </div>
-                        
-                        @if($property->available_date && $property->available_date !== 'N/A')
-                            <div class="bg-green-100 text-green-800 px-4 sm:px-6 py-3 sm:py-4 rounded-12 sm:rounded-16 font-semibold text-center shadow-lg text-sm sm:text-base">
-                                <i class="fas fa-calendar mr-2"></i>
-                                Available: {{ $property->available_date }}
+                            </div>
+    </nav>
+
+    <!-- Back Button -->
+    <section class="back-section">
+        <div class="container">
+            <a href="{{ route('properties.index') }}" class="back-link">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path d="M19 12H5M12 19l-7-7 7-7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                Back to Listings
+            </a>
+                        </div>
+    </section>
+
+    <!-- Success Message -->
+    @if(session('success'))
+        <div class="container">
+            <div class="success-alert">
+                <i class="fas fa-check-circle" style="font-size: 24px;"></i>
+                <span>{{ session('success') }}</span>
+                            </div>
                             </div>
                         @endif
 
-                    </div>
-                </div>
-            </div>
-
-            <div class="responsive-grid">
+    <!-- Property Details -->
+    <section class="property-details-section">
+        <div class="container">
+            <div class="details-layout">
+                
                 <!-- Main Content -->
-                <div class="space-y-8">
-                    <!-- Enhanced Image Gallery Carousel -->
-                    @if($property->high_quality_photos_array && count($property->high_quality_photos_array) > 0)
-                        <div class="image-gallery" data-photos="{{ json_encode($property->high_quality_photos_array ?? []) }}" data-original-photos="{{ json_encode($property->all_photos_array ?? []) }}">
-                            <div class="flex items-center justify-between mb-8">
-                                <h2 class="text-3xl font-bold text-gray-900 flex items-center space-x-3">
-                                    <div class="bg-blue-100 p-3 rounded-full">
-                                        <i class="fas fa-images text-blue-600 text-2xl"></i>
-                                    </div>
-                                    <span>Property Gallery</span>
+                <div class="details-main">
+                    
+                    <!-- Image Gallery -->
+                    <div class="image-gallery">
+                        <div class="gallery-header">
+                            <h2 class="gallery-title">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/>
+                                </svg>
+                                Property Gallery
                                 </h2>
-                                <div class="bg-white px-4 py-2 rounded-full shadow-lg">
-                                    <span class="text-gray-700 font-semibold">
-                                        <span id="currentImage">1</span> of {{ count($property->high_quality_photos_array) }}
+                            <span class="gallery-counter">
+                                @if($property->high_quality_photos_array && count($property->high_quality_photos_array) > 0)
+                                    1 of {{ count($property->high_quality_photos_array) }}
+                                @elseif($property->photo_count > 0)
+                                    1 of {{ $property->photo_count }}
+                                @else
+                                    1 of 1
+                                @endif
                                     </span>
                                 </div>
+                        <div class="main-image">
+                            @if($property->high_quality_photos_array && count($property->high_quality_photos_array) > 0)
+                                <img src="{{ $property->high_quality_photos_array[0] }}" alt="{{ $property->title }}" class="gallery-image">
+                            @elseif($property->first_photo_url && $property->first_photo_url !== 'N/A')
+                                <img src="{{ $property->first_photo_url }}" alt="{{ $property->title }}" class="gallery-image">
+                            @else
+                                <img src="https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=1200&q=80" alt="{{ $property->title }}" class="gallery-image">
+                            @endif
+                            
+                            @if(($property->high_quality_photos_array && count($property->high_quality_photos_array) > 1) || $property->photo_count > 1)
+                                <button class="gallery-nav gallery-prev">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                        <path d="M15 18l-6-6 6-6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                </button>
+                                <button class="gallery-nav gallery-next">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                        <path d="M9 18l6-6-6-6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                </button>
+                            @endif
                             </div>
                             
-                            <!-- Enhanced Main Image Display -->
-                            <div class="main-image-container mb-6">
-                                <div class="aspect-w-16 aspect-h-9">
-                                    <img id="mainImage" src="{{ $property->high_quality_photos_array[0] }}" 
-                                         alt="Property photo" 
-                                         class="w-full h-[500px] object-cover"
-                                         onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjQwMCIgdmlld0JveD0iMCAwIDQwMCA0MDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSI0MDAiIGhlaWdodD0iNDAwIiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik0yMDAgMTUwQzE3NS4xNDcgMTUwIDE1NSAxNzAuMTQ3IDE1NSAxOTVDMTU1IDIxOS44NTMgMTc1LjE0NyAyNDAgMjAwIDI0MEMyMjQuODUzIDI0MCAyNDUgMjE5Ljg1MyAyNDUgMTk1QzI0NSAxNzAuMTQ3IDIyNC44NTMgMTUwIDIwMCAxNTBaIiBmaWxsPSIjOUI5QkEwIi8+CjxwYXRoIGQ9Ik0yMDAgMjgwQzE2NS40OSAyODAgMTM1IDI5MC40OSAxMzUgMzA1VjM1MEgyNjVWMzA1QzI2NSAyOTAuNDkgMjM0LjUxIDI4MCAyMDAgMjgwWiIgZmlsbD0iIzlCOUJBMCIvPgo8L3N2Zz4K'">
-                                </div>
-                                
-                                <!-- Enhanced Navigation Arrows -->
-                                <button onclick="previousImage()" class="gallery-nav-button absolute left-6 top-1/2 transform -translate-y-1/2">
-                                    <i class="fas fa-chevron-left text-xl"></i>
-                                </button>
-                                <button onclick="nextImage()" class="gallery-nav-button absolute right-6 top-1/2 transform -translate-y-1/2">
-                                    <i class="fas fa-chevron-right text-xl"></i>
-                                </button>
-                                
-                                <!-- Enhanced Fullscreen Button -->
-                                <button onclick="openFullscreen()" class="gallery-nav-button absolute top-6 right-6">
-                                    <i class="fas fa-expand text-xl"></i>
-                                </button>
-                            </div>
-                            
-                            <!-- Enhanced Thumbnail Navigation -->
+                        @if($property->high_quality_photos_array && count($property->high_quality_photos_array) > 1)
                             <div class="thumbnail-grid">
-                                @foreach($property->high_quality_photos_array as $index => $photoUrl)
-                                    <div class="thumbnail {{ $index === 0 ? 'active' : '' }}" onclick="showImage({{ $index }})">
-                                        <img src="{{ $photoUrl }}" 
-                                             alt="Thumbnail {{ $index + 1 }}" 
-                                             class="w-full h-20 object-cover"
-                                             id="thumb{{ $index }}"
-                                             onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODAiIGhlaWdodD0iODAiIHZpZXdCb3g9IjAgMCA4MCA4MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjgwIiBoZWlnaHQ9IjgwIiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik00MCAzMEMzNS4wMjkgMzAgMzEgMzQuMDI5IDMxIDM5QzMxIDQzLjk3MSAzNS4wMjkgNDggNDAgNDhDNDQuOTcxIDQ4IDQ5IDQzLjk3MSA0OSAzOUM0OSAzNC4wMjkgNDQuOTcxIDMwIDQwIDMwWiIgZmlsbD0iIzlCOUJBMCIvPgo8cGF0aCBkPSJNNDAgNTZDMzIuOTggNTYgMjcgNjAuOTggMjcgNjZWNzBINjNWNjZDNjMgNjAuOTggNTcuMDIgNTYgNDAgNTZaIiBmaWxsPSIjOUI5QkEwIi8+Cjwvc3ZnPgo='">
-                                    </div>
+                                @foreach(array_slice($property->high_quality_photos_array, 0, 4) as $index => $photo)
+                                    <img src="{{ $photo }}" alt="Thumbnail {{ $index + 1 }}" class="thumbnail {{ $index === 0 ? 'active' : '' }}">
                                 @endforeach
-                            </div>
                         </div>
                     @endif
+                    </div>
 
-                    <!-- Enhanced Property Description -->
-                    @if($property->description && $property->description !== 'N/A')
-                        <div class="property-card p-10">
-                            <h2 class="text-3xl font-bold text-gray-900 mb-6 flex items-center space-x-3">
-                                <div class="bg-blue-100 p-3 rounded-full">
-                                    <i class="fas fa-info-circle text-blue-600 text-2xl"></i>
+                    <!-- Property Info -->
+                    <div class="property-info">
+                        <div class="info-header">
+                            <div>
+                                <h1 class="property-title-large">{{ $property->title }}</h1>
+                                <div class="property-location-large">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                                        <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+                                    </svg>
+                                    {{ $property->location ?: 'Location not specified' }}
                                 </div>
-                                <span>Description</span>
-                            </h2>
-                            <div class="prose max-w-none">
-                                <div class="description-text text-lg">
-                                    {!! nl2br(e($property->description)) !!}
                                 </div>
+                            <div class="price-large">{{ $property->formatted_price }}<span>/month</span></div>
                             </div>
-                        </div>
-                    @endif
 
-                    <!-- Enhanced Detailed Property Information -->
-                    <div class="property-card p-10">
-                        <h2 class="text-3xl font-bold text-gray-900 mb-8 flex items-center space-x-3">
-                            <div class="bg-blue-100 p-3 rounded-full">
-                                <i class="fas fa-list-ul text-blue-600 text-2xl"></i>
-                            </div>
-                            <span>Property Details</span>
-                        </h2>
-                        
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                            <!-- Basic Details -->
-                            <div class="space-y-6">
-                                <h3 class="text-xl font-bold text-gray-900 border-b-2 border-blue-200 pb-3">Basic Information</h3>
-                                
-                                @if($property->amenities && $property->amenities !== 'N/A')
-                                    <div class="info-section">
-                                        <span class="info-label">Amenities</span>
-                                        <p class="info-value">{{ $property->amenities }}</p>
-                                    </div>
+                        <div class="availability-status">
+                            @if($property->available_date && $property->available_date !== 'N/A')
+                                <span class="status-badge status-available">Available {{ $property->available_date }}</span>
+                            @else
+                                <span class="status-badge status-available">Available Now</span>
                                 @endif
                                 
-                                @if($property->bills_included && $property->bills_included !== 'N/A')
-                                    <div class="info-section">
-                                        <span class="info-label">Bills Included</span>
-                                        <p class="info-value">{{ $property->bills_included }}</p>
-                                    </div>
-                                @endif
-                                
-                                @if($property->deposit && $property->deposit !== 'N/A')
-                                    <div class="info-section">
-                                        <span class="info-label">Deposit</span>
-                                        <p class="info-value">{{ $property->deposit }}</p>
-                                    </div>
+                            @if($property->property_type)
+                                <span class="property-type">{{ $property->property_type }}</span>
                                 @endif
                             </div>
                             
-                            <!-- Additional Details -->
-                            <div class="space-y-6">
-                                <h3 class="text-xl font-bold text-gray-900 border-b-2 border-blue-200 pb-3">Additional Features</h3>
-                                
-                                @if($property->minimum_term && $property->minimum_term !== 'N/A')
-                                    <div class="info-section">
-                                        <span class="info-label">Minimum Term</span>
-                                        <p class="info-value">{{ $property->minimum_term }}</p>
+                        <!-- Description -->
+                        <div class="description-section">
+                            <h2 class="section-title">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+                                </svg>
+                                Description
+                            </h2>
+                            
+                            @if($property->address && $property->address !== 'N/A')
+                                <div class="address-block">
+                                    <strong>ADDRESS:</strong> {{ $property->address }}
                                     </div>
                                 @endif
                                 
-                                @if($property->furnishings && $property->furnishings !== 'N/A')
-                                    <div class="info-section">
-                                        <span class="info-label">Furnishings</span>
-                                        <p class="info-value">{{ $property->furnishings }}</p>
-                                    </div>
+                            @if($property->description && $property->description !== 'N/A')
+                                <p class="description-text">{{ $property->description }}</p>
                                 @endif
                                 
-                                @if($property->garden_patio && $property->garden_patio !== 'N/A')
-                                    <div class="info-section">
-                                        <span class="info-label">Garden/Patio</span>
-                                        <p class="info-value">{{ $property->garden_patio }}</p>
+                            @if($property->bills_included && $property->bills_included !== 'N/A')
+                                <div class="offer-section">
+                                    <h3 class="offer-title">BILLS INCLUDED:</h3>
+                                    <div class="offer-list">
+                                        @php
+                                            $bills = explode(',', $property->bills_included);
+                                        @endphp
+                                        @foreach($bills as $bill)
+                                            <div class="offer-item">
+                                                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                                                    <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                                                </svg>
+                                                <span>{{ trim($bill) }}</span>
                                     </div>
-                                @endif
+                                        @endforeach
                             </div>
                         </div>
-                    </div>
+                            @endif
                 </div>
 
-                <!-- Enhanced Sidebar -->
-                <div class="space-y-8">
-                    <!-- Contact Information -->
-                    @if($property->contact_info && $property->contact_info !== 'N/A')
-                        <div class="property-card p-8">
-                            <h2 class="text-2xl font-bold text-gray-900 mb-6 flex items-center space-x-3">
-                                <div class="bg-green-100 p-3 rounded-full">
-                                    <i class="fas fa-phone text-green-600 text-xl"></i>
                                 </div>
-                                <span>Contact Information</span>
-                            </h2>
-                            <div class="bg-green-50 p-4 rounded-12 border border-green-200">
-                                <p class="text-gray-700 font-medium">{{ $property->contact_info }}</p>
                             </div>
-                        </div>
-                    @endif
 
-                    <!-- Management Company -->
-                    @if($property->management_company && $property->management_company !== 'N/A' && auth()->check())
-                        <div class="property-card p-8">
-                            <h2 class="text-2xl font-bold text-gray-900 mb-6 flex items-center space-x-3">
-                                <div class="bg-purple-100 p-3 rounded-full">
-                                    <i class="fas fa-building text-purple-600 text-xl"></i>
-                                </div>
-                                <span>Management Company</span>
-                            </h2>
-                            <div class="bg-purple-50 p-4 rounded-12 border border-purple-200">
-                                <p class="text-gray-700 font-medium">{{ $property->management_company }}</p>
-                            </div>
-                        </div>
-                    @elseif($property->management_company && $property->management_company !== 'N/A')
-                        <div class="property-card p-8">
-                            <h2 class="text-2xl font-bold text-gray-900 mb-6 flex items-center space-x-3">
-                                <div class="bg-purple-100 p-3 rounded-full">
-                                    <i class="fas fa-building text-purple-600 text-xl"></i>
-                                </div>
-                                <span>Management Company</span>
-                            </h2>
-                            <div class="bg-gray-100 border border-gray-300 text-gray-600 px-6 py-4 rounded-lg text-center">
-                                <i class="fas fa-lock text-2xl mb-3"></i>
-                                <p class="mb-2">Management company information is available to registered users.</p>
-                                <a href="{{ route('login') }}" class="font-medium text-blue-600 hover:text-blue-800">Login to view company details</a>
-                            </div>
-                        </div>
-                    @endif
-
-                    <!-- Property Manager -->
-                    @if($property->agent_name && $property->agent_name !== 'N/A' && auth()->check())
-                        <div class="property-card p-8">
-                            <h2 class="text-2xl font-bold text-gray-900 mb-6 flex items-center space-x-3">
-                                <div class="bg-blue-100 p-3 rounded-full">
-                                    <i class="fas fa-user-tie text-blue-600 text-xl"></i>
-                                </div>
-                                <span>Property Manager</span>
-                            </h2>
-                            <div class="bg-blue-50 p-4 rounded-12 border border-blue-200">
-                                <p class="text-gray-700 font-medium">
+                <!-- Sidebar -->
+                <div class="details-sidebar">
+                    
+                    <!-- Property Manager Card -->
+                    <div class="manager-card">
+                        <h3 class="card-title">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                            </svg>
+                            Property Manager
+                        </h3>
+                        @auth
+                            @if($property->agent_name && $property->agent_name !== 'N/A')
+                                <div style="padding: 16px; background: var(--off-white); border-radius: 10px;">
+                                    <p style="font-weight: 600; color: var(--primary-navy); margin-bottom: 8px;">
                                     {{ $property->agent_name }}
-                                    @if($property->paying && in_array(strtolower(trim($property->paying)), ['yes', 'y', '1', 'true']))
-                                        <span class="ml-2">⚡</span>
+                                    </p>
+                                    @if($property->agent_phone && $property->agent_phone !== 'N/A')
+                                        <p style="color: var(--gray); font-size: 14px;">
+                                            <i class="fas fa-phone" style="margin-right: 8px; color: var(--gold);"></i>
+                                            {{ $property->agent_phone }}
+                                        </p>
                                     @endif
-                                </p>
                             </div>
+                            @else
+                                <p style="color: var(--gray); font-size: 14px;">No agent assigned</p>
+                            @endif
+                        @else
+                            <div class="locked-content">
+                                <svg width="48" height="48" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                                </svg>
+                                <p class="locked-text">Please contact your agent for more details</p>
+                                <p class="locked-subtext">Property manager information available to registered users</p>
                         </div>
-                    @elseif($property->agent_name && $property->agent_name !== 'N/A')
-                        <div class="property-card p-8">
-                            <h2 class="text-2xl font-bold text-gray-900 mb-6 flex items-center space-x-3">
-                                <div class="bg-blue-100 p-3 rounded-full">
-                                    <i class="fas fa-user-tie text-blue-600 text-xl"></i>
+                        @endauth
                                 </div>
-                                <span>Property Manager</span>
-                            </h2>
-                            <div class="bg-gray-100 border border-gray-300 text-gray-600 px-6 py-4 rounded-lg text-center">
-                                <i class="fas fa-lock text-2xl mb-3"></i>
-                                <p class="mb-2">Property manager information is available to registered users.</p>
-                                <a href="{{ route('login') }}" class="font-medium text-blue-600 hover:text-blue-800">Login to view manager details</a>
-                            </div>
-                        </div>
-                    @endif
 
-                    <!-- Enhanced Location Information -->
+                    <!-- Location Card -->
                     @if($property->latitude && $property->longitude && $property->latitude !== 'N/A' && $property->longitude !== 'N/A')
-                        <div class="property-card p-8">
-                            <h2 class="text-2xl font-bold text-gray-900 mb-6 flex items-center space-x-3">
-                                <div class="bg-orange-100 p-3 rounded-full">
-                                    <i class="fas fa-map-marker-alt text-orange-600 text-xl"></i>
+                        <div class="location-card">
+                            <h3 class="card-title">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+                                </svg>
+                                Location
+                            </h3>
+                            <div class="map-placeholder">
+                                <svg width="48" height="48" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+                                </svg>
+                                <div class="coordinates">
+                                    <p class="coordinates-label">Coordinates:</p>
+                                    <p class="coordinates-value">{{ $property->latitude }}, {{ $property->longitude }}</p>
                                 </div>
-                                <span>Location</span>
-                            </h2>
-                            <div class="location-card mb-6">
-                                <i class="fas fa-map-marker-alt text-5xl text-orange-500 mb-4"></i>
-                                <p class="text-gray-700 font-semibold mb-2">Coordinates:</p>
-                                <p class="text-lg text-gray-600 font-mono">{{ $property->latitude }}, {{ $property->longitude }}</p>
                             </div>
-                            <a href="https://www.google.com/maps?q={{ $property->latitude }},{{ $property->longitude }}" 
-                               target="_blank" 
-                               class="maps-button">
-                                <i class="fas fa-map-marked-alt mr-2"></i>Open in Google Maps
+                            <a href="https://www.google.com/maps?q={{ $property->latitude }},{{ $property->longitude }}" target="_blank" class="btn-maps">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M20.5 3l-.16.03L15 5.1 9 3 3.36 4.9c-.21.07-.36.25-.36.48V20.5c0 .28.22.5.5.5l.16-.03L9 18.9l6 2.1 5.64-1.9c.21-.07.36-.25.36-.48V3.5c0-.28-.22-.5-.5-.5zM15 19l-6-2.11V5l6 2.11V19z"/>
+                                </svg>
+                                Open in Google Maps
                             </a>
                         </div>
                     @endif
 
-                    <!-- Mark Client as Interested -->
-                    @auth
-                    <div class="property-card p-8">
-                        <h2 class="text-2xl font-bold text-gray-900 mb-6 flex items-center space-x-3">
-                            <div class="bg-blue-100 p-3 rounded-full">
-                                <i class="fas fa-users text-blue-600 text-xl"></i>
-                            </div>
-                            <span>Mark Client as Interested</span>
-                        </h2>
-                        <form method="POST" action="{{ route('admin.properties.interests.add', $property) }}" class="grid grid-cols-1 gap-4">
-                            @csrf
-                            <div>
-                                <label for="client_id" class="block text-sm font-medium text-gray-700 mb-2">Select Client (A→Z)</label>
-                                <select id="client_id" name="client_id" class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500">
-                                    <option value="">Choose a client</option>
-                                    @foreach($clients ?? [] as $client)
-                                        <option value="{{ $client->id }}">{{ $client->full_name }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                            <div>
-                                <label for="notes" class="block text-sm font-medium text-gray-700 mb-2">Notes (optional)</label>
-                                <textarea id="notes" name="notes" rows="2" class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500" placeholder="Availability, preferences, etc."></textarea>
-                            </div>
-                            <div class="flex justify-end">
-                                <button type="submit" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium">
-                                    <i class="fas fa-user-plus mr-2"></i>Add Interested Client
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                    @endauth
-
-                    <!-- Interested Clients -->
-                    <div class="property-card p-8">
-                        <h2 class="text-2xl font-bold text-gray-900 mb-6 flex items-center space-x-3">
-                            <div class="bg-indigo-100 p-3 rounded-full">
-                                <i class="fas fa-user-friends text-indigo-600 text-xl"></i>
-                            </div>
-                            <span>Interested Clients</span>
-                        </h2>
-                        
-                        @auth
-                        <!-- Full client details for authenticated users -->
-                        <ul class="divide-y divide-gray-200">
-                            @forelse($property->interestedClients ?? [] as $client)
-                                <li class="py-3 flex items-start justify-between">
-                                    <div>
-                                        <p class="font-semibold text-gray-900">{{ $client->full_name }}</p>
-                                        <p class="text-sm text-gray-600">{{ $client->email }} @if($client->phone_number) • {{ $client->phone_number }} @endif</p>
-                                        @if($client->pivot && $client->pivot->created_at)
-                                            <p class="text-xs text-gray-400 mt-1">Added {{ $client->pivot->created_at->diffForHumans() }}</p>
-                                        @endif
-                                    </div>
-                                    <form method="POST" action="{{ route('admin.properties.interests.remove', [$property, $client]) }}" onsubmit="return confirm('Remove this client from interested list?')">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button class="text-red-600 hover:text-red-700">
-                                            <i class="fas fa-user-minus"></i>
-                                        </button>
-                                    </form>
-                                </li>
-                            @empty
-                                <li class="py-4 text-center text-gray-500">
-                                    <i class="fas fa-users text-2xl mb-2"></i>
-                                    <p>No interested clients yet</p>
-                                </li>
-                            @endforelse
-                        </ul>
-                        @else
-                        <!-- Privacy-protected view for non-authenticated users -->
-                        <div class="text-center py-8">
-                            <div class="bg-blue-50 border border-blue-200 rounded-lg p-6">
-                                <i class="fas fa-lock text-blue-600 text-3xl mb-4"></i>
-                                <h3 class="text-lg font-semibold text-blue-800 mb-2">Client Privacy Protected</h3>
-                                <p class="text-blue-600 mb-4">
-                                    {{ $property->interestedClients->count() }} client{{ $property->interestedClients->count() !== 1 ? 's' : '' }} 
-                                    {{ $property->interestedClients->count() === 1 ? 'is' : 'are' }} interested in this property
-                                </p>
-                                <p class="text-sm text-blue-500">
-                                    <i class="fas fa-info-circle mr-1"></i>
-                                    Full client details are only visible to authenticated users
-                                </p>
-                            </div>
-                        </div>
-                        @endauth
-                    </div>
-
-                    <!-- Enhanced Quick Actions -->
-                    <div class="property-card p-8">
-                        <h2 class="text-2xl font-bold text-gray-900 mb-6 flex items-center space-x-3">
-                            <div class="bg-indigo-100 p-3 rounded-full">
-                                <i class="fas fa-bolt text-indigo-600 text-xl"></i>
-                            </div>
-                            <span>Quick Actions</span>
-                        </h2>
-                        <div class="space-y-4">
-                            @auth
-                            @if($property instanceof \App\Models\PropertyFromSheet)
-                                <div class="text-sm text-gray-500 text-center p-4 bg-gray-50 rounded-lg">
-                                    Properties from Google Sheets cannot be edited through the admin panel.
-                                </div>
+                    <!-- Interested Clients Card -->
+                    <div class="clients-card">
+                        <h3 class="card-title">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/>
+                            </svg>
+                            Interested Clients
+                        </h3>
+                        <div class="locked-content">
+                            <svg width="48" height="48" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/>
+                            </svg>
+                            <p class="locked-text">Client Privacy Protected</p>
+                            @if(isset($property->interestedClients))
+                                <p class="client-count">{{ $property->interestedClients->count() }} {{ Str::plural('client', $property->interestedClients->count()) }} interested in this property</p>
                             @else
-                                <a href="{{ route('admin.properties.edit', $property->id) }}" 
-                                   class="action-button w-full justify-center">
-                                    <i class="fas fa-edit"></i>
-                                    Edit Property
-                                </a>
-                            @endif
-                            @endauth
-                            
-                            <button onclick="shareProperty()" 
-                                    class="success-button w-full justify-center">
-                                <i class="fas fa-share"></i>
+                                <p class="client-count">0 clients are interested in this property</p>
+                                        @endif
+                            <p class="locked-subtext">Full client details are only visible to authenticated users</p>
+                                    </div>
+                    </div>
+
+                    <!-- Quick Actions Card -->
+                    <div class="actions-card">
+                        <h3 class="card-title">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M13 3c-4.97 0-9 4.03-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42C8.27 19.99 10.51 21 13 21c4.97 0 9-4.03 9-9s-4.03-9-9-9zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z"/>
+                            </svg>
+                            Quick Actions
+                        </h3>
+                        <div class="action-buttons">
+                            <button class="btn-action" onclick="shareProperty()">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                    <path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8M16 6l-4-4-4 4M12 2v13" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
                                 Share Property
                             </button>
                             
-                            @if($property->url && auth()->check())
-                            <a href="{{ $property->url }}" target="_blank" 
-                               class="secondary-button w-full justify-center">
-                                <i class="fas fa-external-link-alt"></i>
+                            @auth
+                                @if($property->link && $property->link !== 'N/A')
+                                    <a href="{{ $property->link }}" target="_blank" class="btn-action-secondary">
+                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                            <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6M15 3h6v6M10 14L21 3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                        </svg>
                                 View Original Listing
                             </a>
-                            @elseif($property->url)
-                            <div class="bg-gray-100 border border-gray-300 text-gray-600 px-4 py-3 rounded-lg text-center">
-                                <i class="fas fa-lock mr-2"></i>
-                                <a href="{{ route('login') }}" class="font-medium text-blue-600 hover:text-blue-800">Login</a> to view original listing
-                            </div>
                             @endif
+                            @endauth
                         </div>
                     </div>
                 </div>
-            </div>
-        </main>
-    </div>
 
-    <!-- Enhanced Fullscreen Image Modal -->
-    <div id="fullscreenModal" class="modal-overlay fixed inset-0 hidden z-50 flex items-center justify-center p-4">
-        <div class="modal-content relative max-w-7xl max-h-full">
-            <img id="fullscreenImage" src="" alt="Property photo" class="max-w-full max-h-full object-contain rounded-20">
-            <button onclick="closeFullscreen()" class="absolute top-6 right-6 text-white text-4xl hover:text-gray-300 transition-colors duration-300 bg-black bg-opacity-50 p-3 rounded-full z-10">
-                <i class="fas fa-times"></i>
-            </button>
-            <button onclick="previousFullscreenImage()" class="absolute left-6 top-1/2 transform -translate-y-1/2 text-white text-4xl hover:text-gray-300 transition-colors duration-300 bg-black bg-opacity-50 p-4 rounded-full z-10">
-                <i class="fas fa-chevron-left"></i>
-            </button>
-            <button onclick="nextFullscreenImage()" class="absolute right-6 top-1/2 transform -translate-y-1/2 text-white text-4xl hover:text-gray-300 transition-colors duration-300 bg-black bg-opacity-50 p-4 rounded-full z-10">
-                <i class="fas fa-chevron-right"></i>
-            </button>
-            <div class="absolute bottom-6 left-1/2 transform -translate-x-1/2 text-white text-xl bg-black bg-opacity-50 px-6 py-3 rounded-full">
-                <span id="fullscreenCounter">1</span> of {{ count($property->high_quality_photos_array ?? $property->all_photos_array ?? []) }}
             </div>
+    </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-logo">
+                    <span class="logo-icon">T</span>
+                    <span class="logo-text">TRUEHOLD</span>
+            </div>
+                <p class="footer-text">Premium Property Solutions</p>
+                <p class="footer-copyright">© 2025 TrueHold. All rights reserved.</p>
         </div>
     </div>
-
-    <!-- Floating Action Button -->
-    <div class="floating-action">
-        <button onclick="scrollToTop()" class="glass-card p-4 rounded-full hover:scale-110 transition-transform duration-300 shadow-2xl">
-            <i class="fas fa-arrow-up text-white text-xl"></i>
-        </button>
-    </div>
+    </footer>
 
     <script>
-        // Global photos data from PHP
-        let propertyPhotos = []; // High quality photos for main image
-        let originalPhotos = []; // Original photos for thumbnails
-        let currentImageIndex = 0;
-        let totalImages = 0;
-        
-        // Initialize photos on page load
-        document.addEventListener('DOMContentLoaded', function() {
-            try {
-                const photosElement = document.querySelector('[data-photos]');
-                if (photosElement && photosElement.dataset.photos) {
-                    const photosData = photosElement.dataset.photos;
-                    propertyPhotos = JSON.parse(photosData);
-                    // Ensure it's an array and filter out any empty/null values
-                    if (Array.isArray(propertyPhotos)) {
-                        propertyPhotos = propertyPhotos.filter(photo => photo && photo.trim() !== '');
-                    } else {
-                        propertyPhotos = [];
-                    }
-                    totalImages = propertyPhotos.length;
-                    console.log('Loaded photos:', totalImages, 'Photos array:', propertyPhotos);
-                }
-                if (photosElement && photosElement.dataset.originalPhotos) {
-                    originalPhotos = JSON.parse(photosElement.dataset.originalPhotos);
-                    if (Array.isArray(originalPhotos)) {
-                        originalPhotos = originalPhotos.filter(photo => photo && photo.trim() !== '');
-                    }
-                }
-                
-                // Fallback: if no photos from data attribute, try to get from thumbnails
-                if (totalImages === 0 || propertyPhotos.length === 0) {
-                    const thumbnails = document.querySelectorAll('.thumbnail img');
-                    propertyPhotos = Array.from(thumbnails)
-                        .map(img => img.src)
-                        .filter(src => src && !src.includes('data:image/svg') && src.trim() !== '');
-                    totalImages = propertyPhotos.length;
-                    console.log('Loaded photos from thumbnails:', totalImages, 'Photos array:', propertyPhotos);
-                }
-                
-                // Final validation - ensure we have photos
-                if (propertyPhotos.length === 0) {
-                    console.warn('No photos found after initialization');
-                } else {
-                    console.log('Successfully initialized with', propertyPhotos.length, 'photos');
-                }
-            } catch (error) {
-                console.error('Error parsing photos data:', error);
-                propertyPhotos = [];
-                originalPhotos = [];
-                totalImages = 0;
-            }
-        });
-        
-        function showImage(index) {
-            if (totalImages === 0) {
-                console.warn('No photos available');
-                return;
-            }
-            
-            // Ensure index is within bounds and is a valid integer
-            index = parseInt(index, 10);
-            if (isNaN(index) || index < 0) index = totalImages - 1;
-            if (index >= totalImages) index = 0;
-            
-            currentImageIndex = index;
-            const mainImage = document.getElementById('mainImage');
-            const currentImageSpan = document.getElementById('currentImage');
-            
-            if (mainImage && currentImageSpan) {
-                // Ensure we have a valid array and the index exists
-                if (propertyPhotos && Array.isArray(propertyPhotos) && propertyPhotos.length > 0) {
-                    // Make sure index is valid
-                    if (index >= 0 && index < propertyPhotos.length && propertyPhotos[index]) {
-                        mainImage.src = propertyPhotos[index];
-                        currentImageSpan.textContent = index + 1;
-                    
-                        // Update thumbnail selection
-                        document.querySelectorAll('.thumbnail').forEach((thumb, i) => {
-                            if (i === index) {
-                                thumb.classList.add('active');
-                            } else {
-                                thumb.classList.remove('active');
-                            }
-                        });
-                    } else {
-                        console.warn('Photo not found at index:', index, 'Array length:', propertyPhotos.length, 'Available indices:', Array.from({length: propertyPhotos.length}, (_, i) => i));
-                    }
-                } else {
-                    console.warn('Invalid photos array:', propertyPhotos);
-                }
-            } else {
-                console.warn('Main image or counter element not found');
-            }
-        }
-
-        function nextImage() {
-            if (totalImages === 0 || !propertyPhotos || propertyPhotos.length === 0) {
-                console.warn('No photos to navigate');
-                return;
-            }
-            // Ensure we're using the actual array length, not totalImages
-            const actualLength = propertyPhotos.length;
-            let nextIndex = (currentImageIndex + 1) % actualLength;
-            
-            // Skip any undefined/null entries
-            let attempts = 0;
-            while (attempts < actualLength && (!propertyPhotos[nextIndex] || propertyPhotos[nextIndex].trim() === '')) {
-                nextIndex = (nextIndex + 1) % actualLength;
-                attempts++;
-            }
-            
-            currentImageIndex = nextIndex;
-            showImage(currentImageIndex);
-        }
-
-        function previousImage() {
-            if (totalImages === 0 || !propertyPhotos || propertyPhotos.length === 0) {
-                console.warn('No photos to navigate');
-                return;
-            }
-            // Ensure we're using the actual array length, not totalImages
-            const actualLength = propertyPhotos.length;
-            let prevIndex = (currentImageIndex - 1 + actualLength) % actualLength;
-            
-            // Skip any undefined/null entries
-            let attempts = 0;
-            while (attempts < actualLength && (!propertyPhotos[prevIndex] || propertyPhotos[prevIndex].trim() === '')) {
-                prevIndex = (prevIndex - 1 + actualLength) % actualLength;
-                attempts++;
-            }
-            
-            currentImageIndex = prevIndex;
-            showImage(currentImageIndex);
-        }
-
-        function openFullscreen() {
-            const fullscreenModal = document.getElementById('fullscreenModal');
-            const fullscreenImage = document.getElementById('fullscreenImage');
-            const fullscreenCounter = document.getElementById('fullscreenCounter');
-            
-            if (fullscreenModal && fullscreenImage && fullscreenCounter) {
-                const mainImage = document.getElementById('mainImage');
-                if (mainImage && propertyPhotos.length > 0) {
-                    fullscreenImage.src = propertyPhotos[currentImageIndex] || mainImage.src;
-                } else if (mainImage) {
-                    fullscreenImage.src = mainImage.src;
-                }
-                fullscreenCounter.textContent = (currentImageIndex + 1) + ' of ' + totalImages;
-                fullscreenModal.classList.remove('hidden');
-                document.body.style.overflow = 'hidden';
-            }
-        }
-        
-        function nextFullscreenImage() {
-            if (totalImages > 0) {
-                nextImage();
-                const fullscreenImage = document.getElementById('fullscreenImage');
-                const fullscreenCounter = document.getElementById('fullscreenCounter');
-                if (fullscreenImage && propertyPhotos.length > 0) {
-                    fullscreenImage.src = propertyPhotos[currentImageIndex];
-                }
-                if (fullscreenCounter) {
-                    fullscreenCounter.textContent = (currentImageIndex + 1) + ' of ' + totalImages;
-                }
-            }
-        }
-        
-        function previousFullscreenImage() {
-            if (totalImages > 0) {
-                previousImage();
-                const fullscreenImage = document.getElementById('fullscreenImage');
-                const fullscreenCounter = document.getElementById('fullscreenCounter');
-                if (fullscreenImage && propertyPhotos.length > 0) {
-                    fullscreenImage.src = propertyPhotos[currentImageIndex];
-                }
-                if (fullscreenCounter) {
-                    fullscreenCounter.textContent = (currentImageIndex + 1) + ' of ' + totalImages;
-                }
-            }
-        }
-
-        function closeFullscreen() {
-            const fullscreenModal = document.getElementById('fullscreenModal');
-            if (fullscreenModal) {
-                fullscreenModal.classList.add('hidden');
-                document.body.style.overflow = 'auto';
-            }
-        }
-        
-        // Keyboard navigation
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'ArrowLeft') {
-                previousImage();
-            } else if (e.key === 'ArrowRight') {
-                nextImage();
-            } else if (e.key === 'Escape') {
-                closeFullscreen();
-            }
-        });
-
         function shareProperty() {
             if (navigator.share) {
                 navigator.share({
                     title: '{{ $property->title }}',
-                    text: 'Check out this property: {{ $property->title }}',
+                    text: 'Check out this property on TrueHold',
                     url: window.location.href
+                }).catch(() => {
+                    copyToClipboard();
                 });
-            } else {
-                // Fallback: copy to clipboard
-                navigator.clipboard.writeText(window.location.href).then(() => {
-                    // Create a temporary success message
-                    const successMsg = document.createElement('div');
-                    successMsg.className = 'fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 animate-fade-in';
-                    successMsg.innerHTML = '<i class="fas fa-check mr-2"></i>Property link copied to clipboard!';
-                    document.body.appendChild(successMsg);
-                    
-                    setTimeout(() => {
-                        successMsg.remove();
-                    }, 3000);
-                });
+                    } else {
+                copyToClipboard();
             }
         }
-
-        function scrollToTop() {
-            window.scrollTo({
-                top: 0,
-                behavior: 'smooth'
+        
+        function copyToClipboard() {
+            const url = window.location.href;
+            navigator.clipboard.writeText(url).then(() => {
+                alert('Property link copied to clipboard!');
             });
         }
-
-        // Keyboard navigation for fullscreen
-        document.addEventListener('keydown', function(e) {
-            const fullscreenModal = document.getElementById('fullscreenModal');
-            if (!fullscreenModal || fullscreenModal.classList.contains('hidden')) {
-                // If not in fullscreen, allow arrow keys to navigate main gallery
-                if (e.key === 'ArrowLeft') {
-                    e.preventDefault();
-                    previousImage();
-                } else if (e.key === 'ArrowRight') {
-                    e.preventDefault();
-                    nextImage();
-                }
-                return;
+    </script>
+    
+    <!-- Lightbox Modal -->
+    <div id="lightbox" class="lightbox">
+        <button class="lightbox-close" onclick="closeLightbox()">&times;</button>
+        
+        <div class="lightbox-zoom-hint">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="11" cy="11" r="8"/>
+                <path d="M21 21l-4.35-4.35"/>
+                <path d="M11 8v6M8 11h6"/>
+            </svg>
+            Click to view full size
+        </div>
+        
+        <button class="lightbox-nav lightbox-prev" onclick="lightboxNavigate(-1)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path d="M15 18l-6-6 6-6" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+        </button>
+        
+        <div class="lightbox-content">
+            <img id="lightboxImage" src="" alt="Enlarged view" class="lightbox-image">
+        </div>
+        
+        <button class="lightbox-nav lightbox-next" onclick="lightboxNavigate(1)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path d="M9 18l6-6-6-6" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+        </button>
+        
+        <div class="lightbox-counter" id="lightboxCounter">1 of 1</div>
+    </div>
+    
+    <script>
+        // Lightbox functionality
+        let lightboxIndex = 0;
+        let allImages = [];
+        
+        function initLightbox() {
+            // Collect all images from gallery
+            const thumbnails = Array.from(document.querySelectorAll('.thumbnail'));
+            const mainImage = document.querySelector('.gallery-image');
+            
+            if (thumbnails.length > 0) {
+                allImages = thumbnails.map(thumb => thumb.src.replace('w=300', 'w=1920'));
+            } else if (mainImage) {
+                allImages = [mainImage.src.replace('w=300', 'w=1920')];
             }
             
-            // In fullscreen mode
-            if (e.key === 'Escape') {
-                closeFullscreen();
-            } else if (e.key === 'ArrowLeft') {
-                e.preventDefault();
-                previousFullscreenImage();
-            } else if (e.key === 'ArrowRight') {
-                e.preventDefault();
-                nextFullscreenImage();
+            // Add click event to main image
+            if (mainImage) {
+                mainImage.addEventListener('click', () => {
+                    openLightbox(currentImageIndex);
+                });
             }
-        });
-
-        // Close fullscreen when clicking outside
-        document.getElementById('fullscreenModal').addEventListener('click', function(e) {
-            if (e.target === this) {
-                closeFullscreen();
-            }
-        });
-
-        // Add smooth scroll behavior
-        document.documentElement.style.scrollBehavior = 'smooth';
-
-        // Add intersection observer for animations
-        const observerOptions = {
-            threshold: 0.1,
-            rootMargin: '0px 0px -50px 0px'
-        };
-
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('animate-fade-in');
-                }
+            
+            // Add click event to thumbnails
+            thumbnails.forEach((thumb, index) => {
+                thumb.addEventListener('dblclick', () => {
+                    openLightbox(index);
+                });
             });
-        }, observerOptions);
-
-        // Observe all property cards
-        document.querySelectorAll('.property-card').forEach(card => {
-            observer.observe(card);
+        }
+        
+        function openLightbox(index) {
+            if (allImages.length === 0) return;
+            
+            lightboxIndex = index;
+            const lightbox = document.getElementById('lightbox');
+            const lightboxImage = document.getElementById('lightboxImage');
+            
+            lightbox.classList.add('active');
+            lightboxImage.src = allImages[lightboxIndex];
+            updateLightboxCounter();
+            
+            // Disable body scroll
+                document.body.style.overflow = 'hidden';
+        }
+        
+        function closeLightbox() {
+            const lightbox = document.getElementById('lightbox');
+            lightbox.classList.remove('active');
+            
+            // Enable body scroll
+            document.body.style.overflow = '';
+        }
+        
+        function lightboxNavigate(direction) {
+            if (allImages.length === 0) return;
+            
+            lightboxIndex = (lightboxIndex + direction + allImages.length) % allImages.length;
+            const lightboxImage = document.getElementById('lightboxImage');
+            lightboxImage.src = allImages[lightboxIndex];
+            updateLightboxCounter();
+        }
+        
+        function updateLightboxCounter() {
+            const counter = document.getElementById('lightboxCounter');
+            counter.textContent = `${lightboxIndex + 1} of ${allImages.length}`;
+        }
+        
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            const lightbox = document.getElementById('lightbox');
+            if (!lightbox.classList.contains('active')) return;
+            
+            if (e.key === 'Escape') {
+                closeLightbox();
+            } else if (e.key === 'ArrowLeft') {
+                lightboxNavigate(-1);
+            } else if (e.key === 'ArrowRight') {
+                lightboxNavigate(1);
+            }
+        });
+        
+        // Close lightbox when clicking outside the image
+        document.getElementById('lightbox')?.addEventListener('click', (e) => {
+            if (e.target.id === 'lightbox') {
+                closeLightbox();
+            }
+        });
+        
+        // Initialize lightbox after gallery is initialized
+        document.addEventListener('DOMContentLoaded', () => {
+            initGallery();
+            initLightbox();
         });
     </script>
 </body>
 </html>
+

@@ -837,7 +837,7 @@
                         </button>
                     </form>
                     @else
-                        <a href="{{ route('login') }}" class="flex items-center flex-1 hover:bg-gray-700 rounded-lg p-2 transition-colors">
+                        <a href="{{ route('login', ['redirect' => url()->current()]) }}" class="flex items-center flex-1 hover:bg-gray-700 rounded-lg p-2 transition-colors">
                             <div class="w-8 h-8 rounded-full flex items-center justify-center" style="background: linear-gradient(135deg, #1f2937, #374151); border: 1px solid #fbbf24;">
                                 <i class="fas fa-user text-sm" style="color: #fbbf24;"></i>
                             </div>

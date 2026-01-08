@@ -16,7 +16,7 @@ class Property extends Model
         'smoker', 'pets', 'occupation', 'gender', 'couples_ok', 'couples_allowed', 'smoking_ok', 'pets_ok',
         'pref_occupation', 'references', 'min_age', 'max_age', 'photo_count', 'first_photo_url',
         'all_photos', 'photos', 'contact_info', 'management_company', 'agent_name', 'paying', 'amenities',
-        'balcony_roof_terrace', 'disabled_access', 'living_room', 'agent_id', 'updatable'
+        'balcony_roof_terrace', 'disabled_access', 'living_room', 'agent_id', 'updatable', 'flag', 'flag_color'
     ];
 
     protected $casts = [

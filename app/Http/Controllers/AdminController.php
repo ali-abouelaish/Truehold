@@ -268,6 +268,8 @@ class AdminController extends Controller
             'images' => 'nullable|array',
             'images.*' => 'image|mimes:jpeg,png,jpg,gif|max:2048',
             'removed_images' => 'nullable|string',
+            'flag' => 'nullable|string|max:50',
+            'flag_color' => 'nullable|string|max:50',
         ]);
 
         if ($validator->fails()) {

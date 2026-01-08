@@ -54,7 +54,7 @@
                 @else
                     <!-- Guest User -->
                     <div class="flex items-center space-x-4">
-                        <a href="{{ route('login') }}" 
+                        <a href="{{ route('login', ['redirect' => url()->current()]) }}" 
                            class="inline-flex items-center px-3 py-2 border text-sm leading-4 font-medium rounded-md transition-colors"
                            style="background: linear-gradient(135deg, #1f2937, #374151); border-color: #fbbf24; color: #fbbf24;"
                            onmouseover="this.style.background='linear-gradient(135deg, #fbbf24, #f59e0b)'; this.style.color='#1f2937';"
@@ -128,7 +128,7 @@
                 </div>
             @else
                 <div class="px-4 py-2 space-y-2">
-                    <a href="{{ route('login') }}" 
+                    <a href="{{ route('login', ['redirect' => url()->current()]) }}" 
                        class="block w-full text-center px-4 py-2 text-base font-medium rounded-md transition-colors"
                        style="background: linear-gradient(135deg, #1f2937, #374151); border: 1px solid #fbbf24; color: #fbbf24;"
                        onmouseover="this.style.background='linear-gradient(135deg, #fbbf24, #f59e0b)'; this.style.color='#1f2937';"
