@@ -32,28 +32,90 @@
 
 <!-- Search and Filter -->
 <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
-    <form method="GET" action="{{ route('admin.properties.flags') }}" class="flex gap-4 flex-wrap">
-        <div class="flex-1 min-w-[200px]">
-            <input type="text" name="search" value="{{ request('search') }}" 
-                   placeholder="Search by title or location..." 
-                   class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500">
+    <form method="GET" action="{{ route('admin.properties.flags') }}" class="space-y-4">
+        <div class="flex gap-4 flex-wrap">
+            <div class="flex-1 min-w-[200px]">
+                <input type="text" name="search" value="{{ request('search') }}" 
+                       placeholder="Search by title or location..." 
+                       class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500">
+            </div>
+            <div>
+                <select name="filter" class="border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                    <option value="">All Properties</option>
+                    <option value="with_flag" {{ request('filter') == 'with_flag' ? 'selected' : '' }}>With Flag</option>
+                    <option value="no_flag" {{ request('filter') == 'no_flag' ? 'selected' : '' }}>No Flag</option>
+                </select>
+            </div>
+            <div>
+                <select name="agent" class="border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 min-w-[180px]">
+                    <option value="">All Agents</option>
+                    @foreach($agentNames as $agentName)
+                        @if($agentName && $agentName !== 'N/A')
+                            <option value="{{ $agentName }}" {{ request('agent') == $agentName ? 'selected' : '' }}>
+                                {{ $agentName }}
+                            </option>
+                        @endif
+                    @endforeach
+                </select>
+            </div>
+            <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium">
+                <i class="fas fa-search mr-2"></i>Search
+            </button>
+            @if(request()->hasAny(['search', 'filter', 'agent']))
+                <a href="{{ route('admin.properties.flags') }}" class="bg-gray-600 hover:bg-gray-700 text-white px-6 py-2 rounded-lg font-medium">
+                    <i class="fas fa-times mr-2"></i>Clear
+                </a>
+            @endif
         </div>
-        <div>
-            <select name="filter" class="border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500">
-                <option value="">All Properties</option>
-                <option value="with_flag" {{ request('filter') == 'with_flag' ? 'selected' : '' }}>With Flag</option>
-                <option value="no_flag" {{ request('filter') == 'no_flag' ? 'selected' : '' }}>No Flag</option>
-            </select>
-        </div>
-        <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium">
-            <i class="fas fa-search mr-2"></i>Search
-        </button>
-        @if(request()->hasAny(['search', 'filter']))
-            <a href="{{ route('admin.properties.flags') }}" class="bg-gray-600 hover:bg-gray-700 text-white px-6 py-2 rounded-lg font-medium">
-                <i class="fas fa-times mr-2"></i>Clear
-            </a>
-        @endif
     </form>
+</div>
+
+<!-- Bulk Actions -->
+<div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border-2 border-blue-200 p-6 mb-6" id="bulkActionsBar" style="display: none;">
+    <div class="flex items-center justify-between flex-wrap gap-4">
+        <div class="flex items-center gap-4">
+            <div class="flex items-center">
+                <i class="fas fa-check-circle text-blue-600 text-2xl mr-3"></i>
+                <div>
+                    <p class="text-sm font-medium text-gray-700">Bulk Actions</p>
+                    <p class="text-xs text-gray-500"><span id="selectedCount">0</span> properties selected</p>
+                </div>
+            </div>
+        </div>
+        <div class="flex items-center gap-3 flex-wrap">
+            <select id="bulkFlagText" class="border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                <option value="">Select Flag...</option>
+                <option value="Premium">Premium</option>
+                <option value="Hot Deal">Hot Deal</option>
+                <option value="Featured">Featured</option>
+                <option value="New">New</option>
+                <option value="Sale">Sale</option>
+                <option value="Discount">Discount</option>
+                <option value="Limited">Limited</option>
+                <option value="Exclusive">Exclusive</option>
+            </select>
+            <select id="bulkFlagColor" class="border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                <option value="">Default (Gold)</option>
+                <option value="linear-gradient(135deg, #f59e0b, #d97706)">🟠 Orange</option>
+                <option value="linear-gradient(135deg, #ef4444, #dc2626)">🔴 Red</option>
+                <option value="linear-gradient(135deg, #10b981, #059669)">🟢 Green</option>
+                <option value="linear-gradient(135deg, #3b82f6, #2563eb)">🔵 Blue</option>
+                <option value="linear-gradient(135deg, #8b5cf6, #7c3aed)">🟣 Purple</option>
+                <option value="linear-gradient(135deg, #ec4899, #db2777)">🌸 Pink</option>
+                <option value="linear-gradient(135deg, #14b8a6, #0d9488)">🩵 Teal</option>
+                <option value="linear-gradient(135deg, #d4af37, #b8941f)">⭐ Gold</option>
+            </select>
+            <button onclick="applyBulkFlag()" class="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg font-medium">
+                <i class="fas fa-check mr-2"></i>Apply to Selected
+            </button>
+            <button onclick="clearBulkFlag()" class="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-lg font-medium">
+                <i class="fas fa-trash mr-2"></i>Remove Flags
+            </button>
+            <button onclick="deselectAll()" class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg font-medium">
+                <i class="fas fa-times mr-2"></i>Deselect All
+            </button>
+        </div>
+    </div>
 </div>
 
 <!-- Available Flag Colors -->
@@ -107,6 +169,10 @@
         <table class="min-w-full divide-y divide-gray-200">
             <thead class="bg-gray-50">
                 <tr>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <input type="checkbox" id="selectAll" onclick="toggleSelectAll()" 
+                               class="rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer">
+                    </th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Property</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Current Flag</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Flag Text</th>
@@ -116,12 +182,24 @@
             </thead>
             <tbody class="bg-white divide-y divide-gray-200">
                 @forelse($properties as $property)
-                <tr id="property-row-{{ $property->id }}">
+                @php
+                    $propertyId = $property['id'] ?? uniqid();
+                    $propertyTitle = $property['title'] ?? 'Untitled';
+                    $propertyLocation = $property['location'] ?? 'Unknown';
+                    $propertyFlag = $property['flag'] ?? '';
+                    $propertyFlagColor = $property['flag_color'] ?? '';
+                    $propertyPhoto = $property['first_photo_url'] ?? '';
+                @endphp
+                <tr id="property-row-{{ $propertyId }}">
+                    <td class="px-6 py-4 text-center">
+                        <input type="checkbox" class="property-checkbox rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer" 
+                               value="{{ $propertyId }}" onchange="updateBulkActionsBar()">
+                    </td>
                     <td class="px-6 py-4">
                         <div class="flex items-center">
                             <div class="flex-shrink-0 h-12 w-12">
-                                @if($property->first_photo_url)
-                                    <img class="h-12 w-12 rounded object-cover" src="{{ $property->first_photo_url }}" alt="">
+                                @if($propertyPhoto && $propertyPhoto !== 'N/A')
+                                    <img class="h-12 w-12 rounded object-cover" src="{{ $propertyPhoto }}" alt="">
                                 @else
                                     <div class="h-12 w-12 rounded bg-gray-200 flex items-center justify-center">
                                         <i class="fas fa-home text-gray-400"></i>
@@ -129,17 +207,17 @@
                                 @endif
                             </div>
                             <div class="ml-4">
-                                <div class="text-sm font-medium text-gray-900">{{ Str::limit($property->title, 50) }}</div>
-                                <div class="text-sm text-gray-500">{{ $property->location }}</div>
+                                <div class="text-sm font-medium text-gray-900">{{ Str::limit($propertyTitle, 50) }}</div>
+                                <div class="text-sm text-gray-500">{{ $propertyLocation }}</div>
                             </div>
                         </div>
                     </td>
                     <td class="px-6 py-4">
-                        <div id="flag-preview-{{ $property->id }}">
-                            @if($property->flag)
+                        <div id="flag-preview-{{ $propertyId }}">
+                            @if($propertyFlag)
                                 <span class="inline-flex items-center px-3 py-1 rounded-md text-xs font-bold text-white shadow-sm" 
-                                      style="background: {{ $property->flag_color ?: 'linear-gradient(135deg, #d4af37, #b8941f)' }}">
-                                    {{ $property->flag }}
+                                      style="background: {{ $propertyFlagColor ?: 'linear-gradient(135deg, #d4af37, #b8941f)' }}">
+                                    {{ $propertyFlag }}
                                 </span>
                             @else
                                 <span class="text-sm text-gray-400 italic">No flag</span>
@@ -147,30 +225,30 @@
                         </div>
                     </td>
                     <td class="px-6 py-4">
-                        <input type="text" id="flag-text-{{ $property->id }}" value="{{ $property->flag }}" 
+                        <input type="text" id="flag-text-{{ $propertyId }}" value="{{ $propertyFlag }}" 
                                placeholder="e.g., Premium, Hot Deal" 
                                class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 text-sm">
                     </td>
                     <td class="px-6 py-4">
-                        <select id="flag-color-{{ $property->id }}" 
+                        <select id="flag-color-{{ $propertyId }}" 
                                 class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 text-sm">
                             <option value="">Default (Gold)</option>
-                            <option value="linear-gradient(135deg, #f59e0b, #d97706)" {{ $property->flag_color == 'linear-gradient(135deg, #f59e0b, #d97706)' ? 'selected' : '' }}>🟠 Orange</option>
-                            <option value="linear-gradient(135deg, #ef4444, #dc2626)" {{ $property->flag_color == 'linear-gradient(135deg, #ef4444, #dc2626)' ? 'selected' : '' }}>🔴 Red</option>
-                            <option value="linear-gradient(135deg, #10b981, #059669)" {{ $property->flag_color == 'linear-gradient(135deg, #10b981, #059669)' ? 'selected' : '' }}>🟢 Green</option>
-                            <option value="linear-gradient(135deg, #3b82f6, #2563eb)" {{ $property->flag_color == 'linear-gradient(135deg, #3b82f6, #2563eb)' ? 'selected' : '' }}>🔵 Blue</option>
-                            <option value="linear-gradient(135deg, #8b5cf6, #7c3aed)" {{ $property->flag_color == 'linear-gradient(135deg, #8b5cf6, #7c3aed)' ? 'selected' : '' }}>🟣 Purple</option>
-                            <option value="linear-gradient(135deg, #ec4899, #db2777)" {{ $property->flag_color == 'linear-gradient(135deg, #ec4899, #db2777)' ? 'selected' : '' }}>🌸 Pink</option>
-                            <option value="linear-gradient(135deg, #14b8a6, #0d9488)" {{ $property->flag_color == 'linear-gradient(135deg, #14b8a6, #0d9488)' ? 'selected' : '' }}>🩵 Teal</option>
-                            <option value="linear-gradient(135deg, #d4af37, #b8941f)" {{ $property->flag_color == 'linear-gradient(135deg, #d4af37, #b8941f)' ? 'selected' : '' }}>⭐ Gold</option>
+                            <option value="linear-gradient(135deg, #f59e0b, #d97706)" {{ $propertyFlagColor == 'linear-gradient(135deg, #f59e0b, #d97706)' ? 'selected' : '' }}>🟠 Orange</option>
+                            <option value="linear-gradient(135deg, #ef4444, #dc2626)" {{ $propertyFlagColor == 'linear-gradient(135deg, #ef4444, #dc2626)' ? 'selected' : '' }}>🔴 Red</option>
+                            <option value="linear-gradient(135deg, #10b981, #059669)" {{ $propertyFlagColor == 'linear-gradient(135deg, #10b981, #059669)' ? 'selected' : '' }}>🟢 Green</option>
+                            <option value="linear-gradient(135deg, #3b82f6, #2563eb)" {{ $propertyFlagColor == 'linear-gradient(135deg, #3b82f6, #2563eb)' ? 'selected' : '' }}>🔵 Blue</option>
+                            <option value="linear-gradient(135deg, #8b5cf6, #7c3aed)" {{ $propertyFlagColor == 'linear-gradient(135deg, #8b5cf6, #7c3aed)' ? 'selected' : '' }}>🟣 Purple</option>
+                            <option value="linear-gradient(135deg, #ec4899, #db2777)" {{ $propertyFlagColor == 'linear-gradient(135deg, #ec4899, #db2777)' ? 'selected' : '' }}>🌸 Pink</option>
+                            <option value="linear-gradient(135deg, #14b8a6, #0d9488)" {{ $propertyFlagColor == 'linear-gradient(135deg, #14b8a6, #0d9488)' ? 'selected' : '' }}>🩵 Teal</option>
+                            <option value="linear-gradient(135deg, #d4af37, #b8941f)" {{ $propertyFlagColor == 'linear-gradient(135deg, #d4af37, #b8941f)' ? 'selected' : '' }}>⭐ Gold</option>
                         </select>
                     </td>
                     <td class="px-6 py-4 text-sm whitespace-nowrap">
-                        <button onclick="updateFlag({{ $property->id }})" 
+                        <button onclick="updateFlag('{{ $propertyId }}')" 
                                 class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium text-sm">
                             <i class="fas fa-save mr-1"></i>Save
                         </button>
-                        <button onclick="clearFlag({{ $property->id }})" 
+                        <button onclick="clearFlag('{{ $propertyId }}')" 
                                 class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-medium text-sm ml-2">
                             <i class="fas fa-times mr-1"></i>Clear
                         </button>
@@ -178,7 +256,7 @@
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="5" class="px-6 py-12 text-center text-gray-500">
+                    <td colspan="6" class="px-6 py-12 text-center text-gray-500">
                         <i class="fas fa-flag text-4xl text-gray-300 mb-3"></i>
                         <p class="text-lg font-medium">No properties found</p>
                         <p class="text-sm mt-2">Try adjusting your search or filters</p>
@@ -198,6 +276,152 @@
 </div>
 
 <script>
+    // Bulk Actions Functions
+    function toggleSelectAll() {
+        const selectAllCheckbox = document.getElementById('selectAll');
+        const checkboxes = document.querySelectorAll('.property-checkbox');
+        checkboxes.forEach(checkbox => {
+            checkbox.checked = selectAllCheckbox.checked;
+        });
+        updateBulkActionsBar();
+    }
+    
+    function updateBulkActionsBar() {
+        const checkboxes = document.querySelectorAll('.property-checkbox:checked');
+        const count = checkboxes.length;
+        const bulkActionsBar = document.getElementById('bulkActionsBar');
+        const selectedCount = document.getElementById('selectedCount');
+        
+        if (count > 0) {
+            bulkActionsBar.style.display = 'block';
+            selectedCount.textContent = count;
+        } else {
+            bulkActionsBar.style.display = 'none';
+        }
+        
+        // Update select all checkbox state
+        const allCheckboxes = document.querySelectorAll('.property-checkbox');
+        const selectAllCheckbox = document.getElementById('selectAll');
+        selectAllCheckbox.checked = allCheckboxes.length > 0 && count === allCheckboxes.length;
+    }
+    
+    function getSelectedPropertyIds() {
+        const checkboxes = document.querySelectorAll('.property-checkbox:checked');
+        return Array.from(checkboxes).map(cb => cb.value);
+    }
+    
+    function deselectAll() {
+        document.querySelectorAll('.property-checkbox').forEach(cb => cb.checked = false);
+        document.getElementById('selectAll').checked = false;
+        updateBulkActionsBar();
+    }
+    
+    function applyBulkFlag() {
+        const flagText = document.getElementById('bulkFlagText').value;
+        const flagColor = document.getElementById('bulkFlagColor').value;
+        const propertyIds = getSelectedPropertyIds();
+        
+        if (!flagText) {
+            showNotification('error', 'Please select a flag text');
+            return;
+        }
+        
+        if (propertyIds.length === 0) {
+            showNotification('error', 'Please select at least one property');
+            return;
+        }
+        
+        // Update each selected property
+        let completed = 0;
+        propertyIds.forEach(propertyId => {
+            fetch(`/admin/properties/${propertyId}/update-flag`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({
+                    flag: flagText,
+                    flag_color: flagColor
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Update individual inputs
+                    document.getElementById(`flag-text-${propertyId}`).value = flagText;
+                    document.getElementById(`flag-color-${propertyId}`).value = flagColor;
+                    
+                    // Update preview
+                    const preview = document.getElementById(`flag-preview-${propertyId}`);
+                    preview.innerHTML = `<span class="inline-flex items-center px-3 py-1 rounded-md text-xs font-bold text-white shadow-sm" style="background: ${flagColor || 'linear-gradient(135deg, #d4af37, #b8941f)'}">${flagText}</span>`;
+                    
+                    completed++;
+                    if (completed === propertyIds.length) {
+                        showNotification('success', `Flag applied to ${completed} properties!`);
+                        deselectAll();
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        });
+    }
+    
+    function clearBulkFlag() {
+        const propertyIds = getSelectedPropertyIds();
+        
+        if (propertyIds.length === 0) {
+            showNotification('error', 'Please select at least one property');
+            return;
+        }
+        
+        if (!confirm(`Remove flags from ${propertyIds.length} properties?`)) {
+            return;
+        }
+        
+        // Clear flag for each selected property
+        let completed = 0;
+        propertyIds.forEach(propertyId => {
+            fetch(`/admin/properties/${propertyId}/update-flag`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({
+                    flag: '',
+                    flag_color: ''
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Update individual inputs
+                    document.getElementById(`flag-text-${propertyId}`).value = '';
+                    document.getElementById(`flag-color-${propertyId}`).value = '';
+                    
+                    // Update preview
+                    const preview = document.getElementById(`flag-preview-${propertyId}`);
+                    preview.innerHTML = '<span class="text-sm text-gray-400 italic">No flag</span>';
+                    
+                    completed++;
+                    if (completed === propertyIds.length) {
+                        showNotification('success', `Flags removed from ${completed} properties!`);
+                        deselectAll();
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        });
+    }
+    
+    // Single Property Functions
     function updateFlag(propertyId) {
         const flagText = document.getElementById(`flag-text-${propertyId}`).value;
         const flagColor = document.getElementById(`flag-color-${propertyId}`).value;

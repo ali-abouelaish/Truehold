@@ -6,6 +6,7 @@ use App\Models\Property;
 use App\Models\User;
 use App\Models\Client;
 use App\Models\PropertyInterest;
+use App\Services\PropertyGoogleSheetsService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
@@ -13,6 +14,13 @@ use Illuminate\Support\Facades\Hash;
 
 class AdminController extends Controller
 {
+    protected $sheetsService;
+
+    public function __construct(PropertyGoogleSheetsService $sheetsService)
+    {
+        $this->sheetsService = $sheetsService;
+    }
+    
     public function dashboard()
     {
         $totalProperties = Property::count();
@@ -614,53 +622,95 @@ class AdminController extends Controller
      */
     public function flags(Request $request)
     {
-        $query = Property::query();
+        // Get all properties from Google Sheets
+        $allProperties = $this->sheetsService->getAllProperties();
         
-        // Search functionality
+        // Apply search filter
         if ($request->filled('search')) {
-            $search = $request->search;
-            $query->where(function($q) use ($search) {
-                $q->where('title', 'like', "%{$search}%")
-                  ->orWhere('location', 'like', "%{$search}%");
+            $search = strtolower($request->search);
+            $allProperties = $allProperties->filter(function($property) use ($search) {
+                $title = strtolower($property['title'] ?? '');
+                $location = strtolower($property['location'] ?? '');
+                return str_contains($title, $search) || str_contains($location, $search);
             });
         }
         
         // Filter by flag status
         if ($request->filled('filter')) {
             if ($request->filter === 'with_flag') {
-                $query->whereNotNull('flag');
+                $allProperties = $allProperties->filter(function($property) {
+                    return !empty($property['flag']);
+                });
             } elseif ($request->filter === 'no_flag') {
-                $query->whereNull('flag');
+                $allProperties = $allProperties->filter(function($property) {
+                    return empty($property['flag']);
+                });
             }
         }
         
-        $properties = $query->latest()->paginate(20)->withQueryString();
+        // Filter by agent
+        if ($request->filled('agent')) {
+            $agentFilter = $request->agent;
+            $allProperties = $allProperties->filter(function($property) use ($agentFilter) {
+                return ($property['agent_name'] ?? '') === $agentFilter;
+            });
+        }
         
-        return view('admin.properties.flags', compact('properties'));
+        // Pagination
+        $page = $request->get('page', 1);
+        $perPage = 20;
+        $offset = ($page - 1) * $perPage;
+        
+        $paginatedProperties = $allProperties->slice($offset, $perPage)->values();
+        
+        $properties = new \Illuminate\Pagination\LengthAwarePaginator(
+            $paginatedProperties,
+            $allProperties->count(),
+            $perPage,
+            $page,
+            ['path' => $request->url(), 'query' => $request->query()]
+        );
+        
+        // Get distinct agent names for filter dropdown
+        $agentNames = $this->sheetsService->getAllProperties()
+            ->pluck('agent_name')
+            ->filter(function($name) {
+                return !empty($name) && $name !== 'N/A';
+            })
+            ->unique()
+            ->sort()
+            ->values();
+        
+        return view('admin.properties.flags', compact('properties', 'agentNames'));
     }
     
     /**
      * Update property flag via AJAX
      */
-    public function updateFlag(Request $request, Property $property)
+    public function updateFlag(Request $request, $propertyId)
     {
         $request->validate([
             'flag' => 'nullable|string|max:50',
             'flag_color' => 'nullable|string|max:100',
         ]);
         
-        $property->update([
-            'flag' => $request->flag,
-            'flag_color' => $request->flag_color,
+        // Update in Google Sheets
+        $success = $this->sheetsService->updateProperty($propertyId, [
+            'flag' => $request->flag ?? '',
+            'flag_color' => $request->flag_color ?? '',
         ]);
         
         if ($request->ajax()) {
             return response()->json([
-                'success' => true,
-                'message' => 'Flag updated successfully!'
+                'success' => $success,
+                'message' => $success ? 'Flag updated successfully!' : 'Failed to update flag'
             ]);
         }
         
-        return back()->with('success', 'Property flag updated successfully!');
+        if ($success) {
+            return back()->with('success', 'Property flag updated successfully!');
+        }
+        
+        return back()->with('error', 'Failed to update property flag');
     }
 }

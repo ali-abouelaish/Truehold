@@ -294,7 +294,9 @@ def scrape_listing_advanced(url,paying):
         photo_count = len(all_photo_urls)
         all_photos = ", ".join(all_photo_urls) if all_photo_urls else None
 
-
+        if photo_count == 0:
+          print(f"🖼️ Skipping {url} — no images found.")
+          return None
 
         # Price
         price = None
@@ -424,6 +426,8 @@ def scrape_listing_advanced(url,paying):
 
 def main(listings):
     results = []
+    seen_urls = set()  # ✅ track URLs already processed in this run
+
     for item in listings:
         url = item.get("url")
         paying = item.get("paying", "")
@@ -431,27 +435,32 @@ def main(listings):
         if not url:
             continue
 
+        # 🚫 Skip duplicate links inside listings list
+        if url in seen_urls:
+            print(f"🔁 Skipping duplicate in listings: {url}")
+            continue
+
+        seen_urls.add(url)
+
         print(f"Scraping {url}")
         data = scrape_listing_advanced(url, paying)
         if data:
             results.append(data)
+
         time.sleep(1)
 
-   
     # Convert to DataFrame
     df_output = pd.DataFrame(results)
 
-    # SAFETY CHECK (ADD THIS)
+    # SAFETY CHECK
     if df_output.empty:
         print("❌ No listings scraped. Sheet not updated.")
-        return  # <-- Stops execution safely
+        return
 
-    # Upload to Google Sheets
-
-# 1️⃣ Clear everything EXCEPT the header row
+    # 1️⃣ Clear everything EXCEPT the header row
     sheet.batch_clear(["A2:ZZ"])
 
-    # 2️⃣ (Optional safety) ensure headers match dataframe
+    # 2️⃣ Ensure headers match dataframe
     existing_headers = sheet.row_values(1)
     df_headers = df_output.columns.tolist()
 
@@ -462,13 +471,4 @@ def main(listings):
     rows = df_output.astype(str).values.tolist()
     sheet.append_rows(rows, value_input_option="RAW")
 
-    print(f"\n✅ Successfully uploaded {len(df_output)} listings to Sheet2!")
-
-
-if __name__ == "__main__":
-     if not listings:
-        print("❌ No listings found — exiting.")
-        exit(0)
-
-     main(listings)
- 
+    print(f"\n✅ Successfully uploaded {len(df_output)} listings to Sheet!")

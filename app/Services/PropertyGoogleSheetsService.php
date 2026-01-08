@@ -725,6 +725,112 @@ class PropertyGoogleSheetsService
      * @param array $propertyData
      * @return bool
      */
+    /**
+     * Update a property in Google Sheets by its ID
+     */
+    public function updateProperty(string $id, array $updates): bool
+    {
+        if (!$this->spreadsheetId || !$this->service) {
+            Log::warning('Google Sheets not configured for property update');
+            return false;
+        }
+
+        try {
+            // Get all properties to find the row number
+            $range = $this->sheetName . '!A:ZZ';
+            $response = $this->service->spreadsheets_values->get($this->spreadsheetId, $range);
+            $rows = $response->getValues();
+            
+            if (empty($rows)) {
+                return false;
+            }
+            
+            // First row is headers
+            $headers = array_map('strtolower', array_map('trim', $rows[0]));
+            
+            // Find the ID column index
+            $idColumnIndex = array_search('id', $headers);
+            if ($idColumnIndex === false) {
+                return false;
+            }
+            
+            // Find the row with matching ID (skip header row)
+            $targetRowIndex = null;
+            for ($i = 1; $i < count($rows); $i++) {
+                if (isset($rows[$i][$idColumnIndex]) && $rows[$i][$idColumnIndex] == $id) {
+                    $targetRowIndex = $i;
+                    break;
+                }
+            }
+            
+            if ($targetRowIndex === null) {
+                return false;
+            }
+            
+            // Prepare updates for each column
+            $updateRequests = [];
+            foreach ($updates as $field => $value) {
+                $normalizedField = strtolower(trim($field));
+                $columnIndex = array_search($normalizedField, $headers);
+                
+                if ($columnIndex !== false) {
+                    // Convert row and column indices to A1 notation
+                    // Row index needs +1 because sheets are 1-indexed
+                    $cellRange = $this->columnIndexToLetter($columnIndex) . ($targetRowIndex + 1);
+                    $fullRange = $this->sheetName . '!' . $cellRange;
+                    
+                    $valueRange = new \Google\Service\Sheets\ValueRange();
+                    $valueRange->setValues([[(string)$value]]);
+                    
+                    $updateRequests[] = [
+                        'range' => $fullRange,
+                        'values' => $valueRange
+                    ];
+                }
+            }
+            
+            // Execute batch update
+            if (!empty($updateRequests)) {
+                $batchUpdateRequest = new \Google\Service\Sheets\BatchUpdateValuesRequest();
+                $batchUpdateRequest->setValueInputOption('USER_ENTERED');
+                $batchUpdateRequest->setData(array_map(function($req) {
+                    return $req['values']->setRange($req['range']);
+                }, $updateRequests));
+                
+                $this->service->spreadsheets_values->batchUpdate(
+                    $this->spreadsheetId,
+                    $batchUpdateRequest
+                );
+                
+                // Clear cache after update
+                $this->clearCache();
+                
+                return true;
+            }
+            
+            return false;
+        } catch (\Exception $e) {
+            Log::error('Failed to update property in Google Sheet', [
+                'property_id' => $id,
+                'error' => $e->getMessage()
+            ]);
+            return false;
+        }
+    }
+    
+    /**
+     * Convert column index to letter (0 = A, 1 = B, etc.)
+     */
+    private function columnIndexToLetter(int $index): string
+    {
+        $letter = '';
+        while ($index >= 0) {
+            $letter = chr($index % 26 + 65) . $letter;
+            $index = intval($index / 26) - 1;
+        }
+        return $letter;
+    }
+    
     public function appendProperty(array $propertyData): bool
     {
         if (!$this->spreadsheetId) {
