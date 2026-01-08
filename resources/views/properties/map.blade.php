@@ -480,6 +480,83 @@ select.filter-input option {
     stroke: var(--gold);
 }
 
+/* Map Legend */
+.map-legend {
+    position: absolute;
+    bottom: 30px;
+    left: 24px;
+    z-index: 1000;
+    background: var(--white);
+    border-radius: 12px;
+    padding: 16px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    min-width: 200px;
+}
+
+.map-legend-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--primary-navy);
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.map-legend-items {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.map-legend-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 12px;
+    color: var(--text-dark);
+}
+
+.legend-marker {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.legend-marker.premium {
+    width: 18px;
+    height: 18px;
+    background: #FFD700;
+    border: 3px solid #b8941f;
+}
+
+.legend-marker.house {
+    background: #3b82f6;
+    border: 2px solid #1e3a5f;
+}
+
+.legend-marker.flat {
+    background: #10b981;
+    border: 2px solid #1e3a5f;
+}
+
+.legend-marker.studio {
+    background: #8b5cf6;
+    border: 2px solid #1e3a5f;
+}
+
+.legend-marker.room {
+    background: #f59e0b;
+    border: 2px solid #1e3a5f;
+}
+
+.legend-marker.other {
+    background: #6b7280;
+    border: 2px solid #1e3a5f;
+}
+
 /* ==========================================
    MAP CONTAINER
    ========================================== */
@@ -565,10 +642,10 @@ select.filter-input option {
 
 /* Info Window Styling */
 .gm-style .gm-style-iw-c {
-    border-radius: 16px;
+    border-radius: 12px;
     padding: 0;
-    max-width: 380px;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+    max-width: 304px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
     overflow: hidden;
 }
 
@@ -602,27 +679,27 @@ select.filter-input option {
 
 .info-window-image {
     width: 100%;
-    height: 200px;
+    height: 160px;
     object-fit: cover;
     background: linear-gradient(135deg, #f5f5f5 0%, #e8e8e8 100%);
     display: block;
 }
 
 .info-window-content {
-    padding: 20px;
+    padding: 16px;
 }
 
 .info-window-header {
-    margin-bottom: 16px;
-    padding-bottom: 16px;
+    margin-bottom: 12px;
+    padding-bottom: 12px;
     border-bottom: 1px solid #e5e7eb;
 }
 
 .info-window-title {
-    font-size: 18px;
+    font-size: 14px;
     font-weight: 700;
     color: var(--primary-navy);
-    margin-bottom: 8px;
+    margin-bottom: 6px;
     line-height: 1.3;
     display: -webkit-box;
     -webkit-line-clamp: 2;
@@ -631,37 +708,37 @@ select.filter-input option {
 }
 
 .info-window-price {
-    font-size: 24px;
+    font-size: 19px;
     font-weight: 700;
     color: var(--gold);
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 5px;
 }
 
 .info-window-price svg {
-    width: 20px;
-    height: 20px;
+    width: 16px;
+    height: 16px;
 }
 
 .info-window-details {
     display: flex;
     flex-direction: column;
-    gap: 10px;
-    margin-bottom: 16px;
+    gap: 8px;
+    margin-bottom: 12px;
 }
 
 .info-window-detail-item {
     display: flex;
     align-items: center;
-    gap: 10px;
-    font-size: 14px;
+    gap: 8px;
+    font-size: 11px;
     color: var(--gray);
 }
 
 .info-window-detail-item svg {
-    width: 16px;
-    height: 16px;
+    width: 13px;
+    height: 13px;
     color: var(--gold);
     flex-shrink: 0;
 }
@@ -672,7 +749,7 @@ select.filter-input option {
 }
 
 .info-window-footer {
-    padding-top: 16px;
+    padding-top: 12px;
     border-top: 1px solid #e5e7eb;
 }
 
@@ -680,39 +757,39 @@ select.filter-input option {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
+    gap: 6px;
     width: 100%;
-    padding: 12px 24px;
+    padding: 10px 20px;
     background: linear-gradient(135deg, var(--gold), var(--gold-light));
     color: var(--white);
-    border-radius: 10px;
+    border-radius: 8px;
     font-weight: 600;
-    font-size: 14px;
+    font-size: 12px;
     text-decoration: none;
     transition: var(--transition);
-    box-shadow: 0 4px 12px rgba(212, 175, 55, 0.3);
+    box-shadow: 0 3px 10px rgba(212, 175, 55, 0.3);
 }
 
 .info-window-btn:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(212, 175, 55, 0.4);
+    box-shadow: 0 5px 16px rgba(212, 175, 55, 0.4);
 }
 
 .info-window-btn svg {
-    width: 16px;
-    height: 16px;
+    width: 13px;
+    height: 13px;
 }
 
 /* Close button styling */
 .gm-style-iw button {
-    width: 32px !important;
-    height: 32px !important;
+    width: 26px !important;
+    height: 26px !important;
     border-radius: 50% !important;
     background: var(--white) !important;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15) !important;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15) !important;
     opacity: 1 !important;
-    top: 10px !important;
-    right: 10px !important;
+    top: 8px !important;
+    right: 8px !important;
 }
 
 .gm-style-iw button:hover {
@@ -759,6 +836,34 @@ select.filter-input option {
         font-size: 13px;
     }
     
+    .map-legend {
+        bottom: 20px;
+        left: 16px;
+        padding: 12px;
+        min-width: 170px;
+    }
+    
+    .map-legend-title {
+        font-size: 12px;
+        margin-bottom: 10px;
+    }
+    
+    .map-legend-item {
+        font-size: 11px;
+        gap: 8px;
+    }
+    
+    .legend-marker {
+        width: 12px;
+        height: 12px;
+    }
+    
+    .legend-marker.premium {
+        width: 15px;
+        height: 15px;
+        border-width: 2px;
+    }
+    
     .map-container {
         top: 190px;
     }
@@ -792,27 +897,27 @@ select.filter-input option {
     
     /* Info window responsive adjustments */
     .gm-style .gm-style-iw-c {
-        max-width: 320px !important;
+        max-width: 256px !important;
     }
     
     .info-window-image {
-        height: 160px;
+        height: 128px;
     }
     
     .info-window-content {
-        padding: 16px;
+        padding: 12px;
     }
     
     .info-window-title {
-        font-size: 16px;
+        font-size: 13px;
     }
     
     .info-window-price {
-        font-size: 20px;
+        font-size: 16px;
     }
     
     .info-window-detail-item {
-        font-size: 13px;
+        font-size: 10px;
     }
 }
 
@@ -1033,6 +1138,42 @@ select.filter-input option {
         </button>
     </div>
 
+    <!-- Map Legend -->
+    <div class="map-legend">
+        <div class="map-legend-title">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/>
+            </svg>
+            Map Legend
+        </div>
+        <div class="map-legend-items">
+            <div class="map-legend-item">
+                <div class="legend-marker premium"></div>
+                <span><strong>Premium Properties</strong></span>
+            </div>
+            <div class="map-legend-item">
+                <div class="legend-marker house"></div>
+                <span>Houses</span>
+            </div>
+            <div class="map-legend-item">
+                <div class="legend-marker flat"></div>
+                <span>Flats / Apartments</span>
+            </div>
+            <div class="map-legend-item">
+                <div class="legend-marker studio"></div>
+                <span>Studios</span>
+            </div>
+            <div class="map-legend-item">
+                <div class="legend-marker room"></div>
+                <span>Rooms</span>
+            </div>
+            <div class="map-legend-item">
+                <div class="legend-marker other"></div>
+                <span>Other</span>
+            </div>
+        </div>
+    </div>
+
     <!-- Loading Screen -->
     <div class="loading-screen" id="loadingScreen">
         <div class="loading-spinner"></div>
@@ -1155,6 +1296,43 @@ select.filter-input option {
             properties.forEach(property => {
                 const lat = parseFloat(property.latitude);
                 const lng = parseFloat(property.longitude);
+                
+                // Check if property is premium
+                const isPremium = property.flag && property.flag.toLowerCase() === 'premium';
+                
+                // Determine marker color based on property type and premium status
+                let markerColor, hoverColor, markerShape, markerScale;
+                
+                if (isPremium) {
+                    // Premium properties - Gold star
+                    markerShape = google.maps.SymbolPath.CIRCLE;
+                    markerScale = 14;
+                    markerColor = '#FFD700'; // Bright gold
+                    hoverColor = '#FFC107';
+                } else {
+                    // Different colors for different property types
+                    const propertyType = (property.property_type || '').toLowerCase();
+                    
+                    if (propertyType.includes('house') || propertyType.includes('home')) {
+                        markerColor = '#3b82f6'; // Blue for houses
+                        hoverColor = '#60a5fa';
+                    } else if (propertyType.includes('flat') || propertyType.includes('apartment')) {
+                        markerColor = '#10b981'; // Green for flats
+                        hoverColor = '#34d399';
+                    } else if (propertyType.includes('studio')) {
+                        markerColor = '#8b5cf6'; // Purple for studios
+                        hoverColor = '#a78bfa';
+                    } else if (propertyType.includes('room')) {
+                        markerColor = '#f59e0b'; // Orange for rooms
+                        hoverColor = '#fbbf24';
+                    } else {
+                        markerColor = '#6b7280'; // Gray for others
+                        hoverColor = '#9ca3af';
+                    }
+                    
+                    markerShape = google.maps.SymbolPath.CIRCLE;
+                    markerScale = 10;
+                }
 
                 const marker = new google.maps.Marker({
                     position: { lat, lng },
@@ -1162,36 +1340,42 @@ select.filter-input option {
                     title: property.title,
                     animation: google.maps.Animation.DROP,
                     icon: {
-                        path: google.maps.SymbolPath.CIRCLE,
-                        scale: 10,
-                        fillColor: '#d4af37',
+                        path: markerShape,
+                        scale: markerScale,
+                        fillColor: markerColor,
                         fillOpacity: 1,
-                        strokeColor: '#1e3a5f',
-                        strokeWeight: 3
-                    }
+                        strokeColor: isPremium ? '#b8941f' : '#1e3a5f',
+                        strokeWeight: isPremium ? 4 : 3
+                    },
+                    zIndex: isPremium ? 1000 : 100 // Premium markers on top
                 });
+                
+                // Store original marker properties for hover
+                marker.originalIcon = {
+                    path: markerShape,
+                    scale: markerScale,
+                    fillColor: markerColor,
+                    fillOpacity: 1,
+                    strokeColor: isPremium ? '#b8941f' : '#1e3a5f',
+                    strokeWeight: isPremium ? 4 : 3
+                };
+                
+                marker.hoverIcon = {
+                    path: markerShape,
+                    scale: markerScale + 2,
+                    fillColor: hoverColor,
+                    fillOpacity: 1,
+                    strokeColor: isPremium ? '#b8941f' : '#1e3a5f',
+                    strokeWeight: isPremium ? 5 : 4
+                };
                 
                 // Add hover effect
                 marker.addListener('mouseover', function() {
-                    this.setIcon({
-                        path: google.maps.SymbolPath.CIRCLE,
-                        scale: 12,
-                        fillColor: '#e8c547',
-                        fillOpacity: 1,
-                        strokeColor: '#1e3a5f',
-                        strokeWeight: 3
-                    });
+                    this.setIcon(this.hoverIcon);
                 });
                 
                 marker.addListener('mouseout', function() {
-                    this.setIcon({
-                        path: google.maps.SymbolPath.CIRCLE,
-                        scale: 10,
-                        fillColor: '#d4af37',
-                        fillOpacity: 1,
-                        strokeColor: '#1e3a5f',
-                        strokeWeight: 3
-                    });
+                    this.setIcon(this.originalIcon);
                 });
 
                 marker.addListener('click', () => {
@@ -1230,14 +1414,6 @@ select.filter-input option {
                                                 <path d="M9 22V12h6v10"/>
                                             </svg>
                                             <span><strong>Type:</strong> ${property.property_type}</span>
-                                        </div>
-                                    ` : ''}
-                                    ${property.agent_name && property.agent_name !== 'N/A' ? `
-                                        <div class="info-window-detail-item">
-                                            <svg viewBox="0 0 24 24" fill="currentColor">
-                                                <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
-                                            </svg>
-                                            <span><strong>Agent:</strong> ${property.agent_name}</span>
                                         </div>
                                     ` : ''}
                                     ${property.couples_allowed ? `
