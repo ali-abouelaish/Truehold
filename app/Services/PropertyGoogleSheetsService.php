@@ -731,7 +731,9 @@ class PropertyGoogleSheetsService
     public function updateProperty(string $id, array $updates): bool
     {
         if (!$this->spreadsheetId || !$this->service) {
-            Log::warning('Google Sheets not configured for property update');
+            Log::warning('Google Sheets not configured for property update', [
+                'property_id' => $id
+            ]);
             return false;
         }
 
@@ -742,15 +744,31 @@ class PropertyGoogleSheetsService
             $rows = $response->getValues();
             
             if (empty($rows)) {
+                Log::error('No rows found in Google Sheet', [
+                    'property_id' => $id,
+                    'spreadsheet_id' => $this->spreadsheetId,
+                    'sheet_name' => $this->sheetName
+                ]);
                 return false;
             }
             
             // First row is headers
             $headers = array_map('strtolower', array_map('trim', $rows[0]));
             
+            Log::info('Processing property update', [
+                'property_id' => $id,
+                'total_rows' => count($rows),
+                'available_headers' => $headers,
+                'updates_requested' => array_keys($updates)
+            ]);
+            
             // Find the ID column index
             $idColumnIndex = array_search('id', $headers);
             if ($idColumnIndex === false) {
+                Log::error('ID column not found in headers', [
+                    'property_id' => $id,
+                    'headers' => $headers
+                ]);
                 return false;
             }
             
@@ -764,11 +782,57 @@ class PropertyGoogleSheetsService
             }
             
             if ($targetRowIndex === null) {
+                Log::error('Property ID not found in Google Sheet', [
+                    'property_id' => $id,
+                    'id_column_index' => $idColumnIndex,
+                    'searched_rows' => count($rows) - 1
+                ]);
                 return false;
+            }
+            
+            // Check if columns exist, if not, we need to add them
+            $missingColumns = [];
+            foreach ($updates as $field => $value) {
+                $normalizedField = strtolower(trim($field));
+                if (array_search($normalizedField, $headers) === false) {
+                    $missingColumns[] = $normalizedField;
+                }
+            }
+            
+            if (!empty($missingColumns)) {
+                Log::warning('Missing columns in Google Sheet, attempting to add them', [
+                    'property_id' => $id,
+                    'missing_columns' => $missingColumns
+                ]);
+                
+                // Add missing columns to the end of the header row
+                foreach ($missingColumns as $column) {
+                    $headers[] = $column;
+                }
+                
+                // Update header row in sheet
+                $headerRange = $this->sheetName . '!A1:' . $this->columnIndexToLetter(count($headers) - 1) . '1';
+                $headerValueRange = new \Google\Service\Sheets\ValueRange();
+                $headerValueRange->setRange($headerRange);
+                $headerValueRange->setValues([$headers]);
+                
+                $this->service->spreadsheets_values->update(
+                    $this->spreadsheetId,
+                    $headerRange,
+                    $headerValueRange,
+                    ['valueInputOption' => 'USER_ENTERED']
+                );
+                
+                Log::info('Added missing columns to Google Sheet', [
+                    'property_id' => $id,
+                    'added_columns' => $missingColumns,
+                    'new_header_count' => count($headers)
+                ]);
             }
             
             // Prepare updates for each column
             $valueRanges = [];
+            $updatedFields = [];
             foreach ($updates as $field => $value) {
                 $normalizedField = strtolower(trim($field));
                 $columnIndex = array_search($normalizedField, $headers);
@@ -784,6 +848,15 @@ class PropertyGoogleSheetsService
                     $valueRange->setValues([[(string)$value]]);
                     
                     $valueRanges[] = $valueRange;
+                    $updatedFields[] = $normalizedField;
+                    
+                    Log::debug('Prepared update', [
+                        'property_id' => $id,
+                        'field' => $normalizedField,
+                        'column_index' => $columnIndex,
+                        'cell_range' => $cellRange,
+                        'value' => $value
+                    ]);
                 }
             }
             
@@ -793,14 +866,15 @@ class PropertyGoogleSheetsService
                 $batchUpdateRequest->setValueInputOption('USER_ENTERED');
                 $batchUpdateRequest->setData($valueRanges);
                 
-                $this->service->spreadsheets_values->batchUpdate(
+                $result = $this->service->spreadsheets_values->batchUpdate(
                     $this->spreadsheetId,
                     $batchUpdateRequest
                 );
                 
-                Log::info('Property updated in Google Sheet', [
+                Log::info('Property successfully updated in Google Sheet', [
                     'property_id' => $id,
-                    'fields_updated' => array_keys($updates)
+                    'fields_updated' => $updatedFields,
+                    'updates_count' => $result->getTotalUpdatedCells()
                 ]);
                 
                 // Clear cache after update
@@ -819,7 +893,9 @@ class PropertyGoogleSheetsService
         } catch (\Exception $e) {
             Log::error('Failed to update property in Google Sheet', [
                 'property_id' => $id,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
+                'error_class' => get_class($e),
+                'trace' => $e->getTraceAsString()
             ]);
             return false;
         }

@@ -694,6 +694,13 @@ class AdminController extends Controller
             'flag_color' => 'nullable|string|max:100',
         ]);
         
+        \Log::info('Flag update request received', [
+            'property_id' => $propertyId,
+            'flag' => $request->flag,
+            'flag_color' => $request->flag_color,
+            'is_ajax' => $request->ajax()
+        ]);
+        
         // Update in Google Sheets
         $success = $this->sheetsService->updateProperty($propertyId, [
             'flag' => $request->flag ?? '',
@@ -701,9 +708,20 @@ class AdminController extends Controller
         ]);
         
         if ($request->ajax()) {
+            $message = $success 
+                ? 'Flag updated successfully!' 
+                : 'Failed to update flag. Check if property ID exists in sheet and columns are present.';
+            
+            \Log::info('Flag update AJAX response', [
+                'property_id' => $propertyId,
+                'success' => $success,
+                'message' => $message
+            ]);
+            
             return response()->json([
                 'success' => $success,
-                'message' => $success ? 'Flag updated successfully!' : 'Failed to update flag'
+                'message' => $message,
+                'property_id' => $propertyId
             ]);
         }
         
@@ -711,6 +729,6 @@ class AdminController extends Controller
             return back()->with('success', 'Property flag updated successfully!');
         }
         
-        return back()->with('error', 'Failed to update property flag');
+        return back()->with('error', 'Failed to update property flag. Please check the logs for details.');
     }
 }

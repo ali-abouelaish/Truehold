@@ -30,6 +30,33 @@
     </div>
 @endif
 
+<!-- Troubleshooting Info -->
+<div class="mb-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
+    <div class="flex">
+        <div class="flex-shrink-0">
+            <i class="fas fa-info-circle text-blue-400 text-lg"></i>
+        </div>
+        <div class="ml-3">
+            <h3 class="text-sm font-semibold text-blue-900 mb-1">📊 Updates are saved to Google Sheets</h3>
+            <p class="text-xs text-blue-700 mb-2">
+                Flag changes are stored directly in your Google Sheets properties spreadsheet.
+            </p>
+            <details class="text-xs text-blue-700">
+                <summary class="cursor-pointer font-medium hover:text-blue-900">
+                    <i class="fas fa-wrench mr-1"></i>Troubleshooting failed updates
+                </summary>
+                <ul class="mt-2 space-y-1 ml-4 list-disc">
+                    <li><strong>Property ID not found:</strong> The property may have been deleted from the sheet</li>
+                    <li><strong>Missing columns:</strong> The system will automatically add 'flag' and 'flag_color' columns if missing</li>
+                    <li><strong>Permission error:</strong> Check Google Sheets API permissions in your service account</li>
+                    <li><strong>Rate limiting:</strong> Updating many properties at once may hit API limits (try smaller batches)</li>
+                    <li><strong>Check logs:</strong> Run <code class="bg-blue-100 px-1 rounded">tail -f storage/logs/laravel.log</code> for detailed errors</li>
+                </ul>
+            </details>
+        </div>
+    </div>
+</div>
+
 <!-- Search and Filter -->
 <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
     <form method="GET" action="{{ route('admin.properties.flags') }}" class="space-y-4">
@@ -370,27 +397,29 @@
                     preview.innerHTML = `<span class="inline-flex items-center px-3 py-1 rounded-md text-xs font-bold text-white shadow-sm" style="background: ${flagColor || 'linear-gradient(135deg, #d4af37, #b8941f)'}">${flagText}</span>`;
                     
                     completed++;
+                    console.log(`✓ Property ${propertyId} updated successfully`);
                 } else {
                     failed++;
+                    console.error(`✗ Property ${propertyId} failed:`, data.message || 'Unknown error');
                 }
                 
                 if (completed + failed === propertyIds.length) {
                     if (completed > 0) {
-                        showNotification('success', `Flag applied to ${completed} properties!${failed > 0 ? ` (${failed} failed)` : ''}`);
+                        showNotification('success', `Flag applied to ${completed} properties!${failed > 0 ? ` (${failed} failed - check console)` : ''}`);
                     } else {
-                        showNotification('error', `Failed to update ${failed} properties`);
+                        showNotification('error', `Failed to update ${failed} properties. Check browser console and server logs for details.`);
                     }
                     deselectAll();
                 }
             })
             .catch(error => {
-                console.error('Error:', error);
+                console.error(`✗ Error updating property ${propertyId}:`, error);
                 failed++;
                 if (completed + failed === propertyIds.length) {
                     if (completed > 0) {
-                        showNotification('success', `Flag applied to ${completed} properties! (${failed} failed)`);
+                        showNotification('success', `Flag applied to ${completed} properties! (${failed} failed - check console)`);
                     } else {
-                        showNotification('error', `Failed to update ${failed} properties`);
+                        showNotification('error', `Failed to update ${failed} properties. Check browser console and server logs.`);
                     }
                     deselectAll();
                 }
