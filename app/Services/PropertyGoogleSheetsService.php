@@ -542,6 +542,8 @@ class PropertyGoogleSheetsService
             'paying' => 'paying',
             'amenities' => 'amenities',
             'balcony_roof_terrace' => 'balcony_roof_terrace',
+            'flag' => 'flag',
+            'flag_color' => 'flag_color',
             'disabled_access' => 'disabled_access',
             'living_room' => 'living_room',
             'updatable' => 'updatable',
@@ -762,33 +764,62 @@ class PropertyGoogleSheetsService
                 'updates_requested' => array_keys($updates)
             ]);
             
-            // Find the ID column index
-            $idColumnIndex = array_search('id', $headers);
-            if ($idColumnIndex === false) {
-                Log::error('ID column not found in headers', [
+            // Since IDs are generated from URLs, we need to find the property by matching the ID
+            // The ID format is: sheet_<md5 of url>
+            // Find the URL column
+            $urlColumnIndex = array_search('url', $headers);
+            $linkColumnIndex = array_search('link', $headers);
+            
+            if ($urlColumnIndex === false && $linkColumnIndex === false) {
+                Log::error('URL/Link column not found in headers', [
                     'property_id' => $id,
                     'headers' => $headers
                 ]);
                 return false;
             }
             
-            // Find the row with matching ID (skip header row)
+            // Extract the hash from the ID
+            $expectedHash = str_replace('sheet_', '', $id);
+            
+            // Find the row with matching ID by generating IDs for each row
             $targetRowIndex = null;
             for ($i = 1; $i < count($rows); $i++) {
-                if (isset($rows[$i][$idColumnIndex]) && $rows[$i][$idColumnIndex] == $id) {
-                    $targetRowIndex = $i;
-                    break;
+                $row = $rows[$i];
+                
+                // Get URL from this row
+                $url = null;
+                if ($urlColumnIndex !== false && isset($row[$urlColumnIndex])) {
+                    $url = $row[$urlColumnIndex];
+                } elseif ($linkColumnIndex !== false && isset($row[$linkColumnIndex])) {
+                    $url = $row[$linkColumnIndex];
+                }
+                
+                if ($url) {
+                    // Generate ID from URL (matching the getAllProperties logic)
+                    $generatedHash = md5($url);
+                    if ($generatedHash === $expectedHash) {
+                        $targetRowIndex = $i;
+                        break;
+                    }
                 }
             }
             
             if ($targetRowIndex === null) {
-                Log::error('Property ID not found in Google Sheet', [
+                Log::error('Property not found in Google Sheet (no matching URL)', [
                     'property_id' => $id,
-                    'id_column_index' => $idColumnIndex,
+                    'expected_hash' => $expectedHash,
+                    'url_column_index' => $urlColumnIndex,
+                    'link_column_index' => $linkColumnIndex,
                     'searched_rows' => count($rows) - 1
                 ]);
                 return false;
             }
+            
+            Log::info('Found property row', [
+                'property_id' => $id,
+                'row_index' => $targetRowIndex,
+                'row_number' => $targetRowIndex + 1
+            ]);
             
             // Check if columns exist, if not, we need to add them
             $missingColumns = [];

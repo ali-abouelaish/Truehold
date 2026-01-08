@@ -622,10 +622,20 @@ class AdminController extends Controller
      */
     public function flags(Request $request)
     {
+        // If not already reloaded, force cache clear and reload
+        if (!$request->has('_reloaded')) {
+            $this->sheetsService->clearCache();
+            \Log::info('Properties cache auto-cleared, redirecting to refresh page');
+            
+            // Redirect to same URL with _reloaded parameter to prevent loop
+            $params = array_merge($request->query(), ['_reloaded' => '1']);
+            return redirect()->route('admin.properties.flags', $params);
+        }
+        
         // Force clear cache if requested
         if ($request->has('clear_cache')) {
             $this->sheetsService->clearCache();
-            \Log::info('Properties cache cleared via flags page');
+            \Log::info('Properties cache manually cleared via flags page');
         }
         
         // Get all properties from Google Sheets
