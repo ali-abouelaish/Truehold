@@ -10,9 +10,15 @@
             <h2 class="text-2xl font-bold text-gray-900">Property Flags Management</h2>
             <p class="text-gray-600">Manage promotional flags and badges for properties</p>
         </div>
-        <a href="{{ route('admin.properties') }}" class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg font-medium">
-            <i class="fas fa-arrow-left mr-2"></i>Back to Properties
-        </a>
+        <div class="flex gap-3">
+            <a href="{{ route('admin.properties.flags', array_merge(request()->query(), ['clear_cache' => 1])) }}" 
+               class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium">
+                <i class="fas fa-sync-alt mr-2"></i>Reload from Sheet
+            </a>
+            <a href="{{ route('admin.properties') }}" class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg font-medium">
+                <i class="fas fa-arrow-left mr-2"></i>Back to Properties
+            </a>
+        </div>
     </div>
 </div>
 
@@ -41,16 +47,27 @@
             <p class="text-xs text-blue-700 mb-2">
                 Flag changes are stored directly in your Google Sheets properties spreadsheet.
             </p>
-            <details class="text-xs text-blue-700">
+            @if($properties->total() > 0 && request()->has('clear_cache'))
+                <div class="bg-green-100 border border-green-300 rounded px-3 py-2 mb-2">
+                    <i class="fas fa-check-circle text-green-600"></i>
+                    <span class="text-green-800 font-medium text-xs">Cache cleared! Properties reloaded with latest IDs.</span>
+                </div>
+            @endif
+            <details class="text-xs text-blue-700" {{ request()->hasAny(['clear_cache']) ? '' : 'open' }}>
                 <summary class="cursor-pointer font-medium hover:text-blue-900">
                     <i class="fas fa-wrench mr-1"></i>Troubleshooting failed updates
                 </summary>
                 <ul class="mt-2 space-y-1 ml-4 list-disc">
-                    <li><strong>Property ID not found:</strong> The property may have been deleted from the sheet</li>
-                    <li><strong>Missing columns:</strong> The system will automatically add 'flag' and 'flag_color' columns if missing</li>
+                    <li><strong>IDs don't match / "Property ID not found":</strong> 
+                        <a href="{{ route('admin.properties.flags', array_merge(request()->query(), ['clear_cache' => 1])) }}" 
+                           class="underline font-semibold text-blue-800 hover:text-blue-900">
+                            Click here to clear cache and reload
+                        </a>
+                    </li>
+                    <li><strong>Missing columns:</strong> Run <code class="bg-blue-100 px-1 rounded">php artisan sheets:add-flag-columns</code> to add them</li>
                     <li><strong>Permission error:</strong> Check Google Sheets API permissions in your service account</li>
-                    <li><strong>Rate limiting:</strong> Updating many properties at once may hit API limits (try smaller batches)</li>
-                    <li><strong>Check logs:</strong> Run <code class="bg-blue-100 px-1 rounded">tail -f storage/logs/laravel.log</code> for detailed errors</li>
+                    <li><strong>Rate limiting:</strong> Updating many properties at once may hit API limits (try smaller batches of 10-20)</li>
+                    <li><strong>Check logs:</strong> Run <code class="bg-blue-100 px-1 rounded">php artisan tail</code> for detailed errors</li>
                 </ul>
             </details>
         </div>

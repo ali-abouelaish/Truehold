@@ -622,6 +622,12 @@ class AdminController extends Controller
      */
     public function flags(Request $request)
     {
+        // Force clear cache if requested
+        if ($request->has('clear_cache')) {
+            $this->sheetsService->clearCache();
+            \Log::info('Properties cache cleared via flags page');
+        }
+        
         // Get all properties from Google Sheets
         $allProperties = $this->sheetsService->getAllProperties();
         
