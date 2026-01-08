@@ -1072,7 +1072,7 @@ select.filter-input option {
                                 @if($agentName && $agentName !== 'N/A')
                                     <option value="{{ $agentName }}">
                                         {{ $agentName }}
-                                        @if(in_array($agentName, $agentsWithPaying ?? []))
+                                        @if(isset($agentsWithPaying) && (is_array($agentsWithPaying) ? in_array($agentName, $agentsWithPaying) : $agentsWithPaying->contains($agentName)))
                                             ⚡
                                         @endif
                                     </option>
