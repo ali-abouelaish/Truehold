@@ -633,6 +633,12 @@
                     <span class="sidebar-text">Add Sheet Property</span>
                 </a>
                 @endif
+                
+                <a href="{{ route('admin.properties.flags') }}" 
+                   class="sidebar-item flex items-center px-4 py-3 text-gray-700 hover:text-blue-600 {{ request()->routeIs('admin.properties.flags') ? 'active' : '' }}">
+                    <i class="fas fa-flag sidebar-icon mr-3 text-lg"></i>
+                    <span class="sidebar-text">Property Flags</span>
+                </a>
                 @endif
                 @endauth
                 

@@ -608,4 +608,59 @@ class AdminController extends Controller
             'Property updatable status changed to ' . ($property->updatable ? 'enabled' : 'disabled')
         );
     }
+    
+    /**
+     * Display the property flags management page
+     */
+    public function flags(Request $request)
+    {
+        $query = Property::query();
+        
+        // Search functionality
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('title', 'like', "%{$search}%")
+                  ->orWhere('location', 'like', "%{$search}%");
+            });
+        }
+        
+        // Filter by flag status
+        if ($request->filled('filter')) {
+            if ($request->filter === 'with_flag') {
+                $query->whereNotNull('flag');
+            } elseif ($request->filter === 'no_flag') {
+                $query->whereNull('flag');
+            }
+        }
+        
+        $properties = $query->latest()->paginate(20)->withQueryString();
+        
+        return view('admin.properties.flags', compact('properties'));
+    }
+    
+    /**
+     * Update property flag via AJAX
+     */
+    public function updateFlag(Request $request, Property $property)
+    {
+        $request->validate([
+            'flag' => 'nullable|string|max:50',
+            'flag_color' => 'nullable|string|max:100',
+        ]);
+        
+        $property->update([
+            'flag' => $request->flag,
+            'flag_color' => $request->flag_color,
+        ]);
+        
+        if ($request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Flag updated successfully!'
+            ]);
+        }
+        
+        return back()->with('success', 'Property flag updated successfully!');
+    }
 }

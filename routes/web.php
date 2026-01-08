@@ -354,6 +354,8 @@ Route::middleware('auth')->prefix('admin')->group(function () {
     Route::patch('/properties/{property}/toggle-updatable', [AdminController::class, 'toggleUpdatable'])->name('admin.properties.toggle-updatable');
     Route::delete('/properties/{property}', [AdminController::class, 'destroy'])->name('admin.properties.destroy');
     Route::post('/upload-image', [AdminController::class, 'uploadImage'])->name('admin.upload-image');
+    Route::get('/properties/flags', [AdminController::class, 'flags'])->name('admin.properties.flags');
+    Route::post('/properties/{property}/update-flag', [AdminController::class, 'updateFlag'])->name('admin.properties.update-flag');
 
     // Property interested clients
     Route::post('/properties/{property}/interests', [AdminController::class, 'addInterestedClient'])->name('admin.properties.interests.add');

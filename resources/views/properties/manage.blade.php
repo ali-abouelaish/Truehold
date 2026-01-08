@@ -57,7 +57,7 @@
                         <span class="text-sm text-gray-300">
                             Welcome, {{ Auth::user()->name }}
                         </span>
-                        <a href="{{ route('dashboard') }}" class="text-blue-400 hover:text-white transition-colors">
+                        <a href="{{ route('admin.dashboard') }}" class="text-blue-400 hover:text-white transition-colors">
                             <i class="fas fa-tachometer-alt mr-2"></i>Dashboard
                         </a>
                         <form method="POST" action="{{ route('logout') }}" class="inline">
@@ -75,7 +75,7 @@
             <!-- Sidebar Navigation -->
             <aside class="w-64 bg-white shadow-lg min-h-screen">
                 <nav class="p-6 space-y-2">
-                    <a href="{{ route('dashboard') }}" class="nav-link block">
+                    <a href="{{ route('admin.dashboard') }}" class="nav-link block">
                         <i class="fas fa-tachometer-alt mr-3"></i>Dashboard
                     </a>
                     <a href="{{ route('properties.index') }}" class="nav-link block">
