@@ -333,20 +333,32 @@
         
         // Update each selected property
         let completed = 0;
+        let failed = 0;
         propertyIds.forEach(propertyId => {
             fetch(`/admin/properties/${propertyId}/update-flag`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                    'Accept': 'application/json'
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
                 },
                 body: JSON.stringify({
                     flag: flagText,
                     flag_color: flagColor
                 })
             })
-            .then(response => response.json())
+            .then(async response => {
+                const contentType = response.headers.get('content-type');
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                if (contentType && contentType.includes('application/json')) {
+                    return response.json();
+                } else {
+                    throw new Error('Response was not JSON');
+                }
+            })
             .then(data => {
                 if (data.success) {
                     // Update individual inputs
@@ -358,14 +370,30 @@
                     preview.innerHTML = `<span class="inline-flex items-center px-3 py-1 rounded-md text-xs font-bold text-white shadow-sm" style="background: ${flagColor || 'linear-gradient(135deg, #d4af37, #b8941f)'}">${flagText}</span>`;
                     
                     completed++;
-                    if (completed === propertyIds.length) {
-                        showNotification('success', `Flag applied to ${completed} properties!`);
-                        deselectAll();
+                } else {
+                    failed++;
+                }
+                
+                if (completed + failed === propertyIds.length) {
+                    if (completed > 0) {
+                        showNotification('success', `Flag applied to ${completed} properties!${failed > 0 ? ` (${failed} failed)` : ''}`);
+                    } else {
+                        showNotification('error', `Failed to update ${failed} properties`);
                     }
+                    deselectAll();
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
+                failed++;
+                if (completed + failed === propertyIds.length) {
+                    if (completed > 0) {
+                        showNotification('success', `Flag applied to ${completed} properties! (${failed} failed)`);
+                    } else {
+                        showNotification('error', `Failed to update ${failed} properties`);
+                    }
+                    deselectAll();
+                }
             });
         });
     }
@@ -384,20 +412,32 @@
         
         // Clear flag for each selected property
         let completed = 0;
+        let failed = 0;
         propertyIds.forEach(propertyId => {
             fetch(`/admin/properties/${propertyId}/update-flag`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                    'Accept': 'application/json'
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
                 },
                 body: JSON.stringify({
                     flag: '',
                     flag_color: ''
                 })
             })
-            .then(response => response.json())
+            .then(async response => {
+                const contentType = response.headers.get('content-type');
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                if (contentType && contentType.includes('application/json')) {
+                    return response.json();
+                } else {
+                    throw new Error('Response was not JSON');
+                }
+            })
             .then(data => {
                 if (data.success) {
                     // Update individual inputs
@@ -409,14 +449,30 @@
                     preview.innerHTML = '<span class="text-sm text-gray-400 italic">No flag</span>';
                     
                     completed++;
-                    if (completed === propertyIds.length) {
-                        showNotification('success', `Flags removed from ${completed} properties!`);
-                        deselectAll();
+                } else {
+                    failed++;
+                }
+                
+                if (completed + failed === propertyIds.length) {
+                    if (completed > 0) {
+                        showNotification('success', `Flags removed from ${completed} properties!${failed > 0 ? ` (${failed} failed)` : ''}`);
+                    } else {
+                        showNotification('error', `Failed to remove flags from ${failed} properties`);
                     }
+                    deselectAll();
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
+                failed++;
+                if (completed + failed === propertyIds.length) {
+                    if (completed > 0) {
+                        showNotification('success', `Flags removed from ${completed} properties! (${failed} failed)`);
+                    } else {
+                        showNotification('error', `Failed to remove flags from ${failed} properties`);
+                    }
+                    deselectAll();
+                }
             });
         });
     }
@@ -431,14 +487,30 @@
             headers: {
                 'Content-Type': 'application/json',
                 'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                'Accept': 'application/json'
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
             },
             body: JSON.stringify({
                 flag: flagText,
                 flag_color: flagColor
             })
         })
-        .then(response => response.json())
+        .then(async response => {
+            const contentType = response.headers.get('content-type');
+            if (!response.ok) {
+                console.error('Response not OK:', response.status, response.statusText);
+                const text = await response.text();
+                console.error('Response body:', text.substring(0, 500));
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            if (contentType && contentType.includes('application/json')) {
+                return response.json();
+            } else {
+                const text = await response.text();
+                console.error('Expected JSON but got:', contentType, text.substring(0, 500));
+                throw new Error('Response was not JSON');
+            }
+        })
         .then(data => {
             if (data.success) {
                 // Update preview
@@ -451,11 +523,13 @@
                 
                 // Show success message
                 showNotification('success', 'Flag updated successfully!');
+            } else {
+                showNotification('error', data.message || 'Failed to update flag');
             }
         })
         .catch(error => {
             console.error('Error:', error);
-            showNotification('error', 'Failed to update flag');
+            showNotification('error', 'Failed to update flag: ' + error.message);
         });
     }
     

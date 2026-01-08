@@ -768,7 +768,7 @@ class PropertyGoogleSheetsService
             }
             
             // Prepare updates for each column
-            $updateRequests = [];
+            $valueRanges = [];
             foreach ($updates as $field => $value) {
                 $normalizedField = strtolower(trim($field));
                 $columnIndex = array_search($normalizedField, $headers);
@@ -780,33 +780,40 @@ class PropertyGoogleSheetsService
                     $fullRange = $this->sheetName . '!' . $cellRange;
                     
                     $valueRange = new \Google\Service\Sheets\ValueRange();
+                    $valueRange->setRange($fullRange);
                     $valueRange->setValues([[(string)$value]]);
                     
-                    $updateRequests[] = [
-                        'range' => $fullRange,
-                        'values' => $valueRange
-                    ];
+                    $valueRanges[] = $valueRange;
                 }
             }
             
             // Execute batch update
-            if (!empty($updateRequests)) {
+            if (!empty($valueRanges)) {
                 $batchUpdateRequest = new \Google\Service\Sheets\BatchUpdateValuesRequest();
                 $batchUpdateRequest->setValueInputOption('USER_ENTERED');
-                $batchUpdateRequest->setData(array_map(function($req) {
-                    return $req['values']->setRange($req['range']);
-                }, $updateRequests));
+                $batchUpdateRequest->setData($valueRanges);
                 
                 $this->service->spreadsheets_values->batchUpdate(
                     $this->spreadsheetId,
                     $batchUpdateRequest
                 );
                 
+                Log::info('Property updated in Google Sheet', [
+                    'property_id' => $id,
+                    'fields_updated' => array_keys($updates)
+                ]);
+                
                 // Clear cache after update
                 $this->clearCache();
                 
                 return true;
             }
+            
+            Log::warning('No valid fields to update in Google Sheet', [
+                'property_id' => $id,
+                'attempted_fields' => array_keys($updates),
+                'available_headers' => $headers
+            ]);
             
             return false;
         } catch (\Exception $e) {

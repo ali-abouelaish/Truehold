@@ -86,8 +86,20 @@ class PropertyController extends Controller
                     return new PropertyFromSheet($propertyData);
                 });
 
-                // Sort by ID (or you can add a created_at/updated_at field to sheets)
-                $properties = $properties->sortByDesc('id')->values();
+                // Sort properties: Premium first, then by ID
+                $properties = $properties->sort(function ($a, $b) {
+                    // Check if property has "Premium" flag (case-insensitive)
+                    $aIsPremium = !empty($a->flag) && strtolower($a->flag) === 'premium';
+                    $bIsPremium = !empty($b->flag) && strtolower($b->flag) === 'premium';
+                    
+                    // If both are premium or both are not premium, sort by ID descending
+                    if ($aIsPremium === $bIsPremium) {
+                        return $b->id <=> $a->id; // Descending by ID
+                    }
+                    
+                    // Premium properties come first
+                    return $bIsPremium <=> $aIsPremium;
+                })->values();
 
                 // Paginate the results
                 $perPage = 20;
@@ -186,7 +198,11 @@ class PropertyController extends Controller
             $agentsWithPaying = collect();
         }
 
-        $properties = $query->latest()->paginate(20);
+        // Sort by premium flag first, then by latest
+        $properties = $query
+            ->orderByRaw("CASE WHEN LOWER(flag) = 'premium' THEN 0 ELSE 1 END")
+            ->latest()
+            ->paginate(20);
 
         // Log filter results for debugging
         \Log::info('Property index filters applied (Database Fallback)', [
@@ -350,6 +366,21 @@ class PropertyController extends Controller
                     })
                 ]);
 
+                // Sort properties: Premium first, then by ID
+                $properties = $properties->sort(function ($a, $b) {
+                    // Check if property has "Premium" flag (case-insensitive)
+                    $aIsPremium = !empty($a['flag']) && strtolower($a['flag']) === 'premium';
+                    $bIsPremium = !empty($b['flag']) && strtolower($b['flag']) === 'premium';
+                    
+                    // If both are premium or both are not premium, sort by ID descending
+                    if ($aIsPremium === $bIsPremium) {
+                        return ($b['id'] ?? 0) <=> ($a['id'] ?? 0); // Descending by ID
+                    }
+                    
+                    // Premium properties come first
+                    return $bIsPremium <=> $aIsPremium;
+                })->values();
+
                 // Convert to Property-like objects for view compatibility
                 $propertyObjects = $properties->map(function ($propertyData) {
                     return new PropertyFromSheet($propertyData);
@@ -442,7 +473,12 @@ class PropertyController extends Controller
         }
 
         // Get properties with all necessary fields for map display
-        $properties = $query->limit(400)->get();
+        // Sort by premium flag first, then by latest
+        $properties = $query
+            ->orderByRaw("CASE WHEN LOWER(flag) = 'premium' THEN 0 ELSE 1 END")
+            ->latest()
+            ->limit(400)
+            ->get();
 
         // Get filter values for dropdowns
         $locations = Property::distinct()->pluck('location')->filter()->sort()->values();
