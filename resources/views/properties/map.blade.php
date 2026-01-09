@@ -1468,49 +1468,59 @@ select.filter-input option {
                 marker.addListener('mouseout', function() {
                     this.setIcon(this.originalIcon);
                 });
-                const infoWindow = new google.maps.InfoWindow({
-                 pixelOffset: new google.maps.Size(0, -50
-                    });
 
-                marker.addListener('click', () => {
-                    // Close any open info windows
+                // Click handler for marker
+                marker.addListener('click', function() {
+                    // Close any existing info windows
                     if (infoWindow) {
                         infoWindow.close();
                     }
                     
                     // Get marker position
-                    const markerPos = marker.getPosition();
+                    const markerPosition = marker.getPosition();
                     
-                    // Build content using helper function
+                    // Build content HTML
                     const content = buildInfoWindowContent(property);
                     
-                    // Set content
+                    // Set content to info window
                     infoWindow.setContent(content);
                     
-                    // Calculate position above marker using simple offset
+                    // Calculate position to display info window above marker
                     const projection = map.getProjection();
                     if (projection) {
-                        const scale = Math.pow(2, map.getZoom());
-                        const markerPoint = projection.fromLatLngToPoint(markerPos);
+                        // Get current zoom scale
+                        const zoomScale = Math.pow(2, map.getZoom());
                         
-                        // Offset: 180 pixels up (info window height + small gap)
-                        const offsetY = 180 / scale;
-                        const offsetPoint = new google.maps.Point(markerPoint.x, markerPoint.y + offsetY);
+                        // Convert marker position to point
+                        const markerPoint = projection.fromLatLngToPoint(markerPosition);
+                        
+                        // Calculate offset (180 pixels up, adjusted for zoom)
+                        const offsetPixels = 180;
+                        const offsetY = offsetPixels / zoomScale;
+                        
+                        // Create offset point
+                        const offsetPoint = new google.maps.Point(
+                            markerPoint.x,
+                            markerPoint.y - offsetY
+                        );
+                        
+                        // Convert back to lat/lng
                         const offsetLatLng = projection.fromPointToLatLng(offsetPoint);
                         
-                        // Set position and open
+                        // Set position and open info window
                         infoWindow.setPosition(offsetLatLng);
                         infoWindow.open(map);
                     } else {
-                        // Fallback: open at marker position
+                        // Fallback: open at marker position if projection unavailable
                         infoWindow.open(map, marker);
                     }
                     
-                    // Add event listener for save URL link after info window opens
+                    // Add event listener for "View Full Details" link
                     google.maps.event.addListenerOnce(infoWindow, 'domready', function() {
-                        const link = document.querySelector('.info-window-btn[data-save-url]');
-                        if (link) {
-                            link.addEventListener('click', function(e) {
+                        const viewDetailsLink = document.querySelector('.info-window-btn[data-save-url]');
+                        if (viewDetailsLink) {
+                            viewDetailsLink.addEventListener('click', function(event) {
+                                // Save current URL to session storage for back navigation
                                 sessionStorage.setItem('propertyListingUrl', window.location.href);
                             });
                         }
