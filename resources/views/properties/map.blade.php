@@ -1248,72 +1248,76 @@ select.filter-input option {
         // - In DevTools console you can tweak: window.__iwOffsetY = 24; then click a marker again
         const IW_DEBUG = new URLSearchParams(window.location.search).get('debug_iw') === '1';
 
-        class PropertyCardOverlay extends google.maps.OverlayView {
-            constructor(mapInstance) {
-                super();
-                this.map = mapInstance;
-                this.position = null;
-                this.container = null;
-                this.setMap(mapInstance);
-            }
-
-            onAdd() {
-                this.container = document.createElement('div');
-                this.container.className = 'property-card-overlay';
-                this.container.style.display = 'none';
-
-                // Prevent map click/drag from triggering when interacting with the card
-                this.container.addEventListener('click', (e) => e.stopPropagation());
-                this.container.addEventListener('mousedown', (e) => e.stopPropagation());
-                this.container.addEventListener('touchstart', (e) => e.stopPropagation(), { passive: true });
-
-                this.getPanes().floatPane.appendChild(this.container);
-            }
-
-            onRemove() {
-                if (this.container) {
-                    this.container.remove();
+        function createPropertyCardOverlay(mapInstance) {
+            class PropertyCardOverlay extends google.maps.OverlayView {
+                constructor() {
+                    super();
+                    this.map = mapInstance;
+                    this.position = null;
                     this.container = null;
+                    this.setMap(mapInstance);
+                }
+
+                onAdd() {
+                    this.container = document.createElement('div');
+                    this.container.className = 'property-card-overlay';
+                    this.container.style.display = 'none';
+
+                    // Prevent map click/drag from triggering when interacting with the card
+                    this.container.addEventListener('click', (e) => e.stopPropagation());
+                    this.container.addEventListener('mousedown', (e) => e.stopPropagation());
+                    this.container.addEventListener('touchstart', (e) => e.stopPropagation(), { passive: true });
+
+                    this.getPanes().floatPane.appendChild(this.container);
+                }
+
+                onRemove() {
+                    if (this.container) {
+                        this.container.remove();
+                        this.container = null;
+                    }
+                }
+
+                draw() {
+                    if (!this.container || !this.position) return;
+                    const proj = this.getProjection();
+                    if (!proj) return;
+                    const point = proj.fromLatLngToDivPixel(this.position);
+                    if (!point) return;
+                    this.container.style.left = `${point.x}px`;
+                    this.container.style.top = `${point.y}px`;
+                }
+
+                setPosition(latLng) {
+                    this.position = latLng;
+                    this.draw();
+                }
+
+                setContent(html) {
+                    if (!this.container) return;
+                    this.container.innerHTML = html;
+
+                    const closeBtn = this.container.querySelector('[data-overlay-close="1"]');
+                    if (closeBtn) {
+                        closeBtn.addEventListener('click', (e) => {
+                            e.preventDefault();
+                            this.hide();
+                        });
+                    }
+                }
+
+                show() {
+                    if (this.container) this.container.style.display = 'block';
+                    this.draw();
+                }
+
+                hide() {
+                    if (this.container) this.container.style.display = 'none';
+                    this.position = null;
                 }
             }
 
-            draw() {
-                if (!this.container || !this.position) return;
-                const proj = this.getProjection();
-                if (!proj) return;
-                const point = proj.fromLatLngToDivPixel(this.position);
-                if (!point) return;
-                this.container.style.left = `${point.x}px`;
-                this.container.style.top = `${point.y}px`;
-            }
-
-            setPosition(latLng) {
-                this.position = latLng;
-                this.draw();
-            }
-
-            setContent(html) {
-                if (!this.container) return;
-                this.container.innerHTML = html;
-
-                const closeBtn = this.container.querySelector('[data-overlay-close="1"]');
-                if (closeBtn) {
-                    closeBtn.addEventListener('click', (e) => {
-                        e.preventDefault();
-                        this.hide();
-                    });
-                }
-            }
-
-            show() {
-                if (this.container) this.container.style.display = 'block';
-                this.draw();
-            }
-
-            hide() {
-                if (this.container) this.container.style.display = 'none';
-                this.position = null;
-            }
+            return new PropertyCardOverlay();
         }
 
         // Generate a consistent color for each landlord/agent
@@ -1375,7 +1379,7 @@ select.filter-input option {
                 projectionHelper.setMap(map);
 
                 // Custom overlay card anchored to marker (no "floating away" on zoom)
-                propertyOverlay = new PropertyCardOverlay(map);
+                propertyOverlay = createPropertyCardOverlay(map);
                 map.addListener('click', () => propertyOverlay?.hide());
 
                 // Load properties
