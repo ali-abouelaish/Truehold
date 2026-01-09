@@ -1400,7 +1400,7 @@ select.filter-input option {
                     this.setIcon(this.originalIcon);
                 });
                 const infoWindow = new google.maps.InfoWindow({
-                 pixelOffset: new google.maps.Size(0, -10)
+                 pixelOffset: new google.maps.Size(0, -50
                     });
 
                 marker.addListener('click', () => {
