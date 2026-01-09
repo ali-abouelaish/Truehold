@@ -1407,7 +1407,7 @@ select.filter-input option {
                     }
                     
                     // Get marker position
-                    const markerPos = marker.getPosition();
+                    
                     
                     // Get the first image or use a placeholder
                     const imageUrl = property.first_photo_url || 
@@ -1467,7 +1467,8 @@ select.filter-input option {
                     
                     // Set content and position
                     infoWindow.setContent(content);
-                    
+                    infoWindow.open(map, marker);
+
                     // Calculate position above marker using simple offset
                     
 
