@@ -642,6 +642,42 @@ select.filter-input option {
     display: none !important;
 }
 
+/* Custom overlay card (pixel-perfect anchored to marker, stable on zoom) */
+.property-card-overlay {
+    position: absolute;
+    z-index: 2000;
+    transform: translate(-50%, calc(-100% - 2px)); /* 2px gap above marker */
+    pointer-events: auto;
+}
+
+.property-card-overlay .info-window-card {
+    box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+}
+
+.property-card-overlay .overlay-close {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 30px;
+    height: 30px;
+    border-radius: 999px;
+    border: 1px solid rgba(30, 58, 95, 0.12);
+    background: rgba(255,255,255,0.96);
+    color: var(--primary-navy);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 22px;
+    line-height: 1;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+}
+
+.property-card-overlay .overlay-close:hover {
+    background: var(--primary-navy);
+    color: var(--white);
+}
+
 .info-window-card {
     background: var(--white);
     overflow: hidden;
@@ -1203,15 +1239,82 @@ select.filter-input option {
     <script>
         let map;
         let markers = [];
-        let infoWindow;
         let properties = [];
         let projectionHelper;
+        let propertyOverlay;
 
         // Debug tools:
         // - Append `?debug_iw=1` to the map URL to enable logging
         // - In DevTools console you can tweak: window.__iwOffsetY = 24; then click a marker again
         const IW_DEBUG = new URLSearchParams(window.location.search).get('debug_iw') === '1';
-        window.__iwOffsetY = window.__iwOffsetY ?? 0;
+
+        class PropertyCardOverlay extends google.maps.OverlayView {
+            constructor(mapInstance) {
+                super();
+                this.map = mapInstance;
+                this.position = null;
+                this.container = null;
+                this.setMap(mapInstance);
+            }
+
+            onAdd() {
+                this.container = document.createElement('div');
+                this.container.className = 'property-card-overlay';
+                this.container.style.display = 'none';
+
+                // Prevent map click/drag from triggering when interacting with the card
+                this.container.addEventListener('click', (e) => e.stopPropagation());
+                this.container.addEventListener('mousedown', (e) => e.stopPropagation());
+                this.container.addEventListener('touchstart', (e) => e.stopPropagation(), { passive: true });
+
+                this.getPanes().floatPane.appendChild(this.container);
+            }
+
+            onRemove() {
+                if (this.container) {
+                    this.container.remove();
+                    this.container = null;
+                }
+            }
+
+            draw() {
+                if (!this.container || !this.position) return;
+                const proj = this.getProjection();
+                if (!proj) return;
+                const point = proj.fromLatLngToDivPixel(this.position);
+                if (!point) return;
+                this.container.style.left = `${point.x}px`;
+                this.container.style.top = `${point.y}px`;
+            }
+
+            setPosition(latLng) {
+                this.position = latLng;
+                this.draw();
+            }
+
+            setContent(html) {
+                if (!this.container) return;
+                this.container.innerHTML = html;
+
+                const closeBtn = this.container.querySelector('[data-overlay-close="1"]');
+                if (closeBtn) {
+                    closeBtn.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        this.hide();
+                    });
+                }
+            }
+
+            show() {
+                if (this.container) this.container.style.display = 'block';
+                this.draw();
+            }
+
+            hide() {
+                if (this.container) this.container.style.display = 'none';
+                this.position = null;
+            }
+        }
 
         // Generate a consistent color for each landlord/agent
         function getColorForAgent(agentName) {
@@ -1271,13 +1374,9 @@ select.filter-input option {
                 projectionHelper.onRemove = function () {};
                 projectionHelper.setMap(map);
 
-                // Create info window (anchored to marker; don't auto-pan on zoom)
-                infoWindow = new google.maps.InfoWindow({
-                    disableAutoPan: true,
-                    shouldFocus: false,
-                    // We'll control anchoring via marker.anchorPoint for consistent spacing at any zoom
-                    pixelOffset: new google.maps.Size(0, 0),
-                });
+                // Custom overlay card anchored to marker (no "floating away" on zoom)
+                propertyOverlay = new PropertyCardOverlay(map);
+                map.addListener('click', () => propertyOverlay?.hide());
 
                 // Load properties
                 loadProperties();
@@ -1430,7 +1529,8 @@ select.filter-input option {
                                    'https://via.placeholder.com/380x200/1e3a5f/d4af37?text=No+Image';
                     
                     const content = `
-                        <div class="info-window-card">
+                        <div class="info-window-card" style="position: relative;">
+                            <button type="button" class="overlay-close" aria-label="Close" data-overlay-close="1">×</button>
                             <img src="${imageUrl}" alt="${property.title || 'Property'}" class="info-window-image" onerror="this.src='https://via.placeholder.com/380x200/1e3a5f/d4af37?text=No+Image'">
                             <div class="info-window-content">
                                 <div class="info-window-header">
@@ -1479,48 +1579,24 @@ select.filter-input option {
                     </div>
                 </div>
             `;
-                    infoWindow.setContent(content);
-                    // Anchor the card to the marker so it stays attached while zooming/panning
-                    // Allow live tuning of offset (positive Y moves card DOWN, negative moves it UP)
-                    infoWindow.setOptions({ pixelOffset: new google.maps.Size(0, Number(window.__iwOffsetY || 0)) });
-                    infoWindow.open({ map, anchor: marker, shouldFocus: false });
+                    propertyOverlay.setContent(content);
+                    propertyOverlay.setPosition(marker.getPosition());
+                    propertyOverlay.show();
 
-                    // Debug: log marker pixel vs info-window pixel to measure the gap
+                    // Debug: log marker pixel vs overlay position
                     if (IW_DEBUG) {
-                        google.maps.event.addListenerOnce(infoWindow, 'domready', () => {
-                            try {
-                                const proj = projectionHelper?.getProjection?.();
-                                const pos = marker.getPosition();
-                                const markerPx = proj && pos ? proj.fromLatLngToDivPixel(pos) : null;
-
-                                // Try to locate the rendered InfoWindow container
-                                const iwEl =
-                                    document.querySelector('.gm-style-iw') ||
-                                    document.querySelector('.gm-style-iw-c') ||
-                                    document.querySelector('.gm-style-iw-d');
-                                const rect = iwEl ? iwEl.getBoundingClientRect() : null;
-
-                                console.groupCollapsed('🪲 InfoWindow debug');
-                                console.log('zoom:', map.getZoom());
-                                console.log('marker latlng:', pos?.toJSON?.() ?? pos);
-                                console.log('marker divPixel:', markerPx);
-                                console.log('iw rect:', rect);
-                                if (markerPx && rect) {
-                                    // viewport-origin for divPixel is map div; rect is viewport, so this is approximate
-                                    console.log('note: rect is viewport-based; divPixel is map-pane-based (gap is still useful directionally)');
-                                }
-                                console.log('pixelOffsetY (window.__iwOffsetY):', window.__iwOffsetY);
-                                console.groupEnd();
-
-                                // Visual cue: outline the info window if found
-                                if (iwEl) {
-                                    iwEl.style.outline = '2px dashed rgba(212, 175, 55, 0.8)';
-                                    iwEl.style.outlineOffset = '2px';
-                                }
-                            } catch (e) {
-                                console.warn('InfoWindow debug failed:', e);
-                            }
-                        });
+                        try {
+                            const proj = projectionHelper?.getProjection?.();
+                            const pos = marker.getPosition();
+                            const markerPx = proj && pos ? proj.fromLatLngToDivPixel(pos) : null;
+                            console.groupCollapsed('🪲 Overlay debug');
+                            console.log('zoom:', map.getZoom());
+                            console.log('marker latlng:', pos?.toJSON?.() ?? pos);
+                            console.log('marker divPixel:', markerPx);
+                            console.groupEnd();
+                        } catch (e) {
+                            console.warn('Overlay debug failed:', e);
+                        }
                     }
                 });
 
