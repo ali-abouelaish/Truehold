@@ -615,10 +615,10 @@ select.filter-input option {
 
 /* Info Window Styling */
 .gm-style .gm-style-iw-c {
-    border-radius: 10px;
+    border-radius: 12px;
     padding: 0 !important;
     max-width: 240px !important;
-    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
     overflow: hidden !important;
 }
 
@@ -637,120 +637,80 @@ select.filter-input option {
     background: linear-gradient(45deg, var(--white) 50%, transparent 51%, transparent) !important;
 }
 
-.info-window-card {
+/* Map Card - Fresh Design */
+.map-card {
+    width: 240px;
     background: var(--white);
+    border-radius: 12px;
     overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    animation: fadeInUp 0.3s ease;
+    animation: cardFadeIn 0.2s ease;
 }
 
-@keyframes fadeInUp {
+@keyframes cardFadeIn {
     from {
         opacity: 0;
-        transform: translateY(10px);
+        transform: scale(0.95);
     }
     to {
         opacity: 1;
-        transform: translateY(0);
+        transform: scale(1);
     }
 }
 
-.info-window-image {
-            width: 100%;
-    height: 120px;
-    object-fit: cover;
+.map-card-image {
+    width: 100%;
+    height: 140px;
+    overflow: hidden;
     background: linear-gradient(135deg, #f5f5f5 0%, #e8e8e8 100%);
+}
+
+.map-card-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
     display: block;
 }
 
-.info-window-content {
-    padding: 12px;
+.map-card-body {
+    padding: 14px;
 }
 
-.info-window-header {
-    margin-bottom: 8px;
-    padding-bottom: 8px;
-    border-bottom: 1px solid #e5e7eb;
-}
-
-.info-window-title {
-    font-size: 12px;
+.map-card-title {
+    font-size: 13px;
     font-weight: 700;
     color: var(--primary-navy);
-    margin-bottom: 4px;
-    line-height: 1.3;
+    margin: 0 0 8px 0;
+    line-height: 1.4;
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
-            overflow: hidden;
+    overflow: hidden;
+    min-height: 36px;
 }
 
-.info-window-price {
-    font-size: 15px;
+.map-card-price {
+    font-size: 18px;
     font-weight: 700;
     color: var(--gold);
-    display: flex;
-    align-items: center;
-    gap: 2px;
+    margin-bottom: 12px;
+    letter-spacing: -0.5px;
 }
 
-.info-window-details {
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-    margin-bottom: 8px;
-}
-
-.info-window-detail-item {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 9px;
-    color: var(--gray);
-}
-
-.info-window-detail-item svg {
-    width: 11px;
-    height: 11px;
-    color: var(--gold);
-    flex-shrink: 0;
-}
-
-.info-window-detail-item strong {
-    color: var(--text-dark);
+.map-card-link {
+    display: inline-block;
+    color: var(--primary-navy);
+    font-size: 12px;
     font-weight: 600;
-}
-
-.info-window-footer {
-    padding-top: 8px;
-    border-top: 1px solid #e5e7eb;
-}
-
-.info-window-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 4px;
-    width: 100%;
-    padding: 7px 14px;
-    background: linear-gradient(135deg, var(--gold), var(--gold-light));
-    color: var(--white);
-    border-radius: 6px;
-    font-weight: 600;
-    font-size: 10px;
     text-decoration: none;
-    transition: var(--transition);
-    box-shadow: 0 2px 8px rgba(212, 175, 55, 0.3);
+    transition: all 0.2s ease;
+    padding: 6px 0;
 }
 
-.info-window-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 5px 16px rgba(212, 175, 55, 0.4);
-}
-
-.info-window-btn svg {
-    width: 11px;
-    height: 11px;
+.map-card-link:hover {
+    color: var(--gold);
+    transform: translateX(4px);
 }
 
 /* Close button styling */
@@ -921,34 +881,35 @@ select.filter-input option {
         max-width: 210px !important;
     }
     
-    .info-window-image {
-        height: 100px;
+    .map-card {
+        width: 210px;
     }
     
-    .info-window-content {
-        padding: 10px;
+    .map-card-image {
+        height: 120px;
     }
     
-    .info-window-title {
+    .map-card-body {
+        padding: 12px;
+    }
+    
+    .map-card-title {
+        font-size: 12px;
+        min-height: 32px;
+    }
+    
+    .map-card-price {
+        font-size: 16px;
+        margin-bottom: 10px;
+    }
+    
+    .map-card-link {
         font-size: 11px;
     }
     
-    .info-window-price {
-        font-size: 13px;
+    .gm-style .gm-style-iw-c {
+        max-width: 210px !important;
     }
-    
-    .info-window-detail-item {
-        font-size: 8px;
-        gap: 5px;
-    }
-    
-    .info-window-btn {
-        padding: 6px 12px;
-        font-size: 9px;
-    }
-    
-    .info-window-detail-item {
-        font-size: 10px;
     }
 }
 
@@ -1421,57 +1382,23 @@ select.filter-input option {
                     // Get the first image or use a placeholder
                     const imageUrl = property.first_photo_url || 
                                    (property.high_quality_photos_array && property.high_quality_photos_array[0]) || 
-                                   'https://via.placeholder.com/380x200/1e3a5f/d4af37?text=No+Image';
+                                   'https://via.placeholder.com/240x140/1e3a5f/d4af37?text=No+Image';
+                    
+                    const priceText = (property.formatted_price || property.price || 'N/A').toString().replace('£', '').trim();
                     
                     const content = `
-                        <div class="info-window-card">
-                            <img src="${imageUrl}" alt="${property.title || 'Property'}" class="info-window-image" onerror="this.src='https://via.placeholder.com/380x200/1e3a5f/d4af37?text=No+Image'">
-                            <div class="info-window-content">
-                                <div class="info-window-header">
-                                    <h3 class="info-window-title">${property.title || 'Property Details'}</h3>
-                                    <div class="info-window-price">
-                                        <span style="font-weight: 700; font-size: 16px;">£</span>
-                                        ${(property.formatted_price || property.price || 'Price not available').toString().replace('£', '').trim()}
-                                    </div>
-                                </div>
-                                <div class="info-window-details">
-                                    ${property.location ? `
-                                        <div class="info-window-detail-item">
-                                            <svg viewBox="0 0 24 24" fill="currentColor">
-                                                <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
-                                            </svg>
-                                            <span><strong>Location:</strong> ${property.location}</span>
-                                        </div>
-                                    ` : ''}
-                                    ${property.property_type ? `
-                                        <div class="info-window-detail-item">
-                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                                <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/>
-                                                <path d="M9 22V12h6v10"/>
-                                            </svg>
-                                            <span><strong>Type:</strong> ${property.property_type}</span>
-                                        </div>
-                                    ` : ''}
-                                    ${property.couples_allowed ? `
-                                        <div class="info-window-detail-item">
-                                            <svg viewBox="0 0 24 24" fill="currentColor">
-                                                <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/>
-                                            </svg>
-                                            <span><strong>Couples:</strong> ${property.couples_allowed === 'Yes' ? '✓ Allowed' : '✗ Not Allowed'}</span>
-                                        </div>
-                                    ` : ''}
-                                </div>
-                                <div class="info-window-footer">
-                                    <a href="/properties/${property.id}" class="info-window-btn" onclick="sessionStorage.setItem('propertyListingUrl', window.location.href);">
-                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-                                            <circle cx="12" cy="12" r="3"/>
-                                        </svg>
-                                        View Full Details
-                                    </a>
+                        <div class="map-card">
+                            <div class="map-card-image">
+                                <img src="${imageUrl}" alt="${property.title || 'Property'}" onerror="this.src='https://via.placeholder.com/240x140/1e3a5f/d4af37?text=No+Image'">
                             </div>
-                    </div>
-                </div>
+                            <div class="map-card-body">
+                                <h3 class="map-card-title">${property.title || 'Property Details'}</h3>
+                                <div class="map-card-price">£${priceText}</div>
+                                <a href="/properties/${property.id}" class="map-card-link" onclick="sessionStorage.setItem('propertyListingUrl', window.location.href);">
+                                    View Details →
+                                </a>
+                            </div>
+                        </div>
                     `;
                     infoWindow.setContent(content);
                     
@@ -1480,8 +1407,8 @@ select.filter-input option {
                     const scale = Math.pow(2, map.getZoom());
                     const markerPoint = projection.fromLatLngToPoint(markerPosition);
                     
-                    // Offset upward by approximately 200 pixels (info window height + gap)
-                    const offsetPixels = 200;
+                    // Offset upward by approximately 180 pixels (card height + gap)
+                    const offsetPixels = 180;
                     const offsetPoint = new google.maps.Point(
                         markerPoint.x,
                         markerPoint.y - (offsetPixels / scale)
