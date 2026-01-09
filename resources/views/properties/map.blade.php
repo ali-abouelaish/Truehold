@@ -258,54 +258,55 @@ body {
 }
 
 /* ==========================================
-   FILTERS BAR
+   FILTERS SECTION
    ========================================== */
 
-.map-filters-bar {
+.filters-section {
+    padding: 24px 0;
     background-color: var(--white);
-    padding: 16px 0;
     border-bottom: 1px solid var(--light-gray);
 }
 
-.map-filters-toggle {
+.filters-toggle {
     display: flex;
     align-items: center;
     gap: 10px;
-    padding: 10px 20px;
+    padding: 12px 24px;
     background-color: var(--white);
     border: 2px solid var(--light-gray);
-    border-radius: 8px;
+    border-radius: 10px;
     color: var(--primary-navy);
     font-weight: 600;
-    font-size: 14px;
-    cursor: pointer;
+    font-size: 15px;
     transition: var(--transition);
+    width: fit-content;
+    cursor: pointer;
 }
 
-.map-filters-toggle:hover {
+.filters-toggle:hover {
     border-color: var(--primary-navy);
     background-color: var(--off-white);
 }
 
-.map-filters-toggle svg:first-child {
+.filters-toggle svg:first-child {
     color: var(--gold);
 }
 
-.map-filters-toggle .chevron {
+.filters-toggle .chevron {
     margin-left: 8px;
     transition: transform 0.3s ease;
 }
 
-.map-filters-content {
+.filters-content {
     display: none;
-    margin-top: 16px;
+    margin-top: 24px;
     padding: 32px;
     background: linear-gradient(135deg, #475569 0%, #3f4a5c 100%);
     border-radius: 16px;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
 }
 
-.map-filters-content.active {
+.filters-content.active {
     display: block;
 }
 
@@ -705,58 +706,58 @@ select.filter-input option {
 }
 
 /* Close button styling */
-.gm-style-iw-c > button,
-.gm-style-iw > button,
-.gm-style .gm-ui-hover-effect {
-    width: 28px !important;
-    height: 28px !important;
+.gm-style-iw-c button.gm-ui-hover-effect,
+.gm-style-iw button.gm-ui-hover-effect {
+    width: 32px !important;
+    height: 32px !important;
     border-radius: 50% !important;
-    background: rgba(255, 255, 255, 0.95) !important;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2) !important;
+    background: var(--white) !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15) !important;
     opacity: 1 !important;
-    top: 8px !important;
-    right: 8px !important;
+    top: 6px !important;
+    right: 6px !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
     transition: all 0.2s ease !important;
     padding: 0 !important;
+    border: 1px solid rgba(30, 58, 95, 0.1) !important;
 }
 
-.gm-style-iw-c > button:hover,
-.gm-style-iw > button:hover,
-.gm-style .gm-ui-hover-effect:hover {
-    background: var(--white) !important;
-    box-shadow: 0 3px 12px rgba(0, 0, 0, 0.3) !important;
-    transform: scale(1.05) !important;
+.gm-style-iw-c button.gm-ui-hover-effect:hover,
+.gm-style-iw button.gm-ui-hover-effect:hover {
+    background: var(--primary-navy) !important;
+    box-shadow: 0 4px 12px rgba(30, 58, 95, 0.3) !important;
+    transform: scale(1.08) !important;
+    border-color: var(--primary-navy) !important;
 }
 
-/* Style the close button image/icon */
-.gm-style-iw-c > button img,
-.gm-style-iw > button img {
-    width: 14px !important;
-    height: 14px !important;
-    margin: 0 !important;
-    opacity: 0.7 !important;
+/* Style the close button icon span (mask-image) */
+.gm-style-iw-c button.gm-ui-hover-effect span,
+.gm-style-iw button.gm-ui-hover-effect span {
+    background-color: var(--primary-navy) !important;
+    width: 20px !important;
+    height: 20px !important;
+    margin: 6px !important;
+    transition: background-color 0.2s ease !important;
 }
 
-.gm-style-iw-c > button:hover img,
-.gm-style-iw > button:hover img {
-    opacity: 1 !important;
+.gm-style-iw-c button.gm-ui-hover-effect:hover span,
+.gm-style-iw button.gm-ui-hover-effect:hover span {
+    background-color: var(--white) !important;
 }
 
-/* Fallback: Add X with CSS if image doesn't show */
-.gm-style-iw-c > button::after {
-    content: '×' !important;
+/* Ensure button is properly positioned */
+.gm-style-iw-c {
+    position: relative !important;
+}
+
+.gm-style-iw-c button[aria-label="Close"],
+.gm-style-iw button[aria-label="Close"] {
     position: absolute !important;
-    top: 50% !important;
-    left: 50% !important;
-    transform: translate(-50%, -50%) !important;
-    font-size: 24px !important;
-    color: #374151 !important;
-    font-weight: 300 !important;
-    line-height: 1 !important;
-    pointer-events: none !important;
+    top: 6px !important;
+    right: 6px !important;
+    z-index: 1000 !important;
 }
 
 /* Adjust close button position */
@@ -813,8 +814,39 @@ select.filter-input option {
         grid-template-columns: 1fr;
     }
     
-    .map-filters-content {
-        padding: 24px 20px;
+    /* Filters */
+    .filters-section {
+        padding: 16px 0;
+    }
+    
+    .filters-toggle {
+        width: 100%;
+        justify-content: center;
+        padding: 14px 20px;
+        font-size: 15px;
+    }
+    
+    .filters-content {
+        padding: 20px 16px;
+        margin-top: 12px;
+    }
+    
+    .filters-header h3 {
+        font-size: 18px;
+    }
+    
+    .filter-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+    
+    .filter-label {
+        font-size: 13px;
+    }
+    
+    .filter-input {
+        padding: 12px 14px;
+        font-size: 14px;
     }
     
     .filter-actions {
@@ -958,21 +990,21 @@ select.filter-input option {
             </div>
     </div>
 
-    <!-- Filters Bar -->
-    <div class="map-filters-bar">
+    <!-- Filters -->
+    <section class="filters-section">
         <div class="container">
-            <button class="map-filters-toggle" onclick="toggleMapFilters()">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+            <button class="filters-toggle" onclick="toggleMapFilters()">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M10 18h4v-2h-4v2zM3 6v2h18V6H3zm3 7h12v-2H6v2z"/>
                 </svg>
-                    <span id="filterToggleText">Show Filters</span>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" class="chevron" id="filterChevron">
+                <span id="filterToggleText">Show Filters</span>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" class="chevron" id="filterChevron">
                     <path d="M6 9l6 6 6-6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                 </svg>
-                </button>
+            </button>
                 
             <!-- Filters Content -->
-            <div class="map-filters-content" id="mapFiltersContent">
+            <div class="filters-content" id="mapFiltersContent">
                 <div class="filters-header">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
                         <path d="M10 18h4v-2h-4v2zM3 6v2h18V6H3zm3 7h12v-2H6v2z"/>
@@ -1070,10 +1102,10 @@ select.filter-input option {
                         </svg>
                         Apply Filters
                                 </button>
-                            </div>
-                        </div>
                 </div>
             </div>
+        </div>
+    </section>
 
     <!-- Map Controls -->
     <div class="map-controls">
