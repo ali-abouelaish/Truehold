@@ -1240,7 +1240,8 @@ select.filter-input option {
             return colorPalette[index];
         }
 
-        function initMap() {
+        // Make initMap globally accessible for Google Maps callback
+        window.initMap = function() {
             try {
                 console.log('🗺️ Initializing map...');
                 
@@ -1273,7 +1274,7 @@ select.filter-input option {
                 console.error('❌ Map initialization failed:', error);
                 document.getElementById('loadingScreen').innerHTML = '<div style="text-align: center;"><i class="fas fa-exclamation-triangle" style="font-size: 48px; color: #ef4444; margin-bottom: 16px;"></i><div class="loading-text" style="color: #ef4444;">Map initialization failed</div><p style="color: #6b7280; margin-top: 8px;">' + error.message + '</p></div>';
             }
-        }
+        };
 
         function loadProperties() {
             try {
@@ -1475,7 +1476,6 @@ select.filter-input option {
                     infoWindow.setContent(content);
                     
                     // Calculate position to place info window right above marker
-                    const markerPosition = marker.getPosition();
                     const projection = map.getProjection();
                     const scale = Math.pow(2, map.getZoom());
                     const markerPoint = projection.fromLatLngToPoint(markerPosition);
