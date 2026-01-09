@@ -1255,8 +1255,12 @@ select.filter-input option {
                     zoomControl: true
                 });
                 
-                // Create info window
-                infoWindow = new google.maps.InfoWindow();
+                // Create info window (anchored to marker; don't auto-pan on zoom)
+                infoWindow = new google.maps.InfoWindow({
+                    disableAutoPan: true,
+                    shouldFocus: false,
+                    pixelOffset: new google.maps.Size(0, -10),
+                });
 
                 // Load properties
                 loadProperties();
@@ -1456,7 +1460,8 @@ select.filter-input option {
                 </div>
             `;
                     infoWindow.setContent(content);
-                    infoWindow.open(map, marker);
+                    // Anchor the card to the marker so it stays attached while zooming/panning
+                    infoWindow.open({ map, anchor: marker, shouldFocus: false });
                 });
 
                 markers.push(marker);
@@ -1589,7 +1594,6 @@ select.filter-input option {
         
         function clearMapFilters() {
             // Reset all filter inputs
-            document.getElementById('filterLocation').value = '';
             document.getElementById('filterPropertyType').value = '';
             document.getElementById('filterMinPrice').value = '';
             document.getElementById('filterMaxPrice').value = '';
