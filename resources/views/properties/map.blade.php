@@ -1083,26 +1083,26 @@ select.filter-input option {
                                 <path d="M13 2L3 14h8l-1 8 10-12h-8l1-8z"/>
                             </svg>
                         </label>
-                        </div>
+                    </div>
                     @endif
                     
                     <div class="filter-group">
                         <label class="filter-label">Property Type</label>
                         <select id="filterPropertyType" class="filter-input">
-                                <option value="">All Types</option>
+                            <option value="">All Types</option>
                             @foreach($propertyTypes ?? [] as $type)
                                 @if($type && $type !== 'N/A')
                                     <option value="{{ $type }}">{{ $type }}</option>
                                 @endif
-                                @endforeach
-                            </select>
-                        </div>
-                        
-                        @auth
+                            @endforeach
+                        </select>
+                    </div>
+                    
+                    @auth
                     <div class="filter-group">
                         <label class="filter-label">Agent Name</label>
                         <select id="filterAgentName" class="filter-input">
-                                <option value="">All Agents</option>
+                            <option value="">All Agents</option>
                             @foreach($agentNames ?? [] as $agentName)
                                 @if($agentName && $agentName !== 'N/A')
                                     <option value="{{ $agentName }}">
@@ -1112,30 +1112,30 @@ select.filter-input option {
                                         @endif
                                     </option>
                                 @endif
-                                @endforeach
-                            </select>
-                        </div>
+                            @endforeach
+                        </select>
+                    </div>
                     @endif
-                        
+                    
                     <div class="filter-group">
                         <label class="filter-label">Min Price</label>
                         <input type="number" id="filterMinPrice" class="filter-input" placeholder="£0" min="0">
-                        </div>
-                        
+                    </div>
+                    
                     <div class="filter-group">
                         <label class="filter-label">Max Price</label>
                         <input type="number" id="filterMaxPrice" class="filter-input" placeholder="£5000" min="0">
-                        </div>
+                    </div>
                     
                     <div class="filter-group">
                         <label class="filter-label">Couples Allowed</label>
                         <select id="filterCouplesAllowed" class="filter-input">
-                                    <option value="">All Properties</option>
+                            <option value="">All Properties</option>
                             <option value="Yes">Yes</option>
                             <option value="No">No</option>
-                                </select>
+                        </select>
                     </div>
-                        </div>
+                </div>
                         
                 <div class="filter-actions">
                     <button type="button" onclick="clearMapFilters()" class="filter-btn-clear">
@@ -1240,8 +1240,7 @@ select.filter-input option {
             return colorPalette[index];
         }
 
-        // Make initMap globally accessible for Google Maps callback
-        window.initMap = function() {
+        function initMap() {
             try {
                 console.log('🗺️ Initializing map...');
                 
@@ -1271,7 +1270,7 @@ select.filter-input option {
                 console.error('❌ Map initialization failed:', error);
                 document.getElementById('loadingScreen').innerHTML = '<div style="text-align: center;"><i class="fas fa-exclamation-triangle" style="font-size: 48px; color: #ef4444; margin-bottom: 16px;"></i><div class="loading-text" style="color: #ef4444;">Map initialization failed</div><p style="color: #6b7280; margin-top: 8px;">' + error.message + '</p></div>';
             }
-        };
+        }
 
         function loadProperties() {
             try {
@@ -1323,75 +1322,6 @@ select.filter-input option {
             }
         }
 
-        // Helper function to build info window content
-        function buildInfoWindowContent(property) {
-            const imageUrl = property.first_photo_url || 
-                           (property.high_quality_photos_array && property.high_quality_photos_array[0]) || 
-                           'https://via.placeholder.com/380x200/1e3a5f/d4af37?text=No+Image';
-            
-            let priceText = property.formatted_price || property.price || 'Price not available';
-            priceText = String(priceText).replace('£', '').trim();
-            
-            let locationHtml = '';
-            if (property.location) {
-                locationHtml = `<div class="info-window-detail-item">
-                    <svg viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
-                    </svg>
-                    <span><strong>Location:</strong> ${property.location}</span>
-                </div>`;
-            }
-            
-            let typeHtml = '';
-            if (property.property_type) {
-                typeHtml = `<div class="info-window-detail-item">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/>
-                        <path d="M9 22V12h6v10"/>
-                    </svg>
-                    <span><strong>Type:</strong> ${property.property_type}</span>
-                </div>`;
-            }
-            
-            let couplesHtml = '';
-            if (property.couples_allowed) {
-                const couplesText = property.couples_allowed === 'Yes' ? '✓ Allowed' : '✗ Not Allowed';
-                couplesHtml = `<div class="info-window-detail-item">
-                    <svg viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/>
-                    </svg>
-                    <span><strong>Couples:</strong> ${couplesText}</span>
-                </div>`;
-            }
-            
-            return `<div class="info-window-card">
-                <img src="${imageUrl}" alt="${property.title || 'Property'}" class="info-window-image" onerror="this.src='https://via.placeholder.com/380x200/1e3a5f/d4af37?text=No+Image'">
-                <div class="info-window-content">
-                    <div class="info-window-header">
-                        <h3 class="info-window-title">${property.title || 'Property Details'}</h3>
-                        <div class="info-window-price">
-                            <span style="font-weight: 700; font-size: 16px;">£</span>
-                            ${priceText}
-                        </div>
-                    </div>
-                    <div class="info-window-details">
-                        ${locationHtml}
-                        ${typeHtml}
-                        ${couplesHtml}
-                    </div>
-                    <div class="info-window-footer">
-                        <a href="/properties/${property.id}" class="info-window-btn" data-save-url="true">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-                                <circle cx="12" cy="12" r="3"/>
-                            </svg>
-                            View Full Details
-                        </a>
-                    </div>
-                </div>
-            </div>`;
-        }
-
         function createMarkers(properties) {
                 // Clear existing markers
             markers.forEach(marker => marker.setMap(null));
@@ -1430,40 +1360,36 @@ select.filter-input option {
                         map: map,
                     title: property.title,
                     animation: google.maps.Animation.DROP,
-                    icon: {
-    path: markerShape,
-    scale: markerScale,
-    fillColor: markerColor,
-    fillOpacity: 1,
-    strokeColor: isPremium ? '#b8941f' : '#1e3a5f',
-    strokeWeight: isPremium ? 3 : 2,
-    anchor: new google.maps.Point(0, 0) // ✅ CRITICAL
-},
+                            icon: {
+                        path: markerShape,
+                        scale: markerScale,
+                        fillColor: markerColor,
+                                fillOpacity: 1,
+                        strokeColor: isPremium ? '#b8941f' : '#1e3a5f',
+                        strokeWeight: isPremium ? 3 : 2
+                    },
                     zIndex: isPremium ? 1000 : 100 // Premium markers on top
                 });
                 
                 // Store original marker properties for hover
                 marker.originalIcon = {
-    path: markerShape,
-    scale: markerScale,
-    fillColor: markerColor,
-    fillOpacity: 1,
-    strokeColor: isPremium ? '#b8941f' : '#1e3a5f',
-    strokeWeight: isPremium ? 3 : 2,
-    anchor: new google.maps.Point(0, 0) // ✅
-};
-
+                    path: markerShape,
+                    scale: markerScale,
+                    fillColor: markerColor,
+                    fillOpacity: 1,
+                    strokeColor: isPremium ? '#b8941f' : '#1e3a5f',
+                    strokeWeight: isPremium ? 3 : 2
+                };
                 
-marker.hoverIcon = {
-    path: markerShape,
-    scale: markerScale + 2,
-    fillColor: hoverColor,
-    fillOpacity: 1,
-    strokeColor: isPremium ? '#b8941f' : '#1e3a5f',
-    strokeWeight: isPremium ? 4 : 3,
-    anchor: new google.maps.Point(0, 0) // ✅
-};
-
+                marker.hoverIcon = {
+                    path: markerShape,
+                    scale: markerScale + 2,
+                    fillColor: hoverColor,
+                    fillOpacity: 1,
+                    strokeColor: isPremium ? '#b8941f' : '#1e3a5f',
+                    strokeWeight: isPremium ? 4 : 3
+                };
+                
                 // Add hover effect
                 marker.addListener('mouseover', function() {
                     this.setIcon(this.hoverIcon);
@@ -1472,44 +1398,66 @@ marker.hoverIcon = {
                 marker.addListener('mouseout', function() {
                     this.setIcon(this.originalIcon);
                 });
-                const infoWindow = new google.maps.InfoWindow({
-                    disableAutoPan: true // optional but recommended
+
+                marker.addListener('click', () => {
+                    // Get the first image or use a placeholder
+                    const imageUrl = property.first_photo_url || 
+                                   (property.high_quality_photos_array && property.high_quality_photos_array[0]) || 
+                                   'https://via.placeholder.com/380x200/1e3a5f/d4af37?text=No+Image';
                     
-});
-
-                // Click handler for marker
-                marker.addListener('click', function () {
-    if (infoWindow) {
-        infoWindow.close();
-    }
-
-    const content = buildInfoWindowContent(property);
-    infoWindow.setContent(content);
-
-    // ✅ THIS is all you need
-    infoWindow.open({
-    map,
-    anchor: marker,
-    shouldFocus: false
-});
-
-
-    google.maps.event.addListenerOnce(infoWindow, 'domready', function () {
-        const viewDetailsLink = document.querySelector(
-            '.info-window-btn[data-save-url]'
-        );
-        if (viewDetailsLink) {
-            viewDetailsLink.addEventListener('click', function () {
-                sessionStorage.setItem(
-                    'propertyListingUrl',
-                    window.location.href
-                );
-            });
-        }
-    });
-});
-
-
+                    const content = `
+                        <div class="info-window-card">
+                            <img src="${imageUrl}" alt="${property.title || 'Property'}" class="info-window-image" onerror="this.src='https://via.placeholder.com/380x200/1e3a5f/d4af37?text=No+Image'">
+                            <div class="info-window-content">
+                                <div class="info-window-header">
+                                    <h3 class="info-window-title">${property.title || 'Property Details'}</h3>
+                                    <div class="info-window-price">
+                                        <span style="font-weight: 700; font-size: 16px;">£</span>
+                                        ${(property.formatted_price || property.price || 'Price not available').toString().replace('£', '').trim()}
+                    </div>
+                </div>
+                                <div class="info-window-details">
+                                    ${property.location ? `
+                                        <div class="info-window-detail-item">
+                                            <svg viewBox="0 0 24 24" fill="currentColor">
+                                                <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+                                            </svg>
+                                            <span><strong>Location:</strong> ${property.location}</span>
+                        </div>
+                    ` : ''}
+                                    ${property.property_type ? `
+                                        <div class="info-window-detail-item">
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/>
+                                                <path d="M9 22V12h6v10"/>
+                                            </svg>
+                                            <span><strong>Type:</strong> ${property.property_type}</span>
+                        </div>
+                    ` : ''}
+                                    ${property.couples_allowed ? `
+                                        <div class="info-window-detail-item">
+                                            <svg viewBox="0 0 24 24" fill="currentColor">
+                                                <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/>
+                                            </svg>
+                                            <span><strong>Couples:</strong> ${property.couples_allowed === 'Yes' ? '✓ Allowed' : '✗ Not Allowed'}</span>
+                                    </div>
+                                ` : ''}
+                                    </div>
+                                <div class="info-window-footer">
+                                    <a href="/properties/${property.id}" class="info-window-btn" onclick="sessionStorage.setItem('propertyListingUrl', window.location.href);">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                                            <circle cx="12" cy="12" r="3"/>
+                                        </svg>
+                                        View Full Details
+                                    </a>
+                            </div>
+                    </div>
+                </div>
+            `;
+                    infoWindow.setContent(content);
+                    infoWindow.open(map, marker);
+                });
 
                 markers.push(marker);
             });
@@ -1641,6 +1589,7 @@ marker.hoverIcon = {
         
         function clearMapFilters() {
             // Reset all filter inputs
+            document.getElementById('filterLocation').value = '';
             document.getElementById('filterPropertyType').value = '';
             document.getElementById('filterMinPrice').value = '';
             document.getElementById('filterMaxPrice').value = '';
