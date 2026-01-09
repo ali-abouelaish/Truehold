@@ -41,8 +41,8 @@
 
 /* Reset & Base Styles */
 * {
-    margin: 0;
-    padding: 0;
+            margin: 0;
+            padding: 0;
     box-sizing: border-box;
 }
 
@@ -488,9 +488,9 @@ select.filter-input option {
 .map-container {
     position: fixed;
     top: 200px;
-    left: 0;
-    right: 0;
-    bottom: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
     background-color: var(--light-gray);
 }
 
@@ -607,7 +607,7 @@ select.filter-input option {
 }
 
 .info-window-image {
-    width: 100%;
+            width: 100%;
     height: 120px;
     object-fit: cover;
     background: linear-gradient(135deg, #f5f5f5 0%, #e8e8e8 100%);
@@ -633,7 +633,7 @@ select.filter-input option {
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
-    overflow: hidden;
+            overflow: hidden;
 }
 
 .info-window-price {
@@ -642,12 +642,7 @@ select.filter-input option {
     color: var(--gold);
     display: flex;
     align-items: center;
-    gap: 3px;
-}
-
-.info-window-price svg {
-    width: 13px;
-    height: 13px;
+    gap: 2px;
 }
 
 .info-window-details {
@@ -888,7 +883,7 @@ select.filter-input option {
     .logo-text {
         font-size: 16px;
     }
-}
+        }
     </style>
 </head>
 <body class="map-page">
@@ -902,7 +897,7 @@ select.filter-input option {
                             <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" stroke-width="2"/>
                             <path d="M9 22V12h6v10" stroke-width="2"/>
                         </svg>
-                    </div>
+                        </div>
                     <span class="logo-text">TRUEHOLD</span>
                 </a>
                 <ul class="nav-links">
@@ -918,24 +913,24 @@ select.filter-input option {
                         </svg>
                         Map View
                     </a></li>
-                    @auth
+                        @auth
                     <li><a href="{{ route('admin.dashboard') }}" class="btn-agent">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
                             <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
                         </svg>
                         Dashboard
                     </a></li>
-                    @else
+                        @else
                     <li><a href="{{ route('login', ['redirect' => url()->current()]) }}" class="btn-agent">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
                             <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
                         </svg>
                         Agent Login
                     </a></li>
-                    @endauth
+                        @endauth
                 </ul>
+                </div>
             </div>
-        </div>
     </nav>
 
     <!-- Map Header -->
@@ -949,8 +944,8 @@ select.filter-input option {
                             <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>
                         </svg>
                         <span id="propertyCount">{{ $properties->count() }} properties loaded</span>
-                    </div>
-                </div>
+            </div>
+        </div>
                 <div class="map-header-actions">
                     <a href="{{ route('properties.index') }}" class="btn-list-view">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
@@ -958,9 +953,9 @@ select.filter-input option {
                         </svg>
                         List View
                     </a>
+                    </div>
                 </div>
             </div>
-        </div>
     </div>
 
     <!-- Filters Bar -->
@@ -970,12 +965,12 @@ select.filter-input option {
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M10 18h4v-2h-4v2zM3 6v2h18V6H3zm3 7h12v-2H6v2z"/>
                 </svg>
-                <span id="filterToggleText">Show Filters</span>
+                    <span id="filterToggleText">Show Filters</span>
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" class="chevron" id="filterChevron">
                     <path d="M6 9l6 6 6-6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                 </svg>
-            </button>
-            
+                </button>
+                
             <!-- Filters Content -->
             <div class="map-filters-content" id="mapFiltersContent">
                 <div class="filters-header">
@@ -989,32 +984,32 @@ select.filter-input option {
                     <div class="filter-group">
                         <label class="filter-label">Location</label>
                         <select id="filterLocation" class="filter-input">
-                            <option value="">All Locations</option>
+                                <option value="">All Locations</option>
                             @foreach($locations ?? [] as $location)
                                 @if($location && $location !== 'N/A')
                                     <option value="{{ $location }}">{{ $location }}</option>
                                 @endif
-                            @endforeach
-                        </select>
-                    </div>
-                    
+                                @endforeach
+                            </select>
+                        </div>
+                        
                     <div class="filter-group">
                         <label class="filter-label">Property Type</label>
                         <select id="filterPropertyType" class="filter-input">
-                            <option value="">All Types</option>
+                                <option value="">All Types</option>
                             @foreach($propertyTypes ?? [] as $type)
                                 @if($type && $type !== 'N/A')
                                     <option value="{{ $type }}">{{ $type }}</option>
                                 @endif
-                            @endforeach
-                        </select>
-                    </div>
-                    
-                    @auth
+                                @endforeach
+                            </select>
+                        </div>
+                        
+                        @auth
                     <div class="filter-group">
                         <label class="filter-label">Agent Name</label>
                         <select id="filterAgentName" class="filter-input">
-                            <option value="">All Agents</option>
+                                <option value="">All Agents</option>
                             @foreach($agentNames ?? [] as $agentName)
                                 @if($agentName && $agentName !== 'N/A')
                                     <option value="{{ $agentName }}">
@@ -1024,9 +1019,9 @@ select.filter-input option {
                                         @endif
                                     </option>
                                 @endif
-                            @endforeach
-                        </select>
-                    </div>
+                                @endforeach
+                            </select>
+                        </div>
                     
                     <div class="filter-group" style="grid-column: span 1;">
                         <label class="filter-label" style="display: flex; align-items: center; gap: 8px; cursor: pointer; user-select: none;">
@@ -1038,47 +1033,47 @@ select.filter-input option {
                                 </svg>
                             </span>
                         </label>
-                    </div>
+                        </div>
                     @endif
                     
                     <div class="filter-group">
                         <label class="filter-label">Min Price</label>
                         <input type="number" id="filterMinPrice" class="filter-input" placeholder="£0" min="0">
-                    </div>
+                        </div>
                     
                     <div class="filter-group">
                         <label class="filter-label">Max Price</label>
                         <input type="number" id="filterMaxPrice" class="filter-input" placeholder="£5000" min="0">
-                    </div>
-                    
+                        </div>
+                        
                     <div class="filter-group">
                         <label class="filter-label">Couples Allowed</label>
                         <select id="filterCouplesAllowed" class="filter-input">
-                            <option value="">All Properties</option>
+                                    <option value="">All Properties</option>
                             <option value="Yes">Yes</option>
                             <option value="No">No</option>
-                        </select>
+                                </select>
                     </div>
-                </div>
-                
+                        </div>
+                        
                 <div class="filter-actions">
                     <button type="button" onclick="clearMapFilters()" class="filter-btn-clear">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                             <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2" stroke-width="2" stroke-linecap="round"/>
                         </svg>
                         Clear Filters
-                    </button>
+                            </button>
                     <button type="button" onclick="applyMapFilters()" class="filter-btn-apply">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                             <circle cx="11" cy="11" r="8" stroke-width="2"/>
                             <path d="M21 21l-4.35-4.35" stroke-width="2" stroke-linecap="round"/>
                         </svg>
                         Apply Filters
-                    </button>
+                                </button>
+                            </div>
+                        </div>
                 </div>
             </div>
-        </div>
-    </div>
 
     <!-- Map Controls -->
     <div class="map-controls">
@@ -1095,7 +1090,7 @@ select.filter-input option {
             </svg>
             Satellite
         </button>
-    </div>
+        </div>
 
     <!-- Loading Screen -->
     <div class="loading-screen" id="loadingScreen">
@@ -1105,7 +1100,7 @@ select.filter-input option {
 
     <!-- Map Container -->
     <div class="map-container">
-        <div id="map"></div>
+    <div id="map"></div>
     </div>
 
     <!-- Properties Data (hidden) -->
@@ -1181,7 +1176,7 @@ select.filter-input option {
                 
                 // Create info window
                 infoWindow = new google.maps.InfoWindow();
-                
+
                 // Load properties
                 loadProperties();
                 
@@ -1190,7 +1185,7 @@ select.filter-input option {
                 
                 console.log('✅ Map initialized successfully');
                 
-            } catch (error) {
+                } catch (error) {
                 console.error('❌ Map initialization failed:', error);
                 document.getElementById('loadingScreen').innerHTML = '<div style="text-align: center;"><i class="fas fa-exclamation-triangle" style="font-size: 48px; color: #ef4444; margin-bottom: 16px;"></i><div class="loading-text" style="color: #ef4444;">Map initialization failed</div><p style="color: #6b7280; margin-top: 8px;">' + error.message + '</p></div>';
             }
@@ -1240,21 +1235,21 @@ select.filter-input option {
                 // Fit map to bounds
                 fitMapToProperties(validProperties);
 
-            } catch (error) {
+                    } catch (error) {
                 console.error('❌ Error loading properties:', error);
                 alert('Failed to load properties: ' + error.message);
             }
         }
 
         function createMarkers(properties) {
-            // Clear existing markers
+                // Clear existing markers
             markers.forEach(marker => marker.setMap(null));
             markers = [];
             window.markers = markers;
 
             properties.forEach(property => {
-                const lat = parseFloat(property.latitude);
-                const lng = parseFloat(property.longitude);
+                    const lat = parseFloat(property.latitude);
+                    const lng = parseFloat(property.longitude);
                 
                 // Check if property is premium
                 const isPremium = property.flag && property.flag.toLowerCase() === 'premium';
@@ -1279,16 +1274,16 @@ select.filter-input option {
                     markerScale = 7;
                 }
 
-                const marker = new google.maps.Marker({
-                    position: { lat, lng },
-                    map: map,
+                        const marker = new google.maps.Marker({
+                        position: { lat, lng },
+                        map: map,
                     title: property.title,
                     animation: google.maps.Animation.DROP,
-                    icon: {
+                            icon: {
                         path: markerShape,
                         scale: markerScale,
                         fillColor: markerColor,
-                        fillOpacity: 1,
+                                fillOpacity: 1,
                         strokeColor: isPremium ? '#b8941f' : '#1e3a5f',
                         strokeWeight: isPremium ? 3 : 2
                     },
@@ -1336,13 +1331,10 @@ select.filter-input option {
                                 <div class="info-window-header">
                                     <h3 class="info-window-title">${property.title || 'Property Details'}</h3>
                                     <div class="info-window-price">
-                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                            <circle cx="12" cy="12" r="10"/>
-                                            <path d="M12 6v12M15 9H9.5a2.5 2.5 0 0 0 0 5h5a2.5 2.5 0 0 1 0 5H9"/>
-                                        </svg>
-                                        ${property.formatted_price || property.price || 'Price not available'}
-                                    </div>
-                                </div>
+                                        <span style="font-weight: 700; font-size: 16px;">£</span>
+                                        ${(property.formatted_price || property.price || 'Price not available').toString().replace('£', '').trim()}
+                    </div>
+                </div>
                                 <div class="info-window-details">
                                     ${property.location ? `
                                         <div class="info-window-detail-item">
@@ -1350,8 +1342,8 @@ select.filter-input option {
                                                 <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
                                             </svg>
                                             <span><strong>Location:</strong> ${property.location}</span>
-                                        </div>
-                                    ` : ''}
+                        </div>
+                    ` : ''}
                                     ${property.property_type ? `
                                         <div class="info-window-detail-item">
                                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -1359,17 +1351,17 @@ select.filter-input option {
                                                 <path d="M9 22V12h6v10"/>
                                             </svg>
                                             <span><strong>Type:</strong> ${property.property_type}</span>
-                                        </div>
-                                    ` : ''}
+                        </div>
+                    ` : ''}
                                     ${property.couples_allowed ? `
                                         <div class="info-window-detail-item">
                                             <svg viewBox="0 0 24 24" fill="currentColor">
                                                 <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/>
                                             </svg>
                                             <span><strong>Couples:</strong> ${property.couples_allowed === 'Yes' ? '✓ Allowed' : '✗ Not Allowed'}</span>
-                                        </div>
-                                    ` : ''}
-                                </div>
+                                    </div>
+                                ` : ''}
+                                    </div>
                                 <div class="info-window-footer">
                                     <a href="/properties/${property.id}" class="info-window-btn" onclick="sessionStorage.setItem('propertyListingUrl', window.location.href);">
                                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -1378,10 +1370,10 @@ select.filter-input option {
                                         </svg>
                                         View Full Details
                                     </a>
-                                </div>
                             </div>
-                        </div>
-                    `;
+                    </div>
+                </div>
+            `;
                     infoWindow.setContent(content);
                     infoWindow.open(map, marker);
                 });
@@ -1403,7 +1395,7 @@ select.filter-input option {
                 bounds.extend({ lat, lng });
             });
 
-            map.fitBounds(bounds);
+                map.fitBounds(bounds);
             
             // Don't zoom in too much for single property
             const listener = google.maps.event.addListener(map, "idle", function() {
@@ -1465,23 +1457,23 @@ select.filter-input option {
                     
                     let visible = true;
                     
-                    // Location filter
+                // Location filter
                     if (location && property.location?.toLowerCase() !== location) {
                         visible = false;
-                    }
-                    
-                    // Property type filter
+                }
+
+                // Property type filter
                     if (propertyType && property.property_type?.toLowerCase() !== propertyType) {
                         visible = false;
                     }
                     
                     // Price filter
-                    const price = parseFloat(property.price) || 0;
-                    if (price < minPrice || price > maxPrice) {
+                const price = parseFloat(property.price) || 0;
+                if (price < minPrice || price > maxPrice) {
                         visible = false;
-                    }
-                    
-                    // Couples allowed filter
+                }
+
+                // Couples allowed filter
                     if (couplesAllowed && property.couples_allowed?.toLowerCase() !== couplesAllowed) {
                         visible = false;
                     }
@@ -1509,7 +1501,7 @@ select.filter-input option {
                     if (visible) visibleCount++;
                 });
             }
-            
+
             // Update property count
             const countElement = document.getElementById('propertyCount');
             if (countElement) {
