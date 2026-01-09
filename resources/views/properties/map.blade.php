@@ -480,57 +480,6 @@ select.filter-input option {
     stroke: var(--gold);
 }
 
-/* Map Legend */
-.map-legend {
-    position: absolute;
-    bottom: 30px;
-    left: 24px;
-    z-index: 1000;
-    background: var(--white);
-    border-radius: 12px;
-    padding: 16px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-    min-width: 200px;
-}
-
-.map-legend-title {
-    font-size: 14px;
-    font-weight: 700;
-    color: var(--primary-navy);
-    margin-bottom: 12px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.map-legend-items {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
-.map-legend-item {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-size: 12px;
-    color: var(--text-dark);
-}
-
-.legend-marker {
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    flex-shrink: 0;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-}
-
-.legend-marker.premium {
-    width: 13px;
-    height: 13px;
-    background: #FFD700;
-    border: 2px solid #b8941f;
-}
 
 /* ==========================================
    MAP CONTAINER
@@ -761,44 +710,58 @@ select.filter-input option {
 }
 
 /* Close button styling */
-.gm-style-iw-c button,
-.gm-style-iw button,
+.gm-style-iw-c > button,
+.gm-style-iw > button,
 .gm-style .gm-ui-hover-effect {
-    width: 24px !important;
-    height: 24px !important;
+    width: 28px !important;
+    height: 28px !important;
     border-radius: 50% !important;
     background: rgba(255, 255, 255, 0.95) !important;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2) !important;
     opacity: 1 !important;
-    top: 6px !important;
-    right: 6px !important;
+    top: 8px !important;
+    right: 8px !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
     transition: all 0.2s ease !important;
+    padding: 0 !important;
 }
 
-.gm-style-iw-c button:hover,
-.gm-style-iw button:hover,
+.gm-style-iw-c > button:hover,
+.gm-style-iw > button:hover,
 .gm-style .gm-ui-hover-effect:hover {
     background: var(--white) !important;
     box-shadow: 0 3px 12px rgba(0, 0, 0, 0.3) !important;
     transform: scale(1.05) !important;
 }
 
-.gm-style-iw-c button img,
-.gm-style-iw button img {
-    width: 12px !important;
-    height: 12px !important;
+/* Style the close button image/icon */
+.gm-style-iw-c > button img,
+.gm-style-iw > button img {
+    width: 14px !important;
+    height: 14px !important;
     margin: 0 !important;
+    opacity: 0.7 !important;
 }
 
-.gm-style-iw button:hover {
-    background: var(--off-white) !important;
+.gm-style-iw-c > button:hover img,
+.gm-style-iw > button:hover img {
+    opacity: 1 !important;
 }
 
-.gm-style-iw button img {
-    margin: 0 !important;
+/* Fallback: Add X with CSS if image doesn't show */
+.gm-style-iw-c > button::after {
+    content: '×' !important;
+    position: absolute !important;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    font-size: 24px !important;
+    color: #374151 !important;
+    font-weight: 300 !important;
+    line-height: 1 !important;
+    pointer-events: none !important;
 }
 
 /* Adjust close button position */
@@ -837,33 +800,6 @@ select.filter-input option {
         font-size: 13px;
     }
     
-    .map-legend {
-        bottom: 20px;
-        left: 16px;
-        padding: 12px;
-        min-width: 170px;
-    }
-    
-    .map-legend-title {
-        font-size: 12px;
-        margin-bottom: 10px;
-    }
-    
-    .map-legend-item {
-        font-size: 11px;
-        gap: 8px;
-    }
-    
-    .legend-marker {
-        width: 8px;
-        height: 8px;
-    }
-    
-    .legend-marker.premium {
-        width: 11px;
-        height: 11px;
-        border-width: 1.5px;
-    }
     
     .map-container {
         top: 190px;
@@ -1091,6 +1027,18 @@ select.filter-input option {
                             @endforeach
                         </select>
                     </div>
+                    
+                    <div class="filter-group" style="grid-column: span 1;">
+                        <label class="filter-label" style="display: flex; align-items: center; gap: 8px; cursor: pointer; user-select: none;">
+                            <input type="checkbox" id="filterPayingOnly" style="width: 18px; height: 18px; cursor: pointer; accent-color: var(--gold);">
+                            <span style="display: flex; align-items: center; gap: 6px;">
+                                Paying Agents Only
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="color: var(--gold);">
+                                    <path d="M13 2L3 14h8l-1 8 10-12h-8l1-8z"/>
+                                </svg>
+                            </span>
+                        </label>
+                    </div>
                     @endif
                     
                     <div class="filter-group">
@@ -1148,30 +1096,6 @@ select.filter-input option {
             Satellite
         </button>
     </div>
-
-    @auth
-    <!-- Map Legend -->
-    <div class="map-legend">
-        <div class="map-legend-title">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/>
-            </svg>
-            Map Legend
-        </div>
-        <div class="map-legend-items">
-            <div class="map-legend-item">
-                <div class="legend-marker premium"></div>
-                <span><strong>Premium Properties</strong></span>
-            </div>
-            <div class="map-legend-item" style="margin-top: 4px; padding-top: 8px; border-top: 1px solid #e5e7eb;">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink: 0; color: #6b7280;">
-                    <circle cx="12" cy="12" r="10"/>
-                </svg>
-                <span style="font-size: 11px; color: #6b7280; line-height: 1.4;">Different colors represent different landlords/agents</span>
-            </div>
-        </div>
-    </div>
-    @endauth
 
     <!-- Loading Screen -->
     <div class="loading-screen" id="loadingScreen">
@@ -1528,6 +1452,7 @@ select.filter-input option {
             const couplesAllowed = document.getElementById('filterCouplesAllowed').value.toLowerCase();
             @auth
             const agentName = document.getElementById('filterAgentName')?.value.toLowerCase() || '';
+            const payingOnly = document.getElementById('filterPayingOnly')?.checked || false;
             @endauth
             
             let visibleCount = 0;
@@ -1566,6 +1491,18 @@ select.filter-input option {
                     if (agentName && property.agent_name?.toLowerCase() !== agentName) {
                         visible = false;
                     }
+                    
+                    // Paying agents only filter (only for authenticated users)
+                    if (payingOnly) {
+                        const isPaying = property.paying === 'Yes' || 
+                                       property.paying === 'yes' || 
+                                       property.paying === '1' || 
+                                       property.paying === 1 || 
+                                       property.paying === true;
+                        if (!isPaying) {
+                            visible = false;
+                        }
+                    }
                     @endauth
                     
                     marker.setVisible(visible);
@@ -1593,6 +1530,8 @@ select.filter-input option {
             @auth
             const agentFilter = document.getElementById('filterAgentName');
             if (agentFilter) agentFilter.value = '';
+            const payingFilter = document.getElementById('filterPayingOnly');
+            if (payingFilter) payingFilter.checked = false;
             @endauth
             
             // Show all markers
