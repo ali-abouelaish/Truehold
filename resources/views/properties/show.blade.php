@@ -972,8 +972,14 @@ html {
         grid-template-columns: 1fr;
     }
     
+    /* Main content (image & description) appears first on mobile */
+    .details-main {
+        order: 1;
+    }
+    
+    /* Sidebar (buttons & actions) appears after on mobile */
     .details-sidebar {
-        order: -1;
+        order: 2;
     }
 }
 
@@ -1037,16 +1043,19 @@ html {
     }
     
     .details-layout {
+        display: flex;
         flex-direction: column;
         gap: 24px;
     }
     
     .details-main {
         width: 100%;
+        order: 1;
     }
     
     .details-sidebar {
         width: 100%;
+        order: 2;
     }
     
     /* Image Gallery */
@@ -1602,13 +1611,13 @@ html {
                     <span class="logo-text">TRUEHOLD</span>
                 </a>
                 <ul class="nav-links">
-                    <li><a href="{{ route('properties.index') }}" class="nav-link">
+                    <li><a href="{{ route('properties.index') }}" class="nav-link" id="navPropertiesLink">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                             <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" stroke-width="2"/>
                         </svg>
                         Properties
                     </a></li>
-                    <li><a href="{{ route('properties.map') }}" class="nav-link">
+                    <li><a href="{{ route('properties.map') }}" class="nav-link" id="navMapLink">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                             <path d="M1 6v16l7-4 8 4 7-4V2l-7 4-8-4-7 4z" stroke-width="2"/>
                         </svg>
@@ -1637,7 +1646,7 @@ html {
     <!-- Back Button -->
     <section class="back-section">
         <div class="container">
-            <a href="{{ route('properties.index') }}" class="back-link">
+            <a href="{{ route('properties.index') }}" class="back-link" id="backButton">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                     <path d="M19 12H5M12 19l-7-7 7-7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                 </svg>
@@ -2067,7 +2076,44 @@ html {
         document.addEventListener('DOMContentLoaded', () => {
             initGallery();
             initLightbox();
+            initBackButton();
         });
+        
+        // Back button with filter preservation
+        function initBackButton() {
+            const backButton = document.getElementById('backButton');
+            const navPropertiesLink = document.getElementById('navPropertiesLink');
+            const navMapLink = document.getElementById('navMapLink');
+            
+            // Check if we have a stored return URL with filters
+            const returnUrl = sessionStorage.getItem('propertyListingUrl');
+            
+            if (returnUrl) {
+                // Update back button
+                if (backButton) {
+                    backButton.href = returnUrl;
+                }
+                
+                // Update nav links to preserve filters
+                if (returnUrl.includes('/properties/map')) {
+                    if (navMapLink) navMapLink.href = returnUrl;
+                } else if (returnUrl.includes('/properties')) {
+                    if (navPropertiesLink) navPropertiesLink.href = returnUrl;
+                }
+            }
+            
+            // Alternative: use browser history for back button
+            if (backButton) {
+                backButton.addEventListener('click', (e) => {
+                    if (window.history.length > 1 && document.referrer && 
+                        (document.referrer.includes('{{ route('properties.index') }}') || 
+                         document.referrer.includes('{{ route('properties.map') }}'))) {
+                        e.preventDefault();
+                        window.history.back();
+                    }
+                });
+            }
+        }
     </script>
 </body>
 </html>

@@ -532,31 +532,6 @@ select.filter-input option {
     border: 3px solid #b8941f;
 }
 
-.legend-marker.house {
-    background: #3b82f6;
-    border: 2px solid #1e3a5f;
-}
-
-.legend-marker.flat {
-    background: #10b981;
-    border: 2px solid #1e3a5f;
-}
-
-.legend-marker.studio {
-    background: #8b5cf6;
-    border: 2px solid #1e3a5f;
-}
-
-.legend-marker.room {
-    background: #f59e0b;
-    border: 2px solid #1e3a5f;
-}
-
-.legend-marker.other {
-    background: #6b7280;
-    border: 2px solid #1e3a5f;
-}
-
 /* ==========================================
    MAP CONTAINER
    ========================================== */
@@ -642,21 +617,26 @@ select.filter-input option {
 
 /* Info Window Styling */
 .gm-style .gm-style-iw-c {
-    border-radius: 12px;
-    padding: 0;
-    max-width: 304px;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-    overflow: hidden;
+    border-radius: 10px;
+    padding: 0 !important;
+    max-width: 240px !important;
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.2);
+    overflow: hidden !important;
 }
 
 .gm-style .gm-style-iw-d {
     overflow: hidden !important;
-    padding: 0;
+    padding: 0 !important;
+    max-width: 240px !important;
 }
 
 .gm-style .gm-style-iw-t::after {
-    background: linear-gradient(45deg, var(--white) 50%, transparent 51%, transparent);
-    box-shadow: -2px 2px 2px 0 rgba(0, 0, 0, 0.1);
+    background: linear-gradient(45deg, var(--white) 50%, transparent 51%, transparent) !important;
+    box-shadow: -2px 2px 2px 0 rgba(0, 0, 0, 0.1) !important;
+}
+
+.gm-style-iw-tc::after {
+    background: linear-gradient(45deg, var(--white) 50%, transparent 51%, transparent) !important;
 }
 
 .info-window-card {
@@ -679,27 +659,27 @@ select.filter-input option {
 
 .info-window-image {
     width: 100%;
-    height: 160px;
+    height: 120px;
     object-fit: cover;
     background: linear-gradient(135deg, #f5f5f5 0%, #e8e8e8 100%);
     display: block;
 }
 
 .info-window-content {
-    padding: 16px;
+    padding: 12px;
 }
 
 .info-window-header {
-    margin-bottom: 12px;
-    padding-bottom: 12px;
+    margin-bottom: 8px;
+    padding-bottom: 8px;
     border-bottom: 1px solid #e5e7eb;
 }
 
 .info-window-title {
-    font-size: 14px;
+    font-size: 12px;
     font-weight: 700;
     color: var(--primary-navy);
-    margin-bottom: 6px;
+    margin-bottom: 4px;
     line-height: 1.3;
     display: -webkit-box;
     -webkit-line-clamp: 2;
@@ -708,37 +688,37 @@ select.filter-input option {
 }
 
 .info-window-price {
-    font-size: 19px;
+    font-size: 15px;
     font-weight: 700;
     color: var(--gold);
     display: flex;
     align-items: center;
-    gap: 5px;
+    gap: 3px;
 }
 
 .info-window-price svg {
-    width: 16px;
-    height: 16px;
+    width: 13px;
+    height: 13px;
 }
 
 .info-window-details {
     display: flex;
     flex-direction: column;
-    gap: 8px;
-    margin-bottom: 12px;
+    gap: 5px;
+    margin-bottom: 8px;
 }
 
 .info-window-detail-item {
     display: flex;
     align-items: center;
-    gap: 8px;
-    font-size: 11px;
+    gap: 6px;
+    font-size: 9px;
     color: var(--gray);
 }
 
 .info-window-detail-item svg {
-    width: 13px;
-    height: 13px;
+    width: 11px;
+    height: 11px;
     color: var(--gold);
     flex-shrink: 0;
 }
@@ -749,7 +729,7 @@ select.filter-input option {
 }
 
 .info-window-footer {
-    padding-top: 12px;
+    padding-top: 8px;
     border-top: 1px solid #e5e7eb;
 }
 
@@ -757,17 +737,17 @@ select.filter-input option {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 6px;
+    gap: 4px;
     width: 100%;
-    padding: 10px 20px;
+    padding: 7px 14px;
     background: linear-gradient(135deg, var(--gold), var(--gold-light));
     color: var(--white);
-    border-radius: 8px;
+    border-radius: 6px;
     font-weight: 600;
-    font-size: 12px;
+    font-size: 10px;
     text-decoration: none;
     transition: var(--transition);
-    box-shadow: 0 3px 10px rgba(212, 175, 55, 0.3);
+    box-shadow: 0 2px 8px rgba(212, 175, 55, 0.3);
 }
 
 .info-window-btn:hover {
@@ -776,20 +756,41 @@ select.filter-input option {
 }
 
 .info-window-btn svg {
-    width: 13px;
-    height: 13px;
+    width: 11px;
+    height: 11px;
 }
 
 /* Close button styling */
-.gm-style-iw button {
-    width: 26px !important;
-    height: 26px !important;
+.gm-style-iw-c button,
+.gm-style-iw button,
+.gm-style .gm-ui-hover-effect {
+    width: 24px !important;
+    height: 24px !important;
     border-radius: 50% !important;
-    background: var(--white) !important;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15) !important;
+    background: rgba(255, 255, 255, 0.95) !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2) !important;
     opacity: 1 !important;
-    top: 8px !important;
-    right: 8px !important;
+    top: 6px !important;
+    right: 6px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    transition: all 0.2s ease !important;
+}
+
+.gm-style-iw-c button:hover,
+.gm-style-iw button:hover,
+.gm-style .gm-ui-hover-effect:hover {
+    background: var(--white) !important;
+    box-shadow: 0 3px 12px rgba(0, 0, 0, 0.3) !important;
+    transform: scale(1.05) !important;
+}
+
+.gm-style-iw-c button img,
+.gm-style-iw button img {
+    width: 12px !important;
+    height: 12px !important;
+    margin: 0 !important;
 }
 
 .gm-style-iw button:hover {
@@ -897,23 +898,33 @@ select.filter-input option {
     
     /* Info window responsive adjustments */
     .gm-style .gm-style-iw-c {
-        max-width: 256px !important;
+        max-width: 210px !important;
     }
     
     .info-window-image {
-        height: 128px;
+        height: 100px;
     }
     
     .info-window-content {
-        padding: 12px;
+        padding: 10px;
     }
     
     .info-window-title {
-        font-size: 13px;
+        font-size: 11px;
     }
     
     .info-window-price {
-        font-size: 16px;
+        font-size: 13px;
+    }
+    
+    .info-window-detail-item {
+        font-size: 8px;
+        gap: 5px;
+    }
+    
+    .info-window-btn {
+        padding: 6px 12px;
+        font-size: 9px;
     }
     
     .info-window-detail-item {
@@ -1138,6 +1149,7 @@ select.filter-input option {
         </button>
     </div>
 
+    @auth
     <!-- Map Legend -->
     <div class="map-legend">
         <div class="map-legend-title">
@@ -1151,28 +1163,15 @@ select.filter-input option {
                 <div class="legend-marker premium"></div>
                 <span><strong>Premium Properties</strong></span>
             </div>
-            <div class="map-legend-item">
-                <div class="legend-marker house"></div>
-                <span>Houses</span>
-            </div>
-            <div class="map-legend-item">
-                <div class="legend-marker flat"></div>
-                <span>Flats / Apartments</span>
-            </div>
-            <div class="map-legend-item">
-                <div class="legend-marker studio"></div>
-                <span>Studios</span>
-            </div>
-            <div class="map-legend-item">
-                <div class="legend-marker room"></div>
-                <span>Rooms</span>
-            </div>
-            <div class="map-legend-item">
-                <div class="legend-marker other"></div>
-                <span>Other</span>
+            <div class="map-legend-item" style="margin-top: 4px; padding-top: 8px; border-top: 1px solid #e5e7eb;">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink: 0; color: #6b7280;">
+                    <circle cx="12" cy="12" r="10"/>
+                </svg>
+                <span style="font-size: 11px; color: #6b7280; line-height: 1.4;">Different colors represent different landlords/agents</span>
             </div>
         </div>
     </div>
+    @endauth
 
     <!-- Loading Screen -->
     <div class="loading-screen" id="loadingScreen">
@@ -1204,6 +1203,42 @@ select.filter-input option {
         let markers = [];
         let infoWindow;
         let properties = [];
+
+        // Generate a consistent color for each landlord/agent
+        function getColorForAgent(agentName) {
+            if (!agentName || agentName === 'N/A') {
+                return '#6b7280'; // Gray for unknown
+            }
+            
+            // Generate hash from agent name
+            let hash = 0;
+            for (let i = 0; i < agentName.length; i++) {
+                hash = agentName.charCodeAt(i) + ((hash << 5) - hash);
+            }
+            
+            // Define a palette of distinct, vibrant colors
+            const colorPalette = [
+                { main: '#3b82f6', hover: '#60a5fa' },  // Blue
+                { main: '#10b981', hover: '#34d399' },  // Green
+                { main: '#8b5cf6', hover: '#a78bfa' },  // Purple
+                { main: '#f59e0b', hover: '#fbbf24' },  // Orange
+                { main: '#ef4444', hover: '#f87171' },  // Red
+                { main: '#06b6d4', hover: '#22d3ee' },  // Cyan
+                { main: '#ec4899', hover: '#f472b6' },  // Pink
+                { main: '#14b8a6', hover: '#2dd4bf' },  // Teal
+                { main: '#f97316', hover: '#fb923c' },  // Deep Orange
+                { main: '#6366f1', hover: '#818cf8' },  // Indigo
+                { main: '#84cc16', hover: '#a3e635' },  // Lime
+                { main: '#a855f7', hover: '#c084fc' },  // Violet
+                { main: '#22c55e', hover: '#4ade80' },  // Emerald
+                { main: '#eab308', hover: '#facc15' },  // Yellow
+                { main: '#dc2626', hover: '#ef4444' }   // Crimson
+            ];
+            
+            // Use hash to select color from palette
+            const index = Math.abs(hash) % colorPalette.length;
+            return colorPalette[index];
+        }
 
         function initMap() {
             try {
@@ -1300,7 +1335,7 @@ select.filter-input option {
                 // Check if property is premium
                 const isPremium = property.flag && property.flag.toLowerCase() === 'premium';
                 
-                // Determine marker color based on property type and premium status
+                // Determine marker color based on agent/landlord and premium status
                 let markerColor, hoverColor, markerShape, markerScale;
                 
                 if (isPremium) {
@@ -1310,26 +1345,12 @@ select.filter-input option {
                     markerColor = '#FFD700'; // Bright gold
                     hoverColor = '#FFC107';
                 } else {
-                    // Different colors for different property types
-                    const propertyType = (property.property_type || '').toLowerCase();
+                    // Different colors for different landlords/agents
+                    const agentName = property.agent_name || property.landlord || 'N/A';
+                    const agentColors = getColorForAgent(agentName);
                     
-                    if (propertyType.includes('house') || propertyType.includes('home')) {
-                        markerColor = '#3b82f6'; // Blue for houses
-                        hoverColor = '#60a5fa';
-                    } else if (propertyType.includes('flat') || propertyType.includes('apartment')) {
-                        markerColor = '#10b981'; // Green for flats
-                        hoverColor = '#34d399';
-                    } else if (propertyType.includes('studio')) {
-                        markerColor = '#8b5cf6'; // Purple for studios
-                        hoverColor = '#a78bfa';
-                    } else if (propertyType.includes('room')) {
-                        markerColor = '#f59e0b'; // Orange for rooms
-                        hoverColor = '#fbbf24';
-                    } else {
-                        markerColor = '#6b7280'; // Gray for others
-                        hoverColor = '#9ca3af';
-                    }
-                    
+                    markerColor = agentColors.main;
+                    hoverColor = agentColors.hover;
                     markerShape = google.maps.SymbolPath.CIRCLE;
                     markerScale = 10;
                 }
@@ -1426,7 +1447,7 @@ select.filter-input option {
                                     ` : ''}
                                 </div>
                                 <div class="info-window-footer">
-                                    <a href="/properties/${property.id}" class="info-window-btn">
+                                    <a href="/properties/${property.id}" class="info-window-btn" onclick="sessionStorage.setItem('propertyListingUrl', window.location.href);">
                                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                             <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
                                             <circle cx="12" cy="12" r="3"/>

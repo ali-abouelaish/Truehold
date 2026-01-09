@@ -1388,6 +1388,17 @@ select.filter-input option {
                 console.error('Failed to copy:', err);
             });
         }
+        
+        // Store current URL with filters before navigating to property detail
+        document.addEventListener('DOMContentLoaded', () => {
+            // Store current URL when clicking on property cards
+            document.querySelectorAll('.property-card').forEach(card => {
+                card.addEventListener('click', (e) => {
+                    // Store the current page URL with all filters
+                    sessionStorage.setItem('propertyListingUrl', window.location.href);
+                });
+            });
+        });
     </script>
 </body>
 </html>
