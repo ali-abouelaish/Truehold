@@ -1439,8 +1439,8 @@ select.filter-input option {
                                                 <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
                                             </svg>
                                             <span><strong>Location:</strong> ${property.location}</span>
-                        </div>
-                    ` : ''}
+                                        </div>
+                                    ` : ''}
                                     ${property.property_type ? `
                                         <div class="info-window-detail-item">
                                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -1448,8 +1448,8 @@ select.filter-input option {
                                                 <path d="M9 22V12h6v10"/>
                                             </svg>
                                             <span><strong>Type:</strong> ${property.property_type}</span>
-                        </div>
-                    ` : ''}
+                                        </div>
+                                    ` : ''}
                                     ${property.couples_allowed ? `
                                         <div class="info-window-detail-item">
                                             <svg viewBox="0 0 24 24" fill="currentColor">
@@ -1460,17 +1460,18 @@ select.filter-input option {
                                 ` : ''}
                                     </div>
                                 <div class="info-window-footer">
-                                    <a href="/properties/${property.id}" class="info-window-btn" onclick="sessionStorage.setItem('propertyListingUrl', window.location.href);">
+                                    <a href="/properties/${property.id}" class="info-window-btn" data-save-url="true">
                                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                             <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
                                             <circle cx="12" cy="12" r="3"/>
                                         </svg>
                                         View Full Details
                                     </a>
+                                </div>
                             </div>
+                        </div>
                     </div>
-                </div>
-            `;
+                `;
                     
                     // Set content
                     infoWindow.setContent(content);
@@ -1493,6 +1494,16 @@ select.filter-input option {
                         // Fallback: open at marker position
                         infoWindow.open(map, marker);
                     }
+                    
+                    // Add event listener for save URL link after info window opens
+                    google.maps.event.addListenerOnce(infoWindow, 'domready', function() {
+                        const link = document.querySelector('.info-window-btn[data-save-url]');
+                        if (link) {
+                            link.addEventListener('click', function(e) {
+                                sessionStorage.setItem('propertyListingUrl', window.location.href);
+                            });
+                        }
+                    });
                 });
 
 
