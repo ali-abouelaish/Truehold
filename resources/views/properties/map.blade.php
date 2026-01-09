@@ -536,13 +536,13 @@ select.filter-input option {
 .map-container {
     position: fixed;
     top: 270px;
-    left: 0;
-    right: 0;
-    bottom: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
     background-color: var(--light-gray);
-    z-index: 1;
-}
-
+            z-index: 1;
+        }
+        
 #map {
     width: 100%;
     height: 100%;
@@ -651,7 +651,56 @@ select.filter-input option {
 }
 
 .property-card-overlay .info-window-card {
+    max-width: 144px; /* 40% thinner vs 240px */
     box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+}
+
+.property-card-overlay .info-window-image {
+    height: 96px; /* 20% shorter vs 120px */
+}
+
+.property-card-overlay .info-window-content {
+    padding: 10px;
+}
+
+.property-card-overlay .info-window-header {
+    margin-bottom: 6px;
+    padding-bottom: 6px;
+}
+
+.property-card-overlay .info-window-title {
+    font-size: 11px;
+    margin-bottom: 3px;
+    -webkit-line-clamp: 2;
+}
+
+.property-card-overlay .info-window-price {
+    font-size: 13px;
+}
+
+.property-card-overlay .info-window-details {
+    gap: 4px;
+    margin-bottom: 6px;
+}
+
+.property-card-overlay .info-window-detail-item {
+    font-size: 9px;
+    gap: 6px;
+}
+
+.property-card-overlay .info-window-footer {
+    padding-top: 6px;
+}
+
+.property-card-overlay .info-window-btn {
+    padding: 6px 10px;
+    font-size: 9px;
+    border-radius: 6px;
+}
+
+.property-card-overlay .info-window-btn svg {
+    width: 10px;
+    height: 10px;
 }
 
 .property-card-overlay .overlay-close {
@@ -837,7 +886,7 @@ select.filter-input option {
 }
 
 /* Ensure button is properly positioned */
-.gm-style-iw-c {
+        .gm-style-iw-c {
     position: relative !important;
 }
 
@@ -918,21 +967,21 @@ select.filter-input option {
     }
     
     .filters-header h3 {
-        font-size: 18px;
-    }
-    
+            font-size: 18px;
+        }
+        
     .filter-grid {
         grid-template-columns: 1fr;
         gap: 16px;
-    }
-    
-    .filter-label {
+        }
+        
+        .filter-label {
         font-size: 13px;
-    }
-    
-    .filter-input {
+        }
+        
+        .filter-input {
         padding: 12px 14px;
-        font-size: 14px;
+                font-size: 14px;
     }
     
     .paying-filter-checkbox {
@@ -950,7 +999,7 @@ select.filter-input option {
     
     .filter-btn-apply,
     .filter-btn-clear {
-        width: 100%;
+            width: 100%;
         justify-content: center;
     }
     
@@ -1121,26 +1170,26 @@ select.filter-input option {
                                 <path d="M13 2L3 14h8l-1 8 10-12h-8l1-8z"/>
                             </svg>
                         </label>
-                    </div>
+                        </div>
                     @endif
                     
                     <div class="filter-group">
                         <label class="filter-label">Property Type</label>
                         <select id="filterPropertyType" class="filter-input">
-                            <option value="">All Types</option>
+                                <option value="">All Types</option>
                             @foreach($propertyTypes ?? [] as $type)
                                 @if($type && $type !== 'N/A')
                                     <option value="{{ $type }}">{{ $type }}</option>
                                 @endif
-                            @endforeach
-                        </select>
-                    </div>
-                    
-                    @auth
+                                @endforeach
+                            </select>
+                        </div>
+                        
+                        @auth
                     <div class="filter-group">
                         <label class="filter-label">Agent Name</label>
                         <select id="filterAgentName" class="filter-input">
-                            <option value="">All Agents</option>
+                                <option value="">All Agents</option>
                             @foreach($agentNames ?? [] as $agentName)
                                 @if($agentName && $agentName !== 'N/A')
                                     <option value="{{ $agentName }}">
@@ -1150,30 +1199,30 @@ select.filter-input option {
                                         @endif
                                     </option>
                                 @endif
-                            @endforeach
-                        </select>
-                    </div>
+                                @endforeach
+                            </select>
+                        </div>
                     @endif
-                    
+                        
                     <div class="filter-group">
                         <label class="filter-label">Min Price</label>
                         <input type="number" id="filterMinPrice" class="filter-input" placeholder="£0" min="0">
-                    </div>
-                    
+                        </div>
+                        
                     <div class="filter-group">
                         <label class="filter-label">Max Price</label>
                         <input type="number" id="filterMaxPrice" class="filter-input" placeholder="£5000" min="0">
-                    </div>
+                        </div>
                     
                     <div class="filter-group">
                         <label class="filter-label">Couples Allowed</label>
                         <select id="filterCouplesAllowed" class="filter-input">
-                            <option value="">All Properties</option>
+                                    <option value="">All Properties</option>
                             <option value="Yes">Yes</option>
                             <option value="No">No</option>
-                        </select>
+                                </select>
                     </div>
-                </div>
+                        </div>
                         
                 <div class="filter-actions">
                     <button type="button" onclick="clearMapFilters()" class="filter-btn-clear">
