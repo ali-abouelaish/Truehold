@@ -1470,7 +1470,8 @@ select.filter-input option {
                     infoWindow.open(map, marker);
 
                     // Calculate position above marker using simple offset
-                    
+                });
+
 
                 markers.push(marker);
             });
