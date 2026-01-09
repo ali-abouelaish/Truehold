@@ -1417,6 +1417,10 @@ select.filter-input option {
                                    (property.high_quality_photos_array && property.high_quality_photos_array[0]) || 
                                    'https://via.placeholder.com/380x200/1e3a5f/d4af37?text=No+Image';
                     
+                    // Format price
+                    let priceText = property.formatted_price || property.price || 'Price not available';
+                    priceText = String(priceText).replace('£', '').trim();
+                    
                     const content = `
                         <div class="info-window-card">
                             <img src="${imageUrl}" alt="${property.title || 'Property'}" class="info-window-image" onerror="this.src='https://via.placeholder.com/380x200/1e3a5f/d4af37?text=No+Image'">
@@ -1425,9 +1429,9 @@ select.filter-input option {
                                     <h3 class="info-window-title">${property.title || 'Property Details'}</h3>
                                     <div class="info-window-price">
                                         <span style="font-weight: 700; font-size: 16px;">£</span>
-                                        ${(property.formatted_price || property.price || 'Price not available').toString().replace('£', '').trim()}
-                    </div>
-                </div>
+                                        ${priceText}
+                                    </div>
+                                </div>
                                 <div class="info-window-details">
                                     ${property.location ? `
                                         <div class="info-window-detail-item">
