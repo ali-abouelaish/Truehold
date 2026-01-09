@@ -1474,7 +1474,7 @@ marker.hoverIcon = {
                 });
                 const infoWindow = new google.maps.InfoWindow({
                     disableAutoPan: true // optional but recommended
-                    pixelOffset: new google.maps.Size(0, 100)
+                    
 });
 
                 // Click handler for marker
@@ -1487,7 +1487,12 @@ marker.hoverIcon = {
     infoWindow.setContent(content);
 
     // ✅ THIS is all you need
-    infoWindow.open(map, marker);
+    infoWindow.open({
+    map,
+    anchor: marker,
+    shouldFocus: false
+});
+
 
     google.maps.event.addListenerOnce(infoWindow, 'domready', function () {
         const viewDetailsLink = document.querySelector(
