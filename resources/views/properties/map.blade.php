@@ -518,18 +518,18 @@ select.filter-input option {
 }
 
 .legend-marker {
-    width: 14px;
-    height: 14px;
+    width: 10px;
+    height: 10px;
     border-radius: 50%;
     flex-shrink: 0;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .legend-marker.premium {
-    width: 18px;
-    height: 18px;
+    width: 13px;
+    height: 13px;
     background: #FFD700;
-    border: 3px solid #b8941f;
+    border: 2px solid #b8941f;
 }
 
 /* ==========================================
@@ -855,14 +855,14 @@ select.filter-input option {
     }
     
     .legend-marker {
-        width: 12px;
-        height: 12px;
+        width: 8px;
+        height: 8px;
     }
     
     .legend-marker.premium {
-        width: 15px;
-        height: 15px;
-        border-width: 2px;
+        width: 11px;
+        height: 11px;
+        border-width: 1.5px;
     }
     
     .map-container {
@@ -1341,7 +1341,7 @@ select.filter-input option {
                 if (isPremium) {
                     // Premium properties - Gold star
                     markerShape = google.maps.SymbolPath.CIRCLE;
-                    markerScale = 14;
+                    markerScale = 10;
                     markerColor = '#FFD700'; // Bright gold
                     hoverColor = '#FFC107';
                 } else {
@@ -1352,7 +1352,7 @@ select.filter-input option {
                     markerColor = agentColors.main;
                     hoverColor = agentColors.hover;
                     markerShape = google.maps.SymbolPath.CIRCLE;
-                    markerScale = 10;
+                    markerScale = 7;
                 }
 
                 const marker = new google.maps.Marker({
@@ -1366,7 +1366,7 @@ select.filter-input option {
                         fillColor: markerColor,
                         fillOpacity: 1,
                         strokeColor: isPremium ? '#b8941f' : '#1e3a5f',
-                        strokeWeight: isPremium ? 4 : 3
+                        strokeWeight: isPremium ? 3 : 2
                     },
                     zIndex: isPremium ? 1000 : 100 // Premium markers on top
                 });
@@ -1378,7 +1378,7 @@ select.filter-input option {
                     fillColor: markerColor,
                     fillOpacity: 1,
                     strokeColor: isPremium ? '#b8941f' : '#1e3a5f',
-                    strokeWeight: isPremium ? 4 : 3
+                    strokeWeight: isPremium ? 3 : 2
                 };
                 
                 marker.hoverIcon = {
@@ -1387,7 +1387,7 @@ select.filter-input option {
                     fillColor: hoverColor,
                     fillOpacity: 1,
                     strokeColor: isPremium ? '#b8941f' : '#1e3a5f',
-                    strokeWeight: isPremium ? 5 : 4
+                    strokeWeight: isPremium ? 4 : 3
                 };
                 
                 // Add hover effect
