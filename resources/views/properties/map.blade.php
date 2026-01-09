@@ -651,7 +651,7 @@ select.filter-input option {
 }
 
 .property-card-overlay .info-window-card {
-    max-width: 144px; /* 40% thinner vs 240px */
+    max-width: 187px; /* 30% wider vs 144px */
     box-shadow: 0 10px 30px rgba(0,0,0,0.25);
 }
 
@@ -1600,15 +1600,6 @@ select.filter-input option {
                                                 <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
                                             </svg>
                                             <span><strong>Location:</strong> ${property.location}</span>
-                        </div>
-                    ` : ''}
-                                    ${property.property_type ? `
-                                        <div class="info-window-detail-item">
-                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                                <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/>
-                                                <path d="M9 22V12h6v10"/>
-                                            </svg>
-                                            <span><strong>Type:</strong> ${property.property_type}</span>
                         </div>
                     ` : ''}
                                     ${property.couples_allowed ? `
