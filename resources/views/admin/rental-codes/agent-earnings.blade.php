@@ -498,12 +498,77 @@ body {
     background-color: var(--off-white);
 }
 
+.rank-gold:hover,
+.rank-silver:hover,
+.rank-bronze:hover {
+    transform: translateY(-2px);
+    transition: transform 0.3s ease;
+}
+
+.rank-gold:hover {
+    background: linear-gradient(135deg, #ffd700 0%, #ffed4e 50%, #ffd700 100%) !important;
+}
+
+.rank-silver:hover {
+    background: linear-gradient(135deg, #c0c0c0 0%, #e8e8e8 50%, #c0c0c0 100%) !important;
+}
+
+.rank-bronze:hover {
+    background: linear-gradient(135deg, #cd7f32 0%, #e8a87c 50%, #cd7f32 100%) !important;
+}
+
 .rank-gold {
-    background: linear-gradient(to right, rgba(255, 215, 0, 0.1), transparent);
+    background: linear-gradient(135deg, #ffd700 0%, #ffed4e 50%, #ffd700 100%) !important;
+    box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
+    border-left: 5px solid #d4af37 !important;
+}
+
+.rank-gold td {
+    color: #1a1a1a !important;
+    font-weight: 600 !important;
+}
+
+.rank-gold .agent-name,
+.rank-gold .rental-code,
+.rank-gold .detail-value {
+    color: #000000 !important;
+    font-weight: 700 !important;
+}
+
+.rank-silver {
+    background: linear-gradient(135deg, #c0c0c0 0%, #e8e8e8 50%, #c0c0c0 100%) !important;
+    box-shadow: 0 4px 15px rgba(192, 192, 192, 0.3);
+    border-left: 5px solid #9ca3af !important;
+}
+
+.rank-silver td {
+    color: #1a1a1a !important;
+    font-weight: 600 !important;
+}
+
+.rank-silver .agent-name,
+.rank-silver .rental-code,
+.rank-silver .detail-value {
+    color: #000000 !important;
+    font-weight: 700 !important;
 }
 
 .rank-bronze {
-    background: linear-gradient(to right, rgba(205, 127, 50, 0.1), transparent);
+    background: linear-gradient(135deg, #cd7f32 0%, #e8a87c 50%, #cd7f32 100%) !important;
+    box-shadow: 0 4px 15px rgba(205, 127, 50, 0.3);
+    border-left: 5px solid #b8750b !important;
+}
+
+.rank-bronze td {
+    color: #1a1a1a !important;
+    font-weight: 600 !important;
+}
+
+.rank-bronze .agent-name,
+.rank-bronze .rental-code,
+.rank-bronze .detail-value {
+    color: #000000 !important;
+    font-weight: 700 !important;
 }
 
 .agent-info {
@@ -523,6 +588,31 @@ body {
     justify-content: center;
     font-weight: 700;
     font-size: 16px;
+    box-shadow: 0 2px 8px rgba(30, 58, 95, 0.2);
+}
+
+.rank-gold .agent-avatar {
+    background: linear-gradient(135deg, #d4af37, #f1c232);
+    color: #1a1a1a;
+    border: 3px solid #b8941f;
+    box-shadow: 0 4px 12px rgba(212, 175, 55, 0.4);
+    font-weight: 900;
+}
+
+.rank-silver .agent-avatar {
+    background: linear-gradient(135deg, #9ca3af, #d1d5db);
+    color: #1a1a1a;
+    border: 3px solid #6b7280;
+    box-shadow: 0 4px 12px rgba(156, 163, 175, 0.4);
+    font-weight: 900;
+}
+
+.rank-bronze .agent-avatar {
+    background: linear-gradient(135deg, #cd7f32, #e8a87c);
+    color: #1a1a1a;
+    border: 3px solid #8b5a2b;
+    box-shadow: 0 4px 12px rgba(205, 127, 50, 0.4);
+    font-weight: 900;
 }
 
 .agent-name {
@@ -542,23 +632,39 @@ body {
 }
 
 .gold-badge {
-    background: linear-gradient(135deg, #ffd700, #ffed4e);
-    color: #8b6914;
+    background: linear-gradient(135deg, #d4af37, #f1c232);
+    color: #1a1a1a;
+    border: 2px solid #b8941f;
+    font-weight: 800;
+    box-shadow: 0 2px 8px rgba(212, 175, 55, 0.4);
 }
 
 .silver-badge {
-    background: linear-gradient(135deg, #c0c0c0, #e8e8e8);
-    color: #666;
+    background: linear-gradient(135deg, #9ca3af, #d1d5db);
+    color: #1a1a1a;
+    border: 2px solid #6b7280;
+    font-weight: 800;
+    box-shadow: 0 2px 8px rgba(156, 163, 175, 0.4);
 }
 
 .bronze-badge {
-    background: linear-gradient(135deg, #cd7f32, #d99a5a);
-    color: #5c3a1a;
+    background: linear-gradient(135deg, #cd7f32, #e8a87c);
+    color: #1a1a1a;
+    border: 2px solid #8b5a2b;
+    font-weight: 800;
+    box-shadow: 0 2px 8px rgba(205, 127, 50, 0.4);
 }
 
 .agent-transactions {
     font-size: 12px;
     color: var(--gray);
+}
+
+.rank-gold .agent-transactions,
+.rank-silver .agent-transactions,
+.rank-bronze .agent-transactions {
+    color: #1a1a1a !important;
+    font-weight: 600 !important;
 }
 
 .earnings-cell {
@@ -573,9 +679,22 @@ body {
     color: var(--primary-navy);
 }
 
+.rank-gold .earnings-amount,
+.rank-silver .earnings-amount,
+.rank-bronze .earnings-amount {
+    color: #000000 !important;
+}
+
 .earnings-commission {
     font-size: 12px;
     color: var(--gray);
+}
+
+.rank-gold .earnings-commission,
+.rank-silver .earnings-commission,
+.rank-bronze .earnings-commission {
+    color: #1a1a1a !important;
+    font-weight: 600 !important;
 }
 
 .total-earnings {
@@ -585,6 +704,12 @@ body {
     font-weight: 700;
     font-size: 18px;
     color: var(--primary-navy);
+}
+
+.rank-gold .total-earnings,
+.rank-silver .total-earnings,
+.rank-bronze .total-earnings {
+    color: #000000 !important;
 }
 
 .total-earnings svg {
@@ -601,9 +726,23 @@ body {
     margin-top: 4px;
 }
 
+.rank-gold .total-label,
+.rank-silver .total-label,
+.rank-bronze .total-label {
+    color: #1a1a1a !important;
+    font-weight: 700 !important;
+}
+
 .activity-date {
     font-size: 14px;
     color: var(--text-dark);
+}
+
+.rank-gold .activity-date,
+.rank-silver .activity-date,
+.rank-bronze .activity-date {
+    color: #000000 !important;
+    font-weight: 600 !important;
 }
 
 .btn-view-file {
@@ -627,6 +766,12 @@ body {
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(212, 175, 55, 0.3);
     color: var(--white);
+}
+
+.rank-gold .btn-view-file,
+.rank-silver .btn-view-file,
+.rank-bronze .btn-view-file {
+    box-shadow: 0 4px 12px rgba(212, 175, 55, 0.5);
 }
 
 .view-toggle {
@@ -689,6 +834,31 @@ body {
     height: 64px;
     margin-bottom: 16px;
     opacity: 0.3;
+}
+
+/* Shine effect for top rankings */
+@keyframes shine {
+    0% {
+        background-position: 200% center;
+    }
+    100% {
+        background-position: -200% center;
+    }
+}
+
+.rank-gold {
+    background-size: 200% auto;
+    animation: shine 3s linear infinite;
+}
+
+.rank-silver {
+    background-size: 200% auto;
+    animation: shine 4s linear infinite;
+}
+
+.rank-bronze {
+    background-size: 200% auto;
+    animation: shine 5s linear infinite;
 }
 
 @media (max-width: 768px) {
@@ -1225,12 +1395,13 @@ body {
                                     
                                     if ($loop->index === 0) {
                                         $rowClass = 'rank-gold';
-                                        $badgeHtml = '<div class="agent-badge gold-badge">Gold - #1</div>';
+                                        $badgeHtml = '<div class="agent-badge gold-badge">🥇 Gold - #1</div>';
                                     } elseif ($loop->index === 1) {
-                                        $badgeHtml = '<div class="agent-badge silver-badge">Silver - #2</div>';
+                                        $rowClass = 'rank-silver';
+                                        $badgeHtml = '<div class="agent-badge silver-badge">🥈 Silver - #2</div>';
                                     } elseif ($loop->index === 2) {
                                         $rowClass = 'rank-bronze';
-                                        $badgeHtml = '<div class="agent-badge bronze-badge">Bronze - #3</div>';
+                                        $badgeHtml = '<div class="agent-badge bronze-badge">🥉 Bronze - #3</div>';
                                     }
                                 @endphp
                                 <tr class="{{ $rowClass }}">
