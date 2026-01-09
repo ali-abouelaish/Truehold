@@ -1405,22 +1405,14 @@ select.filter-input option {
                         infoWindow.close();
                     }
                     
-                    // Pan map to center on marker and offset for info window
+                    // Get marker position
                     const markerPosition = marker.getPosition();
-                    map.panTo(markerPosition);
                     
-                    // Offset the map slightly so info window appears above marker
-                    setTimeout(() => {
-                        const scale = Math.pow(2, map.getZoom());
-                        const worldCoordinate = map.getProjection().fromLatLngToPoint(markerPosition);
-                        const pixelOffset = new google.maps.Point(0, -80 / scale);
-                        const newWorldCoordinate = new google.maps.Point(
-                            worldCoordinate.x,
-                            worldCoordinate.y + pixelOffset.y
-                        );
-                        const newPosition = map.getProjection().fromPointToLatLng(newWorldCoordinate);
-                        map.panTo(newPosition);
-                    }, 100);
+                    // Only pan if marker is not in view, otherwise just open info window
+                    const bounds = map.getBounds();
+                    if (!bounds || !bounds.contains(markerPosition)) {
+                        map.panTo(markerPosition);
+                    }
                     
                     // Get the first image or use a placeholder
                     const imageUrl = property.first_photo_url || 
@@ -1476,9 +1468,13 @@ select.filter-input option {
                             </div>
                     </div>
                 </div>
-            `;
+                    `;
                     infoWindow.setContent(content);
-                    infoWindow.open(map, marker);
+                    
+                    // Open info window with a small delay to ensure proper positioning
+                    setTimeout(() => {
+                        infoWindow.open(map, marker);
+                    }, 50);
                 });
 
                 markers.push(marker);
