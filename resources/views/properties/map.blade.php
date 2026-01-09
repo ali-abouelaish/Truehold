@@ -637,6 +637,11 @@ select.filter-input option {
     background: linear-gradient(45deg, var(--white) 50%, transparent 51%, transparent) !important;
 }
 
+/* Remove the default InfoWindow "tail" so the card sits close to the marker */
+.gm-style .gm-style-iw-tc {
+    display: none !important;
+}
+
 .info-window-card {
     background: var(--white);
     overflow: hidden;
@@ -808,10 +813,7 @@ select.filter-input option {
     z-index: 1000 !important;
 }
 
-/* Adjust close button position */
-.gm-style .gm-style-iw-tc {
-    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
-}
+/* (tail removed above) */
 
 /* ==========================================
    RESPONSIVE DESIGN
@@ -1259,7 +1261,8 @@ select.filter-input option {
                 infoWindow = new google.maps.InfoWindow({
                     disableAutoPan: true,
                     shouldFocus: false,
-                    pixelOffset: new google.maps.Size(0, -10),
+                    // Keep the card tight to the marker
+                    pixelOffset: new google.maps.Size(0, -2),
                 });
 
                 // Load properties
