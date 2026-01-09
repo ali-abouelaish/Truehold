@@ -1399,6 +1399,9 @@ select.filter-input option {
                 marker.addListener('mouseout', function() {
                     this.setIcon(this.originalIcon);
                 });
+                const infoWindow = new google.maps.InfoWindow({
+                 pixelOffset: new google.maps.Size(0, -10)
+                    });
 
                 marker.addListener('click', () => {
                     // Close any open info windows
