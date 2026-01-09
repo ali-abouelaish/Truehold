@@ -1261,8 +1261,8 @@ select.filter-input option {
                 infoWindow = new google.maps.InfoWindow({
                     disableAutoPan: true,
                     shouldFocus: false,
-                    // Keep the card tight to the marker
-                    pixelOffset: new google.maps.Size(0, -2),
+                    // We'll control anchoring via marker.anchorPoint for consistent spacing at any zoom
+                    pixelOffset: new google.maps.Size(0, 0),
                 });
 
                 // Load properties
@@ -1367,6 +1367,9 @@ select.filter-input option {
                         map: map,
                     title: property.title,
                     animation: google.maps.Animation.DROP,
+                    // Critical: prevent Google from applying the default "pin" anchor offset
+                    // (which makes InfoWindows float far above small circle markers)
+                    anchorPoint: new google.maps.Point(0, 0),
                             icon: {
                         path: markerShape,
                         scale: markerScale,
