@@ -1255,8 +1255,11 @@ select.filter-input option {
                     zoomControl: true
                 });
                 
-                // Create info window
-                infoWindow = new google.maps.InfoWindow();
+                // Create info window with pixel offset to position it right above marker
+                // Negative Y offset moves it up, centered on X axis
+                infoWindow = new google.maps.InfoWindow({
+                    pixelOffset: new google.maps.Size(0, -40)
+                });
 
                 // Load properties
                 loadProperties();
@@ -1471,9 +1474,24 @@ select.filter-input option {
                     `;
                     infoWindow.setContent(content);
                     
-                    // Open info window with a small delay to ensure proper positioning
+                    // Calculate position to place info window right above marker
+                    const markerPosition = marker.getPosition();
+                    const projection = map.getProjection();
+                    const scale = Math.pow(2, map.getZoom());
+                    const markerPoint = projection.fromLatLngToPoint(markerPosition);
+                    
+                    // Offset upward by approximately 200 pixels (info window height + gap)
+                    const offsetPixels = 200;
+                    const offsetPoint = new google.maps.Point(
+                        markerPoint.x,
+                        markerPoint.y - (offsetPixels / scale)
+                    );
+                    const offsetLatLng = projection.fromPointToLatLng(offsetPoint);
+                    
+                    // Open info window at calculated position
                     setTimeout(() => {
-                        infoWindow.open(map, marker);
+                        infoWindow.setPosition(offsetLatLng);
+                        infoWindow.open(map);
                     }, 50);
                 });
 
