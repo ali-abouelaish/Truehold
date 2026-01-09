@@ -393,6 +393,47 @@ select.filter-input option {
     color: var(--white);
 }
 
+/* Paying Agents Only Checkbox */
+.paying-filter-checkbox {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    padding: 14px 16px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 8px;
+    background-color: rgba(30, 41, 59, 0.5);
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.paying-filter-checkbox:hover {
+    border-color: var(--gold);
+    background-color: rgba(30, 41, 59, 0.7);
+    box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.1);
+}
+
+.paying-filter-checkbox input[type="checkbox"] {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.paying-filter-checkbox .checkbox-icon {
+    color: rgba(255, 255, 255, 0.4);
+    transition: var(--transition);
+}
+
+.paying-filter-checkbox:hover .checkbox-icon {
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.paying-filter-checkbox input[type="checkbox"]:checked ~ .checkbox-icon {
+    color: var(--gold);
+    filter: drop-shadow(0 0 8px rgba(212, 175, 55, 0.6));
+}
+
 .filter-actions {
     display: flex;
     gap: 12px;
@@ -856,6 +897,15 @@ select.filter-input option {
         font-size: 14px;
     }
     
+    .paying-filter-checkbox {
+        padding: 12px 14px;
+    }
+    
+    .paying-filter-checkbox .checkbox-icon {
+        width: 20px;
+        height: 20px;
+    }
+    
     .filter-actions {
         flex-direction: column;
     }
@@ -1023,32 +1073,32 @@ select.filter-input option {
                     <div class="filter-group">
                         <label class="filter-label">Location</label>
                         <select id="filterLocation" class="filter-input">
-                                <option value="">All Locations</option>
+                            <option value="">All Locations</option>
                             @foreach($locations ?? [] as $location)
                                 @if($location && $location !== 'N/A')
                                     <option value="{{ $location }}">{{ $location }}</option>
                                 @endif
-                                @endforeach
-                            </select>
-                        </div>
-                        
+                            @endforeach
+                        </select>
+                    </div>
+                    
                     <div class="filter-group">
                         <label class="filter-label">Property Type</label>
                         <select id="filterPropertyType" class="filter-input">
-                                <option value="">All Types</option>
+                            <option value="">All Types</option>
                             @foreach($propertyTypes ?? [] as $type)
                                 @if($type && $type !== 'N/A')
                                     <option value="{{ $type }}">{{ $type }}</option>
                                 @endif
-                                @endforeach
-                            </select>
-                        </div>
-                        
-                        @auth
+                            @endforeach
+                        </select>
+                    </div>
+                    
+                    @auth
                     <div class="filter-group">
                         <label class="filter-label">Agent Name</label>
                         <select id="filterAgentName" class="filter-input">
-                                <option value="">All Agents</option>
+                            <option value="">All Agents</option>
                             @foreach($agentNames ?? [] as $agentName)
                                 @if($agentName && $agentName !== 'N/A')
                                     <option value="{{ $agentName }}">
@@ -1058,42 +1108,46 @@ select.filter-input option {
                                         @endif
                                     </option>
                                 @endif
-                                @endforeach
-                            </select>
-                        </div>
-                    
-                    <div class="filter-group" style="grid-column: span 1;">
-                        <label class="filter-label" style="display: flex; align-items: center; gap: 8px; cursor: pointer; user-select: none;">
-                            <input type="checkbox" id="filterPayingOnly" style="width: 18px; height: 18px; cursor: pointer; accent-color: var(--gold);">
-                            <span style="display: flex; align-items: center; gap: 6px;">
-                                Paying Agents Only
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="color: var(--gold);">
-                                    <path d="M13 2L3 14h8l-1 8 10-12h-8l1-8z"/>
-                                </svg>
-                            </span>
-                        </label>
-                        </div>
+                            @endforeach
+                        </select>
+                    </div>
                     @endif
                     
                     <div class="filter-group">
                         <label class="filter-label">Min Price</label>
                         <input type="number" id="filterMinPrice" class="filter-input" placeholder="£0" min="0">
-                        </div>
+                    </div>
                     
                     <div class="filter-group">
                         <label class="filter-label">Max Price</label>
                         <input type="number" id="filterMaxPrice" class="filter-input" placeholder="£5000" min="0">
-                        </div>
-                        
+                    </div>
+                    
                     <div class="filter-group">
                         <label class="filter-label">Couples Allowed</label>
                         <select id="filterCouplesAllowed" class="filter-input">
-                                    <option value="">All Properties</option>
+                            <option value="">All Properties</option>
                             <option value="Yes">Yes</option>
                             <option value="No">No</option>
-                                </select>
+                        </select>
                     </div>
-                        </div>
+                    
+                    @auth
+                    <div class="filter-group">
+                        <label class="filter-label">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" style="color: var(--gold);">
+                                <path d="M13 2L3 14h8l-1 8 10-12h-8l1-8z"/>
+                            </svg>
+                        </label>
+                        <label class="paying-filter-checkbox" for="filterPayingOnly" title="Show only paying agents">
+                            <input type="checkbox" id="filterPayingOnly">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" class="checkbox-icon">
+                                <path d="M13 2L3 14h8l-1 8 10-12h-8l1-8z"/>
+                            </svg>
+                        </label>
+                    </div>
+                    @endif
+                </div>
                         
                 <div class="filter-actions">
                     <button type="button" onclick="clearMapFilters()" class="filter-btn-clear">
