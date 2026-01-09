@@ -1413,7 +1413,7 @@ select.filter-input option {
                     setTimeout(() => {
                         const scale = Math.pow(2, map.getZoom());
                         const worldCoordinate = map.getProjection().fromLatLngToPoint(markerPosition);
-                        const pixelOffset = new google.maps.Point(0, -150 / scale);
+                        const pixelOffset = new google.maps.Point(0, -80 / scale);
                         const newWorldCoordinate = new google.maps.Point(
                             worldCoordinate.x,
                             worldCoordinate.y + pixelOffset.y
