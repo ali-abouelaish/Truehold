@@ -3,8 +3,24 @@
 @section('page-title', 'Agent Earnings Analytics')
 
 @section('content')
-<style>
-/* TrueHold Premium Design Variables */
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <meta name="description" content="Agent Earnings Analytics - TrueHold">
+    <meta name="theme-color" content="#1e3a5f">
+    <title>Agent Earnings - TrueHold</title>
+    
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    
+    <style>
+/* ==========================================
+   TRUEHOLD - Premium Property Listings
+   Color Palette: White, Navy Blue, Gold
+   ========================================== */
+
+/* CSS Variables */
 :root {
     --primary-navy: #1e3a5f;
     --navy-dark: #152a45;
@@ -23,919 +39,751 @@
     --transition: all 0.3s ease;
 }
 
-.truehold-page {
-    background: linear-gradient(135deg, var(--primary-navy) 0%, var(--navy-dark) 100%);
-    min-height: 100vh;
-    padding: 24px;
+/* Reset & Base Styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
 }
 
-.truehold-header {
-    background: linear-gradient(135deg, rgba(255,255,255,0.95), rgba(255,255,255,0.98));
-    backdrop-filter: blur(10px);
-    border-radius: 16px;
-    padding: 32px;
-    margin-bottom: 24px;
-    box-shadow: var(--shadow-lg);
-    border: 1px solid rgba(212, 175, 55, 0.1);
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    color: var(--text-dark);
+    background-color: var(--off-white);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
 
-.header-icon {
-    width: 56px;
-    height: 56px;
-    background: linear-gradient(135deg, var(--gold), var(--gold-light));
-    border-radius: 16px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 4px 16px rgba(212, 175, 55, 0.3);
-}
-
-.header-icon i {
-    color: var(--white);
-    font-size: 24px;
-}
-
-.header-title {
-    font-size: 28px;
-    font-weight: 700;
-    color: var(--primary-navy);
-    margin-bottom: 8px;
-    letter-spacing: -0.5px;
-}
-
-.header-subtitle {
-    color: var(--gray);
-    font-size: 15px;
-}
-
-.date-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    background: linear-gradient(135deg, var(--gold), var(--gold-light));
-    color: var(--white);
-    padding: 10px 20px;
-    border-radius: 12px;
-    font-weight: 600;
-    font-size: 14px;
-    box-shadow: 0 4px 12px rgba(212, 175, 55, 0.25);
-}
-
-.btn-truehold {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 12px 24px;
-    border-radius: 12px;
-    font-weight: 600;
-    font-size: 14px;
+a {
+    text-decoration: none;
+    color: inherit;
     transition: var(--transition);
+    -webkit-tap-highlight-color: transparent;
+}
+
+button {
+    border: none;
     cursor: pointer;
-}
-
-.btn-primary {
-    background: linear-gradient(135deg, var(--primary-navy), var(--navy-light));
-    color: var(--white);
-    box-shadow: 0 4px 12px rgba(30, 58, 95, 0.25);
-}
-
-.btn-primary:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(30, 58, 95, 0.35);
-}
-
-.btn-secondary {
-    background: var(--white);
-    color: var(--primary-navy);
-    border: 2px solid var(--light-gray);
-}
-
-.btn-secondary:hover {
-    border-color: var(--gold);
-    color: var(--gold);
-}
-
-.btn-success {
-    background: linear-gradient(135deg, #10b981, #059669);
-    color: var(--white);
-    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
-}
-
-.btn-success:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(16, 185, 129, 0.35);
-}
-
-.truehold-card {
-    background: var(--white);
-    border-radius: 16px;
-    padding: 24px;
-    box-shadow: var(--shadow-md);
-    border: 1px solid var(--light-gray);
-    margin-bottom: 24px;
-}
-
-.card-header {
-    display: flex;
-    justify-content: between;
-    align-items: center;
-    padding-bottom: 20px;
-    border-bottom: 2px solid var(--light-gray);
-    margin-bottom: 24px;
-}
-
-.card-title {
-    font-size: 20px;
-    font-weight: 700;
-    color: var(--primary-navy);
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.card-title i {
-    color: var(--gold);
-}
-
-.summary-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-    gap: 20px;
-    margin-bottom: 24px;
-}
-
-.summary-card {
-    background: linear-gradient(135deg, var(--white), var(--off-white));
-    border-radius: 16px;
-    padding: 24px;
-    box-shadow: var(--shadow-md);
-    border: 2px solid transparent;
+    font-family: inherit;
     transition: var(--transition);
-    position: relative;
-    overflow: hidden;
+    -webkit-tap-highlight-color: transparent;
 }
 
-.summary-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 4px;
-    height: 100%;
-    background: linear-gradient(180deg, var(--gold), var(--gold-light));
+/* Container */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 24px;
 }
 
-.summary-card:hover {
-    border-color: var(--gold);
-    transform: translateY(-4px);
-    box-shadow: var(--shadow-lg);
-}
+/* ==========================================
+   AGENT EARNINGS PAGE
+   ========================================== */
 
-.summary-label {
-    font-size: 12px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    color: var(--gray);
-    margin-bottom: 8px;
-}
-
-.summary-value {
-    font-size: 32px;
-    font-weight: 800;
-    color: var(--primary-navy);
-    line-height: 1;
-}
-
-.summary-icon {
-    width: 48px;
-    height: 48px;
-    background: linear-gradient(135deg, var(--gold), var(--gold-light));
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 4px 12px rgba(212, 175, 55, 0.25);
-}
-
-.summary-icon i {
+.earnings-header {
+    background: linear-gradient(135deg, var(--primary-navy) 0%, var(--navy-light) 100%);
     color: var(--white);
-    font-size: 20px;
+    padding: 32px 0;
+    box-shadow: 0 4px 16px rgba(30, 58, 95, 0.15);
 }
 
-.filter-section {
-    background: var(--white);
-    border-radius: 16px;
-    overflow: hidden;
-    box-shadow: var(--shadow-md);
-    border: 1px solid var(--light-gray);
-    margin-bottom: 24px;
-}
-
-.filter-header {
-    background: linear-gradient(135deg, var(--primary-navy), var(--navy-light));
-    padding: 20px 24px;
+.earnings-header-content {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    cursor: pointer;
+    gap: 24px;
+    flex-wrap: wrap;
 }
 
-.filter-header h3 {
-    font-size: 18px;
+.earnings-title-section {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.earnings-icon {
+    width: 64px;
+    height: 64px;
+    background: rgba(212, 175, 55, 0.15);
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.earnings-icon svg {
+    stroke: var(--gold);
+}
+
+.earnings-title {
+    font-size: 36px;
     font-weight: 700;
-    color: var(--white);
+    margin: 0 0 4px 0;
+}
+
+.earnings-subtitle {
+    font-size: 16px;
+    color: rgba(255, 255, 255, 0.8);
+    margin: 0;
+}
+
+.earnings-actions {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.date-range-picker {
     display: flex;
     align-items: center;
     gap: 10px;
+    padding: 12px 20px;
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    backdrop-filter: blur(10px);
 }
 
-.filter-toggle {
+.date-range-picker svg {
+    stroke: var(--gold);
+}
+
+.date-badge {
+    padding: 4px 12px;
+    background: var(--gold);
+    color: var(--primary-navy);
+    border-radius: 50px;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.btn-export {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 24px;
+    background: linear-gradient(135deg, var(--gold), var(--gold-light));
     color: var(--white);
-    font-size: 18px;
+    border: none;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 15px;
+    cursor: pointer;
     transition: var(--transition);
 }
 
-.filter-content {
-    padding: 24px;
+.btn-export:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(212, 175, 55, 0.4);
 }
 
-.filter-grid {
+/* Filters Section */
+.filters-section {
+    padding: 24px 0;
+    background-color: var(--white);
+    border-bottom: 1px solid var(--light-gray);
+}
+
+.filters-toggle {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 24px;
+    background-color: var(--white);
+    border: 2px solid var(--light-gray);
+    border-radius: 10px;
+    color: var(--primary-navy);
+    font-weight: 600;
+    font-size: 15px;
+    transition: var(--transition);
+    width: fit-content;
+}
+
+.filters-toggle:hover {
+    border-color: var(--primary-navy);
+    background-color: var(--off-white);
+}
+
+.filters-toggle svg:first-child {
+    color: var(--gold);
+}
+
+.filters-toggle .chevron {
+    margin-left: 8px;
+    transition: transform 0.3s ease;
+}
+
+/* Stats Section */
+.stats-section {
+    padding: 32px 0;
+}
+
+.stats-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
     gap: 20px;
 }
 
-.form-group {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
+.stat-card {
+    padding: 24px;
+    border-radius: 16px;
+    box-shadow: var(--shadow-md);
+    transition: var(--transition);
 }
 
-.form-label {
+.stat-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
+}
+
+.stat-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 16px;
+}
+
+.stat-label {
     font-size: 14px;
     font-weight: 600;
-    color: var(--primary-navy);
+    opacity: 0.9;
+}
+
+.stat-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
     display: flex;
     align-items: center;
-    gap: 6px;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.2);
 }
 
-.form-input,
-.form-select {
-    width: 100%;
-    padding: 12px 16px;
-    border-radius: 12px;
-    border: 2px solid var(--light-gray);
-    font-size: 14px;
-    transition: var(--transition);
-    background: var(--white);
-    color: var(--text-dark);
+.stat-value {
+    font-size: 36px;
+    font-weight: 700;
 }
 
-.form-input:focus,
-.form-select:focus {
-    outline: none;
-    border-color: var(--gold);
-    box-shadow: 0 0 0 4px rgba(212, 175, 55, 0.1);
+.stat-blue {
+    background: linear-gradient(135deg, #5b7fda, #4a6bb8);
+    color: var(--white);
 }
 
-.cycle-grid {
+.stat-green {
+    background: linear-gradient(135deg, #4db8a8, #3c9688);
+    color: var(--white);
+}
+
+.stat-purple {
+    background: linear-gradient(135deg, #9b6ac8, #7f52a8);
+    color: var(--white);
+}
+
+.stat-orange {
+    background: linear-gradient(135deg, #e8a75f, #d18a42);
+    color: var(--white);
+}
+
+/* Charts Section */
+.charts-section {
+    padding: 32px 0;
+}
+
+.charts-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 12px;
+    grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+    gap: 24px;
+}
+
+.chart-card {
+    background: var(--white);
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: var(--shadow-md);
+}
+
+.chart-header {
     margin-bottom: 20px;
 }
 
-.cycle-btn {
-    padding: 16px;
+.chart-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--primary-navy);
+}
+
+.chart-title svg {
+    color: var(--gold);
+}
+
+.chart-placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, rgba(30, 58, 95, 0.03), rgba(30, 58, 95, 0.01));
     border-radius: 12px;
-    border: 2px solid var(--light-gray);
+    color: var(--gray);
+    position: relative;
+}
+
+/* Leaderboard Section */
+.leaderboard-section {
+    padding: 32px 0 48px;
+}
+
+.leaderboard-card {
     background: var(--white);
-    cursor: pointer;
-    transition: var(--transition);
-    text-align: center;
+    border-radius: 16px;
+    box-shadow: var(--shadow-md);
+    overflow: hidden;
 }
 
-.cycle-btn:hover {
-    border-color: var(--gold);
-    transform: translateY(-2px);
-}
-
-.cycle-btn.active {
-    background: linear-gradient(135deg, var(--gold), var(--gold-light));
-    border-color: var(--gold-dark);
-    color: var(--white);
-    box-shadow: 0 4px 12px rgba(212, 175, 55, 0.25);
-}
-
-.cycle-btn.current {
+.leaderboard-header {
+    padding: 24px;
     background: linear-gradient(135deg, var(--primary-navy), var(--navy-light));
-    border-color: var(--navy-dark);
     color: var(--white);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
 }
 
-.agent-table {
+.leaderboard-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 24px;
+    font-weight: 700;
+    margin: 0;
+}
+
+.leaderboard-title svg {
+    color: var(--gold);
+}
+
+.period-badge {
+    padding: 8px 16px;
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 8px;
+    font-size: 13px;
+    backdrop-filter: blur(10px);
+}
+
+.table-responsive {
+    overflow-x: auto;
+}
+
+.leaderboard-table {
     width: 100%;
     border-collapse: collapse;
 }
 
-.agent-table thead {
-    background: linear-gradient(135deg, var(--primary-navy), var(--navy-light));
+.leaderboard-table thead {
+    background-color: var(--off-white);
 }
 
-.agent-table th {
+.leaderboard-table th {
     padding: 16px;
     text-align: left;
-    font-size: 12px;
+    font-size: 13px;
     font-weight: 700;
+    color: var(--primary-navy);
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    color: var(--white);
 }
 
-.agent-table tbody tr {
+.leaderboard-table td {
+    padding: 20px 16px;
     border-bottom: 1px solid var(--light-gray);
+}
+
+.leaderboard-table tbody tr {
     transition: var(--transition);
 }
 
-.agent-table tbody tr:hover {
-    background: rgba(212, 175, 55, 0.05);
+.leaderboard-table tbody tr:hover {
+    background-color: var(--off-white);
 }
 
-.agent-table td {
-    padding: 16px;
+.rank-gold {
+    background: linear-gradient(to right, rgba(255, 215, 0, 0.1), transparent);
+}
+
+.rank-bronze {
+    background: linear-gradient(to right, rgba(205, 127, 50, 0.1), transparent);
+}
+
+.agent-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
 }
 
 .agent-avatar {
     width: 48px;
     height: 48px;
-    border-radius: 12px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary-navy), var(--navy-light));
+    color: var(--white);
     display: flex;
     align-items: center;
     justify-content: center;
     font-weight: 700;
     font-size: 16px;
-    color: var(--white);
-    box-shadow: var(--shadow-md);
 }
 
-.rank-gold {
-    background: linear-gradient(135deg, #fbbf24, #f59e0b);
-    box-shadow: 0 4px 12px rgba(251, 191, 36, 0.4) !important;
-}
-
-.rank-silver {
-    background: linear-gradient(135deg, #d1d5db, #9ca3af);
-    box-shadow: 0 4px 12px rgba(156, 163, 175, 0.4) !important;
-}
-
-.rank-bronze {
-    background: linear-gradient(135deg, #cd7f32, #8b5a2b);
-    box-shadow: 0 4px 12px rgba(205, 127, 50, 0.4) !important;
-}
-
-.rank-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    padding: 4px 12px;
-    border-radius: 8px;
-    font-size: 11px;
+.agent-name {
     font-weight: 600;
+    font-size: 15px;
+    color: var(--text-dark);
+    margin-bottom: 4px;
 }
 
-.badge-gold {
-    background: rgba(251, 191, 36, 0.15);
-    color: #f59e0b;
+.agent-badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 700;
+    margin-bottom: 4px;
 }
 
-.badge-silver {
-    background: rgba(156, 163, 175, 0.15);
-    color: #6b7280;
+.gold-badge {
+    background: linear-gradient(135deg, #ffd700, #ffed4e);
+    color: #8b6914;
 }
 
-.badge-bronze {
-    background: rgba(205, 127, 50, 0.15);
-    color: #8b5a2b;
+.silver-badge {
+    background: linear-gradient(135deg, #c0c0c0, #e8e8e8);
+    color: #666;
 }
 
-.view-toggle {
-    display: flex;
-    gap: 8px;
+.bronze-badge {
+    background: linear-gradient(135deg, #cd7f32, #d99a5a);
+    color: #5c3a1a;
 }
 
-.toggle-btn {
-    width: 40px;
-    height: 40px;
-    border-radius: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: var(--transition);
-    border: 2px solid var(--light-gray);
-    background: var(--white);
-}
-
-.toggle-btn.active {
-    background: linear-gradient(135deg, var(--gold), var(--gold-light));
-    border-color: var(--gold-dark);
-    color: var(--white);
-}
-
-.agent-cards {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-    gap: 20px;
-}
-
-.agent-card {
-    background: var(--white);
-    border-radius: 16px;
-    padding: 24px;
-    box-shadow: var(--shadow-md);
-    border: 2px solid transparent;
-    transition: var(--transition);
-}
-
-.agent-card:hover {
-    border-color: var(--gold);
-    transform: translateY(-4px);
-    box-shadow: var(--shadow-lg);
-}
-
-.loading-screen {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    min-height: 300px;
+.agent-transactions {
+    font-size: 12px;
     color: var(--gray);
 }
 
-.loading-spinner {
-    width: 48px;
-    height: 48px;
-    border: 4px solid var(--light-gray);
-    border-top-color: var(--gold);
-    border-radius: 50%;
-    animation: spin 0.8s linear infinite;
+.earnings-cell {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
 }
 
-@keyframes spin {
-    to { transform: rotate(360deg); }
+.earnings-amount {
+    font-weight: 700;
+    font-size: 16px;
+    color: var(--primary-navy);
 }
 
+.earnings-commission {
+    font-size: 12px;
+    color: var(--gray);
+}
+
+.total-earnings {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 700;
+    font-size: 18px;
+    color: var(--primary-navy);
+}
+
+.total-earnings svg {
+    color: var(--gold);
+}
+
+.total-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--gray);
+}
+
+.activity-date {
+    font-size: 14px;
+    color: var(--text-dark);
+}
+
+.btn-view-file {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    background: linear-gradient(135deg, var(--gold), var(--gold-light));
+    color: var(--white);
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 13px;
+    cursor: pointer;
+    transition: var(--transition);
+    white-space: nowrap;
+}
+
+.btn-view-file:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(212, 175, 55, 0.3);
+}
+
+/* Responsive */
 @media (max-width: 768px) {
-    .truehold-header {
-        padding: 20px;
+    .earnings-header-content,
+    .earnings-actions {
+        flex-direction: column;
+        align-items: flex-start;
+        width: 100%;
     }
     
-    .header-title {
-        font-size: 22px;
+    .earnings-title {
+        font-size: 28px;
     }
     
-    .summary-grid {
+    .date-range-picker,
+    .btn-export {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .charts-grid {
         grid-template-columns: 1fr;
     }
     
-    .filter-grid {
-        grid-template-columns: 1fr;
-    }
-    
-    .cycle-grid {
-        grid-template-columns: 1fr;
-    }
-    
-    .agent-table {
-        font-size: 14px;
-    }
-    
-    .agent-cards {
-        grid-template-columns: 1fr;
+    .leaderboard-table {
+        min-width: 800px;
     }
 }
-</style>
 
-<div class="truehold-page">
-    <!-- Header -->
-    <div class="truehold-header">
-        <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 20px;">
-            <div style="display: flex; align-items: center; gap: 20px;">
-                <div class="header-icon">
-                    <i class="fas fa-chart-line"></i>
+@media (max-width: 480px) {
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .earnings-title-section {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}
+    </style>
+</head>
+<body>
+    <!-- Earnings Header -->
+    <section class="earnings-header">
+        <div class="container">
+            <div class="earnings-header-content">
+                <div class="earnings-title-section">
+                    <div class="earnings-icon">
+                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" stroke-width="2"/>
+                            <circle cx="12" cy="7" r="4" stroke-width="2"/>
+                            <path d="M16 11l5-3m0 0l-5-3m5 3H11" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h1 class="earnings-title">
+                            @if($isPayrollView)
+                                @if(auth()->check() && auth()->user()->role === 'admin')
+                                    Agent Commission File - {{ $agentSearch }}
+                                @else
+                                    My Commission File
+                                @endif
+                            @else
+                                @if(auth()->check() && auth()->user()->role === 'admin')
+                                    Agent Earnings Analytics
+                                @else
+                                    My Earnings
+                                @endif
+                            @endif
+                        </h1>
+                        <p class="earnings-subtitle">
+                            @if($isPayrollView)
+                                @if(auth()->check() && auth()->user()->role === 'admin')
+                                    Approved rentals up to 10th of each month - Commission view
+                                @else
+                                    Your approved rentals up to 10th of each month
+                                @endif
+                            @else
+                                @if(auth()->check() && auth()->user()->role === 'admin')
+                                    Comprehensive earnings analysis and performance insights
+                                @else
+                                    Your earnings overview and performance insights
+                                @endif
+                            @endif
+                        </p>
+                    </div>
                 </div>
-                <div>
-                    <h1 class="header-title">
-                        @if($isPayrollView)
-                            @if(auth()->check() && auth()->user()->role === 'admin')
-                                Agent Commission File - {{ $agentSearch }}
-                            @else
-                                My Commission File
-                            @endif
-                        @else
-                            @if(auth()->check() && auth()->user()->role === 'admin')
-                                Agent Earnings Analytics
-                            @else
-                                My Earnings
-                            @endif
-                        @endif
-                    </h1>
-                    <p class="header-subtitle">
-                        @if($isPayrollView)
-                            @if(auth()->check() && auth()->user()->role === 'admin')
-                                Approved rentals up to 10th of each month - Commission view
-                            @else
-                                Your approved rentals up to 10th of each month
-                            @endif
-                        @else
-                            @if(auth()->check() && auth()->user()->role === 'admin')
-                                Comprehensive earnings analysis and performance insights
-                            @else
-                                Your earnings overview and performance insights
-                            @endif
-                        @endif
-                    </p>
+                <div class="earnings-actions">
                     @if($startDate && $endDate)
-                        <div style="margin-top: 12px;">
-                            <span class="date-badge">
-                                <i class="fas fa-calendar-alt"></i>
-                                {{ \Carbon\Carbon::parse($startDate)->format('d M Y') }} → {{ \Carbon\Carbon::parse($endDate)->format('d M Y') }}
-                                <span style="opacity: 0.8;">({{ \Carbon\Carbon::parse($startDate)->diffInDays(\Carbon\Carbon::parse($endDate)) + 1 }} days)</span>
-                            </span>
+                        <div class="date-range-picker">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                <rect x="3" y="4" width="18" height="18" rx="2" stroke-width="2"/>
+                                <path d="M16 2v4M8 2v4M3 10h18" stroke-width="2" stroke-linecap="round"/>
+                            </svg>
+                            <span>{{ \Carbon\Carbon::parse($startDate)->format('d M Y') }} → {{ \Carbon\Carbon::parse($endDate)->format('d M Y') }}</span>
+                            <span class="date-badge">{{ \Carbon\Carbon::parse($startDate)->diffInDays(\Carbon\Carbon::parse($endDate)) + 1 }} days</span>
                         </div>
+                    @endif
+                    @if(count($agentEarnings) > 0)
+                        <button onclick="exportToExcel()" class="btn-export">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                            Export Excel
+                        </button>
                     @endif
                 </div>
             </div>
-            <div style="display: flex; gap: 12px;">
-                @if($isPayrollView)
-                    <a href="{{ route('rental-codes.agent-earnings') }}" class="btn-truehold btn-secondary">
-                        <i class="fas fa-arrow-left"></i>Back to All Agents
-                    </a>
-                @else
-                    <a href="{{ route('rental-codes.index') }}" class="btn-truehold btn-secondary">
-                        <i class="fas fa-arrow-left"></i>Back to Rental Codes
-                    </a>
-                @endif
-                @if(count($agentEarnings) > 0)
-                    <button onclick="exportToExcel()" class="btn-truehold btn-success">
-                        <i class="fas fa-file-excel"></i>Export Excel
-                    </button>
-                @endif
-            </div>
         </div>
-    </div>
-
-    <!-- Summary Dashboard -->
-    @if(!$agentSearch)
-        <div class="summary-grid">
-            <div class="summary-card">
-                <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-                    <div>
-                        <div class="summary-label">Total Agents</div>
-                        <div class="summary-value">{{ $summary['total_agents'] }}</div>
-                    </div>
-                    <div class="summary-icon">
-                        <i class="fas fa-users"></i>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="summary-card">
-                <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-                    <div>
-                        <div class="summary-label">Total Earnings</div>
-                        <div class="summary-value" style="color: #10b981;">£{{ number_format($summary['total_earnings'], 2) }}</div>
-                    </div>
-                    <div class="summary-icon" style="background: linear-gradient(135deg, #10b981, #059669);">
-                        <i class="fas fa-pound-sign"></i>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="summary-card">
-                <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-                    <div>
-                        <div class="summary-label">Total Transactions</div>
-                        <div class="summary-value">{{ $summary['total_transactions'] }}</div>
-                    </div>
-                    <div class="summary-icon" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed);">
-                        <i class="fas fa-file-invoice"></i>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="summary-card">
-                <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-                    <div>
-                        <div class="summary-label">Avg per Agent</div>
-                        <div class="summary-value">£{{ number_format($summary['avg_earnings_per_agent'], 2) }}</div>
-                    </div>
-                    <div class="summary-icon" style="background: linear-gradient(135deg, #f59e0b, #d97706);">
-                        <i class="fas fa-chart-bar"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-    @endif
+    </section>
 
     <!-- Advanced Filters -->
-    <div class="filter-section">
-        <div class="filter-header" onclick="toggleFilters()">
-            <h3>
-                <i class="fas fa-filter"></i>
+    <section class="filters-section">
+        <div class="container">
+            <button class="filters-toggle" onclick="toggleFilters()">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M10 18h4v-2h-4v2zM3 6v2h18V6H3zm3 7h12v-2H6v2z"/>
+                </svg>
                 @if($isPayrollView) Payroll Filters @else Advanced Filters @endif
-            </h3>
-            <i class="fas fa-chevron-down filter-toggle" id="filterToggleIcon"></i>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" class="chevron" id="filterToggleIcon">
+                    <path d="M6 9l6 6 6-6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </button>
         </div>
-        <div class="filter-content" id="filtersContent" style="display: none;">
-            @if($isPayrollView)
-                <div style="background: rgba(59, 130, 246, 0.1); border: 2px solid rgba(59, 130, 246, 0.2); border-radius: 12px; padding: 20px; margin-bottom: 24px;">
-                    <div style="display: flex; align-items: flex-start; gap: 12px;">
-                        <i class="fas fa-info-circle" style="color: #3b82f6; font-size: 18px; margin-top: 2px;"></i>
-                        <div>
-                            <h4 style="font-weight: 600; color: var(--primary-navy); margin-bottom: 8px;">Payroll View</h4>
-                            <p style="color: var(--gray); font-size: 14px;">
-                                This view shows only <strong>approved</strong> rentals that this agent participated in (as rental agent or marketing agent). Outstanding amounts show what the agent is owed from unpaid rentals.
-                            </p>
+    </section>
+
+    <!-- Stats Cards -->
+    @if(!$agentSearch)
+        <section class="stats-section">
+            <div class="container">
+                <div class="stats-grid">
+                    <div class="stat-card stat-blue">
+                        <div class="stat-header">
+                            <div class="stat-label">Total Agents</div>
+                            <div class="stat-icon">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="stat-value">{{ $summary['total_agents'] }}</div>
+                    </div>
+
+                    <div class="stat-card stat-green">
+                        <div class="stat-header">
+                            <div class="stat-label">Total Earnings</div>
+                            <div class="stat-icon">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1.41 16.09V20h-2.67v-1.93c-1.71-.36-3.16-1.46-3.27-3.4h1.96c.1 1.05.82 1.87 2.65 1.87 1.96 0 2.4-.98 2.4-1.59 0-.83-.44-1.61-2.67-2.14-2.48-.6-4.18-1.62-4.18-3.67 0-1.72 1.39-2.84 3.11-3.21V4h2.67v1.95c1.86.45 2.79 1.86 2.85 3.39H14.3c-.05-1.11-.64-1.87-2.22-1.87-1.5 0-2.4.68-2.4 1.64 0 .84.65 1.39 2.67 1.91s4.18 1.39 4.18 3.91c-.01 1.83-1.38 2.83-3.12 3.16z"/>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="stat-value">£{{ number_format($summary['total_earnings'], 2) }}</div>
+                    </div>
+
+                    <div class="stat-card stat-purple">
+                        <div class="stat-header">
+                            <div class="stat-label">Total Transactions</div>
+                            <div class="stat-icon">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="stat-value">{{ $summary['total_transactions'] }}</div>
+                    </div>
+
+                    <div class="stat-card stat-orange">
+                        <div class="stat-header">
+                            <div class="stat-label">Avg per Agent</div>
+                            <div class="stat-icon">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z"/>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="stat-value">£{{ number_format($summary['avg_earnings_per_agent'], 2) }}</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Charts Section -->
+        @if(count($agentEarnings) > 0)
+            <section class="charts-section">
+                <div class="container">
+                    <div class="charts-grid">
+                        <!-- Monthly Earnings Trend -->
+                        <div class="chart-card">
+                            <div class="chart-header">
+                                <h3 class="chart-title">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                                        <path d="M23 8c0 1.1-.9 2-2 2-.18 0-.35-.02-.51-.07l-3.56 3.55c.05.16.07.34.07.52 0 1.1-.9 2-2 2s-2-.9-2-2c0-.18.02-.36.07-.52l-2.55-2.55c-.16.05-.34.07-.52.07s-.36-.02-.52-.07l-4.55 4.56c.05.16.07.33.07.51 0 1.1-.9 2-2 2s-2-.9-2-2 .9-2 2-2c.18 0 .35.02.51.07l4.56-4.55C8.02 9.36 8 9.18 8 9c0-1.1.9-2 2-2s2 .9 2 2c0 .18-.02.36-.07.52l2.55 2.55c.16-.05.34-.07.52-.07s.36.02.52.07l3.55-3.56C19.02 8.35 19 8.18 19 8c0-1.1.9-2 2-2s2 .9 2 2z"/>
+                                    </svg>
+                                    Monthly Earnings Trend
+                                </h3>
+                            </div>
+                            <div style="height: 300px;">
+                                <canvas id="monthlyChart"></canvas>
+                            </div>
                         </div>
                     </div>
                 </div>
-            @endif
-            
-            <form method="GET" action="{{ route('rental-codes.agent-earnings') }}" id="filterForm">
-                <!-- Quick Commission Cycle Selector -->
-                <div style="background: rgba(212, 175, 55, 0.1); border: 2px solid rgba(212, 175, 55, 0.2); border-radius: 12px; padding: 20px; margin-bottom: 24px;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-                        <label style="font-weight: 600; color: var(--primary-navy); font-size: 15px;">
-                            <i class="fas fa-calendar-check" style="color: var(--gold);"></i> Quick Select Commission Cycle (11th to 10th)
-                        </label>
-                        <span style="font-size: 12px; color: var(--gray);">Click to apply</span>
-                    </div>
-                    
-                    <div class="cycle-grid">
-                        @php
-                            $currentDate = now();
-                            $cycles = [];
-                            
-                            for ($i = 0; $i < 8; $i++) {
-                                $cycleDate = $currentDate->copy()->subMonths($i);
-                                
-                                if ($cycleDate->day <= 10) {
-                                    $cycleStart = $cycleDate->copy()->subMonthNoOverflow()->day(11);
-                                    $cycleEnd = $cycleDate->copy()->day(10);
-                                } else {
-                                    $cycleStart = $cycleDate->copy()->day(11);
-                                    $cycleEnd = $cycleDate->copy()->addMonthNoOverflow()->day(10);
-                                }
-                                
-                                $isSelected = ($startDate === $cycleStart->toDateString() && 
-                                              $endDate === min($currentDate->toDateString(), $cycleEnd->toDateString()));
-                                
-                                $cycles[] = [
-                                    'start' => $cycleStart->toDateString(),
-                                    'end' => min($currentDate->toDateString(), $cycleEnd->toDateString()),
-                                    'label' => $cycleStart->format('d-M') . ' to ' . $cycleEnd->format('d-M Y'),
-                                    'shortLabel' => $cycleStart->format('M Y'),
-                                    'isCurrent' => $i === 0,
-                                    'isSelected' => $isSelected
-                                ];
-                            }
-                        @endphp
-                        
-                        @foreach($cycles as $cycle)
-                            <button type="button" 
-                                    onclick="selectCycle('{{ $cycle['start'] }}', '{{ $cycle['end'] }}')"
-                                    class="cycle-btn {{ $cycle['isSelected'] ? 'active' : ($cycle['isCurrent'] ? 'current' : '') }}">
-                                <div style="font-weight: 700; font-size: 15px; margin-bottom: 4px;">
-                                    @if($cycle['isSelected'])
-                                        <i class="fas fa-check-circle" style="margin-right: 6px;"></i>
-                                    @elseif($cycle['isCurrent'])
-                                        <i class="fas fa-star" style="margin-right: 6px;"></i>
-                                    @endif
-                                    {{ $cycle['shortLabel'] }}
-                                </div>
-                                <div style="font-size: 11px; opacity: 0.8;">{{ $cycle['label'] }}</div>
-                            </button>
-                        @endforeach
-                    </div>
-                    
-                    <!-- Quick Presets -->
-                    <div style="border-top: 2px solid rgba(212, 175, 55, 0.2); padding-top: 16px; margin-top: 16px;">
-                        <div style="font-size: 12px; font-weight: 600; color: var(--gray); margin-bottom: 12px;">Quick Presets:</div>
-                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px;">
-                            @php
-                                $last3MonthsStart = $currentDate->copy()->subMonths(3);
-                                $last3MonthsEnd = $currentDate->toDateString();
-                                $last6MonthsStart = $currentDate->copy()->subMonths(6);
-                                $last6MonthsEnd = $currentDate->toDateString();
-                                $thisYearStart = $currentDate->copy()->startOfYear();
-                                $thisYearEnd = $currentDate->toDateString();
-                                $lastYearStart = $currentDate->copy()->subYear()->startOfYear();
-                                $lastYearEnd = $currentDate->copy()->subYear()->endOfYear();
-                            @endphp
-                            
-                            <button type="button" onclick="selectCycle('{{ $last3MonthsStart->toDateString() }}', '{{ $last3MonthsEnd }}')" 
-                                    class="btn-truehold btn-secondary" style="font-size: 12px; padding: 10px;">
-                                <i class="fas fa-calendar-week"></i>Last 3 Months
-                            </button>
-                            
-                            <button type="button" onclick="selectCycle('{{ $last6MonthsStart->toDateString() }}', '{{ $last6MonthsEnd }}')" 
-                                    class="btn-truehold btn-secondary" style="font-size: 12px; padding: 10px;">
-                                <i class="fas fa-calendar"></i>Last 6 Months
-                            </button>
-                            
-                            <button type="button" onclick="selectCycle('{{ $thisYearStart->toDateString() }}', '{{ $thisYearEnd }}')" 
-                                    class="btn-truehold btn-secondary" style="font-size: 12px; padding: 10px;">
-                                <i class="fas fa-calendar-alt"></i>This Year
-                            </button>
-                            
-                            <button type="button" onclick="selectCycle('{{ $lastYearStart->toDateString() }}', '{{ $lastYearEnd->toDateString() }}')" 
-                                    class="btn-truehold btn-secondary" style="font-size: 12px; padding: 10px;">
-                                <i class="fas fa-history"></i>Last Year
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="filter-grid">
-                    <div class="form-group">
-                        <label class="form-label">
-                            <i class="fas fa-calendar-alt"></i>Start Date
-                        </label>
-                        <input type="date" name="start_date" id="start_date" value="{{ $startDate }}" class="form-input">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label class="form-label">
-                            <i class="fas fa-calendar-alt"></i>End Date
-                        </label>
-                        <input type="date" name="end_date" id="end_date" value="{{ $endDate }}" class="form-input">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label class="form-label">
-                            <i class="fas fa-user"></i>Agent Filter
-                        </label>
-                        @if($isPayrollView)
-                            <div class="form-input" style="background: var(--off-white); color: var(--primary-navy); font-weight: 600;">
-                                <i class="fas fa-user-check" style="color: #10b981; margin-right: 8px;"></i>
-                                {{ $agentSearch }} <span style="opacity: 0.7; font-weight: 400;">(Payroll View)</span>
-                            </div>
-                            <input type="hidden" name="agent_search" value="{{ $agentSearch }}">
-                        @elseif(auth()->check() && auth()->user()->role === 'admin')
-                            <select name="agent_search" class="form-select">
-                                <option value="">All Agents</option>
-                                @foreach($agentEarnings as $agent)
-                                    <option value="{{ $agent['name'] }}" {{ $agentSearch == $agent['name'] ? 'selected' : '' }}>
-                                        {{ $agent['name'] }} ({{ $agent['transaction_count'] }} transactions)
-                                    </option>
-                                @endforeach
-                            </select>
-                        @else
-                            <div class="form-input" style="background: rgba(59, 130, 246, 0.1); color: var(--primary-navy); font-weight: 600;">
-                                <i class="fas fa-user-shield" style="color: #3b82f6; margin-right: 8px;"></i>
-                                {{ auth()->check() ? auth()->user()->name : 'Guest' }} <span style="opacity: 0.7; font-weight: 400;">(Your Payroll Only)</span>
-                            </div>
-                            @auth
-                                <input type="hidden" name="agent_search" value="{{ auth()->user()->name }}">
-                            @endauth
-                        @endif
-                    </div>
-                    
-                    <div class="form-group">
-                        <label class="form-label">
-                            <i class="fas fa-bullhorn"></i>Marketing Agent Filter
-                        </label>
-                        <select name="marketing_agent_filter" class="form-select">
-                            <option value="">All Agents</option>
-                            <option value="marketing_only" {{ $marketingAgentFilter == 'marketing_only' ? 'selected' : '' }}>Marketing Agents Only</option>
-                            <option value="rent_only" {{ $marketingAgentFilter == 'rent_only' ? 'selected' : '' }}>Rent Agents Only</option>
-                            <option value="both" {{ $marketingAgentFilter == 'both' ? 'selected' : '' }}>Both Rent & Marketing</option>
-                        </select>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label class="form-label">
-                            <i class="fas fa-check-circle"></i>Status
-                        </label>
-                        <select name="status" class="form-select">
-                            <option value="">All Statuses</option>
-                            <option value="pending" {{ $status==='pending' ? 'selected' : '' }}>Pending</option>
-                            <option value="approved" {{ $status==='approved' ? 'selected' : '' }}>Approved</option>
-                            <option value="completed" {{ $status==='completed' ? 'selected' : '' }}>Completed</option>
-                            <option value="cancelled" {{ $status==='cancelled' ? 'selected' : '' }}>Cancelled</option>
-                        </select>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label class="form-label">
-                            <i class="fas fa-credit-card"></i>Payment Method
-                        </label>
-                        <select name="payment_method" class="form-select">
-                            <option value="">All Methods</option>
-                            <option value="Cash" {{ $paymentMethod==='Cash' ? 'selected' : '' }}>Cash</option>
-                            <option value="Transfer" {{ $paymentMethod==='Transfer' ? 'selected' : '' }}>Transfer</option>
-                        </select>
-                    </div>
-                </div>
-                
-                <div style="display: flex; gap: 12px; margin-top: 24px;">
-                    <button type="submit" class="btn-truehold btn-primary">
-                        <i class="fas fa-search"></i>Apply Filters
-                    </button>
-                    <a href="{{ route('rental-codes.agent-earnings') }}" class="btn-truehold btn-secondary">
-                        <i class="fas fa-times"></i>Clear
-                    </a>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Earnings Chart -->
-    @if(!$agentSearch && count($agentEarnings) > 0)
-        <div class="truehold-card">
-            <div class="card-title">
-                <i class="fas fa-chart-line"></i>
-                Total Earnings Over Time (Monthly)
-            </div>
-            <div style="height: 300px; display: flex; align-items: center; justify-content: center;">
-                <canvas id="monthlyChart"></canvas>
-            </div>
-        </div>
+            </section>
+        @endif
     @endif
 
-    <!-- Agent Earnings Table/Cards -->
-    <div class="truehold-card">
-        <div class="card-header">
-            <div>
-                <div class="card-title">
-                    @if($agentSearch)
-                        {{ $agentSearch }} - Commission File
-                    @elseif($isPayrollView)
-                        @if(auth()->check() && auth()->user()->role === 'admin')
-                            Commission File - {{ $agentSearch }}
+    <!-- Agent Leaderboard -->
+    <section class="leaderboard-section">
+        <div class="container">
+            <div class="leaderboard-card">
+                <div class="leaderboard-header">
+                    <h3 class="leaderboard-title">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 2L15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2z"/>
+                        </svg>
+                        @if($agentSearch)
+                            {{ $agentSearch }} - Commission File
+                        @elseif($isPayrollView)
+                            Commission File
                         @else
-                            My Commission File
+                            @if(auth()->check() && auth()->user()->role === 'admin')
+                                Agent Earnings Breakdown
+                            @else
+                                Agent Leaderboard
+                            @endif
                         @endif
-                    @else
-                        @if(auth()->check() && auth()->user()->role === 'admin')
-                            Agent Earnings Breakdown
-                        @else
-                            Agent Leaderboard
-                        @endif
-                    @endif
+                    </h3>
+                    <div class="leaderboard-actions">
+                        <span class="period-badge">
+                            @if($startDate || $endDate)
+                                Period: {{ $startDate ? \Carbon\Carbon::parse($startDate)->format('d M Y') : 'Beginning' }}
+                                — {{ \Carbon\Carbon::parse($endDate)->format('d M Y') }}
+                            @else
+                                All Time Data
+                            @endif
+                            @if($status) • Status: {{ ucfirst($status) }} @endif
+                            @if($paymentMethod) • Payment: {{ $paymentMethod }} @endif
+                        </span>
+                    </div>
                 </div>
-                <p style="color: var(--gray); font-size: 14px; margin-top: 8px;">
-                    @if($agentSearch)
-                        Complete payroll breakdown for {{ $agentSearch }}
-                        @if($startDate || $endDate)
-                            • Period: {{ $startDate ? \Carbon\Carbon::parse($startDate)->format('d M Y') : 'Beginning' }}
-                            — {{ \Carbon\Carbon::parse($endDate)->format('d M Y') }}
-                        @endif
-                    @elseif($isPayrollView)
-                        Approved rentals for this agent only
-                        @if($startDate || $endDate)
-                            • Period: {{ $startDate ? \Carbon\Carbon::parse($startDate)->format('d M Y') : 'Beginning' }}
-                            — {{ \Carbon\Carbon::parse($endDate)->format('d M Y') }}
-                        @endif
-                    @else
-                        @if($startDate || $endDate)
-                            Period: {{ $startDate ? \Carbon\Carbon::parse($startDate)->format('d M Y') : 'Beginning' }}
-                            — {{ \Carbon\Carbon::parse($endDate)->format('d M Y') }}
-                        @else
-                            All Time Data
-                        @endif
-                        @if($status) • Status: {{ ucfirst($status) }} @endif
-                        @if($paymentMethod) • Payment: {{ $paymentMethod }} @endif
-                    @endif
-                </p>
-            </div>
-            <div style="display: flex; align-items: center; gap: 16px;">
-                <span style="font-size: 14px; color: var(--gray);">
-                    @if($isPayrollView)
-                        {{ count($agentEarnings) }} commission record{{ count($agentEarnings) !== 1 ? 's' : '' }}
-                    @else
-                        {{ count($agentEarnings) }} agent{{ count($agentEarnings) !== 1 ? 's' : '' }}
-                    @endif
-                </span>
-                <div class="view-toggle">
-                    <button onclick="toggleView('table')" id="tableViewBtn" class="toggle-btn active">
-                        <i class="fas fa-table"></i>
-                    </button>
-                    <button onclick="toggleView('cards')" id="cardsViewBtn" class="toggle-btn">
-                        <i class="fas fa-th-large"></i>
-                    </button>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Table View -->
-        <div id="tableView">
-            @if(count($agentEarnings) > 0)
-                <div style="overflow-x: auto;">
-                    <table class="agent-table">
+
+                <div class="table-responsive">
+                    <table class="leaderboard-table">
                         <thead>
                             <tr>
                                 <th>Agent</th>
@@ -957,72 +805,80 @@
                                         continue;
                                     }
                                     
-                                    $avatarClass = '';
-                                    $rankBadge = '';
+                                    $rankClass = '';
+                                    $badgeClass = '';
+                                    $badgeText = '';
                                     
                                     if ($loop->index === 0) {
-                                        $avatarClass = 'rank-gold';
-                                        $rankBadge = '<span class="rank-badge badge-gold"><span>👑</span> Gold - #1</span>';
+                                        $rankClass = 'rank-gold';
+                                        $badgeClass = 'gold-badge';
+                                        $badgeText = 'Gold - #1';
                                     } elseif ($loop->index === 1) {
-                                        $avatarClass = 'rank-silver';
-                                        $rankBadge = '<span class="rank-badge badge-silver"><span>🥈</span> Silver - #2</span>';
+                                        $badgeClass = 'silver-badge';
+                                        $badgeText = 'Silver - #2';
                                     } elseif ($loop->index === 2) {
-                                        $avatarClass = 'rank-bronze';
-                                        $rankBadge = '<span class="rank-badge badge-bronze"><span>🥉</span> Bronze - #3</span>';
+                                        $rankClass = 'rank-bronze';
+                                        $badgeClass = 'bronze-badge';
+                                        $badgeText = 'Bronze - #3';
                                     }
                                 @endphp
-                                <tr>
+                                <tr class="{{ $rankClass }}">
                                     <td>
-                                        <div style="display: flex; align-items: center; gap: 12px;">
-                                            <div class="agent-avatar {{$avatarClass}}">
-                                                {{ strtoupper(substr($agent['name'], 0, 2)) }}
-                                            </div>
+                                        <div class="agent-info">
+                                            <div class="agent-avatar">{{ strtoupper(substr($agent['name'], 0, 2)) }}</div>
                                             <div>
-                                                <div style="font-weight: 600; color: var(--primary-navy); display: flex; align-items: center; gap: 8px;">
-                                                    {{ $agent['name'] }}
-                                                    {!! $rankBadge !!}
-                                                </div>
-                                                <div style="font-size: 12px; color: var(--gray);">{{ $agent['transaction_count'] }} total transactions</div>
+                                                <div class="agent-name">{{ $agent['name'] }}</div>
+                                                @if($badgeText)
+                                                    <div class="agent-badge {{ $badgeClass }}">{{ $badgeText }}</div>
+                                                @endif
+                                                <div class="agent-transactions">{{ $agent['transaction_count'] }} total transactions</div>
                                             </div>
                                         </div>
                                     </td>
                                     <td>
-                                        <div style="font-weight: 600; color: var(--primary-navy); font-size: 15px;">
-                                            £{{ number_format($agent['agent_earnings'], 2) }}
+                                        <div class="earnings-cell">
+                                            <div class="earnings-amount">£{{ number_format($agent['agent_earnings'], 2) }}</div>
+                                            <div class="earnings-commission">55% of commission</div>
                                         </div>
-                                        <div style="font-size: 12px; color: var(--gray);">55% of commission</div>
                                     </td>
                                     <td>
-                                        <div style="font-weight: 600; color: var(--primary-navy); font-size: 15px;">
-                                            £{{ number_format($agent['agency_earnings'], 2) }}
+                                        <div class="earnings-cell">
+                                            <div class="earnings-amount">£{{ number_format($agent['agency_earnings'], 2) }}</div>
+                                            <div class="earnings-commission">45% of commission</div>
                                         </div>
-                                        <div style="font-size: 12px; color: var(--gray);">45% of commission</div>
                                     </td>
                                     <td>
-                                        <div style="font-weight: 700; color: {{ $loop->index === 0 ? '#f59e0b' : ($loop->index === 1 ? '#6b7280' : ($loop->index === 2 ? '#8b5a2b' : 'var(--primary-navy)')) }}; font-size: 18px;">
+                                        <div class="total-earnings">
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                                <path d="M12 2L15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2z"/>
+                                            </svg>
                                             £{{ number_format($agent['total_earnings'], 2) }}
+                                            <span class="total-label">{{ $agent['transaction_count'] }} total</span>
                                         </div>
-                                        <div style="font-size: 12px; color: var(--gray);">{{ $agent['transaction_count'] }} total</div>
                                     </td>
                                     <td>
-                                        <div style="font-size: 14px; color: var(--primary-navy);">
-                                            {{ $agent['last_transaction_date'] ? $agent['last_transaction_date']->format('d M Y') : 'N/A' }}
-                                        </div>
+                                        <div class="activity-date">{{ $agent['last_transaction_date'] ? $agent['last_transaction_date']->format('d M Y') : 'N/A' }}</div>
                                     </td>
                                     <td>
                                         <a href="{{ isset($agent['id']) ? route('rental-codes.agent-payroll', ['agentId' => $agent['id']]) : route('rental-codes.agent-payroll-by-name', ['agentName' => $agent['name']]) }}" 
-                                           class="btn-truehold btn-primary" style="font-size: 12px; padding: 8px 16px;">
-                                            <i class="fas fa-eye"></i>View Commission File
+                                           class="btn-view-file">
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke-width="2"/>
+                                                <circle cx="12" cy="12" r="3" stroke-width="2"/>
+                                            </svg>
+                                            View Commission File
                                         </a>
                                     </td>
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="6">
-                                        <div class="loading-screen">
-                                            <i class="fas fa-chart-line" style="font-size: 64px; margin-bottom: 16px; opacity: 0.3;"></i>
-                                            <h3 style="color: var(--primary-navy); margin-bottom: 8px;">No earnings data found</h3>
-                                            <p style="color: var(--gray);">No rental codes found for the selected criteria</p>
+                                    <td colspan="6" style="text-align: center; padding: 48px;">
+                                        <div style="display: flex; flex-direction: column; align-items: center; gap: 16px;">
+                                            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="opacity: 0.3;">
+                                                <path d="M23 8c0 1.1-.9 2-2 2-.18 0-.35-.02-.51-.07l-3.56 3.55c.05.16.07.34.07.52 0 1.1-.9 2-2 2s-2-.9-2-2c0-.18.02-.36.07-.52l-2.55-2.55c-.16.05-.34.07-.52.07s-.36-.02-.52-.07l-4.55 4.56c.05.16.07.33.07.51 0 1.1-.9 2-2 2s-2-.9-2-2 .9-2 2-2c.18 0 .35.02.51.07l4.56-4.55C8.02 9.36 8 9.18 8 9c0-1.1.9-2 2-2s2 .9 2 2c0 .18-.02.36-.07.52l2.55 2.55c.16-.05.34-.07.52-.07s.36.02.52.07l3.55-3.56C19.02 8.35 19 8.18 19 8c0-1.1.9-2 2-2s2 .9 2 2z"/>
+                                            </svg>
+                                            <h3 style="color: var(--primary-navy); font-size: 18px; font-weight: 600; margin: 0;">No earnings data found</h3>
+                                            <p style="color: var(--gray); margin: 0;">No rental codes found for the selected criteria</p>
                                         </div>
                                     </td>
                                 </tr>
@@ -1030,215 +886,108 @@
                         </tbody>
                     </table>
                 </div>
-            @else
-                <div class="loading-screen">
-                    <i class="fas fa-chart-line" style="font-size: 64px; margin-bottom: 16px; opacity: 0.3;"></i>
-                    <h3 style="color: var(--primary-navy); margin-bottom: 8px;">No earnings data found</h3>
-                    <p style="color: var(--gray);">No rental codes found for the selected criteria</p>
-                </div>
-            @endif
+            </div>
         </div>
+    </section>
 
-        <!-- Cards View -->
-        <div id="cardsView" class="agent-cards" style="display: none;">
-            @foreach($agentEarnings as $index => $agent)
-                @php
-                    $isAdmin = auth()->check() && auth()->user()->role === 'admin';
-                    $currentUser = auth()->check() ? auth()->user()->name : null;
-                    $isCurrentUser = $agent['name'] === $currentUser;
-                    
-                    if (!$isAdmin && !$isCurrentUser && $loop->index >= 3) {
-                        continue;
-                    }
-                    
-                    $avatarClass = '';
-                    $cardBorder = '';
-                    
-                    if ($loop->index === 0) {
-                        $avatarClass = 'rank-gold';
-                        $cardBorder = 'border-color: #f59e0b;';
-                    } elseif ($loop->index === 1) {
-                        $avatarClass = 'rank-silver';
-                        $cardBorder = 'border-color: #9ca3af;';
-                    } elseif ($loop->index === 2) {
-                        $avatarClass = 'rank-bronze';
-                        $cardBorder = 'border-color: #8b5a2b;';
-                    }
-                @endphp
-                <div class="agent-card" style="{{ $cardBorder }}">
-                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
-                        <div style="display: flex; align-items: center; gap: 12px;">
-                            <div class="agent-avatar {{ $avatarClass }}">
-                                {{ strtoupper(substr($agent['name'], 0, 2)) }}
-                            </div>
-                            <div>
-                                <h4 style="font-weight: 600; color: var(--primary-navy);">{{ $agent['name'] }}</h4>
-                                <p style="font-size: 12px; color: var(--gray);">{{ $agent['transaction_count'] }} transactions</p>
-                            </div>
-                        </div>
-                        <a href="{{ isset($agent['id']) ? route('rental-codes.agent-payroll', ['agentId' => $agent['id']]) : route('rental-codes.agent-payroll-by-name', ['agentName' => $agent['name']]) }}">
-                            <i class="fas fa-money-bill-wave" style="color: var(--gold); font-size: 20px;"></i>
-                        </a>
-                    </div>
-                    
-                    <div style="margin-bottom: 16px;">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                            <span style="font-size: 14px; color: var(--gray);">Total Earnings</span>
-                            <span style="font-size: 22px; font-weight: 700; color: {{ $loop->index === 0 ? '#f59e0b' : ($loop->index === 1 ? '#6b7280' : ($loop->index === 2 ? '#8b5a2b' : 'var(--primary-navy)')) }};">
-                                £{{ number_format($agent['total_earnings'], 2) }}
-                            </span>
-                        </div>
-                    </div>
-                    
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px;">
-                        <div style="background: rgba(16, 185, 129, 0.1); padding: 12px; border-radius: 12px; text-align: center;">
-                            <div style="font-weight: 600; color: #10b981; font-size: 15px;">£{{ number_format($agent['agent_earnings'], 2) }}</div>
-                            <div style="font-size: 11px; color: #059669;">Agent (55%)</div>
-                        </div>
-                        <div style="background: rgba(59, 130, 246, 0.1); padding: 12px; border-radius: 12px; text-align: center;">
-                            <div style="font-weight: 600; color: #3b82f6; font-size: 15px;">£{{ number_format($agent['agency_earnings'], 2) }}</div>
-                            <div style="font-size: 11px; color: #2563eb;">Agency (45%)</div>
-                        </div>
-                    </div>
-                    
-                    <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 12px; border-top: 2px solid var(--light-gray);">
-                        <span style="font-size: 12px; color: var(--gray);">Avg: £{{ number_format($agent['avg_transaction_value'], 2) }}</span>
-                        <span style="font-size: 12px; color: var(--gray);">{{ $agent['last_transaction_date'] ? $agent['last_transaction_date']->format('d M Y') : 'N/A' }}</span>
-                    </div>
-                </div>
-            @endforeach
-        </div>
-    </div>
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script>
-// Filter toggle
-function toggleFilters() {
-    const content = document.getElementById('filtersContent');
-    const icon = document.getElementById('filterToggleIcon');
-    
-    if (content.style.display === 'none') {
-        content.style.display = 'block';
-        icon.classList.remove('fa-chevron-down');
-        icon.classList.add('fa-chevron-up');
-    } else {
-        content.style.display = 'none';
-        icon.classList.remove('fa-chevron-up');
-        icon.classList.add('fa-chevron-down');
-    }
-}
-
-// Commission cycle selection
-function selectCycle(startDate, endDate) {
-    document.getElementById('start_date').value = startDate;
-    document.getElementById('end_date').value = endDate;
-    document.getElementById('filterForm').submit();
-}
-
-// View toggle
-function toggleView(view) {
-    const tableView = document.getElementById('tableView');
-    const cardsView = document.getElementById('cardsView');
-    const tableBtn = document.getElementById('tableViewBtn');
-    const cardsBtn = document.getElementById('cardsViewBtn');
-    
-    if (view === 'table') {
-        tableView.style.display = 'block';
-        cardsView.style.display = 'none';
-        tableBtn.classList.add('active');
-        cardsBtn.classList.remove('active');
-    } else {
-        tableView.style.display = 'none';
-        cardsView.style.display = 'grid';
-        tableBtn.classList.remove('active');
-        cardsBtn.classList.add('active');
-    }
-}
-
-// Export to Excel
-function exportToExcel() {
-    const table = document.querySelector('.agent-table');
-    const rows = Array.from(table.querySelectorAll('tr'));
-    
-    let csv = '';
-    rows.forEach(row => {
-        const cells = Array.from(row.querySelectorAll('th, td'));
-        const rowData = cells.map(cell => {
-            let text = cell.textContent.trim();
-            text = text.replace(/\s+/g, ' ');
-            if (text.includes(',') || text.includes('"')) {
-                text = '"' + text.replace(/"/g, '""') + '"';
-            }
-            return text;
-        });
-        csv += rowData.join(',') + '\n';
-    });
-    
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
-    const url = URL.createObjectURL(blob);
-    link.setAttribute('href', url);
-    link.setAttribute('download', 'agent_earnings_{{ $endDate }}.csv');
-    link.style.visibility = 'hidden';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-}
-
-// Chart.js configuration
-@if(!$agentSearch && count($agentEarnings) > 0)
-Chart.defaults.font.family = '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
-Chart.defaults.color = '#6c757d';
-
-const monthlyCtx = document.getElementById('monthlyChart').getContext('2d');
-const monthlyChart = new Chart(monthlyCtx, {
-    type: 'line',
-    data: {
-        labels: {!! json_encode(array_keys($chartData['monthly_totals'])) !!},
-        datasets: [{
-            label: 'Total Earnings',
-            data: {!! json_encode(array_values($chartData['monthly_totals'])) !!},
-            borderColor: '#d4af37',
-            backgroundColor: 'rgba(212, 175, 55, 0.1)',
-            borderWidth: 3,
-            fill: true,
-            tension: 0.4,
-            pointBackgroundColor: '#d4af37',
-            pointBorderColor: '#fff',
-            pointBorderWidth: 2,
-            pointRadius: 5,
-            pointHoverRadius: 7
-        }]
-    },
-    options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-            legend: {
-                display: false
-            }
-        },
-        scales: {
-            y: {
-                beginAtZero: true,
-                grid: {
-                    color: 'rgba(0, 0, 0, 0.05)'
-                },
-                ticks: {
-                    callback: function(value) {
-                        return '£' + value.toLocaleString();
-                    }
-                }
-            },
-            x: {
-                grid: {
-                    display: false
-                }
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        function toggleFilters() {
+            const toggle = document.querySelector('.filters-toggle');
+            const chevron = document.getElementById('filterToggleIcon');
+            
+            if (chevron.style.transform === 'rotate(180deg)') {
+                chevron.style.transform = 'rotate(0deg)';
+            } else {
+                chevron.style.transform = 'rotate(180deg)';
             }
         }
-    }
-});
-@endif
-</script>
+
+        // Export functionality
+        function exportToExcel() {
+            const table = document.querySelector('.leaderboard-table');
+            const rows = Array.from(table.querySelectorAll('tr'));
+            
+            let csv = '';
+            rows.forEach(row => {
+                const cells = Array.from(row.querySelectorAll('th, td'));
+                const rowData = cells.map(cell => {
+                    let text = cell.textContent.trim();
+                    text = text.replace(/\s+/g, ' ');
+                    if (text.includes(',') || text.includes('"')) {
+                        text = '"' + text.replace(/"/g, '""') + '"';
+                    }
+                    return text;
+                });
+                csv += rowData.join(',') + '\n';
+            });
+            
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            link.setAttribute('href', url);
+            link.setAttribute('download', 'agent_earnings_{{ $endDate }}.csv');
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // Chart.js configuration
+        @if(!$agentSearch && count($agentEarnings) > 0)
+        Chart.defaults.font.family = '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+        Chart.defaults.color = '#6c757d';
+
+        const monthlyCtx = document.getElementById('monthlyChart').getContext('2d');
+        const monthlyChart = new Chart(monthlyCtx, {
+            type: 'line',
+            data: {
+                labels: {!! json_encode(array_keys($chartData['monthly_totals'])) !!},
+                datasets: [{
+                    label: 'Total Earnings',
+                    data: {!! json_encode(array_values($chartData['monthly_totals'])) !!},
+                    borderColor: '#d4af37',
+                    backgroundColor: 'rgba(212, 175, 55, 0.1)',
+                    borderWidth: 3,
+                    fill: true,
+                    tension: 0.4,
+                    pointBackgroundColor: '#d4af37',
+                    pointBorderColor: '#fff',
+                    pointBorderWidth: 2,
+                    pointRadius: 5,
+                    pointHoverRadius: 7
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.05)'
+                        },
+                        ticks: {
+                            callback: function(value) {
+                                return '£' + value.toLocaleString();
+                            }
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        }
+                    }
+                }
+            }
+        });
+        @endif
+    </script>
+</body>
+</html>
 @endsection
