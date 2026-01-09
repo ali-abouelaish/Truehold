@@ -1469,24 +1469,7 @@ select.filter-input option {
                     infoWindow.setContent(content);
                     
                     // Calculate position above marker using simple offset
-                    const projection = map.getProjection();
-                    if (projection) {
-                        const scale = Math.pow(2, map.getZoom());
-                        const markerPoint = projection.fromLatLngToPoint(markerPos);
-                        
-                        // Offset: 180 pixels up (info window height + small gap)
-                        const offsetY = 20/ scale;
-                        const offsetPoint = new google.maps.Point(markerPoint.x, markerPoint.y - offsetY);
-                        const offsetLatLng = projection.fromPointToLatLng(offsetPoint);
-                        
-                        // Set position and open
-                        infoWindow.setPosition(offsetLatLng);
-                        infoWindow.open(map);
-                    } else {
-                        // Fallback: open at marker position
-                        infoWindow.open(map, marker);
-                    }
-                });
+                    
 
                 markers.push(marker);
             });
