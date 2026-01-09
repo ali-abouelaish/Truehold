@@ -12,7 +12,8 @@ google_sheet_csv = "https://docs.google.com/spreadsheets/d/1qkiVKv8HimkCznrxMvJV
 df_profiles = pd.read_csv(google_sheet_csv)
 
 profiles = df_profiles.iloc[:, 0].tolist()
-flags = df_profiles.iloc[:, 1].fillna("").tolist()
+paying_flags = df_profiles.iloc[:, 1].fillna("").tolist()
+property_flags = df_profiles.iloc[:, 2].fillna("").tolist() if len(df_profiles.columns) > 2 else [""] * len(profiles)
 
 # -----------------------------
 # 2) Scraper setup
@@ -25,8 +26,10 @@ all_results = []   # ← this is now your main array
 # -----------------------------
 # 3) Scrape each profile
 # -----------------------------
-for profile_url, flag in zip(profiles, flags):
+for profile_url, paying_flag, property_flag in zip(profiles, paying_flags, property_flags):
     print(f"\n🔍 Scraping profile: {profile_url}")
+    if property_flag:
+        print(f"   📌 Will apply flag: {property_flag}")
     offset = 0
     prev_page_links = set()
 
@@ -61,7 +64,8 @@ for profile_url, flag in zip(profiles, flags):
                 all_results.append({
                     "profile": profile_url,
                     "url": link,
-                    "paying": flag
+                    "paying": paying_flag,
+                    "profile_flag": property_flag
                 })
 
             prev_page_links = current_page_links
@@ -212,7 +216,7 @@ def extract_feature_list(soup):
                 features[key] = val
     return features
 
-def scrape_listing_advanced(url,paying):
+def scrape_listing_advanced(url, paying, profile_flag=""):
     try:
         headers = {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
@@ -414,7 +418,8 @@ def scrape_listing_advanced(url,paying):
             "first_photo_url": first_photo_url,
             "all_photos": all_photos,
             "photos": json.dumps(all_photo_urls) if all_photo_urls else None,
-            "paying": paying
+            "paying": paying,
+            "profile_flag": profile_flag
 
         }
 
@@ -431,6 +436,7 @@ def main(listings):
     for item in listings:
         url = item.get("url")
         paying = item.get("paying", "")
+        profile_flag = item.get("profile_flag", "")
 
         if not url:
             continue
@@ -443,7 +449,9 @@ def main(listings):
         seen_urls.add(url)
 
         print(f"Scraping {url}")
-        data = scrape_listing_advanced(url, paying)
+        if profile_flag:
+            print(f"   📌 Applying profile flag: {profile_flag}")
+        data = scrape_listing_advanced(url, paying, profile_flag)
         if data:
             results.append(data)
 
@@ -457,18 +465,81 @@ def main(listings):
         print("❌ No listings scraped. Sheet not updated.")
         return
 
-    # 1️⃣ Clear everything EXCEPT the header row
+    # ========================================
+    # PRESERVE EXISTING FLAGS
+    # ========================================
+    print("\n📌 Preserving existing flags...")
+    
+    # 1️⃣ Read existing data with flags
+    existing_data = sheet.get_all_records()
+    existing_headers = sheet.row_values(1)
+    
+    # Create a dictionary mapping URL -> (flag, flag_color)
+    flag_map = {}
+    if existing_data:
+        for row in existing_data:
+            url = row.get('url', '').strip()
+            flag = row.get('flag', '')
+            flag_color = row.get('flag_color', '')
+            
+            # Only store if URL exists and flag is set
+            if url and (flag or flag_color):
+                flag_map[url] = {
+                    'flag': flag if flag else '',
+                    'flag_color': flag_color if flag_color else ''
+                }
+    
+    print(f"✓ Found {len(flag_map)} properties with existing flags")
+    
+    # 2️⃣ Add flag and flag_color columns to df_output if they don't exist
+    if 'flag' not in df_output.columns:
+        df_output['flag'] = ''
+    if 'flag_color' not in df_output.columns:
+        df_output['flag_color'] = ''
+    
+    # 3️⃣ Apply flags with priority: Manual > Profile > Empty
+    manual_count = 0
+    profile_count = 0
+    
+    for idx, row in df_output.iterrows():
+        url = row.get('url', '').strip()
+        profile_flag = row.get('profile_flag', '').strip()
+        
+        # Priority 1: Manual flags from sheet (preserved)
+        if url in flag_map:
+            df_output.at[idx, 'flag'] = flag_map[url]['flag']
+            df_output.at[idx, 'flag_color'] = flag_map[url]['flag_color']
+            manual_count += 1
+        # Priority 2: Profile flags from agent
+        elif profile_flag:
+            df_output.at[idx, 'flag'] = profile_flag
+            # You can set a default color here or leave empty
+            # df_output.at[idx, 'flag_color'] = '#FFD700'  # Gold for profile flags
+            profile_count += 1
+    
+    print(f"✓ Applied {manual_count} manual flags (preserved)")
+    print(f"✓ Applied {profile_count} profile flags (from agents)")
+    
+    # Remove the profile_flag column before uploading (it's only used internally)
+    if 'profile_flag' in df_output.columns:
+        df_output = df_output.drop(columns=['profile_flag'])
+    
+    # ========================================
+    # UPDATE SHEET
+    # ========================================
+    
+    # 4️⃣ Clear everything EXCEPT the header row
     sheet.batch_clear(["A2:ZZ"])
 
-    # 2️⃣ Ensure headers match dataframe
-    existing_headers = sheet.row_values(1)
+    # 5️⃣ Ensure headers match dataframe
     df_headers = df_output.columns.tolist()
 
     if existing_headers != df_headers:
         sheet.update("A1", [df_headers])
+        print(f"✓ Updated headers: {df_headers}")
 
-    # 3️⃣ Append new rows
+    # 6️⃣ Append new rows with preserved flags
     rows = df_output.astype(str).values.tolist()
     sheet.append_rows(rows, value_input_option="RAW")
 
-    print(f"\n✅ Successfully uploaded {len(df_output)} listings to Sheet!")
+    print(f"\n✅ Successfully uploaded {len(df_output)} listings to Sheet with preserved flags!")

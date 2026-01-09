@@ -195,6 +195,8 @@ body {
     color: var(--white);
     padding: 24px 0;
     box-shadow: 0 4px 16px rgba(30, 58, 95, 0.15);
+    position: relative;
+    z-index: 10;
 }
 
 .map-header-content {
@@ -265,6 +267,8 @@ body {
     padding: 24px 0;
     background-color: var(--white);
     border-bottom: 1px solid var(--light-gray);
+    position: relative;
+    z-index: 10;
 }
 
 .filters-toggle {
@@ -304,6 +308,8 @@ body {
     background: linear-gradient(135deg, #475569 0%, #3f4a5c 100%);
     border-radius: 16px;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    position: relative;
+    z-index: 100;
 }
 
 .filters-content.active {
@@ -440,8 +446,8 @@ select.filter-input option {
    ========================================== */
 
 .map-controls {
-    position: absolute;
-    top: 160px;
+    position: fixed;
+    top: 285px;
     left: 24px;
     z-index: 1000;
     display: flex;
@@ -488,11 +494,12 @@ select.filter-input option {
 
 .map-container {
     position: fixed;
-    top: 200px;
-            left: 0;
-            right: 0;
-            bottom: 0;
+    top: 270px;
+    left: 0;
+    right: 0;
+    bottom: 0;
     background-color: var(--light-gray);
+    z-index: 1;
 }
 
 #map {
@@ -787,7 +794,7 @@ select.filter-input option {
     }
     
     .map-controls {
-        top: 150px;
+        top: 265px;
         left: 16px;
     }
     
@@ -798,7 +805,7 @@ select.filter-input option {
     
     
     .map-container {
-        top: 190px;
+        top: 250px;
     }
     
     .nav-links {
