@@ -1474,6 +1474,7 @@ marker.hoverIcon = {
                 });
                 const infoWindow = new google.maps.InfoWindow({
                     disableAutoPan: true // optional but recommended
+                    pixelOffset: new google.maps.Size(0, 100)
 });
 
                 // Click handler for marker
