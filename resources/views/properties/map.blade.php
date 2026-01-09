@@ -1475,7 +1475,7 @@ select.filter-input option {
                         const markerPoint = projection.fromLatLngToPoint(markerPos);
                         
                         // Offset: 180 pixels up (info window height + small gap)
-                        const offsetY = 180 / scale;
+                        const offsetY = 20/ scale;
                         const offsetPoint = new google.maps.Point(markerPoint.x, markerPoint.y - offsetY);
                         const offsetLatLng = projection.fromPointToLatLng(offsetPoint);
                         
