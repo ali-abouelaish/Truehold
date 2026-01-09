@@ -393,47 +393,6 @@ select.filter-input option {
     color: var(--white);
 }
 
-/* Paying Agents Only Checkbox */
-.paying-filter-checkbox {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    position: relative;
-    padding: 14px 16px;
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    border-radius: 8px;
-    background-color: rgba(30, 41, 59, 0.5);
-    cursor: pointer;
-    transition: var(--transition);
-}
-
-.paying-filter-checkbox:hover {
-    border-color: var(--gold);
-    background-color: rgba(30, 41, 59, 0.7);
-    box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.1);
-}
-
-.paying-filter-checkbox input[type="checkbox"] {
-    position: absolute;
-    opacity: 0;
-    width: 0;
-    height: 0;
-}
-
-.paying-filter-checkbox .checkbox-icon {
-    color: rgba(255, 255, 255, 0.4);
-    transition: var(--transition);
-}
-
-.paying-filter-checkbox:hover .checkbox-icon {
-    color: rgba(255, 255, 255, 0.6);
-}
-
-.paying-filter-checkbox input[type="checkbox"]:checked ~ .checkbox-icon {
-    color: var(--gold);
-    filter: drop-shadow(0 0 8px rgba(212, 175, 55, 0.6));
-}
-
 .filter-actions {
     display: flex;
     gap: 12px;
@@ -897,15 +856,6 @@ select.filter-input option {
         font-size: 14px;
     }
     
-    .paying-filter-checkbox {
-        padding: 12px 14px;
-    }
-    
-    .paying-filter-checkbox .checkbox-icon {
-        width: 20px;
-        height: 20px;
-    }
-    
     .filter-actions {
         flex-direction: column;
     }
@@ -1131,22 +1081,6 @@ select.filter-input option {
                             <option value="No">No</option>
                         </select>
                     </div>
-                    
-                    @auth
-                    <div class="filter-group">
-                        <label class="filter-label">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" style="color: var(--gold);">
-                                <path d="M13 2L3 14h8l-1 8 10-12h-8l1-8z"/>
-                            </svg>
-                        </label>
-                        <label class="paying-filter-checkbox" for="filterPayingOnly" title="Show only paying agents">
-                            <input type="checkbox" id="filterPayingOnly">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" class="checkbox-icon">
-                                <path d="M13 2L3 14h8l-1 8 10-12h-8l1-8z"/>
-                            </svg>
-                        </label>
-                    </div>
-                    @endif
                 </div>
                         
                 <div class="filter-actions">
@@ -1537,7 +1471,6 @@ select.filter-input option {
             const couplesAllowed = document.getElementById('filterCouplesAllowed').value.toLowerCase();
             @auth
             const agentName = document.getElementById('filterAgentName')?.value.toLowerCase() || '';
-            const payingOnly = document.getElementById('filterPayingOnly')?.checked || false;
             @endauth
             
             let visibleCount = 0;
@@ -1576,18 +1509,6 @@ select.filter-input option {
                     if (agentName && property.agent_name?.toLowerCase() !== agentName) {
                         visible = false;
                     }
-                    
-                    // Paying agents only filter (only for authenticated users)
-                    if (payingOnly) {
-                        const isPaying = property.paying === 'Yes' || 
-                                       property.paying === 'yes' || 
-                                       property.paying === '1' || 
-                                       property.paying === 1 || 
-                                       property.paying === true;
-                        if (!isPaying) {
-                            visible = false;
-                        }
-                    }
                     @endauth
                     
                     marker.setVisible(visible);
@@ -1615,8 +1536,6 @@ select.filter-input option {
             @auth
             const agentFilter = document.getElementById('filterAgentName');
             if (agentFilter) agentFilter.value = '';
-            const payingFilter = document.getElementById('filterPayingOnly');
-            if (payingFilter) payingFilter.checked = false;
             @endauth
             
             // Show all markers
