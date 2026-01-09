@@ -1468,64 +1468,37 @@ select.filter-input option {
                 marker.addListener('mouseout', function() {
                     this.setIcon(this.originalIcon);
                 });
+                const infoWindow = new google.maps.InfoWindow({
+    pixelOffset: new google.maps.Size(0, -10)
+});
 
                 // Click handler for marker
-                marker.addListener('click', function() {
-                    // Close any existing info windows
-                    if (infoWindow) {
-                        infoWindow.close();
-                    }
-                    
-                    // Get marker position
-                    const markerPosition = marker.getPosition();
-                    
-                    // Build content HTML
-                    const content = buildInfoWindowContent(property);
-                    
-                    // Set content to info window
-                    infoWindow.setContent(content);
-                    
-                    // Calculate position to display info window above marker
-                    const projection = map.getProjection();
-                    if (projection) {
-                        // Get current zoom scale
-                        const zoomScale = Math.pow(2, map.getZoom());
-                        
-                        // Convert marker position to point
-                        const markerPoint = projection.fromLatLngToPoint(markerPosition);
-                        
-                        // Calculate offset (180 pixels up, adjusted for zoom)
-                        const offsetPixels = 180;
-                        const offsetY = offsetPixels / zoomScale;
-                        
-                        // Create offset point
-                        const offsetPoint = new google.maps.Point(
-                            markerPoint.x,
-                            markerPoint.y - offsetY
-                        );
-                        
-                        // Convert back to lat/lng
-                        const offsetLatLng = projection.fromPointToLatLng(offsetPoint);
-                        
-                        // Set position and open info window
-                        infoWindow.setPosition(offsetLatLng);
-                        infoWindow.open(map);
-                    } else {
-                        // Fallback: open at marker position if projection unavailable
-                        infoWindow.open(map, marker);
-                    }
-                    
-                    // Add event listener for "View Full Details" link
-                    google.maps.event.addListenerOnce(infoWindow, 'domready', function() {
-                        const viewDetailsLink = document.querySelector('.info-window-btn[data-save-url]');
-                        if (viewDetailsLink) {
-                            viewDetailsLink.addEventListener('click', function(event) {
-                                // Save current URL to session storage for back navigation
-                                sessionStorage.setItem('propertyListingUrl', window.location.href);
-                            });
-                        }
-                    });
-                });
+                marker.addListener('click', function () {
+    if (infoWindow) {
+        infoWindow.close();
+    }
+
+    const content = buildInfoWindowContent(property);
+    infoWindow.setContent(content);
+
+    // ✅ THIS is all you need
+    infoWindow.open(map, marker);
+
+    google.maps.event.addListenerOnce(infoWindow, 'domready', function () {
+        const viewDetailsLink = document.querySelector(
+            '.info-window-btn[data-save-url]'
+        );
+        if (viewDetailsLink) {
+            viewDetailsLink.addEventListener('click', function () {
+                sessionStorage.setItem(
+                    'propertyListingUrl',
+                    window.location.href
+                );
+            });
+        }
+    });
+});
+
 
 
                 markers.push(marker);
