@@ -1430,36 +1430,40 @@ select.filter-input option {
                         map: map,
                     title: property.title,
                     animation: google.maps.Animation.DROP,
-                            icon: {
-                        path: markerShape,
-                        scale: markerScale,
-                        fillColor: markerColor,
-                                fillOpacity: 1,
-                        strokeColor: isPremium ? '#b8941f' : '#1e3a5f',
-                        strokeWeight: isPremium ? 3 : 2
-                    },
+                    icon: {
+    path: markerShape,
+    scale: markerScale,
+    fillColor: markerColor,
+    fillOpacity: 1,
+    strokeColor: isPremium ? '#b8941f' : '#1e3a5f',
+    strokeWeight: isPremium ? 3 : 2,
+    anchor: new google.maps.Point(0, 0) // ✅ CRITICAL
+},
                     zIndex: isPremium ? 1000 : 100 // Premium markers on top
                 });
                 
                 // Store original marker properties for hover
                 marker.originalIcon = {
-                    path: markerShape,
-                    scale: markerScale,
-                    fillColor: markerColor,
-                    fillOpacity: 1,
-                    strokeColor: isPremium ? '#b8941f' : '#1e3a5f',
-                    strokeWeight: isPremium ? 3 : 2
-                };
+    path: markerShape,
+    scale: markerScale,
+    fillColor: markerColor,
+    fillOpacity: 1,
+    strokeColor: isPremium ? '#b8941f' : '#1e3a5f',
+    strokeWeight: isPremium ? 3 : 2,
+    anchor: new google.maps.Point(0, 0) // ✅
+};
+
                 
-                marker.hoverIcon = {
-                    path: markerShape,
-                    scale: markerScale + 2,
-                    fillColor: hoverColor,
-                    fillOpacity: 1,
-                    strokeColor: isPremium ? '#b8941f' : '#1e3a5f',
-                    strokeWeight: isPremium ? 4 : 3
-                };
-                
+marker.hoverIcon = {
+    path: markerShape,
+    scale: markerScale + 2,
+    fillColor: hoverColor,
+    fillOpacity: 1,
+    strokeColor: isPremium ? '#b8941f' : '#1e3a5f',
+    strokeWeight: isPremium ? 4 : 3,
+    anchor: new google.maps.Point(0, 0) // ✅
+};
+
                 // Add hover effect
                 marker.addListener('mouseover', function() {
                     this.setIcon(this.hoverIcon);
@@ -1469,7 +1473,7 @@ select.filter-input option {
                     this.setIcon(this.originalIcon);
                 });
                 const infoWindow = new google.maps.InfoWindow({
-    pixelOffset: new google.maps.Size(0, -10)
+                    disableAutoPan: true // optional but recommended
 });
 
                 // Click handler for marker
