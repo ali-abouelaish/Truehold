@@ -393,6 +393,47 @@ select.filter-input option {
     color: var(--white);
 }
 
+/* Paying Agents Only Checkbox */
+.paying-filter-checkbox {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    padding: 14px 16px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 8px;
+    background-color: rgba(30, 41, 59, 0.5);
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.paying-filter-checkbox:hover {
+    border-color: var(--gold);
+    background-color: rgba(30, 41, 59, 0.7);
+    box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.1);
+}
+
+.paying-filter-checkbox input[type="checkbox"] {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.paying-filter-checkbox .checkbox-icon {
+    color: rgba(255, 255, 255, 0.4);
+    transition: var(--transition);
+}
+
+.paying-filter-checkbox:hover .checkbox-icon {
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.paying-filter-checkbox input[type="checkbox"]:checked ~ .checkbox-icon {
+    color: var(--gold);
+    filter: drop-shadow(0 0 8px rgba(212, 175, 55, 0.6));
+}
+
 .filter-actions {
     display: flex;
     gap: 12px;
@@ -568,7 +609,7 @@ select.filter-input option {
 .loading-text {
     margin-top: 20px;
     font-size: 18px;
-    font-weight: 600;
+            font-weight: 600;
     color: var(--primary-navy);
 }
 
@@ -856,6 +897,15 @@ select.filter-input option {
         font-size: 14px;
     }
     
+    .paying-filter-checkbox {
+        padding: 12px 14px;
+    }
+    
+    .paying-filter-checkbox .checkbox-icon {
+        width: 20px;
+        height: 20px;
+    }
+    
     .filter-actions {
         flex-direction: column;
     }
@@ -1004,11 +1054,11 @@ select.filter-input option {
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M10 18h4v-2h-4v2zM3 6v2h18V6H3zm3 7h12v-2H6v2z"/>
                 </svg>
-                <span id="filterToggleText">Show Filters</span>
+                    <span id="filterToggleText">Show Filters</span>
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" class="chevron" id="filterChevron">
                     <path d="M6 9l6 6 6-6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                 </svg>
-            </button>
+                </button>
                 
             <!-- Filters Content -->
             <div class="filters-content" id="mapFiltersContent">
@@ -1020,17 +1070,21 @@ select.filter-input option {
                 </div>
                 
                 <div class="filter-grid">
+                    @auth
                     <div class="filter-group">
-                        <label class="filter-label">Location</label>
-                        <select id="filterLocation" class="filter-input">
-                            <option value="">All Locations</option>
-                            @foreach($locations ?? [] as $location)
-                                @if($location && $location !== 'N/A')
-                                    <option value="{{ $location }}">{{ $location }}</option>
-                                @endif
-                            @endforeach
-                        </select>
+                        <label class="filter-label">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" style="color: var(--gold);">
+                                <path d="M13 2L3 14h8l-1 8 10-12h-8l1-8z"/>
+                            </svg>
+                        </label>
+                        <label class="paying-filter-checkbox" for="filterPayingOnly" title="Show only paying agents">
+                            <input type="checkbox" id="filterPayingOnly">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" class="checkbox-icon">
+                                <path d="M13 2L3 14h8l-1 8 10-12h-8l1-8z"/>
+                            </svg>
+                        </label>
                     </div>
+                    @endif
                     
                     <div class="filter-group">
                         <label class="filter-label">Property Type</label>
@@ -1097,9 +1151,9 @@ select.filter-input option {
                         </svg>
                         Apply Filters
                                 </button>
+                            </div>
+                        </div>
                 </div>
-            </div>
-        </div>
     </section>
 
     <!-- Map Controls -->
@@ -1464,13 +1518,13 @@ select.filter-input option {
         }
         
         function applyMapFilters() {
-            const location = document.getElementById('filterLocation').value.toLowerCase();
             const propertyType = document.getElementById('filterPropertyType').value.toLowerCase();
             const minPrice = parseFloat(document.getElementById('filterMinPrice').value) || 0;
             const maxPrice = parseFloat(document.getElementById('filterMaxPrice').value) || Infinity;
             const couplesAllowed = document.getElementById('filterCouplesAllowed').value.toLowerCase();
             @auth
             const agentName = document.getElementById('filterAgentName')?.value.toLowerCase() || '';
+            const payingOnly = document.getElementById('filterPayingOnly')?.checked || false;
             @endauth
             
             let visibleCount = 0;
@@ -1483,12 +1537,7 @@ select.filter-input option {
                     
                     let visible = true;
                     
-                // Location filter
-                    if (location && property.location?.toLowerCase() !== location) {
-                        visible = false;
-                }
-
-                // Property type filter
+                    // Property type filter
                     if (propertyType && property.property_type?.toLowerCase() !== propertyType) {
                         visible = false;
                     }
@@ -1509,6 +1558,18 @@ select.filter-input option {
                     if (agentName && property.agent_name?.toLowerCase() !== agentName) {
                         visible = false;
                     }
+                    
+                    // Paying agents only filter (only for authenticated users)
+                    if (payingOnly) {
+                        const isPaying = property.paying === 'Yes' || 
+                                       property.paying === 'yes' || 
+                                       property.paying === '1' || 
+                                       property.paying === 1 || 
+                                       property.paying === true;
+                        if (!isPaying) {
+                            visible = false;
+                        }
+                    }
                     @endauth
                     
                     marker.setVisible(visible);
@@ -1528,7 +1589,6 @@ select.filter-input option {
         
         function clearMapFilters() {
             // Reset all filter inputs
-            document.getElementById('filterLocation').value = '';
             document.getElementById('filterPropertyType').value = '';
             document.getElementById('filterMinPrice').value = '';
             document.getElementById('filterMaxPrice').value = '';
@@ -1536,6 +1596,8 @@ select.filter-input option {
             @auth
             const agentFilter = document.getElementById('filterAgentName');
             if (agentFilter) agentFilter.value = '';
+            const payingFilter = document.getElementById('filterPayingOnly');
+            if (payingFilter) payingFilter.checked = false;
             @endauth
             
             // Show all markers

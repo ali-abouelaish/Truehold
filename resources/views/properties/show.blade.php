@@ -612,7 +612,7 @@ html {
 
 .property-location-large {
     display: flex;
-    align-items: center;
+            align-items: center;
     gap: 8px;
     color: var(--gray);
     font-size: 16px;
@@ -1288,8 +1288,8 @@ html {
     
     .btn-action,
     .btn-action-secondary {
-        width: 100%;
-        justify-content: center;
+                width: 100%;
+                justify-content: center;
         padding: 12px 20px;
         font-size: 14px;
     }
@@ -1551,7 +1551,7 @@ html {
     .lightbox-image {
         max-height: 75vh;
     }
-}
+        }
     </style>
     
     <script>
@@ -1623,7 +1623,7 @@ html {
                         </svg>
                         Map View
                     </a></li>
-                    @auth
+                        @auth
                     <li><a href="{{ route('admin.dashboard') }}" class="btn-agent">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
                             <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
@@ -1637,9 +1637,9 @@ html {
                         </svg>
                         Agent Login
                     </a></li>
-                    @endauth
+                        @endauth
                 </ul>
-                        </div>
+                    </div>
                             </div>
     </nav>
 
@@ -1652,7 +1652,7 @@ html {
                 </svg>
                 Back to Listings
             </a>
-                        </div>
+                            </div>
     </section>
 
     <!-- Success Message -->
@@ -1661,8 +1661,8 @@ html {
             <div class="success-alert">
                 <i class="fas fa-check-circle" style="font-size: 24px;"></i>
                 <span>{{ session('success') }}</span>
-                            </div>
-                            </div>
+                    </div>
+                </div>
                         @endif
 
     <!-- Property Details -->
@@ -2108,7 +2108,7 @@ html {
                     if (window.history.length > 1 && document.referrer && 
                         (document.referrer.includes('{{ route('properties.index') }}') || 
                          document.referrer.includes('{{ route('properties.map') }}'))) {
-                        e.preventDefault();
+                e.preventDefault();
                         window.history.back();
                     }
                 });
