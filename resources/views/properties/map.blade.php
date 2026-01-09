@@ -1205,6 +1205,13 @@ select.filter-input option {
         let markers = [];
         let infoWindow;
         let properties = [];
+        let projectionHelper;
+
+        // Debug tools:
+        // - Append `?debug_iw=1` to the map URL to enable logging
+        // - In DevTools console you can tweak: window.__iwOffsetY = 24; then click a marker again
+        const IW_DEBUG = new URLSearchParams(window.location.search).get('debug_iw') === '1';
+        window.__iwOffsetY = window.__iwOffsetY ?? 0;
 
         // Generate a consistent color for each landlord/agent
         function getColorForAgent(agentName) {
@@ -1257,6 +1264,13 @@ select.filter-input option {
                     zoomControl: true
                 });
                 
+                // Projection helper for debugging pixel offsets
+                projectionHelper = new google.maps.OverlayView();
+                projectionHelper.onAdd = function () {};
+                projectionHelper.draw = function () {};
+                projectionHelper.onRemove = function () {};
+                projectionHelper.setMap(map);
+
                 // Create info window (anchored to marker; don't auto-pan on zoom)
                 infoWindow = new google.maps.InfoWindow({
                     disableAutoPan: true,
@@ -1467,7 +1481,47 @@ select.filter-input option {
             `;
                     infoWindow.setContent(content);
                     // Anchor the card to the marker so it stays attached while zooming/panning
+                    // Allow live tuning of offset (positive Y moves card DOWN, negative moves it UP)
+                    infoWindow.setOptions({ pixelOffset: new google.maps.Size(0, Number(window.__iwOffsetY || 0)) });
                     infoWindow.open({ map, anchor: marker, shouldFocus: false });
+
+                    // Debug: log marker pixel vs info-window pixel to measure the gap
+                    if (IW_DEBUG) {
+                        google.maps.event.addListenerOnce(infoWindow, 'domready', () => {
+                            try {
+                                const proj = projectionHelper?.getProjection?.();
+                                const pos = marker.getPosition();
+                                const markerPx = proj && pos ? proj.fromLatLngToDivPixel(pos) : null;
+
+                                // Try to locate the rendered InfoWindow container
+                                const iwEl =
+                                    document.querySelector('.gm-style-iw') ||
+                                    document.querySelector('.gm-style-iw-c') ||
+                                    document.querySelector('.gm-style-iw-d');
+                                const rect = iwEl ? iwEl.getBoundingClientRect() : null;
+
+                                console.groupCollapsed('🪲 InfoWindow debug');
+                                console.log('zoom:', map.getZoom());
+                                console.log('marker latlng:', pos?.toJSON?.() ?? pos);
+                                console.log('marker divPixel:', markerPx);
+                                console.log('iw rect:', rect);
+                                if (markerPx && rect) {
+                                    // viewport-origin for divPixel is map div; rect is viewport, so this is approximate
+                                    console.log('note: rect is viewport-based; divPixel is map-pane-based (gap is still useful directionally)');
+                                }
+                                console.log('pixelOffsetY (window.__iwOffsetY):', window.__iwOffsetY);
+                                console.groupEnd();
+
+                                // Visual cue: outline the info window if found
+                                if (iwEl) {
+                                    iwEl.style.outline = '2px dashed rgba(212, 175, 55, 0.8)';
+                                    iwEl.style.outlineOffset = '2px';
+                                }
+                            } catch (e) {
+                                console.warn('InfoWindow debug failed:', e);
+                            }
+                        });
+                    }
                 });
 
                 markers.push(marker);
