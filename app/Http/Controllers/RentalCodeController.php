@@ -1847,12 +1847,15 @@ public function generateCode()
 
             $byAgent[$agentName]['outstanding_amount'] = max(0, $byAgent[$agentName]['entitled_amount'] - $byAgent[$agentName]['paid_amount']);
 
+            // Store negative agent_cut for refunded items to make display clearer
+            $displayAgentCut = $isRefunded ? -$agentCut : $agentCut;
+
             $byAgent[$agentName]['transactions'][] = [
                 'id' => $code->id,
                 'total_fee' => $totalFee,
                 'base_commission' => $baseCommission,
                 'agency_cut' => $agencyCut,
-                'agent_cut' => $agentCut,
+                'agent_cut' => $displayAgentCut, // Negative if refunded
                 'vat_amount' => in_array($paymentMethod, ['Transfer', 'Card machine']) ? ($totalFee - $baseCommission) : 0,
                 'marketing_deduction' => 0,
                 'marketing_agent' => null,
@@ -1984,13 +1987,16 @@ public function generateCode()
                     $byAgent[$requestedAgentName]['entitled_amount'] - $byAgent[$requestedAgentName]['paid_amount']
                 );
 
+                // Store negative agent_cut for refunded items to make display clearer
+                $displayMarketingCut = $isRefunded ? -$marketingCommission : $marketingCommission;
+
                 // Add transaction record
                 $byAgent[$requestedAgentName]['transactions'][] = [
                     'id' => $code->id,
                     'total_fee' => $totalFee,
                     'base_commission' => $marketingCommission,
                     'agency_cut' => 0,
-                    'agent_cut' => $marketingCommission,
+                    'agent_cut' => $displayMarketingCut, // Negative if refunded
                     'vat_amount' => 0,
                     'marketing_deduction' => 0,
                     'marketing_agent' => $requestedAgentName,
@@ -2309,29 +2315,51 @@ public function generateCode()
                 }
             }
 
-            // Add to agent totals
-            $agentData['agency_earnings'] += $agencyCut;
-            $agentData['agent_earnings'] += $agentCut;
-            $agentData['total_earnings'] += $baseCommission;
-            $agentData['transaction_count'] += 1;
+            // Check if refunded
+            $isRefunded = $code->refunded ?? false;
 
-            // Track VAT deductions
-            if (in_array($paymentMethod, ['Transfer', 'Card machine'])) {
-                $vatAmount = $totalFee - $baseCommission;
-                $agentData['vat_deductions'] += $vatAmount;
-            }
-
-            // Track paid amounts
-            $isPaid = $code->paid ?? false;
-            $agentEarnings = $agentCut;
-
-            if ($isPaid) {
-                $agentData['paid_amount'] += $agentEarnings;
+            // If refunded, subtract from totals instead of adding
+            if ($isRefunded) {
+                $agentData['agency_earnings'] -= $agencyCut;
+                $agentData['agent_earnings'] -= $agentCut;
+                $agentData['total_earnings'] -= $baseCommission;
+                $agentData['transaction_count'] += 1;
+                
+                // Deduct from paid or entitled amounts
+                $isPaid = $code->paid ?? false;
+                if ($isPaid) {
+                    $agentData['paid_amount'] -= $agentCut;
+                } else {
+                    $agentData['entitled_amount'] -= $agentCut;
+                }
             } else {
-                $agentData['entitled_amount'] += $agentEarnings;
+                // Add to agent totals (normal flow)
+                $agentData['agency_earnings'] += $agencyCut;
+                $agentData['agent_earnings'] += $agentCut;
+                $agentData['total_earnings'] += $baseCommission;
+                $agentData['transaction_count'] += 1;
+
+                // Track VAT deductions
+                if (in_array($paymentMethod, ['Transfer', 'Card machine'])) {
+                    $vatAmount = $totalFee - $baseCommission;
+                    $agentData['vat_deductions'] += $vatAmount;
+                }
+
+                // Track paid amounts
+                $isPaid = $code->paid ?? false;
+                $agentEarnings = $agentCut;
+
+                if ($isPaid) {
+                    $agentData['paid_amount'] += $agentEarnings;
+                } else {
+                    $agentData['entitled_amount'] += $agentEarnings;
+                }
             }
 
             $agentData['outstanding_amount'] = max(0, $agentData['entitled_amount'] - $agentData['paid_amount']);
+
+            // Store negative agent_cut for refunded items to make display clearer
+            $displayAgentCut = $isRefunded ? -$agentCut : $agentCut;
 
             // Add transaction details
             $agentData['transactions'][] = [
@@ -2339,14 +2367,16 @@ public function generateCode()
                 'total_fee' => $totalFee,
                 'base_commission' => $baseCommission,
                 'agency_cut' => $agencyCut,
-                'agent_cut' => $agentCut,
+                'agent_cut' => $displayAgentCut, // Negative if refunded
                 'vat_amount' => in_array($paymentMethod, ['Transfer', 'Card machine']) ? ($totalFee - $baseCommission) : 0,
                 'marketing_deduction' => $marketingDeduction ?? 0,
                 'marketing_agent' => $code->marketing_agent_name,
                 'client_count' => $clientCount,
                 'clients' => $code->client ? $code->client->full_name : 'N/A',
-                'paid' => $isPaid,
+                'paid' => $isPaid ?? false,
                 'paid_at' => $code->paid_at,
+                'refunded' => $isRefunded,
+                'refunded_at' => $code->refunded_at,
                 'date' => $rentalDate,
                 'code' => $code->rental_code ?? 'N/A',
                 'status' => $code->status ?? 'Unknown',

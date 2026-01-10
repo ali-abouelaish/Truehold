@@ -1083,8 +1083,8 @@ body {
                         </div>
                         <div class="detail-item">
                             <div class="detail-label">{{ ($transaction['is_marketing_earnings'] ?? false) ? 'Marketing Cut' : 'Agent Cut' }}</div>
-                            <div class="detail-value {{ ($transaction['refunded'] ?? false) ? 'refunded' : 'success' }}" style="{{ ($transaction['refunded'] ?? false) ? 'color: #ef4444; font-weight: 700;' : '' }}">
-                                {{ ($transaction['refunded'] ?? false) ? '-' : '' }}£{{ number_format(abs($transaction['agent_cut']), 2) }}
+                            <div class="detail-value {{ ($transaction['refunded'] ?? false) || ($transaction['agent_cut'] ?? 0) < 0 ? 'refunded' : 'success' }}" style="{{ ($transaction['refunded'] ?? false) || ($transaction['agent_cut'] ?? 0) < 0 ? 'color: #ef4444; font-weight: 700;' : '' }}">
+                                £{{ number_format($transaction['agent_cut'] ?? 0, 2) }}
                             </div>
                                     </div>
                                 </div>
