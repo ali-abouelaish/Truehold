@@ -419,6 +419,7 @@ body {
 /* Leaderboard Section */
 .leaderboard-section {
     padding: 32px 0 48px;
+    background-color: var(--off-white);
 }
 
 .leaderboard-card {
@@ -426,6 +427,7 @@ body {
     border-radius: 16px;
     box-shadow: var(--shadow-md);
     overflow: hidden;
+    border: 1px solid var(--light-gray);
 }
 
 .leaderboard-header {
@@ -472,7 +474,8 @@ body {
 }
 
 .leaderboard-table thead {
-    background-color: var(--off-white);
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-bottom: 2px solid var(--light-gray);
 }
 
 .leaderboard-table th {
@@ -492,10 +495,11 @@ body {
 
 .leaderboard-table tbody tr {
     transition: var(--transition);
+    background-color: var(--white);
 }
 
 .leaderboard-table tbody tr:hover {
-    background-color: var(--off-white);
+    background-color: #f8f9fa;
 }
 
 .rank-gold:hover,
@@ -506,21 +510,26 @@ body {
 }
 
 .rank-gold:hover {
-    background: linear-gradient(135deg, #ffd700 0%, #ffed4e 50%, #ffd700 100%) !important;
+    background: linear-gradient(135deg, #fffbf0 0%, #ffed9f 30%, #fffbf0 70%, #ffd93d 100%) !important;
+    box-shadow: 0 6px 20px rgba(255, 215, 0, 0.35);
 }
 
 .rank-silver:hover {
-    background: linear-gradient(135deg, #c0c0c0 0%, #e8e8e8 50%, #c0c0c0 100%) !important;
+    background: linear-gradient(135deg, #fafafa 0%, #e0e0e0 30%, #fafafa 70%, #d1d1d1 100%) !important;
+    box-shadow: 0 6px 20px rgba(192, 192, 192, 0.35);
 }
 
 .rank-bronze:hover {
-    background: linear-gradient(135deg, #cd7f32 0%, #e8a87c 50%, #cd7f32 100%) !important;
+    background: linear-gradient(135deg, #fffaf5 0%, #ffd0a8 30%, #fffaf5 70%, #e8a87c 100%) !important;
+    box-shadow: 0 6px 20px rgba(205, 127, 50, 0.35);
 }
 
 .rank-gold {
-    background: linear-gradient(135deg, #ffd700 0%, #ffed4e 50%, #ffd700 100%) !important;
-    box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
+    background: linear-gradient(135deg, #fff9e6 0%, #ffeaa7 30%, #fff9e6 70%, #ffd93d 100%) !important;
+    box-shadow: 0 4px 15px rgba(255, 215, 0, 0.25);
     border-left: 5px solid #d4af37 !important;
+    border-top: 1px solid #f1c232;
+    border-bottom: 1px solid #f1c232;
 }
 
 .rank-gold td {
@@ -536,9 +545,11 @@ body {
 }
 
 .rank-silver {
-    background: linear-gradient(135deg, #c0c0c0 0%, #e8e8e8 50%, #c0c0c0 100%) !important;
-    box-shadow: 0 4px 15px rgba(192, 192, 192, 0.3);
+    background: linear-gradient(135deg, #f5f5f5 0%, #e8e8e8 30%, #f5f5f5 70%, #d1d1d1 100%) !important;
+    box-shadow: 0 4px 15px rgba(192, 192, 192, 0.25);
     border-left: 5px solid #9ca3af !important;
+    border-top: 1px solid #d1d5db;
+    border-bottom: 1px solid #d1d5db;
 }
 
 .rank-silver td {
@@ -554,9 +565,11 @@ body {
 }
 
 .rank-bronze {
-    background: linear-gradient(135deg, #cd7f32 0%, #e8a87c 50%, #cd7f32 100%) !important;
-    box-shadow: 0 4px 15px rgba(205, 127, 50, 0.3);
-    border-left: 5px solid #b8750b !important;
+    background: linear-gradient(135deg, #fff5ed 0%, #ffd7b8 30%, #fff5ed 70%, #e8a87c 100%) !important;
+    box-shadow: 0 4px 15px rgba(205, 127, 50, 0.25);
+    border-left: 5px solid #cd7f32 !important;
+    border-top: 1px solid #e8a87c;
+    border-bottom: 1px solid #e8a87c;
 }
 
 .rank-bronze td {
@@ -592,26 +605,26 @@ body {
 }
 
 .rank-gold .agent-avatar {
-    background: linear-gradient(135deg, #d4af37, #f1c232);
+    background: linear-gradient(135deg, #f1c232, #ffd93d);
     color: #1a1a1a;
-    border: 3px solid #b8941f;
-    box-shadow: 0 4px 12px rgba(212, 175, 55, 0.4);
+    border: 3px solid #d4af37;
+    box-shadow: 0 4px 12px rgba(212, 175, 55, 0.3);
     font-weight: 900;
 }
 
 .rank-silver .agent-avatar {
-    background: linear-gradient(135deg, #9ca3af, #d1d5db);
+    background: linear-gradient(135deg, #d1d5db, #e8e8e8);
     color: #1a1a1a;
-    border: 3px solid #6b7280;
-    box-shadow: 0 4px 12px rgba(156, 163, 175, 0.4);
+    border: 3px solid #9ca3af;
+    box-shadow: 0 4px 12px rgba(156, 163, 175, 0.3);
     font-weight: 900;
 }
 
 .rank-bronze .agent-avatar {
-    background: linear-gradient(135deg, #cd7f32, #e8a87c);
+    background: linear-gradient(135deg, #e8a87c, #ffd7b8);
     color: #1a1a1a;
-    border: 3px solid #8b5a2b;
-    box-shadow: 0 4px 12px rgba(205, 127, 50, 0.4);
+    border: 3px solid #cd7f32;
+    box-shadow: 0 4px 12px rgba(205, 127, 50, 0.3);
     font-weight: 900;
 }
 
@@ -632,27 +645,27 @@ body {
 }
 
 .gold-badge {
-    background: linear-gradient(135deg, #d4af37, #f1c232);
+    background: linear-gradient(135deg, #f1c232, #ffd93d);
     color: #1a1a1a;
-    border: 2px solid #b8941f;
+    border: 2px solid #d4af37;
     font-weight: 800;
-    box-shadow: 0 2px 8px rgba(212, 175, 55, 0.4);
+    box-shadow: 0 2px 8px rgba(212, 175, 55, 0.3);
 }
 
 .silver-badge {
-    background: linear-gradient(135deg, #9ca3af, #d1d5db);
+    background: linear-gradient(135deg, #d1d5db, #e8e8e8);
     color: #1a1a1a;
-    border: 2px solid #6b7280;
+    border: 2px solid #9ca3af;
     font-weight: 800;
-    box-shadow: 0 2px 8px rgba(156, 163, 175, 0.4);
+    box-shadow: 0 2px 8px rgba(156, 163, 175, 0.3);
 }
 
 .bronze-badge {
-    background: linear-gradient(135deg, #cd7f32, #e8a87c);
+    background: linear-gradient(135deg, #e8a87c, #ffd7b8);
     color: #1a1a1a;
-    border: 2px solid #8b5a2b;
+    border: 2px solid #cd7f32;
     font-weight: 800;
-    box-shadow: 0 2px 8px rgba(205, 127, 50, 0.4);
+    box-shadow: 0 2px 8px rgba(205, 127, 50, 0.3);
 }
 
 .agent-transactions {
@@ -836,7 +849,7 @@ body {
     opacity: 0.3;
 }
 
-/* Shine effect for top rankings */
+/* Shine effect for top rankings - Light mode */
 @keyframes shine {
     0% {
         background-position: 200% center;
@@ -848,17 +861,17 @@ body {
 
 .rank-gold {
     background-size: 200% auto;
-    animation: shine 3s linear infinite;
+    animation: shine 4s linear infinite;
 }
 
 .rank-silver {
     background-size: 200% auto;
-    animation: shine 4s linear infinite;
+    animation: shine 5s linear infinite;
 }
 
 .rank-bronze {
     background-size: 200% auto;
-    animation: shine 5s linear infinite;
+    animation: shine 6s linear infinite;
 }
 
 @media (max-width: 768px) {

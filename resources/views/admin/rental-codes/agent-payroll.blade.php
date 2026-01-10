@@ -1012,7 +1012,9 @@ body {
                                 </div>
                                 <div class="rental-date">
                                     Date: {{ \Carbon\Carbon::parse($transaction['date'])->format('M d, Y') }}
-                                    @if($transaction['client_count'] > 1)
+                                    @if(!empty($transaction['clients']))
+                                        | Client: {{ $transaction['clients'] }}
+                                    @elseif($transaction['client_count'] > 1)
                                         | Clients: {{ $transaction['client_count'] }}
                                     @endif
                                 </div>
@@ -1020,6 +1022,12 @@ body {
                         </div>
                     </div>
                     <div class="rental-details">
+                        @if(!empty($transaction['clients']))
+                        <div class="detail-item">
+                            <div class="detail-label">Client</div>
+                            <div class="detail-value" style="font-size: 14px;">{{ $transaction['clients'] }}</div>
+                        </div>
+                        @endif
                         <div class="detail-item">
                             <div class="detail-label">Total Fee</div>
                             <div class="detail-value">£{{ number_format($transaction['total_fee'], 2) }}</div>

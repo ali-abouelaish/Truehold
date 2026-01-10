@@ -834,6 +834,29 @@ strong {
                                                        onmouseout="this.style.background='linear-gradient(135deg, #1e40af, #3b82f6)'; this.style.borderColor='#3b82f6';">
                                                         <i class="fas fa-eye"></i>
                                                     </a>
+                                                    @php
+                                                        // Check if this rental code has any documents
+                                                        $hasDocuments = false;
+                                                        if ($rentalCode->client_contract && !empty($rentalCode->client_contract)) {
+                                                            $hasDocuments = true;
+                                                        } elseif ($rentalCode->payment_proof || $rentalCode->client_id_document || 
+                                                                  $rentalCode->client_id_image || $rentalCode->cash_receipt_image) {
+                                                            $hasDocuments = true;
+                                                        } elseif ($rentalCode->contact_images && !empty($rentalCode->contact_images)) {
+                                                            $hasDocuments = true;
+                                                        }
+                                                    @endphp
+                                                    <a href="{{ route('rental-codes.show', $rentalCode) }}#documents" 
+                                                       class="btn btn-sm transition-colors {{ $hasDocuments ? '' : 'opacity-50' }}" 
+                                                       title="{{ $hasDocuments ? 'View Documents' : 'No Documents' }}"
+                                                       style="background: linear-gradient(135deg, #0891b2, #06b6d4); border: 1px solid #06b6d4; color: #ffffff; text-decoration: none;"
+                                                       onmouseover="this.style.background='linear-gradient(135deg, #06b6d4, #0891b2)'; this.style.borderColor='#0891b2';"
+                                                       onmouseout="this.style.background='linear-gradient(135deg, #0891b2, #06b6d4)'; this.style.borderColor='#06b6d4';">
+                                                        <i class="fas fa-file-alt"></i>
+                                                        @if($hasDocuments)
+                                                            <span class="badge bg-success ms-1" style="font-size: 0.6rem; padding: 2px 4px;">●</span>
+                                                        @endif
+                                                    </a>
                                                     @if(auth()->user()->canEditRentalCode($rentalCode))
                                                     <a href="{{ route('rental-codes.edit', $rentalCode) }}" class="btn btn-sm transition-colors" title="Edit"
                                                        style="background: linear-gradient(135deg, #d97706, #f59e0b); border: 1px solid #f59e0b; color: #ffffff; text-decoration: none;"

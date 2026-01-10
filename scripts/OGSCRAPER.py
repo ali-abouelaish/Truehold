@@ -2,6 +2,17 @@ import requests
 from bs4 import BeautifulSoup
 import pandas as pd
 import time
+import sys
+import os
+
+# Fix Windows console encoding for emojis
+if sys.platform == 'win32':
+    # Try to set UTF-8 encoding
+    try:
+        sys.stdout.reconfigure(encoding='utf-8')
+    except:
+        # If that fails, just replace emojis with text
+        pass
 
 # -----------------------------
 # 1) Load profiles from public Google Sheet
@@ -110,8 +121,26 @@ from google.oauth2.service_account import Credentials
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 # Get the project root (parent directory of scripts folder)
 PROJECT_ROOT = os.path.dirname(SCRIPT_DIR)
-# Construct path to service account file
-SERVICE_ACCOUNT_FILE = os.path.join(PROJECT_ROOT, "credentials", "service_account.json")
+# Construct path to service account file - try multiple locations
+SERVICE_ACCOUNT_PATHS = [
+    os.path.join(PROJECT_ROOT, "storage", "app", "google-credentials.json"),
+    os.path.join(PROJECT_ROOT, "credentials", "service_account.json"),
+    os.path.join(PROJECT_ROOT, "storage", "app", "service_account.json")
+]
+
+SERVICE_ACCOUNT_FILE = None
+for path in SERVICE_ACCOUNT_PATHS:
+    if os.path.exists(path):
+        SERVICE_ACCOUNT_FILE = path
+        print(f"Found credentials at: {path}")
+        break
+
+if not SERVICE_ACCOUNT_FILE:
+    print("ERROR: Could not find Google service account credentials file!")
+    print("Tried the following paths:")
+    for path in SERVICE_ACCOUNT_PATHS:
+        print(f"  - {path}")
+    sys.exit(1)
 
 SCOPES = [
     "https://www.googleapis.com/auth/spreadsheets",
@@ -269,10 +298,10 @@ def scrape_listing_advanced(url, paying, profile_flag=""):
                 if location_match:
                     latitude, longitude = location_match.group(1), location_match.group(2)
 
-        # Photos (only inside photo-gallery containers)
+        # Photos (collect ALL images from photo galleries)
         all_photo_urls = []
 
-        # ✅ Main image container
+        # ✅ Method 1: Main image container
         main_gallery = soup.select_one("dl.photo-gallery__main-image-wrapper")
         if main_gallery:
             main_links = main_gallery.find_all("a", href=re.compile(
@@ -283,7 +312,7 @@ def scrape_listing_advanced(url, paying, profile_flag=""):
                 if photo_url and photo_url not in all_photo_urls:
                     all_photo_urls.append(photo_url)
 
-        # ✅ Thumbnail gallery container
+        # ✅ Method 2: Thumbnail gallery container
         thumb_gallery = soup.select_one("div.photo-gallery__thumbnails")
         if thumb_gallery:
             thumb_links = thumb_gallery.find_all("a", href=re.compile(
@@ -294,6 +323,48 @@ def scrape_listing_advanced(url, paying, profile_flag=""):
                 if photo_url and photo_url not in all_photo_urls:
                     all_photo_urls.append(photo_url)
 
+        # ✅ Method 3: Look for img tags with photo URLs
+        photo_imgs = soup.find_all("img", src=re.compile(
+            r"photos2\.spareroom\.co\.uk/images/flatshare/listings/"
+        ))
+        for img in photo_imgs:
+            src = img.get("src", "")
+            # Convert thumbnail/medium URLs to large URLs
+            photo_url = re.sub(r"/\w+/(\d+/\d+/\d+\.jpg)", r"/large/\1", src)
+            if "photos2.spareroom.co.uk" in photo_url and photo_url not in all_photo_urls:
+                if not photo_url.startswith("http"):
+                    photo_url = "https://" + photo_url.lstrip("/")
+                all_photo_urls.append(photo_url)
+
+        # ✅ Method 4: Look for data-src attributes (lazy loading)
+        lazy_imgs = soup.find_all(attrs={"data-src": re.compile(
+            r"photos2\.spareroom\.co\.uk/images/flatshare/listings/"
+        )})
+        for img in lazy_imgs:
+            data_src = img.get("data-src", "")
+            photo_url = re.sub(r"/\w+/(\d+/\d+/\d+\.jpg)", r"/large/\1", data_src)
+            if "photos2.spareroom.co.uk" in photo_url and photo_url not in all_photo_urls:
+                if not photo_url.startswith("http"):
+                    photo_url = "https://" + photo_url.lstrip("/")
+                all_photo_urls.append(photo_url)
+
+        # ✅ Method 5: Check for carousel/slider containers
+        carousel_containers = soup.select(".carousel, .slider, .photo-carousel, [class*='photo']")
+        for container in carousel_containers:
+            links = container.find_all("a", href=re.compile(
+                r"photos2\.spareroom\.co\.uk.*\.jpg"
+            ))
+            for link in links:
+                photo_url = link.get("href")
+                if photo_url:
+                    photo_url = re.sub(r"/\w+/(\d+/\d+/\d+\.jpg)", r"/large/\1", photo_url)
+                    if not photo_url.startswith("http"):
+                        photo_url = "https://" + photo_url.lstrip("/")
+                    if photo_url not in all_photo_urls:
+                        all_photo_urls.append(photo_url)
+
+        print(f"📸 Found {len(all_photo_urls)} photos for {url}")
+        
         first_photo_url = all_photo_urls[0] if all_photo_urls else None
         photo_count = len(all_photo_urls)
         all_photos = ", ".join(all_photo_urls) if all_photo_urls else None
@@ -419,8 +490,9 @@ def scrape_listing_advanced(url, paying, profile_flag=""):
             "all_photos": all_photos,
             "photos": json.dumps(all_photo_urls) if all_photo_urls else None,
             "paying": paying,
-            "profile_flag": profile_flag
-
+            "profile_flag": profile_flag,
+            "flag": "",  # ✅ Will be populated from profile or manual flags
+            "flag_color": ""  # ✅ Will be populated from profile or manual flags
         }
 
         return result
@@ -500,6 +572,7 @@ def main(listings):
     # 3️⃣ Apply flags with priority: Manual > Profile > Empty
     manual_count = 0
     profile_count = 0
+    new_count = 0
     
     for idx, row in df_output.iterrows():
         url = row.get('url', '').strip()
@@ -510,15 +583,20 @@ def main(listings):
             df_output.at[idx, 'flag'] = flag_map[url]['flag']
             df_output.at[idx, 'flag_color'] = flag_map[url]['flag_color']
             manual_count += 1
+            print(f"   📌 Preserved manual flag for {url[:50]}... : '{flag_map[url]['flag']}'")
         # Priority 2: Profile flags from agent
         elif profile_flag:
             df_output.at[idx, 'flag'] = profile_flag
             # You can set a default color here or leave empty
             # df_output.at[idx, 'flag_color'] = '#FFD700'  # Gold for profile flags
             profile_count += 1
+            print(f"   🏷️ Applied profile flag for {url[:50]}... : '{profile_flag}'")
+        else:
+            new_count += 1
     
     print(f"✓ Applied {manual_count} manual flags (preserved)")
     print(f"✓ Applied {profile_count} profile flags (from agents)")
+    print(f"✓ {new_count} properties with no flags")
     
     # Remove the profile_flag column before uploading (it's only used internally)
     if 'profile_flag' in df_output.columns:
@@ -533,6 +611,21 @@ def main(listings):
 
     # 5️⃣ Ensure headers match dataframe
     df_headers = df_output.columns.tolist()
+    
+    print(f"\n📋 Columns to be written to sheet ({len(df_headers)}):")
+    print(f"   {', '.join(df_headers)}")
+    
+    # Verify flag columns exist
+    if 'flag' in df_headers and 'flag_color' in df_headers:
+        print(f"   ✅ Flag columns present in data")
+        # Show sample of flag data
+        flagged_props = df_output[df_output['flag'] != '']
+        if len(flagged_props) > 0:
+            print(f"   📊 Properties with flags: {len(flagged_props)}")
+            for idx, prop in flagged_props.head(3).iterrows():
+                print(f"      - {prop.get('title', 'N/A')[:40]}: flag='{prop.get('flag', '')}' color='{prop.get('flag_color', '')}'")
+    else:
+        print(f"   ⚠️ WARNING: Flag columns missing from data!")
 
     if existing_headers != df_headers:
         sheet.update("A1", [df_headers])

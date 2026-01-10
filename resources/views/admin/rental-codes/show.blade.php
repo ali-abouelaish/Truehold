@@ -627,7 +627,7 @@ strong {
     </div>
 
     <!-- Documents Section -->
-    <div class="row">
+    <div class="row" id="documents">
         <div class="col-12">
             <div class="card shadow">
                 <div class="card-header bg-success text-white">
