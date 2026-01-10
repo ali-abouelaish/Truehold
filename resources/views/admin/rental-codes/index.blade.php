@@ -740,6 +740,9 @@ strong {
                                         <th>Date</th>
                                         <th>Consultation Fee</th>
                                         <th>Status</th>
+                                        @if(auth()->user()->role === 'admin')
+                                        <th>Refunded</th>
+                                        @endif
                                         <th>Agent</th>
                                         <th>Marketing Agent</th>
                                         @if(auth()->user()->role === 'admin')
@@ -815,14 +818,36 @@ strong {
                                             </td>
                                             @if(auth()->user()->role === 'admin')
                                             <td>
-                                                <div class="dropdown">
-                                                    <select class="form-select form-select-sm" 
-                                                            onchange="changeStatus({{ $rentalCode->id }}, this.value)"
-                                                            style="background: linear-gradient(135deg, #374151, #4b5563); border: 1px solid #6b7280; color: #d1d5db; min-width: 120px;">
-                                                        <option value="pending" {{ $rentalCode->status === 'pending' ? 'selected' : '' }}>Pending</option>
-                                                        <option value="approved" {{ $rentalCode->status === 'approved' ? 'selected' : '' }}>Approved</option>
-                                                        <option value="paid" {{ $rentalCode->status === 'paid' ? 'selected' : '' }}>Paid</option>
-                                                    </select>
+                                                <div class="d-flex flex-column gap-2">
+                                                    <div class="dropdown">
+                                                        <select class="form-select form-select-sm" 
+                                                                onchange="changeStatus({{ $rentalCode->id }}, this.value)"
+                                                                style="background: linear-gradient(135deg, #374151, #4b5563); border: 1px solid #6b7280; color: #d1d5db; min-width: 120px;">
+                                                            <option value="pending" {{ $rentalCode->status === 'pending' ? 'selected' : '' }}>Pending</option>
+                                                            <option value="approved" {{ $rentalCode->status === 'approved' ? 'selected' : '' }}>Approved</option>
+                                                            <option value="paid" {{ $rentalCode->status === 'paid' ? 'selected' : '' }}>Paid</option>
+                                                        </select>
+                                                    </div>
+                                                    <button type="button" 
+                                                            class="btn btn-sm {{ $rentalCode->refunded ? 'btn-danger' : 'btn-outline-danger' }}"
+                                                            onclick="toggleRefunded({{ $rentalCode->id }}, {{ $rentalCode->refunded ? 'false' : 'true' }})"
+                                                            title="{{ $rentalCode->refunded ? 'Unmark as Refunded' : 'Mark as Refunded' }}"
+                                                            style="font-size: 11px; padding: 4px 8px; white-space: nowrap;">
+                                                        <i class="fas fa-undo-alt"></i> {{ $rentalCode->refunded ? 'Refunded' : 'Refund' }}
+                                                    </button>
+                                                </div>
+                                            </td>
+                                            @if(auth()->user()->role === 'admin')
+                                            <td>
+                                                <div class="form-check form-switch">
+                                                    <input class="form-check-input" type="checkbox" 
+                                                           id="refunded_{{ $rentalCode->id }}"
+                                                           {{ $rentalCode->refunded ? 'checked' : '' }}
+                                                           onchange="toggleRefunded({{ $rentalCode->id }}, this.checked)"
+                                                           style="cursor: pointer; width: 2.5em; height: 1.5em;">
+                                                    <label class="form-check-label" for="refunded_{{ $rentalCode->id }}" style="color: #d1d5db; font-size: 12px;">
+                                                        Refunded
+                                                    </label>
                                                 </div>
                                             </td>
                                             @endif
@@ -1317,6 +1342,61 @@ function changeStatus(rentalCodeId, newStatus) {
     } else {
         // Reset to original value if user cancels
         event.target.value = event.target.getAttribute('data-original-value') || 'pending';
+    }
+}
+
+// Toggle refunded status
+function toggleRefunded(rentalCodeId, isRefunded) {
+    const action = isRefunded ? 'mark as refunded' : 'unmark as refunded';
+    if (confirm(`Are you sure you want to ${action} this rental? This will ${isRefunded ? 'deduct' : 'restore'} the amount from the agent's payroll.`)) {
+        const checkbox = document.getElementById('refunded_' + rentalCodeId);
+        const button = event?.target?.closest('button');
+        
+        // Disable controls
+        if (checkbox) {
+            checkbox.disabled = true;
+            checkbox.style.opacity = '0.6';
+        }
+        if (button) {
+            button.disabled = true;
+            button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+        }
+        
+        fetch(`/admin/rental-codes/${rentalCodeId}/update-refunded`, {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+            },
+            body: JSON.stringify({
+                refunded: isRefunded
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Reload the page to show updated state
+                location.reload();
+            } else {
+                throw new Error(data.message || 'Failed to update refunded status');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error updating refunded status. Please try again.');
+            
+            // Re-enable controls
+            if (checkbox) {
+                checkbox.checked = !isRefunded;
+                checkbox.disabled = false;
+                checkbox.style.opacity = '1';
+            }
+            if (button) {
+                button.disabled = false;
+                button.innerHTML = '<i class="fas fa-undo-alt"></i> ' + (isRefunded ? 'Refund' : 'Refunded');
+            }
+        });
     }
 }
 

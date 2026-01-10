@@ -639,37 +639,30 @@ strong {
                     <div class="row">
                         <!-- Client Contract -->
                         @php
-                            $clientContracts = null;
-                            if ($rentalCode->client_contract) {
-                                // Handle both new format (JSON array) and old format (single string) for backward compatibility
-                                if (is_string($rentalCode->client_contract)) {
-                                    $decoded = json_decode($rentalCode->client_contract, true);
-                                    // If JSON decode was successful and it's an array, use it (new format)
-                                    if (json_last_error() === JSON_ERROR_NONE && is_array($decoded) && count($decoded) > 0) {
+                            $clientContracts = [];
+                            $rawContract = $rentalCode->client_contract;
+                            
+                            if (!empty($rawContract)) {
+                                if (is_string($rawContract)) {
+                                    // Try to decode as JSON first
+                                    $decoded = json_decode($rawContract, true);
+                                    if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+                                        // It's a JSON array
                                         $clientContracts = array_filter($decoded, function($item) {
-                                            return !empty($item) && is_string($item);
+                                            return !empty($item) && is_string($item) && trim($item) !== '';
                                         });
-                                        // Re-index array after filtering
-                                        $clientContracts = array_values($clientContracts);
-                                    } else {
-                                        // If it's a single string path (old format), convert to array for consistent display
-                                        if (!empty(trim($rentalCode->client_contract))) {
-                                            $clientContracts = [$rentalCode->client_contract];
-                                        }
+                                    } elseif (trim($rawContract) !== '' && trim($rawContract) !== '[]' && trim($rawContract) !== 'null') {
+                                        // It's a single file path string
+                                        $clientContracts = [trim($rawContract)];
                                     }
-                                } elseif (is_array($rentalCode->client_contract)) {
-                                    // Already an array (new format) - filter out empty values
-                                    $clientContracts = array_filter($rentalCode->client_contract, function($item) {
-                                        return !empty($item) && is_string($item);
+                                } elseif (is_array($rawContract)) {
+                                    // Already an array
+                                    $clientContracts = array_filter($rawContract, function($item) {
+                                        return !empty($item) && is_string($item) && trim($item) !== '';
                                     });
-                                    // Re-index array after filtering
-                                    $clientContracts = array_values($clientContracts);
-                                } else {
-                                    // Fallback: wrap in array for backward compatibility
-                                    if (!empty($rentalCode->client_contract)) {
-                                        $clientContracts = [$rentalCode->client_contract];
-                                    }
                                 }
+                                // Re-index array after filtering
+                                $clientContracts = array_values($clientContracts);
                             }
                         @endphp
                         @if($clientContracts && is_array($clientContracts) && count($clientContracts) > 0)
@@ -679,59 +672,65 @@ strong {
                                     <i class="fas fa-file-contract text-primary me-3 fs-4"></i>
                                     <div>
                                         <h6 class="mb-1">Client Contract</h6>
-                                        <small class="text-muted">{{ count($clientContracts) }} document(s)</small>
+                                        <small class="text-muted">{{ count($clientContracts) }} page(s)</small>
                                     </div>
                                 </div>
                                 <div class="mt-2">
-                                    @foreach($clientContracts as $index => $contract)
-                                        @if($contract && is_string($contract) && !empty(trim($contract)))
-                                            <div class="mb-2">
-                                                <div class="d-flex align-items-center mb-1">
-                                                    <span class="text-muted me-2" style="font-size: 0.875rem;">Document {{ $index + 1 }}:</span>
-                                                    <span class="text-info" style="font-size: 0.875rem;">{{ basename($contract) }}</span>
-                                                </div>
-                                                <div>
-                                                    <a href="{{ route('rental-codes.view-file', ['rentalCode' => $rentalCode->id, 'field' => 'client_contract', 'index' => $index]) }}" 
-                                       target="_blank" 
-                                                       class="btn btn-outline-primary btn-sm me-2" 
-                                                       style="border-color: #3b82f6 !important; color: #3b82f6 !important; background-color: transparent !important;">
-                                                        <i class="fas fa-eye me-1"></i>View
-                                    </a>
-                                                    <a href="{{ route('rental-codes.download-file', ['rentalCode' => $rentalCode->id, 'field' => 'client_contract', 'index' => $index]) }}" 
-                                                       class="btn btn-outline-secondary btn-sm" 
-                                                       style="border-color: #6b7280 !important; color: #d1d5db !important; background-color: transparent !important;">
-                                        <i class="fas fa-download me-1"></i>Download
-                                    </a>
-                                                </div>
-                                            </div>
-                                            @if(!$loop->last)
-                                                <hr style="border-color: #4b5563; margin: 0.75rem 0;">
-                                            @endif
-                                        @endif
-                                    @endforeach
+                                    <button type="button" class="btn btn-outline-primary btn-sm me-2" 
+                                            onclick="openContractViewer()"
+                                            style="border-color: #3b82f6 !important; color: #3b82f6 !important; background-color: transparent !important;">
+                                        <i class="fas fa-eye me-1"></i>View Full Contract
+                                    </button>
+                                    <button type="button" class="btn btn-outline-secondary btn-sm" 
+                                            onclick="downloadAllContracts()"
+                                            style="border-color: #6b7280 !important; color: #d1d5db !important; background-color: transparent !important;">
+                                        <i class="fas fa-download me-1"></i>Download All
+                                    </button>
                                 </div>
                             </div>
                         </div>
                         @endif
 
                         <!-- Payment Proof -->
-                        @if($rentalCode->payment_proof && !empty($rentalCode->payment_proof))
+                        @php
+                            $paymentProofs = [];
+                            $rawProof = $rentalCode->payment_proof;
+                            
+                            if (!empty($rawProof)) {
+                                if (is_string($rawProof)) {
+                                    $decoded = json_decode($rawProof, true);
+                                    if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+                                        $paymentProofs = array_filter($decoded, function($item) {
+                                            return !empty($item) && is_string($item) && trim($item) !== '';
+                                        });
+                                    } elseif (trim($rawProof) !== '' && trim($rawProof) !== '[]' && trim($rawProof) !== 'null') {
+                                        $paymentProofs = [trim($rawProof)];
+                                    }
+                                } elseif (is_array($rawProof)) {
+                                    $paymentProofs = array_filter($rawProof, function($item) {
+                                        return !empty($item) && is_string($item) && trim($item) !== '';
+                                    });
+                                }
+                                $paymentProofs = array_values($paymentProofs);
+                            }
+                        @endphp
+                        @if(count($paymentProofs) > 0)
                         <div class="col-md-4 mb-3">
                             <div class="document-item">
                                 <div class="d-flex align-items-center">
                                     <i class="fas fa-receipt text-success me-3 fs-4"></i>
                                     <div>
                                         <h6 class="mb-1">Payment Proof</h6>
-                                        <small class="text-muted">Payment receipt</small>
+                                        <small class="text-muted">{{ count($paymentProofs) }} document(s)</small>
                                     </div>
                                 </div>
                                 <div class="mt-2">
-                                    <a href="{{ route('rental-codes.view-file', ['rentalCode' => $rentalCode->id, 'field' => 'payment_proof']) }}" 
+                                    <a href="{{ route('rental-codes.view-file', ['rentalCode' => $rentalCode->id, 'field' => 'payment_proof', 'index' => 0]) }}" 
                                        target="_blank" 
                                        class="btn btn-outline-success btn-sm me-2">
                                         <i class="fas fa-eye me-1"></i>View Document
                                     </a>
-                                    <a href="{{ route('rental-codes.download-file', ['rentalCode' => $rentalCode->id, 'field' => 'payment_proof']) }}" 
+                                    <a href="{{ route('rental-codes.download-file', ['rentalCode' => $rentalCode->id, 'field' => 'payment_proof', 'index' => 0]) }}" 
                                        class="btn btn-outline-secondary btn-sm me-2">
                                         <i class="fas fa-download me-1"></i>Download
                                     </a>
@@ -741,23 +740,45 @@ strong {
                         @endif
 
                         <!-- Client ID Document -->
-                        @if($rentalCode->client_id_document && !empty($rentalCode->client_id_document))
+                        @php
+                            $clientIdDocs = [];
+                            $rawIdDoc = $rentalCode->client_id_document;
+                            
+                            if (!empty($rawIdDoc)) {
+                                if (is_string($rawIdDoc)) {
+                                    $decoded = json_decode($rawIdDoc, true);
+                                    if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+                                        $clientIdDocs = array_filter($decoded, function($item) {
+                                            return !empty($item) && is_string($item) && trim($item) !== '';
+                                        });
+                                    } elseif (trim($rawIdDoc) !== '' && trim($rawIdDoc) !== '[]' && trim($rawIdDoc) !== 'null') {
+                                        $clientIdDocs = [trim($rawIdDoc)];
+                                    }
+                                } elseif (is_array($rawIdDoc)) {
+                                    $clientIdDocs = array_filter($rawIdDoc, function($item) {
+                                        return !empty($item) && is_string($item) && trim($item) !== '';
+                                    });
+                                }
+                                $clientIdDocs = array_values($clientIdDocs);
+                            }
+                        @endphp
+                        @if(count($clientIdDocs) > 0)
                         <div class="col-md-4 mb-3">
                             <div class="document-item">
                                 <div class="d-flex align-items-center">
                                     <i class="fas fa-id-card text-info me-3 fs-4"></i>
                                     <div>
                                         <h6 class="mb-1">Client ID Document</h6>
-                                        <small class="text-muted">Identity verification</small>
+                                        <small class="text-muted">{{ count($clientIdDocs) }} document(s)</small>
                                     </div>
                                 </div>
                                 <div class="mt-2">
-                                    <a href="{{ route('rental-codes.view-file', ['rentalCode' => $rentalCode->id, 'field' => 'client_id_document']) }}" 
+                                    <a href="{{ route('rental-codes.view-file', ['rentalCode' => $rentalCode->id, 'field' => 'client_id_document', 'index' => 0]) }}" 
                                        target="_blank" 
                                        class="btn btn-outline-info btn-sm me-2">
                                         <i class="fas fa-eye me-1"></i>View Document
                                     </a>
-                                    <a href="{{ route('rental-codes.download-file', ['rentalCode' => $rentalCode->id, 'field' => 'client_id_document']) }}" 
+                                    <a href="{{ route('rental-codes.download-file', ['rentalCode' => $rentalCode->id, 'field' => 'client_id_document', 'index' => 0]) }}" 
                                        class="btn btn-outline-secondary btn-sm me-2">
                                         <i class="fas fa-download me-1"></i>Download
                                     </a>
@@ -856,31 +877,7 @@ strong {
                     </div>
 
                     <!-- No Documents Message -->
-                    @php
-                        $hasDocuments = false;
-                        // Check client_contract (can be array or string)
-                        if ($rentalCode->client_contract) {
-                            $contracts = is_string($rentalCode->client_contract) ? json_decode($rentalCode->client_contract, true) : $rentalCode->client_contract;
-                            if (is_array($contracts) && count($contracts) > 0) {
-                                $hasDocuments = true;
-                            } elseif (is_string($rentalCode->client_contract) && !empty($rentalCode->client_contract)) {
-                                $hasDocuments = true;
-                            }
-                        }
-                        // Check other single file fields
-                        if ($rentalCode->payment_proof || $rentalCode->client_id_document || 
-                            $rentalCode->client_id_image || $rentalCode->cash_receipt_image) {
-                            $hasDocuments = true;
-                        }
-                        // Check contact_images array
-                        if ($rentalCode->contact_images) {
-                            $contactImages = is_string($rentalCode->contact_images) ? json_decode($rentalCode->contact_images, true) : $rentalCode->contact_images;
-                            if ($contactImages && is_array($contactImages) && count($contactImages) > 0) {
-                                $hasDocuments = true;
-                            }
-                        }
-                    @endphp
-                    @if(!$hasDocuments)
+                    @if(!$rentalCode->has_documents)
                     <div class="text-center py-4">
                         <i class="fas fa-file-alt text-muted fs-1 mb-3"></i>
                         <h5 class="text-muted">No Documents Available</h5>
@@ -1092,5 +1089,157 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 });
+
+// Contract Viewer Functions
+function openContractViewer() {
+    const modal = document.getElementById('contractViewerModal');
+    const modalInstance = new bootstrap.Modal(modal);
+    modalInstance.show();
+}
+
+function downloadAllContracts() {
+    @if($clientContracts && is_array($clientContracts) && count($clientContracts) > 0)
+        @foreach($clientContracts as $index => $contract)
+            @if($contract && is_string($contract) && !empty(trim($contract)))
+                setTimeout(() => {
+                    const link = document.createElement('a');
+                    link.href = "{{ route('rental-codes.download-file', ['rentalCode' => $rentalCode->id, 'field' => 'client_contract', 'index' => $index]) }}";
+                    link.download = "{{ basename($contract) }}";
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                }, {{ $index * 500 }});
+            @endif
+        @endforeach
+    @endif
+}
+
+// Navigate between contract pages
+let currentContractPage = 0;
+const totalContractPages = {{ isset($clientContracts) && is_array($clientContracts) ? count($clientContracts) : 0 }};
+
+function nextContractPage() {
+    if (currentContractPage < totalContractPages - 1) {
+        currentContractPage++;
+        updateContractDisplay();
+    }
+}
+
+function prevContractPage() {
+    if (currentContractPage > 0) {
+        currentContractPage--;
+        updateContractDisplay();
+    }
+}
+
+function updateContractDisplay() {
+    // Hide all contract pages
+    const allPages = document.querySelectorAll('.contract-page');
+    allPages.forEach(page => page.style.display = 'none');
+    
+    // Show current page
+    const currentPage = document.getElementById('contract-page-' + currentContractPage);
+    if (currentPage) {
+        currentPage.style.display = 'block';
+    }
+    
+    // Update counter
+    document.getElementById('contractPageCounter').textContent = `Page ${currentContractPage + 1} of ${totalContractPages}`;
+    
+    // Update button states
+    document.getElementById('prevContractBtn').disabled = currentContractPage === 0;
+    document.getElementById('nextContractBtn').disabled = currentContractPage === totalContractPages - 1;
+}
+
+// Initialize on modal show
+document.addEventListener('DOMContentLoaded', function() {
+    const modal = document.getElementById('contractViewerModal');
+    if (modal) {
+        modal.addEventListener('shown.bs.modal', function() {
+            currentContractPage = 0;
+            updateContractDisplay();
+        });
+    }
+});
 </script>
+
+<!-- Contract Viewer Modal -->
+<div class="modal fade" id="contractViewerModal" tabindex="-1" aria-labelledby="contractViewerModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content" style="background-color: #1f2937; border: 1px solid #374151;">
+            <div class="modal-header" style="border-bottom: 1px solid #374151;">
+                <h5 class="modal-title" id="contractViewerModalLabel" style="color: #f9fafb;">
+                    <i class="fas fa-file-contract me-2"></i>Client Contract - Full Document
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" style="background-color: #111827; padding: 0; position: relative; min-height: 70vh;">
+                <!-- Page Navigation Controls -->
+                <div style="position: sticky; top: 0; z-index: 10; background-color: #1f2937; border-bottom: 1px solid #374151; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <span id="contractPageCounter" style="color: #d1d5db; font-weight: 600;">Page 1 of {{ isset($clientContracts) && is_array($clientContracts) ? count($clientContracts) : 0 }}</span>
+                    </div>
+                    <div class="btn-group">
+                        <button type="button" id="prevContractBtn" class="btn btn-sm" onclick="prevContractPage()"
+                                style="background: linear-gradient(135deg, #374151, #4b5563); color: #d1d5db; border: 1px solid #4b5563;">
+                            <i class="fas fa-chevron-left"></i> Previous
+                        </button>
+                        <button type="button" id="nextContractBtn" class="btn btn-sm" onclick="nextContractPage()"
+                                style="background: linear-gradient(135deg, #374151, #4b5563); color: #d1d5db; border: 1px solid #4b5563;">
+                            Next <i class="fas fa-chevron-right"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Scrollable Contract Container -->
+                <div style="padding: 20px; overflow-y: auto; max-height: calc(70vh - 60px);">
+                    @if(isset($clientContracts) && is_array($clientContracts) && count($clientContracts) > 0)
+                        @foreach($clientContracts as $index => $contract)
+                            @if($contract && is_string($contract) && !empty(trim($contract)))
+                                <div class="contract-page" id="contract-page-{{ $index }}" style="margin-bottom: 30px; display: none;">
+                                    <div style="text-align: center; margin-bottom: 15px;">
+                                        <span style="color: #9ca3af; font-size: 14px; font-weight: 600;">
+                                            Page {{ $index + 1 }} - {{ basename($contract) }}
+                                        </span>
+                                    </div>
+                                    <div style="background-color: #1f2937; border-radius: 8px; padding: 20px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);">
+                                        @php
+                                            $extension = strtolower(pathinfo($contract, PATHINFO_EXTENSION));
+                                            $fileUrl = route('rental-codes.view-file', ['rentalCode' => $rentalCode->id, 'field' => 'client_contract', 'index' => $index]);
+                                        @endphp
+                                        
+                                        @if($extension === 'pdf')
+                                            <iframe src="{{ $fileUrl }}" 
+                                                    style="width: 100%; height: 800px; border: none; border-radius: 4px;">
+                                            </iframe>
+                                        @else
+                                            <img src="{{ $fileUrl }}" 
+                                                 alt="Contract Page {{ $index + 1 }}" 
+                                                 style="width: 100%; height: auto; border-radius: 4px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);">
+                                        @endif
+                                    </div>
+                                </div>
+                            @endif
+                        @endforeach
+                    @else
+                        <div style="text-align: center; padding: 40px; color: #9ca3af;">
+                            <i class="fas fa-file-contract" style="font-size: 48px; margin-bottom: 16px; opacity: 0.5;"></i>
+                            <p>No contract documents available</p>
+                        </div>
+                    @endif
+                </div>
+            </div>
+            <div class="modal-footer" style="border-top: 1px solid #374151;">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" 
+                        style="background: linear-gradient(135deg, #4b5563, #6b7280); border: 1px solid #6b7280;">
+                    Close
+                </button>
+                <button type="button" class="btn btn-primary" onclick="downloadAllContracts()"
+                        style="background: linear-gradient(135deg, #3b82f6, #2563eb); border: 1px solid #3b82f6;">
+                    <i class="fas fa-download me-1"></i>Download All Pages
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
 @endsection

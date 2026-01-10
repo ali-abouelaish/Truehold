@@ -26,6 +26,8 @@ class RentalCode extends Model
         'status',
         'paid',
         'paid_at',
+        'refunded',
+        'refunded_at',
         // Document upload fields
         'client_contract',
         'payment_proof',
@@ -45,6 +47,8 @@ class RentalCode extends Model
         'consultation_fee' => 'decimal:2',
         'paid' => 'boolean',
         'paid_at' => 'datetime',
+        'refunded' => 'boolean',
+        'refunded_at' => 'datetime',
         'contact_images' => 'array',
         'cash_document_submitted_at' => 'datetime',
         'cash_document_reviewed_at' => 'datetime',
@@ -181,6 +185,75 @@ class RentalCode extends Model
     public function marketingAgentUser()
     {
         return $this->belongsTo(User::class, 'marketing_agent_id');
+    }
+
+    /**
+     * Check if this rental code has any documents uploaded
+     */
+    public function getHasDocumentsAttribute(): bool
+    {
+        // Check client_contract (can be JSON array, single string, or null)
+        if ($this->hasValidDocument('client_contract')) {
+            return true;
+        }
+
+        // Check payment_proof (can be JSON array, single string, or null)
+        if ($this->hasValidDocument('payment_proof')) {
+            return true;
+        }
+
+        // Check client_id_document (can be JSON array, single string, or null)
+        if ($this->hasValidDocument('client_id_document')) {
+            return true;
+        }
+
+        // Check other document fields
+        if (!empty($this->client_id_image) || !empty($this->cash_receipt_image)) {
+            return true;
+        }
+
+        // Check contact_images array
+        if (!empty($this->contact_images) && is_array($this->contact_images) && count($this->contact_images) > 0) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Helper to check if a document field has valid content
+     */
+    private function hasValidDocument(string $field): bool
+    {
+        $value = $this->$field;
+
+        if (empty($value)) {
+            return false;
+        }
+
+        // If it's a string, check if it's a JSON array or a file path
+        if (is_string($value)) {
+            $decoded = json_decode($value, true);
+            // Valid JSON array with at least one non-empty item
+            if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+                $validItems = array_filter($decoded, function($item) {
+                    return !empty($item) && is_string($item);
+                });
+                return count($validItems) > 0;
+            }
+            // Not JSON, check if it's a non-empty string (file path)
+            return !empty(trim($value));
+        }
+
+        // If it's already an array
+        if (is_array($value)) {
+            $validItems = array_filter($value, function($item) {
+                return !empty($item) && is_string($item);
+            });
+            return count($validItems) > 0;
+        }
+
+        return false;
     }
 
 }

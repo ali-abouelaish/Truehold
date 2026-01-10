@@ -492,6 +492,13 @@ body {
     border-color: #f59e0b;
 }
 
+.rental-card.refunded {
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(220, 38, 38, 0.1));
+    border-color: #ef4444;
+    border-width: 2px;
+    opacity: 0.85;
+}
+
 .rental-header {
     display: flex;
     justify-content: space-between;
@@ -693,13 +700,13 @@ body {
                         <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1.41 16.09V20h-2.67v-1.93c-1.71-.36-3.16-1.46-3.27-3.4h1.96c.1 1.05.82 1.87 2.65 1.87 1.96 0 2.4-.98 2.4-1.59 0-.83-.44-1.61-2.67-2.14-2.48-.6-4.18-1.62-4.18-3.67 0-1.72 1.39-2.84 3.11-3.21V4h2.67v1.95c1.86.45 2.79 1.86 2.85 3.39H14.3c-.05-1.11-.64-1.87-2.22-1.87-1.5 0-2.4.68-2.4 1.64 0 .84.65 1.39 2.67 1.91s4.18 1.39 4.18 3.91c-.01 1.83-1.38 2.83-3.12 3.16z"/>
                     </svg>
                 </div>
-                <div>
+        <div>
                     <h1 class="payroll-title">{{ $agentName }} - Commission File</h1>
                     <p class="payroll-subtitle">Complete commission breakdown for {{ $agentName }}</p>
                 </div>
             </div>
             <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
-                @if($startDate && $endDate)
+            @if($startDate && $endDate)
                     <div class="date-range-picker">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
                             <rect x="3" y="4" width="18" height="18" rx="2" stroke-width="2"/>
@@ -707,20 +714,20 @@ body {
                         </svg>
                         <span>{{ \Carbon\Carbon::parse($startDate)->format('d M Y') }} → {{ \Carbon\Carbon::parse($endDate)->format('d M Y') }}</span>
                         <span class="date-badge">{{ \Carbon\Carbon::parse($startDate)->diffInDays(\Carbon\Carbon::parse($endDate)) + 1 }} days</span>
-                    </div>
-                @endif
+                </div>
+            @endif
                 <a href="{{ route('rental-codes.agent-earnings') }}" class="btn-secondary">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M19 12H5M12 19l-7-7 7-7"/>
                     </svg>
                     Back to Commission Report
-                </a>
-            </div>
+            </a>
         </div>
+    </div>
     </div>
 </section>
 
-<!-- Summary Cards -->
+    <!-- Summary Cards -->
 <section class="summary-section">
     <div class="container-fluid px-4">
         <div class="summary-grid">
@@ -732,10 +739,10 @@ body {
                             <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/>
                             <path d="M12.5 7H11v6l5.2 3.2.8-1.3-4.5-2.7V7z"/>
                         </svg>
-                    </div>
-                </div>
+                        </div>
+                            </div>
                 <div class="summary-value">£{{ number_format($agent['total_earnings'], 2) }}</div>
-            </div>
+                        </div>
 
             <div class="summary-card summary-card-green">
                 <div class="summary-header">
@@ -747,17 +754,17 @@ body {
                     </div>
                 </div>
                 @php
-                    $totalAgentEarnings = 0;
-                    foreach ($agent['transactions'] ?? [] as $transaction) {
-                        $totalAgentEarnings += (float) ($transaction['agent_cut'] ?? 0);
-                    }
-                    foreach ($agent['landlord_bonuses'] ?? [] as $bonus) {
-                        $totalAgentEarnings += (float) ($bonus['agent_commission'] ?? 0);
-                    }
-                @endphp
+                                $totalAgentEarnings = 0;
+                                foreach ($agent['transactions'] ?? [] as $transaction) {
+                                    $totalAgentEarnings += (float) ($transaction['agent_cut'] ?? 0);
+                                }
+                                foreach ($agent['landlord_bonuses'] ?? [] as $bonus) {
+                                    $totalAgentEarnings += (float) ($bonus['agent_commission'] ?? 0);
+                                }
+                            @endphp
                 <div class="summary-value">£{{ number_format($totalAgentEarnings, 2) }}</div>
                 <small style="opacity: 0.8; font-size: 12px;">Rental + Marketing</small>
-            </div>
+        </div>
 
             <div class="summary-card summary-card-pink">
                 <div class="summary-header">
@@ -766,10 +773,10 @@ body {
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
                             <path d="M18 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 4h5v8l-2.5-1.5L6 12V4z"/>
                         </svg>
-                    </div>
-                </div>
+                        </div>
+                            </div>
                 <div class="summary-value">£{{ number_format($agent['marketing_agent_earnings'] ?? 0, 2) }}</div>
-            </div>
+        </div>
 
             <div class="summary-card summary-card-orange">
                 <div class="summary-header">
@@ -778,10 +785,10 @@ body {
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
                             <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>
                         </svg>
-                    </div>
-                </div>
+                        </div>
+                            </div>
                 <div class="summary-value">{{ $agent['transaction_count'] }}</div>
-            </div>
+        </div>
 
             <div class="summary-card summary-card-yellow">
                 <div class="summary-header">
@@ -790,15 +797,15 @@ body {
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
                             <path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/>
                         </svg>
+                        </div>
+                            </div>
+                <div class="summary-value">£{{ number_format($agent['outstanding_amount'], 2) }}</div>
+                        </div>
                     </div>
                 </div>
-                <div class="summary-value">£{{ number_format($agent['outstanding_amount'], 2) }}</div>
-            </div>
-        </div>
-    </div>
 </section>
 
-<!-- Filters Section -->
+    <!-- Filters Section -->
 <section class="container-fluid px-4">
     <div class="filters-section">
         <div class="filters-header">
@@ -808,10 +815,10 @@ body {
                 </svg>
                 Filters & Commission Cycles
             </h3>
-        </div>
+                </div>
         
         <form method="GET" action="{{ url()->current() }}" id="filterForm">
-            <!-- Quick Commission Cycle Selector -->
+                        <!-- Quick Commission Cycle Selector -->
             <div class="cycle-section">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
                     <label style="font-weight: 600; color: var(--primary-navy); font-size: 15px;">
@@ -819,108 +826,108 @@ body {
                             <path d="M9 11H7v2h2v-2zm4 0h-2v2h2v-2zm4 0h-2v2h2v-2zm2-7h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/>
                         </svg>
                         Quick Select Commission Cycle (11th to 10th)
-                    </label>
+                                    </label>
                     <span style="font-size: 12px; color: var(--gray);">Click to apply</span>
-                </div>
-                
+                                </div>
+                                
                 <div class="cycle-grid">
-                    @php
-                        $currentDate = now();
-                        $cycles = [];
-                        
-                        for ($i = 0; $i < 8; $i++) {
-                            $cycleDate = $currentDate->copy()->subMonths($i);
-                            
-                            if ($cycleDate->day <= 10) {
-                                $cycleStart = $cycleDate->copy()->subMonthNoOverflow()->day(11);
-                                $cycleEnd = $cycleDate->copy()->day(10);
-                            } else {
-                                $cycleStart = $cycleDate->copy()->day(11);
-                                $cycleEnd = $cycleDate->copy()->addMonthNoOverflow()->day(10);
-                            }
-                            
-                            $isSelected = ($startDate === $cycleStart->toDateString() && 
-                                          $endDate === min($currentDate->toDateString(), $cycleEnd->toDateString()));
-                            
-                            $cycles[] = [
-                                'start' => $cycleStart->toDateString(),
-                                'end' => min($currentDate->toDateString(), $cycleEnd->toDateString()),
-                                'label' => $cycleStart->format('d-M') . ' to ' . $cycleEnd->format('d-M Y'),
-                                'shortLabel' => $cycleStart->format('M Y'),
-                                'isCurrent' => $i === 0,
-                                'isSelected' => $isSelected
-                            ];
-                        }
-                    @endphp
-                    
-                    @foreach($cycles as $cycle)
-                        <button type="button" 
-                                onclick="selectCycle('{{ $cycle['start'] }}', '{{ $cycle['end'] }}')"
+                                    @php
+                                        $currentDate = now();
+                                        $cycles = [];
+                                        
+                                        for ($i = 0; $i < 8; $i++) {
+                                            $cycleDate = $currentDate->copy()->subMonths($i);
+                                            
+                                            if ($cycleDate->day <= 10) {
+                                                $cycleStart = $cycleDate->copy()->subMonthNoOverflow()->day(11);
+                                                $cycleEnd = $cycleDate->copy()->day(10);
+                                            } else {
+                                                $cycleStart = $cycleDate->copy()->day(11);
+                                                $cycleEnd = $cycleDate->copy()->addMonthNoOverflow()->day(10);
+                                            }
+                                            
+                                            $isSelected = ($startDate === $cycleStart->toDateString() && 
+                                                          $endDate === min($currentDate->toDateString(), $cycleEnd->toDateString()));
+                                            
+                                            $cycles[] = [
+                                                'start' => $cycleStart->toDateString(),
+                                                'end' => min($currentDate->toDateString(), $cycleEnd->toDateString()),
+                                                'label' => $cycleStart->format('d-M') . ' to ' . $cycleEnd->format('d-M Y'),
+                                                'shortLabel' => $cycleStart->format('M Y'),
+                                                'isCurrent' => $i === 0,
+                                                'isSelected' => $isSelected
+                                            ];
+                                        }
+                                    @endphp
+                                    
+                                    @foreach($cycles as $cycle)
+                                            <button type="button" 
+                                                    onclick="selectCycle('{{ $cycle['start'] }}', '{{ $cycle['end'] }}')"
                                 class="cycle-btn {{ $cycle['isSelected'] ? 'active' : ($cycle['isCurrent'] ? 'current' : '') }}">
                             <div style="font-weight: 700; font-size: 15px; margin-bottom: 4px;">
-                                @if($cycle['isSelected'])
+                                                        @if($cycle['isSelected'])
                                     <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" style="vertical-align: middle; margin-right: 4px;">
                                         <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
                                     </svg>
-                                @elseif($cycle['isCurrent'])
+                                                        @elseif($cycle['isCurrent'])
                                     <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" style="vertical-align: middle; margin-right: 4px;">
                                         <path d="M12 2L15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2z"/>
                                     </svg>
-                                @endif
+                                                        @endif
                                 {{ $cycle['shortLabel'] }}
-                            </div>
+                                                    </div>
                             <div style="font-size: 11px; opacity: 0.8;">{{ $cycle['label'] }}</div>
-                        </button>
-                    @endforeach
-                </div>
-                
+                                            </button>
+                                    @endforeach
+                                </div>
+                                
                 <!-- Quick Presets -->
                 <div style="border-top: 2px solid rgba(212, 175, 55, 0.2); padding-top: 16px; margin-top: 16px;">
                     <div style="font-size: 12px; font-weight: 600; color: var(--gray); margin-bottom: 12px;">Quick Presets:</div>
                     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px;">
-                        @php
-                            $last3MonthsStart = $currentDate->copy()->subMonths(3);
-                            $last3MonthsEnd = $currentDate->toDateString();
-                            $last6MonthsStart = $currentDate->copy()->subMonths(6);
-                            $last6MonthsEnd = $currentDate->toDateString();
-                            $thisYearStart = $currentDate->copy()->startOfYear();
-                            $thisYearEnd = $currentDate->toDateString();
-                            $lastYearStart = $currentDate->copy()->subYear()->startOfYear();
-                            $lastYearEnd = $currentDate->copy()->subYear()->endOfYear();
-                        @endphp
-                        
+                                        @php
+                                            $last3MonthsStart = $currentDate->copy()->subMonths(3);
+                                            $last3MonthsEnd = $currentDate->toDateString();
+                                            $last6MonthsStart = $currentDate->copy()->subMonths(6);
+                                            $last6MonthsEnd = $currentDate->toDateString();
+                                            $thisYearStart = $currentDate->copy()->startOfYear();
+                                            $thisYearEnd = $currentDate->toDateString();
+                                            $lastYearStart = $currentDate->copy()->subYear()->startOfYear();
+                                            $lastYearEnd = $currentDate->copy()->subYear()->endOfYear();
+                                        @endphp
+                                        
                         <button type="button" onclick="selectCycle('{{ $last3MonthsStart->toDateString() }}', '{{ $last3MonthsEnd }}')" 
                                 class="btn-secondary" style="font-size: 12px; padding: 10px; justify-content: center;">
                             Last 3 Months
-                        </button>
+                                            </button>
                         
                         <button type="button" onclick="selectCycle('{{ $last6MonthsStart->toDateString() }}', '{{ $last6MonthsEnd }}')" 
                                 class="btn-secondary" style="font-size: 12px; padding: 10px; justify-content: center;">
                             Last 6 Months
-                        </button>
+                                            </button>
                         
                         <button type="button" onclick="selectCycle('{{ $thisYearStart->toDateString() }}', '{{ $thisYearEnd }}')" 
                                 class="btn-secondary" style="font-size: 12px; padding: 10px; justify-content: center;">
                             This Year
-                        </button>
+                                            </button>
                         
                         <button type="button" onclick="selectCycle('{{ $lastYearStart->toDateString() }}', '{{ $lastYearEnd->toDateString() }}')" 
                                 class="btn-secondary" style="font-size: 12px; padding: 10px; justify-content: center;">
                             Last Year
-                        </button>
-                    </div>
-                </div>
-            </div>
-            
+                                            </button>
+                                </div>
+                            </div>
+                        </div>
+                        
             <div class="filter-grid">
                 <div class="form-group">
                     <label class="form-label">Start Date</label>
                     <input type="date" name="start_date" id="start_date" value="{{ $startDate }}" class="form-input">
-                </div>
+                        </div>
                 <div class="form-group">
                     <label class="form-label">End Date</label>
                     <input type="date" name="end_date" id="end_date" value="{{ $endDate }}" class="form-input">
-                </div>
+                        </div>
             </div>
             
             <div style="display: flex; gap: 12px;">
@@ -930,19 +937,19 @@ body {
                         <path d="m21 21-4.35-4.35"/>
                     </svg>
                     Apply Filters
-                </button>
+                            </button>
                 <a href="{{ url()->current() }}" class="btn-secondary">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M18 6L6 18M6 6l12 12"/>
                     </svg>
                     Clear Filters
-                </a>
-            </div>
-        </form>
-    </div>
+                            </a>
+                        </div>
+                    </form>
+                </div>
 </section>
 
-<!-- Rental Codes Section -->
+    <!-- Rental Codes Section -->
 <section class="container-fluid px-4">
     <div class="rental-codes-section">
         <div class="section-header">
@@ -952,81 +959,86 @@ body {
                 </svg>
                 Rental Codes ({{ count($agent['transactions']) }})
             </h3>
-            @auth
-            @if(auth()->user()->role === 'admin' && count($agent['transactions']) > 0)
-            <form id="bulkPaidForm" method="POST" action="{{ route('rental-codes.bulk-mark-paid') }}" class="d-inline">
-                @csrf
-                <input type="hidden" name="rental_code_ids[]" value="" id="dummyIdsPlaceholder" style="display:none;">
+                        @auth
+                        @if(auth()->user()->role === 'admin' && count($agent['transactions']) > 0)
+                        <form id="bulkPaidForm" method="POST" action="{{ route('rental-codes.bulk-mark-paid') }}" class="d-inline">
+                            @csrf
+                            <input type="hidden" name="rental_code_ids[]" value="" id="dummyIdsPlaceholder" style="display:none;">
                 <button type="submit" class="btn-success" onclick="return submitBulkPaid(event)">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M20 6L9 17l-5-5"/>
                     </svg>
                     Mark Selected Paid
-                </button>
-            </form>
-            @endif
-            @endauth
-        </div>
+                            </button>
+                        </form>
+                        @endif
+                        @endauth
+                    </div>
         <div class="section-content">
-            @if(count($agent['transactions']) > 0)
-                @php
-                    $rt = $agent['rental_totals'] ?? ['count'=>0,'agent_cut'=>0,'paid'=>0,'entitled'=>0,'outstanding'=>0];
-                    $marketingEarnings = $agent['marketing_agent_earnings'] ?? 0;
-                    $totalAgentEarningsFromRentals = $rt['agent_cut'] + $marketingEarnings;
+                    @if(count($agent['transactions']) > 0)
+                        @php
+                            $rt = $agent['rental_totals'] ?? ['count'=>0,'agent_cut'=>0,'paid'=>0,'entitled'=>0,'outstanding'=>0];
+                            $marketingEarnings = $agent['marketing_agent_earnings'] ?? 0;
+                            $totalAgentEarningsFromRentals = $rt['agent_cut'] + $marketingEarnings;
                     
-                    $marketingPaid = 0;
-                    $marketingEntitled = 0;
-                    foreach ($agent['transactions'] ?? [] as $transaction) {
-                        if ($transaction['is_marketing_earnings'] ?? false) {
-                            if ($transaction['paid'] ?? false) {
-                                $marketingPaid += (float) ($transaction['agent_cut'] ?? 0);
-                            } else {
-                                $marketingEntitled += (float) ($transaction['agent_cut'] ?? 0);
+                            $marketingPaid = 0;
+                            $marketingEntitled = 0;
+                            foreach ($agent['transactions'] ?? [] as $transaction) {
+                                if ($transaction['is_marketing_earnings'] ?? false) {
+                                    if ($transaction['paid'] ?? false) {
+                                        $marketingPaid += (float) ($transaction['agent_cut'] ?? 0);
+                                    } else {
+                                        $marketingEntitled += (float) ($transaction['agent_cut'] ?? 0);
+                                    }
+                                }
                             }
-                        }
-                    }
-                    $totalPaid = $rt['paid'] + $marketingPaid;
-                    $totalEntitled = $rt['entitled'] + $marketingEntitled;
-                @endphp
+                            $totalPaid = $rt['paid'] + $marketingPaid;
+                            $totalEntitled = $rt['entitled'] + $marketingEntitled;
+                        @endphp
                 <div class="totals-bar">
                     <div class="total-item">
                         <div class="total-label">Rental Count</div>
                         <div class="total-value">{{ $rt['count'] }}</div>
-                    </div>
+                            </div>
                     <div class="total-item">
                         <div class="total-label">Agent Earnings</div>
                         <div class="total-value success">£{{ number_format($totalAgentEarningsFromRentals, 2) }}</div>
-                    </div>
+                            </div>
                     <div class="total-item">
                         <div class="total-label">Paid</div>
                         <div class="total-value success">£{{ number_format($totalPaid, 2) }}</div>
-                    </div>
+                            </div>
                     <div class="total-item">
                         <div class="total-label">To Be Paid</div>
                         <div class="total-value warning">£{{ number_format($totalEntitled, 2) }}</div>
-                    </div>
-                </div>
-                @auth
-                @if(auth()->user()->role === 'admin')
+                            </div>
+                        </div>
+                        @auth
+                        @if(auth()->user()->role === 'admin')
                 <div style="margin-bottom: 20px;">
                     <label style="display: flex; align-items: center; gap: 8px; font-weight: 600; color: var(--primary-navy); cursor: pointer;">
                         <input type="checkbox" id="selectAll" onchange="toggleSelectAll(this)" style="width: 18px; height: 18px; cursor: pointer;">
                         Select All
                     </label>
-                </div>
-                @endif
-                @endauth
-                @foreach($agent['transactions'] as $transaction)
-                <div class="rental-card {{ $transaction['paid'] ? 'paid' : 'pending' }}">
+                        </div>
+                        @endif
+                        @endauth
+                        @foreach($agent['transactions'] as $transaction)
+                <div class="rental-card {{ ($transaction['refunded'] ?? false) ? 'refunded' : ($transaction['paid'] ? 'paid' : 'pending') }}">
                     <div class="rental-header">
                         <div style="display: flex; align-items: center; gap: 12px;">
-                            @auth
-                            @if(auth()->user()->role === 'admin' && !$transaction['paid'])
+                                @auth
+                                @if(auth()->user()->role === 'admin' && !$transaction['paid'])
                             <input type="checkbox" class="bulk-checkbox" value="{{ $transaction['id'] }}" style="width: 18px; height: 18px; cursor: pointer;">
-                            @endif
-                            @endauth
+                                @endif
+                                @endauth
                             <div>
                                 <div class="rental-badges">
+                                    @if($transaction['refunded'] ?? false)
+                                        <span class="rental-badge badge-refunded" style="background: linear-gradient(135deg, #ef4444, #dc2626); color: white; font-weight: 700; padding: 6px 12px;">
+                                            ↻ REFUNDED
+                                        </span>
+                                    @endif
                                     <span class="rental-badge badge-{{ $transaction['payment_method'] === 'Transfer' || $transaction['payment_method'] === 'Card Machine' || $transaction['payment_method'] === 'Card machine' ? 'transfer' : ($transaction['payment_method'] === 'Cash' ? 'cash' : 'card') }}">
                                         @if($transaction['payment_method'] === 'Transfer')
                                             ⚡
@@ -1056,7 +1068,7 @@ body {
                                     @endif
                                 </div>
                             </div>
-                        </div>
+                                    </div>
                     </div>
                     <div class="rental-details">
                         @if(!empty($transaction['clients']))
@@ -1071,39 +1083,41 @@ body {
                         </div>
                         <div class="detail-item">
                             <div class="detail-label">{{ ($transaction['is_marketing_earnings'] ?? false) ? 'Marketing Cut' : 'Agent Cut' }}</div>
-                            <div class="detail-value success">£{{ number_format($transaction['agent_cut'], 2) }}</div>
-                        </div>
-                    </div>
-                    @if($transaction['vat_amount'] > 0 || $transaction['marketing_deduction'] > 0)
+                            <div class="detail-value {{ ($transaction['refunded'] ?? false) ? 'refunded' : 'success' }}" style="{{ ($transaction['refunded'] ?? false) ? 'color: #ef4444; font-weight: 700;' : '' }}">
+                                {{ ($transaction['refunded'] ?? false) ? '-' : '' }}£{{ number_format(abs($transaction['agent_cut']), 2) }}
+                            </div>
+                                    </div>
+                                </div>
+                                @if($transaction['vat_amount'] > 0 || $transaction['marketing_deduction'] > 0)
                     <div class="deductions-section">
                         <div class="deductions-title">Deductions:</div>
-                        @if($transaction['vat_amount'] > 0)
+                                    @if($transaction['vat_amount'] > 0)
                             <div class="deduction-item deduction-vat">VAT: £{{ number_format($transaction['vat_amount'], 2) }}</div>
-                        @endif
-                        @if($transaction['marketing_deduction'] > 0)
+                                    @endif
+                                    @if($transaction['marketing_deduction'] > 0)
                             <div class="deduction-item deduction-marketing">Marketing: £{{ number_format($transaction['marketing_deduction'], 2) }}</div>
-                        @endif
-                        @if($transaction['marketing_agent'] ?? false)
+                                    @endif
+                                    @if($transaction['marketing_agent'] ?? false)
                             <div class="deduction-item deduction-agent">Marketing Agent: {{ $transaction['marketing_agent'] }}</div>
-                        @endif
-                    </div>
-                    @endif
-                </div>
-                @endforeach
-            @else
+                                    @endif
+                                </div>
+                                @endif
+                        </div>
+                        @endforeach
+                    @else
                 <div class="empty-state">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>
                     </svg>
                     <h3 style="color: var(--primary-navy); margin-bottom: 8px;">No rental codes found</h3>
                     <p style="color: var(--gray);">No rental codes found for this agent</p>
+                        </div>
+                    @endif
                 </div>
-            @endif
-        </div>
-    </div>
+            </div>
 </section>
 
-<!-- Landlord Bonuses Section -->
+    <!-- Landlord Bonuses Section -->
 <section class="container-fluid px-4">
     <div class="rental-codes-section">
         <div class="section-header">
@@ -1113,59 +1127,59 @@ body {
                 </svg>
                 Landlord Bonuses ({{ count($agent['landlord_bonuses'] ?? []) }})
             </h3>
-        </div>
+                </div>
         <div class="section-content">
-            @if(count($agent['landlord_bonuses'] ?? []) > 0)
-                @php
-                    $bt = $agent['bonus_totals'] ?? ['count'=>0,'agent_commission'=>0,'paid'=>0,'entitled'=>0,'outstanding'=>0];
-                @endphp
+                    @if(count($agent['landlord_bonuses'] ?? []) > 0)
+                        @php
+                            $bt = $agent['bonus_totals'] ?? ['count'=>0,'agent_commission'=>0,'paid'=>0,'entitled'=>0,'outstanding'=>0];
+                        @endphp
                 <div class="totals-bar">
                     <div class="total-item">
                         <div class="total-label">Bonuses</div>
                         <div class="total-value">{{ $bt['count'] }}</div>
-                    </div>
+                            </div>
                     <div class="total-item">
                         <div class="total-label">Agent Commission</div>
                         <div class="total-value success">£{{ number_format($bt['agent_commission'], 2) }}</div>
-                    </div>
+                            </div>
                     <div class="total-item">
                         <div class="total-label">Paid</div>
                         <div class="total-value success">£{{ number_format($bt['paid'], 2) }}</div>
-                    </div>
+                            </div>
                     <div class="total-item">
                         <div class="total-label">To Be Paid</div>
                         <div class="total-value warning">£{{ number_format($bt['entitled'], 2) }}</div>
-                    </div>
-                </div>
-                @foreach($agent['landlord_bonuses'] as $bonus)
+                            </div>
+                        </div>
+                        @foreach($agent['landlord_bonuses'] as $bonus)
                 <div class="rental-card {{ ($bonus['status'] ?? 'pending') === 'paid' ? 'paid' : 'pending' }}">
                     <div class="rental-header">
                         <div>
                             <div class="rental-badges">
                                 <span class="rental-badge" style="background: linear-gradient(135deg, #3b82f6, #2563eb); color: white;">
                                     🎁 {{ $bonus['bonus_code'] }}
-                                </span>
+                                    </span>
                                 <span class="rental-code">{{ $bonus['property'] }}</span>
-                                @if($bonus['status'] === 'paid')
+                                    @if($bonus['status'] === 'paid')
                                     <span class="rental-badge badge-paid">✓ Paid</span>
-                                @else
+                                    @else
                                     <span class="rental-badge badge-pending">Pending</span>
-                                @endif
-                            </div>
+                                    @endif
+                                </div>
                             <div class="rental-date">
-                                Landlord: {{ $bonus['landlord'] }} | Client: {{ $bonus['client'] }}
+                                    Landlord: {{ $bonus['landlord'] }} | Client: {{ $bonus['client'] }}
+                                </div>
                             </div>
-                        </div>
-                    </div>
+                                    </div>
                     <div class="rental-details">
                         <div class="detail-item">
                             <div class="detail-label">Total Commission</div>
                             <div class="detail-value">£{{ number_format($bonus['commission'], 2) }}</div>
-                        </div>
+                                    </div>
                         <div class="detail-item">
                             <div class="detail-label">Agent Commission</div>
                             <div class="detail-value success">£{{ number_format($bonus['agent_commission'], 2) }}</div>
-                        </div>
+                                </div>
                         <div class="detail-item">
                             <div class="detail-label">Split</div>
                             <div class="detail-value">{{ $bonus['bonus_split'] === '100_0' ? '100% Agent' : '55% Agent, 45% Agency' }}</div>
@@ -1174,26 +1188,26 @@ body {
                             <div class="detail-label">Date</div>
                             <div class="detail-value">{{ \Carbon\Carbon::parse($bonus['date'])->format('M d, Y') }}</div>
                         </div>
-                    </div>
-                    @if($bonus['notes'])
+                                </div>
+                                @if($bonus['notes'])
                     <div style="margin-top: 12px; padding-top: 12px; border-top: 2px solid var(--light-gray);">
                         <div style="font-size: 12px; color: var(--gray); font-weight: 600;">Notes:</div>
                         <div style="font-size: 13px; color: var(--text-dark); margin-top: 4px;">{{ $bonus['notes'] }}</div>
-                    </div>
-                    @endif
-                </div>
-                @endforeach
-            @else
+                                </div>
+                                @endif
+                        </div>
+                        @endforeach
+                    @else
                 <div class="empty-state">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
                     </svg>
                     <h3 style="color: var(--primary-navy); margin-bottom: 8px;">No landlord bonuses found</h3>
                     <p style="color: var(--gray);">No landlord bonuses found for this agent</p>
+                        </div>
+                    @endif
                 </div>
-            @endif
-        </div>
-    </div>
+            </div>
 </section>
 
 <script>

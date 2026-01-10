@@ -1799,30 +1799,50 @@ public function generateCode()
                 ];
             }
 
+            // Check if refunded
+            $isRefunded = $code->refunded ?? false;
+
             // Calculate splits
             $agencyCut = $baseCommission * 0.45;
             $agentCut = $baseCommission * 0.55;
 
-            // Add to agent totals
-            $byAgent[$agentName]['agency_earnings'] += $agencyCut;
-            $byAgent[$agentName]['agent_earnings'] += $agentCut;
-            $byAgent[$agentName]['total_earnings'] += $baseCommission;
-            $byAgent[$agentName]['transaction_count'] += 1;
+            // If refunded, subtract from totals instead of adding
+            if ($isRefunded) {
+                $byAgent[$agentName]['agency_earnings'] -= $agencyCut;
+                $byAgent[$agentName]['agent_earnings'] -= $agentCut;
+                $byAgent[$agentName]['total_earnings'] -= $baseCommission;
+                // Still count as a transaction for reporting purposes
+                $byAgent[$agentName]['transaction_count'] += 1;
+                
+                // Deduct from paid or entitled amounts
+                $isPaid = $code->paid ?? false;
+                if ($isPaid) {
+                    $byAgent[$agentName]['paid_amount'] -= $agentCut;
+                } else {
+                    $byAgent[$agentName]['entitled_amount'] -= $agentCut;
+                }
+            } else {
+                // Add to agent totals (normal flow)
+                $byAgent[$agentName]['agency_earnings'] += $agencyCut;
+                $byAgent[$agentName]['agent_earnings'] += $agentCut;
+                $byAgent[$agentName]['total_earnings'] += $baseCommission;
+                $byAgent[$agentName]['transaction_count'] += 1;
 
-            // Track VAT deductions
-            if ($paymentMethod === 'Transfer') {
-                $vatAmount = $totalFee - $baseCommission;
-                $byAgent[$agentName]['vat_deductions'] += $vatAmount;
+                // Track paid amounts
+                $isPaid = $code->paid ?? false;
+                $agentEarnings = $agentCut;
+
+                if ($isPaid) {
+                    $byAgent[$agentName]['paid_amount'] += $agentEarnings;
+                } else {
+                    $byAgent[$agentName]['entitled_amount'] += $agentEarnings;
+                }
             }
 
-            // Track paid amounts
-            $isPaid = $code->paid ?? false;
-            $agentEarnings = $agentCut;
-
-            if ($isPaid) {
-                $byAgent[$agentName]['paid_amount'] += $agentEarnings;
-            } else {
-                $byAgent[$agentName]['entitled_amount'] += $agentEarnings;
+            // Track VAT deductions (only for non-refunded)
+            if (!$isRefunded && $paymentMethod === 'Transfer') {
+                $vatAmount = $totalFee - $baseCommission;
+                $byAgent[$agentName]['vat_deductions'] += $vatAmount;
             }
 
             $byAgent[$agentName]['outstanding_amount'] = max(0, $byAgent[$agentName]['entitled_amount'] - $byAgent[$agentName]['paid_amount']);
@@ -1838,8 +1858,10 @@ public function generateCode()
                 'marketing_agent' => null,
                 'client_count' => 1,
                 'clients' => $code->client ? $code->client->full_name : 'N/A',
-                'paid' => $isPaid,
+                'paid' => $isPaid ?? false,
                 'paid_at' => $code->paid_at,
+                'refunded' => $isRefunded,
+                'refunded_at' => $code->refunded_at,
                 'date' => $rentalDate,
                 'code' => $code->rental_code ?? 'N/A',
                 'status' => $code->status ?? 'Unknown',
@@ -1921,21 +1943,40 @@ public function generateCode()
                     $baseCommission = $totalFee * 0.8;
                 }
 
+                // Check if refunded
+                $isRefunded = $code->refunded ?? false;
+                
                 // Marketing agent gets fixed commission: £30 (1 client) or £40 (2+ clients)
                 $marketingCommission = $clientCount >= 2 ? 40 : 30;
                 
-                // Add marketing earnings to agent totals
-                $byAgent[$requestedAgentName]['agent_earnings'] += $marketingCommission;
-                $byAgent[$requestedAgentName]['marketing_agent_earnings'] += $marketingCommission;
-                $byAgent[$requestedAgentName]['total_earnings'] += $marketingCommission;
-                $byAgent[$requestedAgentName]['transaction_count'] += 1;
-
-                // Track paid amounts for marketing agent
-                $isPaid = $code->paid ?? false;
-                if ($isPaid) {
-                    $byAgent[$requestedAgentName]['paid_amount'] += $marketingCommission;
+                // If refunded, subtract from totals instead of adding
+                if ($isRefunded) {
+                    $byAgent[$requestedAgentName]['agent_earnings'] -= $marketingCommission;
+                    $byAgent[$requestedAgentName]['marketing_agent_earnings'] -= $marketingCommission;
+                    $byAgent[$requestedAgentName]['total_earnings'] -= $marketingCommission;
+                    $byAgent[$requestedAgentName]['transaction_count'] += 1;
+                    
+                    // Deduct from paid or entitled amounts
+                    $isPaid = $code->paid ?? false;
+                    if ($isPaid) {
+                        $byAgent[$requestedAgentName]['paid_amount'] -= $marketingCommission;
+                    } else {
+                        $byAgent[$requestedAgentName]['entitled_amount'] -= $marketingCommission;
+                    }
                 } else {
-                    $byAgent[$requestedAgentName]['entitled_amount'] += $marketingCommission;
+                    // Add marketing earnings to agent totals (normal flow)
+                    $byAgent[$requestedAgentName]['agent_earnings'] += $marketingCommission;
+                    $byAgent[$requestedAgentName]['marketing_agent_earnings'] += $marketingCommission;
+                    $byAgent[$requestedAgentName]['total_earnings'] += $marketingCommission;
+                    $byAgent[$requestedAgentName]['transaction_count'] += 1;
+
+                    // Track paid amounts for marketing agent
+                    $isPaid = $code->paid ?? false;
+                    if ($isPaid) {
+                        $byAgent[$requestedAgentName]['paid_amount'] += $marketingCommission;
+                    } else {
+                        $byAgent[$requestedAgentName]['entitled_amount'] += $marketingCommission;
+                    }
                 }
 
                 // Calculate outstanding amount
@@ -1955,8 +1996,10 @@ public function generateCode()
                     'marketing_agent' => $requestedAgentName,
                     'client_count' => $clientCount,
                     'clients' => $code->client ? $code->client->full_name : 'N/A',
-                    'paid' => $isPaid,
+                    'paid' => $isPaid ?? false,
                     'paid_at' => $code->paid_at,
+                    'refunded' => $isRefunded,
+                    'refunded_at' => $code->refunded_at,
                     'date' => $rentalDate,
                     'code' => $code->rental_code ?? 'N/A',
                     'status' => $code->status ?? 'Unknown',
@@ -2809,6 +2852,68 @@ public function generateCode()
             return response()->json([
                 'success' => false,
                 'message' => 'Error updating rental code status: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Update refunded status for a rental code
+     */
+    public function updateRefunded(Request $request, RentalCode $rentalCode)
+    {
+        // Only admin users can update refunded status
+        if (auth()->user()->role !== 'admin') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Only administrators can update refunded status.',
+            ], 403);
+        }
+
+        try {
+            $validated = $request->validate([
+                'refunded' => 'required|boolean',
+            ]);
+
+            \Log::info('Updating rental code refunded status', [
+                'rental_code_id' => $rentalCode->id,
+                'old_refunded' => $rentalCode->refunded,
+                'new_refunded' => $validated['refunded']
+            ]);
+
+            $updateData = [
+                'refunded' => $validated['refunded'],
+            ];
+
+            // Set refunded_at timestamp if marking as refunded
+            if ($validated['refunded']) {
+                $updateData['refunded_at'] = now();
+            } else {
+                $updateData['refunded_at'] = null;
+            }
+
+            $rentalCode->update($updateData);
+
+            \Log::info('Rental code refunded status updated successfully', [
+                'rental_code_id' => $rentalCode->id,
+                'refunded' => $rentalCode->refunded,
+                'refunded_at' => $rentalCode->refunded_at
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => $validated['refunded'] ? 'Rental code marked as refunded' : 'Rental code unmarked as refunded',
+                'refunded' => $rentalCode->refunded,
+                'refunded_at' => $rentalCode->refunded_at,
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Error updating rental code refunded status', [
+                'rental_code_id' => $rentalCode->id,
+                'error' => $e->getMessage()
+            ]);
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Error updating refunded status: ' . $e->getMessage(),
             ], 500);
         }
     }

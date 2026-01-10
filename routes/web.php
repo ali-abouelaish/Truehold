@@ -397,6 +397,7 @@ Route::middleware('auth')->prefix('admin')->group(function () {
     Route::post('/rental-codes/{rentalCode}/mark-paid', [RentalCodeController::class, 'markAsPaid'])->name('rental-codes.mark-paid');
     Route::post('/rental-codes/{rentalCode}/mark-unpaid', [RentalCodeController::class, 'markAsUnpaid'])->name('rental-codes.mark-unpaid');
     Route::post('/rental-codes/{rentalCode}/update-status', [RentalCodeController::class, 'updateStatus'])->name('rental-codes.update-status');
+    Route::post('/rental-codes/{rentalCode}/update-refunded', [RentalCodeController::class, 'updateRefunded'])->name('rental-codes.update-refunded');
     Route::post('/rental-codes/bulk-update-status', [RentalCodeController::class, 'bulkUpdateStatus'])->name('rental-codes.bulk-update-status');
     Route::post('/rental-codes/bulk-mark-paid', [RentalCodeController::class, 'bulkMarkPaid'])->name('rental-codes.bulk-mark-paid');
     Route::post('/rental-codes/approve-all-pending', [RentalCodeController::class, 'approveAllPending'])->name('rental-codes.approve-all-pending');
