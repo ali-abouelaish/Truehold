@@ -1032,6 +1032,7 @@ public function generateCode()
                 $byAgent[$agentName]['outstanding_amount'] = max(0, $byAgent[$agentName]['entitled_amount'] - $byAgent[$agentName]['paid_amount']);
                 
                 $byAgent[$agentName]['transactions'][] = [
+                    'id' => $code->id,
                     'total_fee' => $totalFee,
                     'base_commission' => $baseCommission,
                     'agency_cut' => $agencyCut,
@@ -1040,6 +1041,7 @@ public function generateCode()
                     'marketing_deduction' => $marketingDeduction,
                     'marketing_agent' => $marketingAgentName,
                     'client_count' => $clientCount,
+                    'clients' => $code->client ? $code->client->full_name : 'N/A',
                     'paid' => $isPaid,
                     'paid_at' => $code->paid_at,
                     'date' => $rentalDate,
@@ -1110,6 +1112,7 @@ public function generateCode()
                 $byAgent[$marketingAgentName]['outstanding_amount'] = max(0, $byAgent[$marketingAgentName]['entitled_amount'] - $byAgent[$marketingAgentName]['paid_amount']);
                 
                 $byAgent[$marketingAgentName]['transactions'][] = [
+                    'id' => $code->id,
                     'total_fee' => $totalFee,
                     'base_commission' => $marketingDeduction,
                     'agency_cut' => 0,
@@ -1118,6 +1121,7 @@ public function generateCode()
                     'marketing_deduction' => 0,
                     'marketing_agent' => $marketingAgentName,
                     'client_count' => $clientCount,
+                    'clients' => $code->client ? $code->client->full_name : 'N/A',
                     'paid' => $marketingIsPaid,
                     'paid_at' => $code->paid_at,
                     'date' => $rentalDate,
@@ -1824,6 +1828,7 @@ public function generateCode()
             $byAgent[$agentName]['outstanding_amount'] = max(0, $byAgent[$agentName]['entitled_amount'] - $byAgent[$agentName]['paid_amount']);
 
             $byAgent[$agentName]['transactions'][] = [
+                'id' => $code->id,
                 'total_fee' => $totalFee,
                 'base_commission' => $baseCommission,
                 'agency_cut' => $agencyCut,
@@ -1832,6 +1837,7 @@ public function generateCode()
                 'marketing_deduction' => 0,
                 'marketing_agent' => null,
                 'client_count' => 1,
+                'clients' => $code->client ? $code->client->full_name : 'N/A',
                 'paid' => $isPaid,
                 'paid_at' => $code->paid_at,
                 'date' => $rentalDate,
@@ -1939,6 +1945,7 @@ public function generateCode()
 
                 // Add transaction record
                 $byAgent[$requestedAgentName]['transactions'][] = [
+                    'id' => $code->id,
                     'total_fee' => $totalFee,
                     'base_commission' => $marketingCommission,
                     'agency_cut' => 0,
@@ -1947,6 +1954,7 @@ public function generateCode()
                     'marketing_deduction' => 0,
                     'marketing_agent' => $requestedAgentName,
                     'client_count' => $clientCount,
+                    'clients' => $code->client ? $code->client->full_name : 'N/A',
                     'paid' => $isPaid,
                     'paid_at' => $code->paid_at,
                     'date' => $rentalDate,
@@ -2293,6 +2301,7 @@ public function generateCode()
                 'marketing_deduction' => $marketingDeduction ?? 0,
                 'marketing_agent' => $code->marketing_agent_name,
                 'client_count' => $clientCount,
+                'clients' => $code->client ? $code->client->full_name : 'N/A',
                 'paid' => $isPaid,
                 'paid_at' => $code->paid_at,
                 'date' => $rentalDate,
@@ -2573,6 +2582,7 @@ public function generateCode()
                 'marketing_deduction' => $marketingDeduction,
                 'marketing_agent' => $isMarketingEarnings ? $agentUser->name : ($code->marketing_agent_name ?? null),
                 'client_count' => $clientCount,
+                'clients' => $code->client ? $code->client->full_name : 'N/A',
                 'paid' => $isPaid,
                 'paid_at' => $code->paid_at,
                 'date' => $rentalDate,

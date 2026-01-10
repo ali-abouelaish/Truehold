@@ -4,6 +4,42 @@
 
 @section('content')
 <style>
+/* Force Light Mode - Override All Dark Mode Styles */
+html, body {
+    background-color: #ffffff !important;
+    color: #212529 !important;
+}
+
+.main-content {
+    background-color: #ffffff !important;
+}
+
+main {
+    background-color: #ffffff !important;
+}
+
+.container, .container-fluid, div, section, article, .card, .card-body {
+    background-color: transparent !important;
+}
+
+/* Override any parent dark mode */
+.earnings-container, .earnings-container * {
+    color: #212529 !important;
+}
+
+.leaderboard-section {
+    background-color: #ffffff !important;
+}
+
+.leaderboard-card {
+    background-color: #ffffff !important;
+}
+
+/* Override sidebar dark colors for this page */
+#sidebar {
+    background-color: #1f2937 !important;
+}
+
 /* TrueHold Premium Design - Light Mode */
 :root {
     --primary-navy: #1e3a5f;
@@ -24,7 +60,8 @@
 }
 
 body {
-    background-color: #ffffff;
+    background-color: #ffffff !important;
+    color: #212529 !important;
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
 }
 
