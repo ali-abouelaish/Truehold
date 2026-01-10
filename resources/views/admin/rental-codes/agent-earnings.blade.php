@@ -24,7 +24,7 @@
 }
 
 body {
-    background-color: var(--off-white);
+    background-color: #ffffff;
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
 }
 
@@ -419,11 +419,11 @@ body {
 /* Leaderboard Section */
 .leaderboard-section {
     padding: 32px 0 48px;
-    background-color: var(--off-white);
+    background-color: #ffffff;
 }
 
 .leaderboard-card {
-    background: var(--white);
+    background: #ffffff;
     border-radius: 16px;
     box-shadow: var(--shadow-md);
     overflow: hidden;
@@ -495,7 +495,7 @@ body {
 
 .leaderboard-table tbody tr {
     transition: var(--transition);
-    background-color: var(--white);
+    background-color: #ffffff;
 }
 
 .leaderboard-table tbody tr:hover {
