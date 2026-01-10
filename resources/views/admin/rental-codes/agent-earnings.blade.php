@@ -530,13 +530,36 @@ body {
     border-bottom: 1px solid var(--light-gray);
 }
 
+/* Force all table cells to have proper light mode colors */
+.leaderboard-table td,
+.leaderboard-table th {
+    background-color: transparent !important;
+}
+
+.leaderboard-table td {
+    color: #212529 !important;
+}
+
+.leaderboard-table th {
+    color: var(--primary-navy) !important;
+}
+
 .leaderboard-table tbody tr {
     transition: var(--transition);
-    background-color: #ffffff;
+    background-color: #ffffff !important;
 }
 
 .leaderboard-table tbody tr:hover {
-    background-color: #f8f9fa;
+    background-color: #f8f9fa !important;
+}
+
+/* Force override any parent dark mode styles on ALL table rows */
+.leaderboard-table tbody tr:not(.rank-gold):not(.rank-silver):not(.rank-bronze) {
+    background-color: #ffffff !important;
+}
+
+.leaderboard-table tbody tr:not(.rank-gold):not(.rank-silver):not(.rank-bronze):hover {
+    background-color: #f8f9fa !important;
 }
 
 .rank-gold:hover,
@@ -965,80 +988,80 @@ body {
                         <circle cx="12" cy="7" r="4" stroke-width="2"/>
                         <path d="M16 11l5-3m0 0l-5-3m5 3H11" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                     </svg>
-                </div>
-                <div>
+                    </div>
+    <div>
                     <h1 class="earnings-title">
-                        @if($isPayrollView)
-                            @if(auth()->check() && auth()->user()->role === 'admin')
-                                Agent Commission File - {{ $agentSearch }}
+                            @if($isPayrollView)
+                                @if(auth()->check() && auth()->user()->role === 'admin')
+                                    Agent Commission File - {{ $agentSearch }}
+                                @else
+                                    My Commission File
+                                @endif
                             @else
-                                My Commission File
+                                @if(auth()->check() && auth()->user()->role === 'admin')
+                                    Agent Earnings Analytics
+                                @else
+                                    My Earnings
+                                @endif
                             @endif
-                        @else
-                            @if(auth()->check() && auth()->user()->role === 'admin')
-                                Agent Earnings Analytics
-                            @else
-                                My Earnings
-                            @endif
-                        @endif
-                    </h1>
+                        </h1>
                     <p class="earnings-subtitle">
-                        @if($isPayrollView)
-                            @if(auth()->check() && auth()->user()->role === 'admin')
-                                Approved rentals up to 10th of each month - Commission view
+                            @if($isPayrollView)
+                                @if(auth()->check() && auth()->user()->role === 'admin')
+                                    Approved rentals up to 10th of each month - Commission view
+                                @else
+                                    Your approved rentals up to 10th of each month
+                                @endif
                             @else
-                                Your approved rentals up to 10th of each month
+                                @if(auth()->check() && auth()->user()->role === 'admin')
+                                    Comprehensive earnings analysis and performance insights
+                                @else
+                                    Your earnings overview and performance insights
+                                @endif
                             @endif
-                        @else
-                            @if(auth()->check() && auth()->user()->role === 'admin')
-                                Comprehensive earnings analysis and performance insights
-                            @else
-                                Your earnings overview and performance insights
-                            @endif
-                        @endif
-                    </p>
+                        </p>
                 </div>
             </div>
             <div class="earnings-actions">
-                @if($startDate && $endDate)
+                        @if($startDate && $endDate)
                     <div class="date-range-picker">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
                             <rect x="3" y="4" width="18" height="18" rx="2" stroke-width="2"/>
                             <path d="M16 2v4M8 2v4M3 10h18" stroke-width="2" stroke-linecap="round"/>
                         </svg>
-                        <span>{{ \Carbon\Carbon::parse($startDate)->format('d M Y') }} → {{ \Carbon\Carbon::parse($endDate)->format('d M Y') }}</span>
+                                <span>{{ \Carbon\Carbon::parse($startDate)->format('d M Y') }} → {{ \Carbon\Carbon::parse($endDate)->format('d M Y') }}</span>
                         <span class="date-badge">{{ \Carbon\Carbon::parse($startDate)->diffInDays(\Carbon\Carbon::parse($endDate)) + 1 }} days</span>
-                    </div>
-                @endif
-                @if($isPayrollView)
+                            </div>
+                        @endif
+                    @if($isPayrollView)
                     <a href="{{ route('rental-codes.agent-earnings') }}" class="btn-secondary">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path d="M19 12H5M12 19l-7-7 7-7"/>
                         </svg>
                         Back to All Agents
-                    </a>
-                @else
+                        </a>
+                    @else
                     <a href="{{ route('rental-codes.index') }}" class="btn-secondary">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path d="M19 12H5M12 19l-7-7 7-7"/>
                         </svg>
                         Back to Rental Codes
-                    </a>
-                @endif
-                @if(count($agentEarnings) > 0)
+        </a>
+                    @endif
+                    @if(count($agentEarnings) > 0)
                     <button onclick="exportToExcel()" class="btn-export">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/>
                         </svg>
                         Export Excel
                     </button>
-                @endif
+                    @endif
+                </div>
             </div>
-        </div>
     </div>
 </section>
 
-<!-- Advanced Filters -->
+    <!-- Advanced Filters -->
 <section class="filters-section">
     <div class="container-fluid px-4">
         <button class="filters-toggle" onclick="toggleFilters()">
@@ -1049,27 +1072,27 @@ body {
             <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" id="filterToggleIcon">
                 <path d="M6 9l6 6 6-6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
-        </button>
+                    </button>
         
         <div class="filters-content" id="filtersContent">
-            @if($isPayrollView)
+                @if($isPayrollView)
                 <div style="background: rgba(59, 130, 246, 0.1); border: 2px solid rgba(59, 130, 246, 0.2); border-radius: 12px; padding: 20px; margin-bottom: 24px;">
                     <div style="display: flex; align-items: flex-start; gap: 12px;">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" style="color: #3b82f6; margin-top: 2px;">
                             <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
                         </svg>
-                        <div>
+                            <div>
                             <h4 style="font-weight: 600; color: var(--primary-navy); margin-bottom: 8px;">Payroll View</h4>
                             <p style="color: var(--gray); font-size: 14px; margin: 0;">
-                                This view shows only <strong>approved</strong> rentals that this agent participated in (as rental agent or marketing agent). Outstanding amounts show what the agent is owed from unpaid rentals.
-                            </p>
+                                    This view shows only <strong>approved</strong> rentals that this agent participated in (as rental agent or marketing agent). Outstanding amounts show what the agent is owed from unpaid rentals.
+                                </p>
+                            </div>
                         </div>
                     </div>
-                </div>
-            @endif
+                @endif
             
             <form method="GET" action="{{ route('rental-codes.agent-earnings') }}" id="filterForm">
-                <!-- Quick Commission Cycle Selector -->
+                    <!-- Quick Commission Cycle Selector -->
                 <div class="cycle-section">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
                         <label style="font-weight: 600; color: var(--primary-navy); font-size: 15px;">
@@ -1077,110 +1100,110 @@ body {
                                 <path d="M9 11H7v2h2v-2zm4 0h-2v2h2v-2zm4 0h-2v2h2v-2zm2-7h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/>
                             </svg>
                             Quick Select Commission Cycle (11th to 10th)
-                        </label>
+                            </label>
                         <span style="font-size: 12px; color: var(--gray);">Click to apply</span>
-                    </div>
-                    
-                    <div class="cycle-grid">
-                        @php
-                            $currentDate = now();
-                            $cycles = [];
-                            
-                            for ($i = 0; $i < 8; $i++) {
-                                $cycleDate = $currentDate->copy()->subMonths($i);
-                                
-                                if ($cycleDate->day <= 10) {
-                                    $cycleStart = $cycleDate->copy()->subMonthNoOverflow()->day(11);
-                                    $cycleEnd = $cycleDate->copy()->day(10);
-                                } else {
-                                    $cycleStart = $cycleDate->copy()->day(11);
-                                    $cycleEnd = $cycleDate->copy()->addMonthNoOverflow()->day(10);
-                                }
-                                
-                                $isSelected = ($startDate === $cycleStart->toDateString() && 
-                                              $endDate === min($currentDate->toDateString(), $cycleEnd->toDateString()));
-                                
-                                $cycles[] = [
-                                    'start' => $cycleStart->toDateString(),
-                                    'end' => min($currentDate->toDateString(), $cycleEnd->toDateString()),
-                                    'label' => $cycleStart->format('d-M') . ' to ' . $cycleEnd->format('d-M Y'),
-                                    'shortLabel' => $cycleStart->format('M Y'),
-                                    'isCurrent' => $i === 0,
-                                    'isSelected' => $isSelected
-                                ];
-                            }
-                        @endphp
+                        </div>
                         
-                        @foreach($cycles as $cycle)
-                            <button type="button" 
-                                    onclick="selectCycle('{{ $cycle['start'] }}', '{{ $cycle['end'] }}')"
+                    <div class="cycle-grid">
+                            @php
+                                $currentDate = now();
+                                $cycles = [];
+                                
+                                for ($i = 0; $i < 8; $i++) {
+                                    $cycleDate = $currentDate->copy()->subMonths($i);
+                                    
+                                    if ($cycleDate->day <= 10) {
+                                        $cycleStart = $cycleDate->copy()->subMonthNoOverflow()->day(11);
+                                        $cycleEnd = $cycleDate->copy()->day(10);
+                                    } else {
+                                        $cycleStart = $cycleDate->copy()->day(11);
+                                        $cycleEnd = $cycleDate->copy()->addMonthNoOverflow()->day(10);
+                                    }
+                                    
+                                    $isSelected = ($startDate === $cycleStart->toDateString() && 
+                                                  $endDate === min($currentDate->toDateString(), $cycleEnd->toDateString()));
+                                    
+                                    $cycles[] = [
+                                        'start' => $cycleStart->toDateString(),
+                                        'end' => min($currentDate->toDateString(), $cycleEnd->toDateString()),
+                                        'label' => $cycleStart->format('d-M') . ' to ' . $cycleEnd->format('d-M Y'),
+                                        'shortLabel' => $cycleStart->format('M Y'),
+                                        'isCurrent' => $i === 0,
+                                        'isSelected' => $isSelected
+                                    ];
+                                }
+                            @endphp
+                            
+                            @foreach($cycles as $cycle)
+                                <button type="button" 
+                                        onclick="selectCycle('{{ $cycle['start'] }}', '{{ $cycle['end'] }}')"
                                     class="cycle-btn {{ $cycle['isSelected'] ? 'active' : ($cycle['isCurrent'] ? 'current' : '') }}">
                                 <div style="font-weight: 700; font-size: 15px; margin-bottom: 4px;">
-                                    @if($cycle['isSelected'])
+                                            @if($cycle['isSelected'])
                                         <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" style="vertical-align: middle; margin-right: 4px;">
                                             <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
                                         </svg>
-                                    @elseif($cycle['isCurrent'])
+                                            @elseif($cycle['isCurrent'])
                                         <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" style="vertical-align: middle; margin-right: 4px;">
                                             <path d="M12 2L15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2z"/>
                                         </svg>
-                                    @endif
+                                            @endif
                                     {{ $cycle['shortLabel'] }}
-                                </div>
+                                        </div>
                                 <div style="font-size: 11px; opacity: 0.8;">{{ $cycle['label'] }}</div>
-                            </button>
-                        @endforeach
-                    </div>
-                    
+                                </button>
+                            @endforeach
+                        </div>
+                        
                     <!-- Quick Presets -->
                     <div style="border-top: 2px solid rgba(212, 175, 55, 0.2); padding-top: 16px; margin-top: 16px;">
                         <div style="font-size: 12px; font-weight: 600; color: var(--gray); margin-bottom: 12px;">Quick Presets:</div>
                         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px;">
                             @php
-                                $last3MonthsStart = $currentDate->copy()->subMonths(3);
-                                $last3MonthsEnd = $currentDate->toDateString();
-                                $last6MonthsStart = $currentDate->copy()->subMonths(6);
-                                $last6MonthsEnd = $currentDate->toDateString();
-                                $thisYearStart = $currentDate->copy()->startOfYear();
-                                $thisYearEnd = $currentDate->toDateString();
-                                $lastYearStart = $currentDate->copy()->subYear()->startOfYear();
-                                $lastYearEnd = $currentDate->copy()->subYear()->endOfYear();
-                            @endphp
-                            
+                                    $last3MonthsStart = $currentDate->copy()->subMonths(3);
+                                    $last3MonthsEnd = $currentDate->toDateString();
+                                    $last6MonthsStart = $currentDate->copy()->subMonths(6);
+                                    $last6MonthsEnd = $currentDate->toDateString();
+                                    $thisYearStart = $currentDate->copy()->startOfYear();
+                                    $thisYearEnd = $currentDate->toDateString();
+                                    $lastYearStart = $currentDate->copy()->subYear()->startOfYear();
+                                    $lastYearEnd = $currentDate->copy()->subYear()->endOfYear();
+                                @endphp
+                                
                             <button type="button" onclick="selectCycle('{{ $last3MonthsStart->toDateString() }}', '{{ $last3MonthsEnd }}')" 
                                     class="btn-secondary" style="font-size: 12px; padding: 10px; justify-content: center;">
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
                                     <path d="M20 3h-1V1h-2v2H7V1H5v2H4c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 18H4V8h16v13z"/>
                                 </svg>
                                 Last 3 Months
-                            </button>
-                            
+                                </button>
+                                
                             <button type="button" onclick="selectCycle('{{ $last6MonthsStart->toDateString() }}', '{{ $last6MonthsEnd }}')" 
                                     class="btn-secondary" style="font-size: 12px; padding: 10px; justify-content: center;">
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
                                     <path d="M20 3h-1V1h-2v2H7V1H5v2H4c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 18H4V8h16v13z"/>
                                 </svg>
                                 Last 6 Months
-                            </button>
-                            
+                                </button>
+                                
                             <button type="button" onclick="selectCycle('{{ $thisYearStart->toDateString() }}', '{{ $thisYearEnd }}')" 
                                     class="btn-secondary" style="font-size: 12px; padding: 10px; justify-content: center;">
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
                                     <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z"/>
                                 </svg>
                                 This Year
-                            </button>
-                            
+                                </button>
+                                
                             <button type="button" onclick="selectCycle('{{ $lastYearStart->toDateString() }}', '{{ $lastYearEnd->toDateString() }}')" 
                                     class="btn-secondary" style="font-size: 12px; padding: 10px; justify-content: center;">
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
                                     <path d="M13 3c-4.97 0-9 4.03-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42C8.27 19.99 10.51 21 13 21c4.97 0 9-4.03 9-9s-4.03-9-9-9z"/>
                                 </svg>
                                 Last Year
-                            </button>
+                                </button>
+                            </div>
                         </div>
                     </div>
-                </div>
 
                 <div class="filter-grid">
                     <div class="form-group">
@@ -1189,9 +1212,9 @@ body {
                                 <path d="M20 3h-1V1h-2v2H7V1H5v2H4c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 18H4V8h16v13z"/>
                             </svg>
                             Start Date
-                        </label>
+                            </label>
                         <input type="date" name="start_date" id="start_date" value="{{ $startDate }}" class="form-input">
-                    </div>
+            </div>
                     
                     <div class="form-group">
                         <label class="form-label">
@@ -1199,9 +1222,9 @@ body {
                                 <path d="M20 3h-1V1h-2v2H7V1H5v2H4c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 18H4V8h16v13z"/>
                             </svg>
                             End Date
-                        </label>
+                            </label>
                         <input type="date" name="end_date" id="end_date" value="{{ $endDate }}" class="form-input">
-                    </div>
+                        </div>
                     
                     <div class="form-group">
                         <label class="form-label">
@@ -1209,13 +1232,13 @@ body {
                                 <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
                             </svg>
                             Agent Filter
-                        </label>
-                        @if($isPayrollView)
+                            </label>
+                            @if($isPayrollView)
                             <div class="form-input" style="background: var(--off-white); color: var(--primary-navy); font-weight: 600;">
                                 {{ $agentSearch }} <span style="opacity: 0.7; font-weight: 400;">(Payroll View)</span>
-                            </div>
-                            <input type="hidden" name="agent_search" value="{{ $agentSearch }}">
-                        @elseif(auth()->check() && auth()->user()->role === 'admin')
+                                </div>
+                                <input type="hidden" name="agent_search" value="{{ $agentSearch }}">
+                            @elseif(auth()->check() && auth()->user()->role === 'admin')
                             <select name="agent_search" class="form-select">
                                 <option value="">All Agents</option>
                                 @foreach($agentEarnings as $agent)
@@ -1224,15 +1247,15 @@ body {
                                     </option>
                                 @endforeach
                             </select>
-                        @else
+                            @else
                             <div class="form-input" style="background: rgba(59, 130, 246, 0.1); color: var(--primary-navy); font-weight: 600;">
                                 {{ auth()->check() ? auth()->user()->name : 'Guest' }} <span style="opacity: 0.7; font-weight: 400;">(Your Payroll Only)</span>
-                            </div>
-                            @auth
+                                </div>
+                                @auth
                                 <input type="hidden" name="agent_search" value="{{ auth()->user()->name }}">
-                            @endauth
-                        @endif
-                    </div>
+                                @endauth
+                            @endif
+                        </div>
                     
                     <div class="form-group">
                         <label class="form-label">
@@ -1240,14 +1263,14 @@ body {
                                 <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
                             </svg>
                             Marketing Agent Filter
-                        </label>
+                            </label>
                         <select name="marketing_agent_filter" class="form-select">
-                            <option value="">All Agents</option>
-                            <option value="marketing_only" {{ $marketingAgentFilter == 'marketing_only' ? 'selected' : '' }}>Marketing Agents Only</option>
-                            <option value="rent_only" {{ $marketingAgentFilter == 'rent_only' ? 'selected' : '' }}>Rent Agents Only</option>
-                            <option value="both" {{ $marketingAgentFilter == 'both' ? 'selected' : '' }}>Both Rent & Marketing</option>
-                        </select>
-                    </div>
+                                <option value="">All Agents</option>
+                                <option value="marketing_only" {{ $marketingAgentFilter == 'marketing_only' ? 'selected' : '' }}>Marketing Agents Only</option>
+                                <option value="rent_only" {{ $marketingAgentFilter == 'rent_only' ? 'selected' : '' }}>Rent Agents Only</option>
+                                <option value="both" {{ $marketingAgentFilter == 'both' ? 'selected' : '' }}>Both Rent & Marketing</option>
+                            </select>
+            </div>
                     
                     <div class="form-group">
                         <label class="form-label">
@@ -1255,15 +1278,15 @@ body {
                                 <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
                             </svg>
                             Status
-                        </label>
+                            </label>
                         <select name="status" class="form-select">
-                            <option value="">All Statuses</option>
-                            <option value="pending" {{ $status==='pending' ? 'selected' : '' }}>Pending</option>
-                            <option value="approved" {{ $status==='approved' ? 'selected' : '' }}>Approved</option>
-                            <option value="completed" {{ $status==='completed' ? 'selected' : '' }}>Completed</option>
-                            <option value="cancelled" {{ $status==='cancelled' ? 'selected' : '' }}>Cancelled</option>
-                        </select>
-                    </div>
+                                <option value="">All Statuses</option>
+                    <option value="pending" {{ $status==='pending' ? 'selected' : '' }}>Pending</option>
+                    <option value="approved" {{ $status==='approved' ? 'selected' : '' }}>Approved</option>
+                    <option value="completed" {{ $status==='completed' ? 'selected' : '' }}>Completed</option>
+                    <option value="cancelled" {{ $status==='cancelled' ? 'selected' : '' }}>Cancelled</option>
+                </select>
+            </div>
                     
                     <div class="form-group">
                         <label class="form-label">
@@ -1271,13 +1294,13 @@ body {
                                 <path d="M20 4H4c-1.11 0-1.99.89-1.99 2L2 18c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/>
                             </svg>
                             Payment Method
-                        </label>
+                            </label>
                         <select name="payment_method" class="form-select">
-                            <option value="">All Methods</option>
-                            <option value="Cash" {{ $paymentMethod==='Cash' ? 'selected' : '' }}>Cash</option>
-                            <option value="Transfer" {{ $paymentMethod==='Transfer' ? 'selected' : '' }}>Transfer</option>
-                        </select>
-                    </div>
+                                <option value="">All Methods</option>
+                    <option value="Cash" {{ $paymentMethod==='Cash' ? 'selected' : '' }}>Cash</option>
+                    <option value="Transfer" {{ $paymentMethod==='Transfer' ? 'selected' : '' }}>Transfer</option>
+                </select>
+            </div>
                 </div>
                 
                 <div style="display: flex; gap: 12px; margin-top: 24px;">
@@ -1287,21 +1310,21 @@ body {
                             <path d="m21 21-4.35-4.35"/>
                         </svg>
                         Apply Filters
-                    </button>
+                </button>
                     <a href="{{ route('rental-codes.agent-earnings') }}" class="btn-secondary">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path d="M18 6L6 18M6 6l12 12"/>
                         </svg>
                         Clear
                     </a>
-                </div>
-            </form>
-        </div>
+            </div>
+        </form>
     </div>
+</div>
 </section>
 
 <!-- Stats Cards -->
-@if(!$agentSearch)
+        @if(!$agentSearch)
 <section class="stats-section">
     <div class="container-fluid px-4">
         <div class="stats-grid">
@@ -1313,10 +1336,10 @@ body {
                             <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/>
                         </svg>
                     </div>
-                </div>
+                    </div>
                 <div class="stat-value">{{ $summary['total_agents'] }}</div>
             </div>
-
+            
             <div class="stat-card stat-green">
                 <div class="stat-header">
                     <div class="stat-label">Total Earnings</div>
@@ -1325,10 +1348,10 @@ body {
                             <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1.41 16.09V20h-2.67v-1.93c-1.71-.36-3.16-1.46-3.27-3.4h1.96c.1 1.05.82 1.87 2.65 1.87 1.96 0 2.4-.98 2.4-1.59 0-.83-.44-1.61-2.67-2.14-2.48-.6-4.18-1.62-4.18-3.67 0-1.72 1.39-2.84 3.11-3.21V4h2.67v1.95c1.86.45 2.79 1.86 2.85 3.39H14.3c-.05-1.11-.64-1.87-2.22-1.87-1.5 0-2.4.68-2.4 1.64 0 .84.65 1.39 2.67 1.91s4.18 1.39 4.18 3.91c-.01 1.83-1.38 2.83-3.12 3.16z"/>
                         </svg>
                     </div>
-                </div>
-                <div class="stat-value">£{{ number_format($summary['total_earnings'], 2) }}</div>
             </div>
-
+                <div class="stat-value">£{{ number_format($summary['total_earnings'], 2) }}</div>
+    </div>
+    
             <div class="stat-card stat-purple">
                 <div class="stat-header">
                     <div class="stat-label">Total Transactions</div>
@@ -1336,11 +1359,11 @@ body {
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
                             <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>
                         </svg>
-                    </div>
                 </div>
-                <div class="stat-value">{{ $summary['total_transactions'] }}</div>
             </div>
-
+                <div class="stat-value">{{ $summary['total_transactions'] }}</div>
+    </div>
+    
             <div class="stat-card stat-orange">
                 <div class="stat-header">
                     <div class="stat-label">Avg per Agent</div>
@@ -1348,16 +1371,16 @@ body {
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
                             <path d="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z"/>
                         </svg>
-                    </div>
                 </div>
-                <div class="stat-value">£{{ number_format($summary['avg_earnings_per_agent'], 2) }}</div>
             </div>
+                <div class="stat-value">£{{ number_format($summary['avg_earnings_per_agent'], 2) }}</div>
         </div>
     </div>
+</div>
 </section>
 @endif
 
-<!-- Charts Section -->
+        <!-- Charts Section -->
 @if(!$agentSearch && count($agentEarnings) > 0)
 <section class="charts-section">
     <div class="container-fluid px-4">
@@ -1369,14 +1392,14 @@ body {
                     </svg>
                     Monthly Earnings Trend
                 </h3>
-            </div>
+                </div>
             <div style="height: 300px;">
                 <canvas id="monthlyChart"></canvas>
             </div>
-        </div>
-    </div>
+                </div>
+            </div>
 </section>
-@endif
+        @endif
 
 <!-- Agent Leaderboard -->
 <section class="leaderboard-section">
@@ -1387,35 +1410,35 @@ body {
                     <svg viewBox="0 0 24 24" fill="currentColor">
                         <path d="M12 2L15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2z"/>
                     </svg>
-                    @if($agentSearch)
-                        {{ $agentSearch }} - Commission File
-                    @elseif($isPayrollView)
-                        @if(auth()->check() && auth()->user()->role === 'admin')
-                            Commission File - {{ $agentSearch }}
-                        @else
-                            My Commission File
-                        @endif
-                    @else
-                        @if(auth()->check() && auth()->user()->role === 'admin')
+                            @if($agentSearch)
+                                {{ $agentSearch }} - Commission File
+                            @elseif($isPayrollView)
+                                @if(auth()->check() && auth()->user()->role === 'admin')
+                                    Commission File - {{ $agentSearch }}
+                                @else
+                                    My Commission File
+                                @endif
+                            @else
+                                @if(auth()->check() && auth()->user()->role === 'admin')
                             Agent Leaderboard
-                        @else
-                            Agent Leaderboard
-                        @endif
-                    @endif
-                </h3>
+                                @else
+                                    Agent Leaderboard
+                                @endif
+                            @endif
+                        </h3>
                 <div class="leaderboard-actions">
                     <span class="period-badge">
-                        @if($startDate || $endDate)
+                                @if($startDate || $endDate)
                             Period: {{ $startDate ? \Carbon\Carbon::parse($startDate)->format('d M Y') : 'Beginning' }} → {{ \Carbon\Carbon::parse($endDate)->format('d M Y') }}
-                        @else
-                            All Time Data
-                        @endif
-                        @if($status) • Status: {{ ucfirst($status) }} @endif
-                        @if($paymentMethod) • Payment: {{ $paymentMethod }} @endif
-                    </span>
+                            @else
+                                All Time Data
+                            @endif
+            @if($status) • Status: {{ ucfirst($status) }} @endif
+            @if($paymentMethod) • Payment: {{ $paymentMethod }} @endif
+                        </span>
                 </div>
-            </div>
-
+    </div>
+    
             @if(count($agentEarnings) > 0)
                 <div class="table-responsive">
                     <table class="leaderboard-table">
@@ -1427,74 +1450,74 @@ body {
                                 <th>Total Earnings</th>
                                 <th>Last Activity</th>
                                 <th>Actions</th>
-                            </tr>
-                        </thead>
+                </tr>
+            </thead>
                         <tbody>
-                            @forelse($agentEarnings as $index => $agent)
-                                @php
-                                    $isAdmin = auth()->check() && auth()->user()->role === 'admin';
-                                    $currentUser = auth()->check() ? auth()->user()->name : null;
-                                    $isCurrentUser = $agent['name'] === $currentUser;
+                        @forelse($agentEarnings as $index => $agent)
+                        @php
+                            $isAdmin = auth()->check() && auth()->user()->role === 'admin';
+                            $currentUser = auth()->check() ? auth()->user()->name : null;
+                            $isCurrentUser = $agent['name'] === $currentUser;
                                     
                                     if (!$isAdmin && !$isCurrentUser && $loop->index >= 3) {
-                                        continue;
+                                    continue;
                                     }
                                     
                                     $rowClass = '';
                                     $badgeHtml = '';
-                                    
-                                    if ($loop->index === 0) {
+                            
+                            if ($loop->index === 0) {
                                         $rowClass = 'rank-gold';
                                         $badgeHtml = '<div class="agent-badge gold-badge">🥇 Gold - #1</div>';
-                                    } elseif ($loop->index === 1) {
+                            } elseif ($loop->index === 1) {
                                         $rowClass = 'rank-silver';
                                         $badgeHtml = '<div class="agent-badge silver-badge">🥈 Silver - #2</div>';
-                                    } elseif ($loop->index === 2) {
+                            } elseif ($loop->index === 2) {
                                         $rowClass = 'rank-bronze';
                                         $badgeHtml = '<div class="agent-badge bronze-badge">🥉 Bronze - #3</div>';
                                     }
-                                @endphp
+                        @endphp
                                 <tr class="{{ $rowClass }}">
                                     <td>
                                         <div class="agent-info">
                                             <div class="agent-avatar">
-                                                {{ strtoupper(substr($agent['name'], 0, 2)) }}
-                                            </div>
-                                            <div>
+                                            {{ strtoupper(substr($agent['name'], 0, 2)) }}
+                            </div>
+                                    <div>
                                                 <div class="agent-name">{{ $agent['name'] }}</div>
                                                 {!! $badgeHtml !!}
                                                 <div class="agent-transactions">{{ $agent['transaction_count'] }} total transactions</div>
-                                            </div>
-                                        </div>
-                                    </td>
+                            </div>
+                        </div>
+                    </td>
                                     <td>
                                         <div class="earnings-cell">
                                             <div class="earnings-amount">£{{ number_format($agent['agent_earnings'], 2) }}</div>
                                             <div class="earnings-commission">55% of commission</div>
-                                        </div>
-                                    </td>
+                        </div>
+                    </td>
                                     <td>
                                         <div class="earnings-cell">
                                             <div class="earnings-amount">£{{ number_format($agent['agency_earnings'], 2) }}</div>
                                             <div class="earnings-commission">45% of commission</div>
-                                        </div>
-                                    </td>
+                        </div>
+                    </td>
                                     <td>
                                         <div class="total-earnings">
                                             <svg viewBox="0 0 24 24" fill="currentColor">
                                                 <path d="M12 2L15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2z"/>
                                             </svg>
-                                            £{{ number_format($agent['total_earnings'], 2) }}
+                            £{{ number_format($agent['total_earnings'], 2) }}
                                             <span class="total-label">{{ $agent['transaction_count'] }} total</span>
-                                        </div>
-                                    </td>
+                        </div>
+                    </td>
                                     <td>
                                         <div class="activity-date">
-                                            {{ $agent['last_transaction_date'] ? $agent['last_transaction_date']->format('d M Y') : 'N/A' }}
-                                        </div>
-                                    </td>
+                                    {{ $agent['last_transaction_date'] ? $agent['last_transaction_date']->format('d M Y') : 'N/A' }}
+                                </div>
+                            </td>
                                     <td>
-                                        <a href="{{ isset($agent['id']) ? route('rental-codes.agent-payroll', ['agentId' => $agent['id']]) : route('rental-codes.agent-payroll-by-name', ['agentName' => $agent['name']]) }}" 
+                                    <a href="{{ isset($agent['id']) ? route('rental-codes.agent-payroll', ['agentId' => $agent['id']]) : route('rental-codes.agent-payroll-by-name', ['agentName' => $agent['name']]) }}" 
                                            class="btn-view-file">
                                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                                 <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
@@ -1502,10 +1525,10 @@ body {
                                             </svg>
                                             View Commission File
                                         </a>
-                                    </td>
-                                </tr>
-                            @empty
-                                <tr>
+                    </td>
+                </tr>
+                @empty
+                <tr>
                                     <td colspan="6">
                                         <div class="empty-state">
                                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -1513,13 +1536,13 @@ body {
                                             </svg>
                                             <h3 style="color: var(--primary-navy); margin-bottom: 8px;">No earnings data found</h3>
                                             <p style="color: var(--gray);">No rental codes found for the selected criteria</p>
-                                        </div>
-                                    </td>
-                                </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
-                </div>
+                        </div>
+                    </td>
+                </tr>
+                @endforelse
+            </tbody>
+        </table>
+            </div>
             @else
                 <div class="empty-state" style="padding: 60px 20px;">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -1527,9 +1550,9 @@ body {
                     </svg>
                     <h3 style="color: var(--primary-navy); margin-bottom: 8px;">No earnings data found</h3>
                     <p style="color: var(--gray);">No rental codes found for the selected criteria</p>
-                </div>
-            @endif
-        </div>
+                                        </div>
+                                    @endif
+                                </div>
     </div>
 </section>
 
@@ -1636,9 +1659,9 @@ const monthlyChart = new Chart(monthlyCtx, {
                     display: false
                 }
             }
-        }
-    }
-});
+                }
+            }
+        });
 @endif
 </script>
 @endsection
