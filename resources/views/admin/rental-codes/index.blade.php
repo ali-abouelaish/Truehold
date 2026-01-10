@@ -837,6 +837,7 @@ strong {
                                                     </button>
                                                 </div>
                                             </td>
+                                            @endif
                                             @if(auth()->user()->role === 'admin')
                                             <td>
                                                 <div class="form-check form-switch">
