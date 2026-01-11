@@ -740,13 +740,13 @@ strong {
                                         <th>Date</th>
                                         <th>Consultation Fee</th>
                                         <th>Status</th>
-                                        @if(auth()->user()->role === 'admin')
-                                        <th>Refunded</th>
-                                        @endif
                                         <th>Agent</th>
                                         <th>Marketing Agent</th>
                                         @if(auth()->user()->role === 'admin')
                                         <th>Quick Actions</th>
+                                        @endif
+                                        @if(auth()->user()->role === 'admin')
+                                        <th>Refunded</th>
                                         @endif
                                         <th>Actions</th>
                                     </tr>
