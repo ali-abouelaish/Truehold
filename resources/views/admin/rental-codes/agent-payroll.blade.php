@@ -754,10 +754,13 @@ body {
                     </div>
                 </div>
                 @php
-                                $totalAgentEarnings = 0;
-                                foreach ($agent['transactions'] ?? [] as $transaction) {
-                                    $totalAgentEarnings += (float) ($transaction['agent_cut'] ?? 0);
+                                // Use controller's calculated agent_earnings which already accounts for refunded items
+                                $totalAgentEarnings = (float) ($agent['agent_earnings'] ?? 0);
+                                // Add marketing agent earnings if this agent has marketing earnings
+                                if (isset($agent['marketing_agent_earnings']) && $agent['marketing_agent_earnings'] > 0) {
+                                    $totalAgentEarnings += (float) $agent['marketing_agent_earnings'];
                                 }
+                                // Add landlord bonuses
                                 foreach ($agent['landlord_bonuses'] ?? [] as $bonus) {
                                     $totalAgentEarnings += (float) ($bonus['agent_commission'] ?? 0);
                                 }
@@ -801,8 +804,34 @@ body {
                             </div>
                 <div class="summary-value">£{{ number_format($agent['outstanding_amount'], 2) }}</div>
                         </div>
+            @php
+                // Calculate total refunded amount
+                $totalRefunded = 0;
+                $refundedCount = 0;
+                foreach ($agent['transactions'] ?? [] as $transaction) {
+                    if ($transaction['refunded'] ?? false) {
+                        $refundedCount++;
+                        // agent_cut is already negative for refunded items, so we add it (subtracting negative = adding)
+                        $totalRefunded += abs((float) ($transaction['agent_cut'] ?? 0));
+                    }
+                }
+            @endphp
+            @if($refundedCount > 0)
+            <div class="summary-card" style="background: linear-gradient(135deg, #ef4444, #dc2626); color: white; border-color: #dc2626;">
+                <div class="summary-header">
+                    <div class="summary-label">Refunded</div>
+                    <div class="summary-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+                        </svg>
                     </div>
                 </div>
+                <div class="summary-value">-£{{ number_format($totalRefunded, 2) }}</div>
+                <small style="opacity: 0.8; font-size: 12px;">{{ $refundedCount }} transaction(s)</small>
+            </div>
+            @endif
+        </div>
+    </div>
 </section>
 
     <!-- Filters Section -->
