@@ -136,7 +136,7 @@ class LandlordBonusController extends Controller
     {
         $landlordBonuses = LandlordBonus::with(['agent', 'creator'])
             ->orderBy('bonus_code', 'desc')
-            ->paginate(20);
+            ->paginate(100);
         
         return view('admin.landlord-bonuses.index', compact('landlordBonuses'));
     }

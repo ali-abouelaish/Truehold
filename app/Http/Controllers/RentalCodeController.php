@@ -1799,8 +1799,21 @@ public function generateCode()
                 ];
             }
 
-            // Check if refunded
-            $isRefunded = $code->refunded ?? false;
+            // Check if refunded - use model's boolean cast
+            $isRefunded = (bool) ($code->refunded ?? false);
+            
+            // Debug logging for refunded items
+            if ($isRefunded) {
+                \Log::info('Processing refunded rental code', [
+                    'rental_code_id' => $code->id,
+                    'rental_code' => $code->rental_code,
+                    'agent_name' => $agentName,
+                    'refunded_value' => $code->refunded,
+                    'refunded_type' => gettype($code->refunded),
+                    'refunded_at' => $code->refunded_at,
+                    'agent_cut' => $agentCut,
+                ]);
+            }
 
             // Calculate splits
             $agencyCut = $baseCommission * 0.45;
@@ -1946,8 +1959,19 @@ public function generateCode()
                     $baseCommission = $totalFee * 0.8;
                 }
 
-                // Check if refunded
-                $isRefunded = $code->refunded ?? false;
+                // Check if refunded - use model's boolean cast
+                $isRefunded = (bool) ($code->refunded ?? false);
+                
+                // Debug logging for refunded marketing items
+                if ($isRefunded) {
+                    \Log::info('Processing refunded marketing rental code', [
+                        'rental_code_id' => $code->id,
+                        'rental_code' => $code->rental_code,
+                        'agent_name' => $requestedAgentName,
+                        'refunded_value' => $code->refunded,
+                        'marketing_commission' => $marketingCommission,
+                    ]);
+                }
                 
                 // Marketing agent gets fixed commission: £30 (1 client) or £40 (2+ clients)
                 $marketingCommission = $clientCount >= 2 ? 40 : 30;
@@ -2315,8 +2339,21 @@ public function generateCode()
                 }
             }
 
-            // Check if refunded
-            $isRefunded = $code->refunded ?? false;
+            // Check if refunded - use model's boolean cast
+            $isRefunded = (bool) ($code->refunded ?? false);
+            
+            // Debug logging for refunded items
+            if ($isRefunded) {
+                \Log::info('Processing refunded rental code (agentPayrollNew)', [
+                    'rental_code_id' => $code->id,
+                    'rental_code' => $code->rental_code,
+                    'agent_name' => $requestedAgentName,
+                    'refunded_value' => $code->refunded,
+                    'refunded_type' => gettype($code->refunded),
+                    'refunded_at' => $code->refunded_at,
+                    'agent_cut' => $agentCut,
+                ]);
+            }
 
             // If refunded, subtract from totals instead of adding
             if ($isRefunded) {
@@ -2922,11 +2959,15 @@ public function generateCode()
             }
 
             $rentalCode->update($updateData);
+            $rentalCode->refresh(); // Reload from database to ensure we have the latest values
 
             \Log::info('Rental code refunded status updated successfully', [
                 'rental_code_id' => $rentalCode->id,
+                'rental_code' => $rentalCode->rental_code,
                 'refunded' => $rentalCode->refunded,
-                'refunded_at' => $rentalCode->refunded_at
+                'refunded_type' => gettype($rentalCode->refunded),
+                'refunded_at' => $rentalCode->refunded_at,
+                'raw_refunded' => $rentalCode->getRawOriginal('refunded') ?? 'null'
             ]);
 
             return response()->json([
