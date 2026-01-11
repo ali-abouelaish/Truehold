@@ -320,6 +320,15 @@
                 <h3 class="section-title">Receiver's Details:</h3>
                 <div class="client-info">
                     <p><strong>{{ $invoice->client_name }}</strong></p>
+                    @if($invoice->client_address)
+                        <p style="white-space: pre-line; margin-top: 8px;">{{ $invoice->client_address }}</p>
+                    @endif
+                    @if($invoice->client_email)
+                        <p style="margin-top: 4px;"><strong>Email:</strong> {{ $invoice->client_email }}</p>
+                    @endif
+                    @if($invoice->client_phone)
+                        <p style="margin-top: 4px;"><strong>Phone:</strong> {{ $invoice->client_phone }}</p>
+                    @endif
                 </div>
             </div>
             
