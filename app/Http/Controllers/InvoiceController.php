@@ -155,7 +155,8 @@ class InvoiceController extends Controller
         $newInvoice = $invoice->replicate();
         $newInvoice->invoice_number = $newInvoice->generateInvoiceNumber();
         $newInvoice->invoice_date = now()->toDateString();
-        $newInvoice->due_date = now()->addDays(30)->toDateString();
+        $newInvoice->due_date = now()->addDays(7)->toDateString();
+        $newInvoice->payment_terms = 'Net 7';
         $newInvoice->status = 'draft';
         $newInvoice->amount_paid = 0;
         $newInvoice->calculateTotals();

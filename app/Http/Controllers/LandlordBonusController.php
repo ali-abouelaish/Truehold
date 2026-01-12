@@ -315,8 +315,8 @@ class LandlordBonusController extends Controller
             $invoice = new Invoice();
             $invoice->invoice_number = $invoice->generateInvoiceNumber();
             $invoice->invoice_date = now()->toDateString();
-            $invoice->due_date = now()->addDays(30)->toDateString();
-            $invoice->payment_terms = '30 days';
+            $invoice->due_date = now()->addDays(7)->toDateString();
+            $invoice->payment_terms = 'Net 7';
             $invoice->client_name = $clientName;
             $invoice->client_address = $clientAddress;
             $invoice->client_email = $clientEmail;

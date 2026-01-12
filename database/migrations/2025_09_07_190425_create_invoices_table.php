@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('invoice_number')->unique();
             $table->date('invoice_date');
             $table->date('due_date');
-            $table->string('payment_terms')->default('30 days');
+            $table->string('payment_terms')->default('Net 7');
             $table->string('po_number')->nullable();
             
             // Company information
