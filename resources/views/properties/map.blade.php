@@ -1222,6 +1222,14 @@ select.filter-input option {
                             <option value="No">No</option>
                                 </select>
                     </div>
+                    
+                    <div class="filter-group">
+                        <label class="filter-label">Ensuite Rooms</label>
+                        <select id="filterEnsuite" class="filter-input">
+                                    <option value="">All Properties</option>
+                            <option value="yes">Ensuite Only</option>
+                                </select>
+                    </div>
                         </div>
                         
                 <div class="filter-actions">
@@ -1707,6 +1715,7 @@ select.filter-input option {
             const minPrice = parseFloat(document.getElementById('filterMinPrice').value) || 0;
             const maxPrice = parseFloat(document.getElementById('filterMaxPrice').value) || Infinity;
             const couplesAllowed = document.getElementById('filterCouplesAllowed').value.toLowerCase();
+            const ensuite = document.getElementById('filterEnsuite')?.value || '';
             @auth
             const agentName = document.getElementById('filterAgentName')?.value.toLowerCase() || '';
             const payingOnly = document.getElementById('filterPayingOnly')?.checked || false;
@@ -1736,6 +1745,16 @@ select.filter-input option {
                 // Couples allowed filter
                     if (couplesAllowed && property.couples_allowed?.toLowerCase() !== couplesAllowed) {
                         visible = false;
+                    }
+                    
+                    // Ensuite filter - must have "en-suite" or "ensuite" in description and NOT have "studio"
+                    if (ensuite === 'yes') {
+                        const description = (property.description || '').toLowerCase();
+                        const hasEnsuite = description.includes('en-suite') || description.includes('ensuite');
+                        const hasStudio = description.includes('studio');
+                        if (!hasEnsuite || hasStudio) {
+                            visible = false;
+                        }
                     }
                     
                     @auth
@@ -1778,6 +1797,8 @@ select.filter-input option {
             document.getElementById('filterMinPrice').value = '';
             document.getElementById('filterMaxPrice').value = '';
             document.getElementById('filterCouplesAllowed').value = '';
+            const ensuiteFilter = document.getElementById('filterEnsuite');
+            if (ensuiteFilter) ensuiteFilter.value = '';
             @auth
             const agentFilter = document.getElementById('filterAgentName');
             if (agentFilter) agentFilter.value = '';

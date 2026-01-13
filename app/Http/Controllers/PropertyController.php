@@ -70,6 +70,10 @@ class PropertyController extends Controller
                     $filters['couples_allowed'] = $request->couples_allowed;
                 }
 
+                if ($request->filled('ensuite')) {
+                    $filters['ensuite'] = $request->ensuite;
+                }
+
                 // Get filtered properties from Google Sheets
                 $filteredProperties = $this->sheetsService->filterProperties($filters);
                 
@@ -171,6 +175,10 @@ class PropertyController extends Controller
 
         if ($request->filled('couples_allowed')) {
             $query->byCouplesAllowed($request->couples_allowed);
+        }
+
+        if ($request->filled('ensuite')) {
+            $query->byEnsuite($request->ensuite);
         }
 
         // Get unique values for filter dropdowns
@@ -320,6 +328,10 @@ class PropertyController extends Controller
                     $filters['couples_allowed'] = $request->couples_allowed;
                 }
 
+                if ($request->filled('ensuite')) {
+                    $filters['ensuite'] = $request->ensuite;
+                }
+
                 // Get filtered properties from Google Sheets
                 $filteredProperties = $this->sheetsService->filterProperties($filters);
                 
@@ -391,6 +403,10 @@ class PropertyController extends Controller
                     // Ensure coordinates are properly formatted as numbers
                     $propertyData['latitude'] = isset($propertyData['latitude']) ? (float) $propertyData['latitude'] : null;
                     $propertyData['longitude'] = isset($propertyData['longitude']) ? (float) $propertyData['longitude'] : null;
+                    // Ensure description is included for filtering
+                    if (!isset($propertyData['description'])) {
+                        $propertyData['description'] = '';
+                    }
                     return $propertyData;
                 })->take(400)->values()->all();
 
@@ -470,6 +486,10 @@ class PropertyController extends Controller
 
         if ($request->filled('couples_allowed')) {
             $query->byCouplesAllowed($request->couples_allowed);
+        }
+
+        if ($request->filled('ensuite')) {
+            $query->byEnsuite($request->ensuite);
         }
 
         // Get properties with all necessary fields for map display

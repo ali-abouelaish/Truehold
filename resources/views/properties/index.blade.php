@@ -1126,7 +1126,7 @@ select.filter-input option {
                     </svg>
                 </button>
                 
-                @if(request()->hasAny(['location', 'property_type', 'min_price', 'max_price', 'couples_allowed', 'agent_name']))
+                @if(request()->hasAny(['location', 'property_type', 'min_price', 'max_price', 'couples_allowed', 'ensuite', 'agent_name']))
                     <div style="display: flex; align-items: center; gap: 8px; padding: 8px 16px; background: rgba(212, 175, 55, 0.15); border: 1px solid var(--gold); border-radius: 8px;">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="color: var(--gold);">
                             <path d="M10 18h4v-2h-4v2zM3 6v2h18V6H3zm3 7h12v-2H6v2z"/>
@@ -1217,6 +1217,14 @@ select.filter-input option {
                                     <option value="">All Properties</option>
                                     <option value="yes" {{ request('couples_allowed') == 'yes' ? 'selected' : '' }}>Couples Welcome</option>
                                     <option value="no" {{ request('couples_allowed') == 'no' ? 'selected' : '' }}>Singles Only</option>
+                                </select>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label class="filter-label">Ensuite Rooms</label>
+                        <select name="ensuite" class="filter-input">
+                                    <option value="">All Properties</option>
+                                    <option value="yes" {{ request('ensuite') == 'yes' ? 'selected' : '' }}>Ensuite Only</option>
                                 </select>
                     </div>
                             </div>

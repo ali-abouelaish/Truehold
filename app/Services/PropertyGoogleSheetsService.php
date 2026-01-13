@@ -629,6 +629,22 @@ class PropertyGoogleSheetsService
             });
         }
         
+        // Ensuite filter - must have "en-suite" or "ensuite" in description and NOT have "studio"
+        if (isset($filters['ensuite']) && $filters['ensuite'] === 'yes') {
+            $properties = $properties->filter(function ($property) {
+                $description = strtolower($property['description'] ?? '');
+                
+                // Must have "en-suite" or "ensuite" in description
+                $hasEnsuite = stripos($description, 'en-suite') !== false 
+                            || stripos($description, 'ensuite') !== false;
+                
+                // Must NOT have "studio" in description
+                $hasStudio = stripos($description, 'studio') !== false;
+                
+                return $hasEnsuite && !$hasStudio;
+            });
+        }
+        
         // Price filtering
         if (isset($filters['min_price'])) {
             $properties = $properties->filter(function ($property) use ($filters) {

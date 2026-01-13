@@ -387,6 +387,22 @@ class Property extends Model
         return $query;
     }
 
+    // Scope for filtering by ensuite rooms
+    public function scopeByEnsuite($query, $ensuite)
+    {
+        if (!$ensuite || $ensuite !== 'yes') return $query;
+        
+        return $query->where(function($q) {
+            // Must have "en-suite" or "ensuite" in description (case-insensitive)
+            $q->where(function($subQ) {
+                $subQ->whereRaw('LOWER(description) LIKE ?', ['%en-suite%'])
+                     ->orWhereRaw('LOWER(description) LIKE ?', ['%ensuite%']);
+            })
+            // Must NOT have "studio" in description (case-insensitive)
+            ->whereRaw('LOWER(description) NOT LIKE ?', ['%studio%']);
+        });
+    }
+
     // Scope for filtering by London borough (approximate using coordinates)
     public function scopeByLondonBorough($query, $borough)
     {

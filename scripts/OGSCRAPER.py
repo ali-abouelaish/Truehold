@@ -636,3 +636,8 @@ def main(listings):
     sheet.append_rows(rows, value_input_option="RAW")
 
     print(f"\n✅ Successfully uploaded {len(df_output)} listings to Sheet with preserved flags!")
+
+
+# Call main() to scrape each individual listing
+if __name__ == "__main__":
+    main(listings)
