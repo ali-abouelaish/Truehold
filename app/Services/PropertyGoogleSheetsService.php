@@ -630,6 +630,7 @@ class PropertyGoogleSheetsService
         }
         
         // Ensuite filter - must have "en-suite" or "ensuite" in description and NOT have "studio"
+        // Also exclude cases where en-suites are mentioned but not available
         if (isset($filters['ensuite']) && $filters['ensuite'] === 'yes') {
             $properties = $properties->filter(function ($property) {
                 $description = strtolower($property['description'] ?? '');
@@ -638,10 +639,69 @@ class PropertyGoogleSheetsService
                 $hasEnsuite = stripos($description, 'en-suite') !== false 
                             || stripos($description, 'ensuite') !== false;
                 
+                if (!$hasEnsuite) {
+                    return false;
+                }
+                
                 // Must NOT have "studio" in description
                 $hasStudio = stripos($description, 'studio') !== false;
+                if ($hasStudio) {
+                    return false;
+                }
                 
-                return $hasEnsuite && !$hasStudio;
+                // Must NOT indicate that en-suites are not available
+                // Check for direct patterns first
+                $directNegativePatterns = [
+                    'en-suite not available',
+                    'ensuite not available',
+                    'en-suite unavailable',
+                    'ensuite unavailable',
+                    'en-suite are not available',
+                    'ensuite are not available',
+                    'en-suite not included',
+                    'ensuite not included',
+                    'en-suite not for',
+                    'ensuite not for',
+                ];
+                
+                foreach ($directNegativePatterns as $pattern) {
+                    if (stripos($description, $pattern) !== false) {
+                        return false;
+                    }
+                }
+                
+                // Check for patterns with words in between (e.g., "en-suite rooms (ENSUITES ARE NOT AVAILABLE")
+                // If both "en-suite"/"ensuite" and "not available"/"unavailable" appear, exclude
+                $hasEnsuiteMention = stripos($description, 'en-suite') !== false || stripos($description, 'ensuite') !== false;
+                $hasNotAvailable = stripos($description, 'not available') !== false || stripos($description, 'unavailable') !== false;
+                
+                if ($hasEnsuiteMention && $hasNotAvailable) {
+                    // Additional check: make sure they're in the same context
+                    // Find positions to ensure they're reasonably close (within 200 characters)
+                    $ensuitePos = max(
+                        stripos($description, 'en-suite') !== false ? stripos($description, 'en-suite') : -1,
+                        stripos($description, 'ensuite') !== false ? stripos($description, 'ensuite') : -1
+                    );
+                    $notAvailablePos = max(
+                        stripos($description, 'not available') !== false ? stripos($description, 'not available') : -1,
+                        stripos($description, 'unavailable') !== false ? stripos($description, 'unavailable') : -1
+                    );
+                    
+                    if ($ensuitePos !== -1 && $notAvailablePos !== -1 && abs($ensuitePos - $notAvailablePos) < 200) {
+                        return false;
+                    }
+                }
+                
+                // Check for pattern indicating available rooms have shared bathrooms
+                // If description mentions "en-suite"/"ensuite", "available", and "shared bathroom" together, exclude
+                if ($hasEnsuiteMention && stripos($description, 'available') !== false) {
+                    if (stripos($description, 'shared bathroom') !== false || 
+                        (stripos($description, 'available room') !== false && stripos($description, 'shared') !== false)) {
+                        return false;
+                    }
+                }
+                
+                return true;
             });
         }
         

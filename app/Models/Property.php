@@ -388,6 +388,8 @@ class Property extends Model
     }
 
     // Scope for filtering by ensuite rooms
+    // Note: Complex edge cases (like "en-suite rooms (ENSUITES ARE NOT AVAILABLE)") 
+    // are handled in application-level filtering (Google Sheets service and JavaScript)
     public function scopeByEnsuite($query, $ensuite)
     {
         if (!$ensuite || $ensuite !== 'yes') return $query;
@@ -399,7 +401,18 @@ class Property extends Model
                      ->orWhereRaw('LOWER(description) LIKE ?', ['%ensuite%']);
             })
             // Must NOT have "studio" in description (case-insensitive)
-            ->whereRaw('LOWER(description) NOT LIKE ?', ['%studio%']);
+            ->whereRaw('LOWER(description) NOT LIKE ?', ['%studio%'])
+            // Must NOT have direct patterns indicating en-suites are not available
+            ->where(function($subQ) {
+                $subQ->whereRaw('LOWER(description) NOT LIKE ?', ['%en-suite%not available%'])
+                     ->whereRaw('LOWER(description) NOT LIKE ?', ['%ensuite%not available%'])
+                     ->whereRaw('LOWER(description) NOT LIKE ?', ['%en-suite%unavailable%'])
+                     ->whereRaw('LOWER(description) NOT LIKE ?', ['%ensuite%unavailable%'])
+                     ->whereRaw('LOWER(description) NOT LIKE ?', ['%en-suite%are not available%'])
+                     ->whereRaw('LOWER(description) NOT LIKE ?', ['%ensuite%are not available%'])
+                     ->whereRaw('LOWER(description) NOT LIKE ?', ['%en-suite%not included%'])
+                     ->whereRaw('LOWER(description) NOT LIKE ?', ['%ensuite%not included%']);
+            });
         });
     }
 

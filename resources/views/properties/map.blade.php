@@ -1748,12 +1748,75 @@ select.filter-input option {
                     }
                     
                     // Ensuite filter - must have "en-suite" or "ensuite" in description and NOT have "studio"
+                    // Also exclude cases where en-suites are mentioned but not available
                     if (ensuite === 'yes') {
                         const description = (property.description || '').toLowerCase();
                         const hasEnsuite = description.includes('en-suite') || description.includes('ensuite');
-                        const hasStudio = description.includes('studio');
-                        if (!hasEnsuite || hasStudio) {
+                        
+                        if (!hasEnsuite) {
                             visible = false;
+                        } else {
+                            // Must NOT have "studio" in description
+                            const hasStudio = description.includes('studio');
+                            if (hasStudio) {
+                                visible = false;
+                            } else {
+                                // Must NOT indicate that en-suites are not available
+                                // Check for direct patterns first
+                                const directNegativePatterns = [
+                                    'en-suite not available',
+                                    'ensuite not available',
+                                    'en-suite unavailable',
+                                    'ensuite unavailable',
+                                    'en-suite are not available',
+                                    'ensuite are not available',
+                                    'en-suite not included',
+                                    'ensuite not included',
+                                    'en-suite not for',
+                                    'ensuite not for',
+                                ];
+                                
+                                const hasDirectNegativePattern = directNegativePatterns.some(pattern => 
+                                    description.includes(pattern)
+                                );
+                                
+                                if (hasDirectNegativePattern) {
+                                    visible = false;
+                                } else {
+                                    // Check for patterns with words in between (e.g., "en-suite rooms (ENSUITES ARE NOT AVAILABLE")
+                                    const hasNotAvailable = description.includes('not available') || description.includes('unavailable');
+                                    
+                                    if (hasEnsuite && hasNotAvailable) {
+                                        // Find positions to ensure they're reasonably close (within 200 characters)
+                                        const ensuitePos = Math.max(
+                                            description.indexOf('en-suite') !== -1 ? description.indexOf('en-suite') : -1,
+                                            description.indexOf('ensuite') !== -1 ? description.indexOf('ensuite') : -1
+                                        );
+                                        const notAvailablePos = Math.max(
+                                            description.indexOf('not available') !== -1 ? description.indexOf('not available') : -1,
+                                            description.indexOf('unavailable') !== -1 ? description.indexOf('unavailable') : -1
+                                        );
+                                        
+                                        if (ensuitePos !== -1 && notAvailablePos !== -1 && Math.abs(ensuitePos - notAvailablePos) < 200) {
+                                            visible = false;
+                                        } else {
+                                            // Check for pattern indicating available rooms have shared bathrooms
+                                            if (description.includes('available') && 
+                                                (description.includes('shared bathroom') || 
+                                                 (description.includes('available room') && description.includes('shared')))) {
+                                                visible = false;
+                                            }
+                                        }
+                                    } else {
+                                        // Check for pattern indicating available rooms have shared bathrooms
+                                        if (description.includes('available') && 
+                                            (description.includes('shared bathroom') || 
+                                             (description.includes('available room') && description.includes('shared')))) {
+                                            visible = false;
+                                        }
+                                    }
+                                }
+                            }
                         }
                     }
                     
