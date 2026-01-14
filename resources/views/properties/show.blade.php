@@ -1584,7 +1584,15 @@ html {
             });
             
             function updateGallery() {
-                mainImage.src = images[currentImageIndex].src.replace('w=300', 'w=1200');
+                let imageSrc = images[currentImageIndex].src;
+                // Convert to high quality - remove size parameters and use large version
+                imageSrc = imageSrc.replace(/w=\d+/, 'w=1200');
+                imageSrc = imageSrc.replace(/h=\d+/, 'h=900');
+                // If it's a square thumbnail, convert to large
+                if (imageSrc.includes('/square/')) {
+                    imageSrc = imageSrc.replace('/square/', '/large/');
+                }
+                mainImage.src = imageSrc;
                 images.forEach((thumb, index) => {
                     thumb.classList.toggle('active', index === currentImageIndex);
                 });
@@ -1717,8 +1725,8 @@ html {
                             
                         @if($property->high_quality_photos_array && count($property->high_quality_photos_array) > 1)
                             <div class="thumbnail-grid">
-                                @foreach(array_slice($property->high_quality_photos_array, 0, 4) as $index => $photo)
-                                    <img src="{{ $photo }}" alt="Thumbnail {{ $index + 1 }}" class="thumbnail {{ $index === 0 ? 'active' : '' }}">
+                                @foreach($property->high_quality_photos_array as $index => $photo)
+                                    <img src="{{ $photo }}" alt="Thumbnail {{ $index + 1 }}" class="thumbnail {{ $index === 0 ? 'active' : '' }}" data-index="{{ $index }}">
                                 @endforeach
                         </div>
                     @endif
@@ -1989,14 +1997,25 @@ html {
         let allImages = [];
         
         function initLightbox() {
-            // Collect all images from gallery
+            // Collect all images from gallery - use all thumbnails (not limited to visible ones)
             const thumbnails = Array.from(document.querySelectorAll('.thumbnail'));
             const mainImage = document.querySelector('.gallery-image');
             
             if (thumbnails.length > 0) {
-                allImages = thumbnails.map(thumb => thumb.src.replace('w=300', 'w=1920'));
+                // Get all thumbnail images (all images are now shown as thumbnails)
+                allImages = thumbnails.map(thumb => {
+                    let src = thumb.src;
+                    // Convert to high quality if needed (remove size parameters, use original)
+                    src = src.replace(/w=\d+/, 'w=1920');
+                    src = src.replace(/h=\d+/, 'h=1080');
+                    // If it's a square thumbnail, convert to large
+                    if (src.includes('/square/')) {
+                        src = src.replace('/square/', '/large/');
+                    }
+                    return src;
+                });
             } else if (mainImage) {
-                allImages = [mainImage.src.replace('w=300', 'w=1920')];
+                allImages = [mainImage.src.replace(/w=\d+/, 'w=1920').replace(/h=\d+/, 'h=1080')];
             }
             
             // Add click event to main image
