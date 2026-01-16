@@ -1365,7 +1365,7 @@ function toggleRefunded(rentalCodeId, isRefunded) {
         
         fetch(`/admin/rental-codes/${rentalCodeId}/update-refunded`, {
             method: 'POST',
-            headers: {
+                headers: {
                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
                 'Content-Type': 'application/json',
                 'Accept': 'application/json',

@@ -1218,8 +1218,8 @@ select.filter-input option {
                         <label class="filter-label">Couples Allowed</label>
                         <select id="filterCouplesAllowed" class="filter-input">
                                     <option value="">All Properties</option>
-                            <option value="Yes">Yes</option>
-                            <option value="No">No</option>
+                            <option value="yes">Couples Welcome</option>
+                            <option value="no">Singles Only</option>
                                 </select>
                     </div>
                     
@@ -1742,9 +1742,39 @@ select.filter-input option {
                         visible = false;
                 }
 
-                // Couples allowed filter
-                    if (couplesAllowed && property.couples_allowed?.toLowerCase() !== couplesAllowed) {
-                        visible = false;
+                // Couples allowed filter (matches listing view backend logic)
+                    if (couplesAllowed) {
+                        const propertyCouplesOk = (property.couples_ok || '').toLowerCase();
+                        const propertyCouplesAllowed = (property.couples_allowed || '').toLowerCase();
+                        
+                        if (couplesAllowed === 'yes') {
+                            // Must allow couples - check for yes, couples, allowed, or welcome
+                            const allowsCouples = propertyCouplesOk.includes('yes') || 
+                                                propertyCouplesOk.includes('couples') ||
+                                                propertyCouplesOk.includes('allowed') ||
+                                                propertyCouplesOk.includes('welcome') ||
+                                                propertyCouplesAllowed.includes('yes') ||
+                                                propertyCouplesAllowed.includes('couples') ||
+                                                propertyCouplesAllowed.includes('allowed') ||
+                                                propertyCouplesAllowed.includes('welcome');
+                            if (!allowsCouples) {
+                                visible = false;
+                            }
+                        } else if (couplesAllowed === 'no') {
+                            // Must NOT allow couples (singles only) - check for no, not, single, or individual
+                            const disallowsCouples = propertyCouplesOk.includes('no') || 
+                                                   propertyCouplesOk.includes('not') ||
+                                                   propertyCouplesOk.includes('single') ||
+                                                   propertyCouplesOk.includes('individual') ||
+                                                   propertyCouplesAllowed.includes('no') ||
+                                                   propertyCouplesAllowed.includes('not') ||
+                                                   propertyCouplesAllowed.includes('single') ||
+                                                   propertyCouplesAllowed.includes('individual');
+                            // If it doesn't explicitly disallow couples, hide it
+                            if (!disallowsCouples) {
+                                visible = false;
+                            }
+                        }
                     }
                     
                     // Ensuite filter - must have "en-suite" or "ensuite" in description and NOT have "studio"

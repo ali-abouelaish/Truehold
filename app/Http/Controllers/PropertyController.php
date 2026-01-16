@@ -407,6 +407,13 @@ class PropertyController extends Controller
                     if (!isset($propertyData['description'])) {
                         $propertyData['description'] = '';
                     }
+                    // Ensure couples fields are included for filtering
+                    if (!isset($propertyData['couples_ok'])) {
+                        $propertyData['couples_ok'] = '';
+                    }
+                    if (!isset($propertyData['couples_allowed'])) {
+                        $propertyData['couples_allowed'] = '';
+                    }
                     return $propertyData;
                 })->take(400)->values()->all();
 
@@ -534,7 +541,9 @@ class PropertyController extends Controller
                 'property_type' => $property->property_type,
                 'agent_name' => $property->agent_name,
                 'management_company' => $property->management_company,
-                'couples_ok' => $property->couples_ok,
+                'couples_ok' => $property->couples_ok ?? '',
+                'couples_allowed' => $property->couples_allowed ?? '',
+                'description' => $property->description ?? '',
                 'first_photo_url' => $property->first_photo_url,
                 'high_quality_photos_array' => $property->high_quality_photos_array,
             ];
