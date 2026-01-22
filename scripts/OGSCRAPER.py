@@ -298,68 +298,9 @@ def scrape_listing_advanced(url, paying, profile_flag=""):
                 if location_match:
                     latitude, longitude = location_match.group(1), location_match.group(2)
 
-        # Photos (collect ALL images from photo galleries)
-        all_photo_urls = []
+            all_photo_urls = []
 
-        # ✅ Method 1: Photo-gallery container (most reliable - targets the specific container structure)
-        photo_gallery = soup.select_one("div.photo-gallery")
-        if photo_gallery:
-            # Extract from main image wrapper
-            main_gallery = photo_gallery.select_one("dl.photo-gallery__main-image-wrapper")
-            if main_gallery:
-                # Check for links with data-src or href attributes (try class first, then any link)
-                main_links = main_gallery.find_all("a", class_="photo-gallery__thumbnail-link")
-                if not main_links:
-                    # Fallback: find any links in the main gallery
-                    main_links = main_gallery.find_all("a", href=re.compile(r"photos2\.spareroom\.co\.uk"))
-                
-                for link in main_links:
-                    # Prefer data-src attribute (more reliable), then href
-                    photo_url = link.get("data-src") or link.get("href")
-                    if photo_url:
-                        # Ensure it's a full URL and points to large version
-                        if not photo_url.startswith("http"):
-                            photo_url = "https://" + photo_url.lstrip("/")
-                        # Convert square/medium to large if needed
-                        photo_url = re.sub(r"/\w+/(\d+/\d+/\d+\.jpg)", r"/large/\1", photo_url)
-                        if "photos2.spareroom.co.uk" in photo_url and photo_url not in all_photo_urls:
-                            all_photo_urls.append(photo_url)
-                
-                # Also check the img tag src attribute in main image
-                main_img = main_gallery.find("img", class_="photo-gallery__main-image")
-                if main_img:
-                    img_src = main_img.get("src")
-                    if img_src:
-                        if not img_src.startswith("http"):
-                            img_src = "https://" + img_src.lstrip("/")
-                        # Convert to large version
-                        img_src = re.sub(r"/\w+/(\d+/\d+/\d+\.jpg)", r"/large/\1", img_src)
-                        if "photos2.spareroom.co.uk" in img_src and img_src not in all_photo_urls:
-                            all_photo_urls.append(img_src)
-
-            # Extract from thumbnail gallery container
-            thumb_gallery = photo_gallery.select_one("div.photo-gallery__thumbnails")
-            if thumb_gallery:
-                # Find all links in thumbnail gallery (try class first, then any link)
-                thumb_links = thumb_gallery.find_all("a", class_="photo-gallery__thumbnail-link")
-                if not thumb_links:
-                    # Fallback: find any links in the thumbnail gallery
-                    thumb_links = thumb_gallery.find_all("a", href=re.compile(r"photos2\.spareroom\.co\.uk"))
-                
-                for link in thumb_links:
-                    # Prefer data-src attribute (more reliable), then href
-                    photo_url = link.get("data-src") or link.get("href")
-                    if photo_url:
-                        # Ensure it's a full URL and points to large version
-                        if not photo_url.startswith("http"):
-                            photo_url = "https://" + photo_url.lstrip("/")
-                        # Convert square/medium to large if needed
-                        photo_url = re.sub(r"/\w+/(\d+/\d+/\d+\.jpg)", r"/large/\1", photo_url)
-                        if "photos2.spareroom.co.uk" in photo_url and photo_url not in all_photo_urls:
-                            all_photo_urls.append(photo_url)
-        
-        # ✅ Method 2: Fallback - Main image container (if photo-gallery not found)
-        if not photo_gallery:
+            # ✅ Main image container
             main_gallery = soup.select_one("dl.photo-gallery__main-image-wrapper")
             if main_gallery:
                 main_links = main_gallery.find_all("a", href=re.compile(
@@ -370,7 +311,7 @@ def scrape_listing_advanced(url, paying, profile_flag=""):
                     if photo_url and photo_url not in all_photo_urls:
                         all_photo_urls.append(photo_url)
 
-            # ✅ Fallback - Thumbnail gallery container
+            # ✅ Thumbnail gallery container
             thumb_gallery = soup.select_one("div.photo-gallery__thumbnails")
             if thumb_gallery:
                 thumb_links = thumb_gallery.find_all("a", href=re.compile(
@@ -381,55 +322,13 @@ def scrape_listing_advanced(url, paying, profile_flag=""):
                     if photo_url and photo_url not in all_photo_urls:
                         all_photo_urls.append(photo_url)
 
-        # ✅ Method 3: Look for img tags with photo URLs
-        photo_imgs = soup.find_all("img", src=re.compile(
-            r"photos2\.spareroom\.co\.uk/images/flatshare/listings/"
-        ))
-        for img in photo_imgs:
-            src = img.get("src", "")
-            # Convert thumbnail/medium URLs to large URLs
-            photo_url = re.sub(r"/\w+/(\d+/\d+/\d+\.jpg)", r"/large/\1", src)
-            if "photos2.spareroom.co.uk" in photo_url and photo_url not in all_photo_urls:
-                if not photo_url.startswith("http"):
-                    photo_url = "https://" + photo_url.lstrip("/")
-                all_photo_urls.append(photo_url)
-
-        # ✅ Method 4: Look for data-src attributes (lazy loading)
-        lazy_imgs = soup.find_all(attrs={"data-src": re.compile(
-            r"photos2\.spareroom\.co\.uk/images/flatshare/listings/"
-        )})
-        for img in lazy_imgs:
-            data_src = img.get("data-src", "")
-            photo_url = re.sub(r"/\w+/(\d+/\d+/\d+\.jpg)", r"/large/\1", data_src)
-            if "photos2.spareroom.co.uk" in photo_url and photo_url not in all_photo_urls:
-                if not photo_url.startswith("http"):
-                    photo_url = "https://" + photo_url.lstrip("/")
-                all_photo_urls.append(photo_url)
-
-        # ✅ Method 5: Check for carousel/slider containers
-        carousel_containers = soup.select(".carousel, .slider, .photo-carousel, [class*='photo']")
-        for container in carousel_containers:
-            links = container.find_all("a", href=re.compile(
-                r"photos2\.spareroom\.co\.uk.*\.jpg"
-            ))
-            for link in links:
-                photo_url = link.get("href")
-                if photo_url:
-                    photo_url = re.sub(r"/\w+/(\d+/\d+/\d+\.jpg)", r"/large/\1", photo_url)
-                    if not photo_url.startswith("http"):
-                        photo_url = "https://" + photo_url.lstrip("/")
-                    if photo_url not in all_photo_urls:
-                        all_photo_urls.append(photo_url)
-
-        print(f"📸 Found {len(all_photo_urls)} photos for {url}")
-        
-        first_photo_url = all_photo_urls[0] if all_photo_urls else None
-        photo_count = len(all_photo_urls)
-        all_photos = ", ".join(all_photo_urls) if all_photo_urls else None
-
-        if photo_count == 0:
-          print(f"🖼️ Skipping {url} — no images found.")
-          return None
+            first_photo_url = all_photo_urls[0] if all_photo_urls else None
+            photo_count = len(all_photo_urls)
+            all_photos = ", ".join(all_photo_urls) if all_photo_urls else None
+            # 🚫 Skip listings with NO images
+            if photo_count == 0:
+            print(f"🖼️ Skipping {url} — no images found.")
+            return None
 
         # Price
         price = None
