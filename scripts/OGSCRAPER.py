@@ -327,8 +327,8 @@ def scrape_listing_advanced(url, paying, profile_flag=""):
             all_photos = ", ".join(all_photo_urls) if all_photo_urls else None
             # 🚫 Skip listings with NO images
             if photo_count == 0:
-            print(f"🖼️ Skipping {url} — no images found.")
-            return None
+                print(f"🖼️ Skipping {url} — no images found.")
+                return None
 
         # Price
         price = None
