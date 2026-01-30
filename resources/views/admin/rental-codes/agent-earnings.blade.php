@@ -1445,8 +1445,6 @@ body {
                         <thead>
                             <tr>
                                 <th>Agent</th>
-                                <th>Agent Earnings</th>
-                                <th>Agency Earnings</th>
                                 <th>Total Earnings</th>
                                 <th>Last Activity</th>
                                 <th>Actions</th>
@@ -1491,18 +1489,6 @@ body {
                         </div>
                     </td>
                                     <td>
-                                        <div class="earnings-cell">
-                                            <div class="earnings-amount">£{{ number_format($agent['agent_earnings'], 2) }}</div>
-                                            <div class="earnings-commission">55% of commission</div>
-                        </div>
-                    </td>
-                                    <td>
-                                        <div class="earnings-cell">
-                                            <div class="earnings-amount">£{{ number_format($agent['agency_earnings'], 2) }}</div>
-                                            <div class="earnings-commission">45% of commission</div>
-                        </div>
-                    </td>
-                                    <td>
                                         <div class="total-earnings">
                                             <svg viewBox="0 0 24 24" fill="currentColor">
                                                 <path d="M12 2L15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2z"/>
@@ -1527,9 +1513,9 @@ body {
                                         </a>
                     </td>
                 </tr>
-                @empty
+                                @empty
                 <tr>
-                                    <td colspan="6">
+                                    <td colspan="4">
                                         <div class="empty-state">
                                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                                 <path d="M23 8c0 1.1-.9 2-2 2-.18 0-.35-.02-.51-.07l-3.56 3.55c.05.16.07.34.07.52 0 1.1-.9 2-2 2s-2-.9-2-2c0-.18.02-.36.07-.52l-2.55-2.55c-.16.05-.34.07-.52.07s-.36-.02-.52-.07l-4.55 4.56c.05.16.07.33.07.51 0 1.1-.9 2-2 2s-2-.9-2-2 .9-2 2-2c.18 0 .35.02.51.07l4.56-4.55C8.02 9.36 8 9.18 8 9c0-1.1.9-2 2-2s2 .9 2 2c0 .18-.02.36-.07.52l2.55 2.55c.16-.05.34-.07.52-.07s.36.02.52.07l3.55-3.56C19.02 8.35 19 8.18 19 8c0-1.1.9-2 2-2s2 .9 2 2z"/>
