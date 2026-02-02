@@ -12,11 +12,16 @@ use Illuminate\Support\Facades\Validator;
 
 class PropertyController extends Controller
 {
-    protected $sheetsService;
-
-    public function __construct(PropertyGoogleSheetsService $sheetsService)
+    /**
+     * Get the Google Sheets service only when properties spreadsheet is configured.
+     * This avoids loading the Google API client when not using Sheets.
+     */
+    protected function getSheetsService(): ?PropertyGoogleSheetsService
     {
-        $this->sheetsService = $sheetsService;
+        if (empty(config('services.google.properties.spreadsheet_id'))) {
+            return null;
+        }
+        return app(PropertyGoogleSheetsService::class);
     }
 
     /**
@@ -26,10 +31,11 @@ class PropertyController extends Controller
     {
         // Check if Google Sheets is configured
         $useGoogleSheets = !empty(config('services.google.properties.spreadsheet_id'));
-        
+        $sheetsService = $this->getSheetsService();
+
         // Force clear cache if requested (for debugging)
-        if ($request->has('clear_cache')) {
-            $this->sheetsService->clearCache();
+        if ($request->has('clear_cache') && $sheetsService) {
+            $sheetsService->clearCache();
             \Log::info('Properties cache manually cleared');
         }
         
@@ -75,10 +81,10 @@ class PropertyController extends Controller
                 }
 
                 // Get filtered properties from Google Sheets
-                $filteredProperties = $this->sheetsService->filterProperties($filters);
+                $filteredProperties = $sheetsService->filterProperties($filters);
                 
                 // Get filter values for dropdowns
-                $filterValues = $this->sheetsService->getFilterValues();
+                $filterValues = $sheetsService->getFilterValues();
                 $locations = $filterValues['locations'];
                 $propertyTypes = $filterValues['propertyTypes'];
                 $availableDates = $filterValues['available_dates'];
@@ -236,7 +242,7 @@ class PropertyController extends Controller
         if ($useGoogleSheets) {
             try {
                 // Try to get from Google Sheets first
-                $propertyData = $this->sheetsService->getPropertyById($id);
+                $propertyData = $this->getSheetsService()->getPropertyById($id);
                 
                 if ($propertyData) {
                     $property = new PropertyFromSheet($propertyData);
@@ -333,7 +339,7 @@ class PropertyController extends Controller
                 }
 
                 // Get filtered properties from Google Sheets
-                $filteredProperties = $this->sheetsService->filterProperties($filters);
+                $filteredProperties = $this->getSheetsService()->filterProperties($filters);
                 
                 // Filter properties with valid coordinates
                 $properties = $filteredProperties->filter(function ($property) {
@@ -418,7 +424,7 @@ class PropertyController extends Controller
                 })->take(400)->values()->all();
 
                 // Get filter values for dropdowns
-                $filterValues = $this->sheetsService->getFilterValues();
+                $filterValues = $this->getSheetsService()->getFilterValues();
                 $locations = $filterValues['locations'];
                 $propertyTypes = $filterValues['propertyTypes'];
                 $availableDates = $filterValues['available_dates'];
@@ -610,16 +616,19 @@ class PropertyController extends Controller
         $property = Property::create($propertyData);
 
         // Also append to Google Sheets "Properties" worksheet if configured
-        try {
-            $this->sheetsService->appendProperty($property->toArray());
-        } catch (\Exception $e) {
-            \Log::error('Failed to append property to Google Sheets from PropertyController@store', [
-                'property_id' => $property->id ?? null,
-                'error' => $e->getMessage(),
-            ]);
-            // Do not block the user flow if Sheets fails
+        $sheetsService = $this->getSheetsService();
+        if ($sheetsService) {
+            try {
+                $sheetsService->appendProperty($property->toArray());
+            } catch (\Exception $e) {
+                \Log::error('Failed to append property to Google Sheets from PropertyController@store', [
+                    'property_id' => $property->id ?? null,
+                    'error' => $e->getMessage(),
+                ]);
+                // Do not block the user flow if Sheets fails
+            }
         }
-        
+
         return redirect()->route('properties.show', $property)
             ->with('success', 'Property created successfully!');
     }

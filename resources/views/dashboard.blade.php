@@ -10,7 +10,7 @@
     <link rel="icon" type="image/jpeg" href="{{ asset('images/truehold-logo.jpg') }}">
     <link rel="apple-touch-icon" href="{{ asset('images/truehold-logo.jpg') }}">
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="{{ asset('css/font-awesome.min.css') }}" rel="stylesheet">
     
     <style>
         .dashboard-header {

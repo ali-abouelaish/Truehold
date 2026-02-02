@@ -12,7 +12,7 @@
     <link rel="icon" type="image/jpeg" href="{{ asset('images/truehold-logo.jpg') }}">
     <link rel="apple-touch-icon" href="{{ asset('images/truehold-logo.jpg') }}">
     
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="{{ asset('css/font-awesome.min.css') }}" rel="stylesheet">
     
     <style>
 /* ==========================================
@@ -1777,24 +1777,135 @@ html {
                             @if($property->description && $property->description !== 'N/A')
                                 <p class="description-text">{{ $property->description }}</p>
                                 @endif
-                                
-                            @if($property->bills_included && $property->bills_included !== 'N/A')
+
+                            @php
+                                $hasExtraCost = ($property->deposit !== null && $property->deposit !== '' && (string)$property->deposit !== 'N/A')
+                                    || ($property->bills_included !== null && $property->bills_included !== '' && (string)$property->bills_included !== 'N/A');
+                                $totalRooms = (int) ($property->total_rooms ?? 1);
+                                $depositFormatted = $property->deposit;
+                                if ($property->deposit !== null && $property->deposit !== '' && (string)$property->deposit !== 'N/A' && is_numeric(preg_replace('/[^0-9.]/', '', $property->deposit))) {
+                                    $depositFormatted = '£' . number_format((float) preg_replace('/[^0-9.]/', '', $property->deposit), 2);
+                                }
+                            @endphp
+                            @if($hasExtraCost)
                                 <div class="offer-section">
-                                    <h3 class="offer-title">BILLS INCLUDED:</h3>
+                                    <h3 class="offer-title">Extra cost</h3>
                                     <div class="offer-list">
-                                        @php
-                                            $bills = explode(',', $property->bills_included);
-                                        @endphp
-                                        @foreach($bills as $bill)
+                                        @if($property->deposit !== null && $property->deposit !== '' && (string)$property->deposit !== 'N/A')
+                                            @if($totalRooms > 1)
+                                                @for($r = 1; $r <= $totalRooms; $r++)
+                                                    <div class="offer-item">
+                                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                                                            <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                                                        </svg>
+                                                        <span><strong>Deposit (Room {{ $r }})</strong> {{ $depositFormatted }}</span>
+                                                    </div>
+                                                @endfor
+                                            @else
+                                                <div class="offer-item">
+                                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                                                        <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                                                    </svg>
+                                                    <span><strong>Deposit</strong> {{ $depositFormatted }}</span>
+                                                </div>
+                                            @endif
+                                        @endif
+                                        @if($property->bills_included !== null && $property->bills_included !== '' && (string)$property->bills_included !== 'N/A')
                                             <div class="offer-item">
                                                 <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
                                                     <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
                                                 </svg>
-                                                <span>{{ trim($bill) }}</span>
+                                                <span><strong>Bills included?</strong> {{ $property->bills_included }}</span>
+                                            </div>
+                                        @endif
                                     </div>
+                                </div>
+                            @endif
+                                
+                            @php
+                                $availabilityFields = [
+                                    'available_date' => 'Available date',
+                                    'min_term' => 'Min term',
+                                    'max_term' => 'Max term',
+                                ];
+                                $amenityFields = [
+                                    'furnishings' => 'Furnishings',
+                                    'parking' => 'Parking',
+                                    'garden' => 'Garden',
+                                    'broadband' => 'Broadband',
+                                    'housemates' => 'Housemates',
+                                    'total_rooms' => 'Total rooms',
+                                ];
+                                $preferenceFields = [
+                                    'smoker' => 'Smoker',
+                                    'pets' => 'Pets',
+                                    'occupation' => 'Occupation',
+                                    'gender' => 'Gender',
+                                    'couples_ok' => 'Couples OK',
+                                    'smoking_ok' => 'Smoking OK',
+                                    'pets_ok' => 'Pets OK',
+                                    'pref_occupation' => 'Preferred occupation',
+                                    'references' => 'References',
+                                    'min_age' => 'Min age',
+                                    'max_age' => 'Max age',
+                                ];
+                                $hasValue = function($val) {
+                                    return $val !== null && $val !== '' && (string)$val !== 'N/A';
+                                };
+                            @endphp
+
+                            @if(array_reduce(array_keys($availabilityFields), fn($carry, $k) => $carry || $hasValue($property->{$k} ?? null), false))
+                                <div class="offer-section">
+                                    <h3 class="offer-title">Availability</h3>
+                                    <div class="offer-list">
+                                        @foreach($availabilityFields as $key => $label)
+                                            @if($hasValue($property->{$key} ?? null))
+                                                <div class="offer-item">
+                                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                                                        <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                                                    </svg>
+                                                    <span><strong>{{ $label }}:</strong> {{ $property->$key }}</span>
+                                                </div>
+                                            @endif
                                         @endforeach
-                            </div>
-                        </div>
+                                    </div>
+                                </div>
+                            @endif
+
+                            @if(array_reduce(array_keys($amenityFields), fn($carry, $k) => $carry || $hasValue($property->{$k} ?? null), false))
+                                <div class="offer-section">
+                                    <h3 class="offer-title">Amenities</h3>
+                                    <div class="offer-list">
+                                        @foreach($amenityFields as $key => $label)
+                                            @if($hasValue($property->{$key} ?? null))
+                                                <div class="offer-item">
+                                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                                                        <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                                                    </svg>
+                                                    <span><strong>{{ $label }}:</strong> {{ $property->$key }}</span>
+                                                </div>
+                                            @endif
+                                        @endforeach
+                                    </div>
+                                </div>
+                            @endif
+
+                            @if(array_reduce(array_keys($preferenceFields), fn($carry, $k) => $carry || $hasValue($property->{$k} ?? null), false))
+                                <div class="offer-section">
+                                    <h3 class="offer-title">New housemate preferences</h3>
+                                    <div class="offer-list">
+                                        @foreach($preferenceFields as $key => $label)
+                                            @if($hasValue($property->{$key} ?? null))
+                                                <div class="offer-item">
+                                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                                                        <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                                                    </svg>
+                                                    <span><strong>{{ $label }}:</strong> {{ $property->$key }}</span>
+                                                </div>
+                                            @endif
+                                        @endforeach
+                                    </div>
+                                </div>
                             @endif
                 </div>
 
