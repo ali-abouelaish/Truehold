@@ -428,16 +428,16 @@ def scrape_listing_advanced(url, paying, profile_flag=""):
             # override listing-level price later after it's parsed too
             pass
 
-        # Flatten room1..room6 columns (always present)
+        # Flatten room columns: only for the number of rooms in this listing (deposits/type/price only for rooms that exist)
         flat_rooms = {}
-        for i in range(1, 7):
+        for i in range(1, room_count + 1):
             flat_rooms[f"room{i}_type"] = ""
             flat_rooms[f"room{i}_price_pcm"] = ""
             flat_rooms[f"room{i}_deposit"] = ""
 
         for r in room_options:
             i = r.get("room_index")
-            if i and 1 <= i <= 6:
+            if i and 1 <= i <= room_count:
                 flat_rooms[f"room{i}_type"] = r.get("room_type") or ""
                 flat_rooms[f"room{i}_price_pcm"] = r.get("price_pcm") or ""
                 flat_rooms[f"room{i}_deposit"] = r.get("deposit") or ""
@@ -652,8 +652,11 @@ def scrape_listing_advanced(url, paying, profile_flag=""):
             "paying": paying,
             "profile_flag": profile_flag,
             "flag": "",  # ✅ Will be populated from profile or manual flags
-            "flag_color": ""  # ✅ Will be populated from profile or manual flags
-            **flat_rooms,  # ✅ Flatten room1..room6 columns (always present)
+            "flag_color": "",  # ✅ Will be populated from profile or manual flags
+            "room_count": room_count,
+            "min_room_price_pcm": min_room_price_pcm,
+            "max_room_price_pcm": max_room_price_pcm,
+            **flat_rooms,  # room1_type, room1_price_pcm, room1_deposit ... only for rooms that exist
         }
 
         return result
@@ -782,7 +785,8 @@ def main(listings):
         df_output = df_output.drop(columns=cols_to_drop)
         print(f"\n📋 Dropped {len(cols_to_drop)} empty columns: {', '.join(cols_to_drop)}")
 
-    # 5️⃣ Ensure headers match dataframe
+    # 5️⃣ Ensure headers match dataframe (strip any leading/trailing spaces)
+    df_output.columns = [str(c).strip() for c in df_output.columns]
     df_headers = df_output.columns.tolist()
     
     print(f"\n📋 Columns to be written to sheet ({len(df_headers)}):")
