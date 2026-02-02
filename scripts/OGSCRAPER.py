@@ -207,6 +207,151 @@ def extract_price(price_text):
     return None
 
 
+
+
+
+
+
+
+
+
+def parse_money_to_int(text):
+    """Extract £ number from text, return int (e.g. '£950.00' -> 950)."""
+    if not text:
+        return None
+    m = re.search(r"£\s*([0-9][0-9,]*)(?:\.\d{2})?", str(text))
+    if not m:
+        return None
+    return int(m.group(1).replace(",", ""))
+
+def normalize_room_type(text):
+    """Normalize room type to single/double/ensuite/studio/etc."""
+    if not text:
+        return None
+    t = text.strip().lower()
+    # SpareRoom often uses: single, double, ensuite, twin, studio
+    if "en-suite" in t or "ensuite" in t or "en suite" in t:
+        return "ensuite"
+    if "single" in t:
+        return "single"
+    if "double" in t:
+        return "double"
+    if "studio" in t:
+        return "studio"
+    return t  # fallback
+
+def extract_room_options(soup, max_rooms=6):
+    """
+    Extract per-room options from <section class="feature--price_room_only">.
+    Returns list like:
+    [{"room_index":1,"price_pcm":950,"room_type":"double"}, ...]
+    """
+    rooms = []
+    dl = soup.select_one("section.feature--price_room_only dl.feature-list")
+    if not dl:
+        return rooms
+
+    dts = dl.find_all("dt", class_="feature-list__key")
+    dds = dl.find_all("dd", class_="feature-list__value")
+
+    for i, (dt, dd) in enumerate(zip(dts, dds), start=1):
+        if i > max_rooms:
+            break
+        price_text = dt.get_text(" ", strip=True) if dt else ""
+        room_type_text = dd.get_text(" ", strip=True) if dd else ""
+
+        rooms.append({
+            "room_index": i,
+            "price_pcm": parse_money_to_int(price_text),  # this section is already pcm
+            "room_type": normalize_room_type(room_type_text),
+        })
+    return rooms
+
+def extract_room_deposits(soup):
+    """
+    Extract deposits like:
+      - Deposit (Room 1)
+      - Security deposit (Room 2)
+    Also extract generic:
+      - Deposit
+      - Security deposit
+    Returns:
+      (room_deposits_dict, generic_deposit_int_or_none)
+    """
+    room_deposits = {}
+    generic_deposit = None
+
+    extra = soup.select_one("section.feature--extra-cost dl.feature-list")
+    if not extra:
+        return room_deposits, generic_deposit
+
+    keys = extra.find_all("dt", class_="feature-list__key")
+    vals = extra.find_all("dd", class_="feature-list__value")
+
+    for k, v in zip(keys, vals):
+        ktxt = k.get_text(" ", strip=True) if k else ""
+        vtxt = v.get_text(" ", strip=True) if v else ""
+
+        k_lower = ktxt.lower()
+
+        # Per-room: (security )deposit (room X)
+        m = re.search(r"(security\s*)?deposit\s*\(room\s*(\d+)\)", k_lower, re.IGNORECASE)
+        if m:
+            room_idx = int(m.group(2))
+            room_deposits[room_idx] = parse_money_to_int(vtxt)
+            continue
+
+        # Generic: Deposit / Security deposit (no room number)
+        if "deposit" in k_lower:
+            # prefer security deposit if multiple show up
+            parsed = parse_money_to_int(vtxt)
+            if parsed is not None:
+                if generic_deposit is None:
+                    generic_deposit = parsed
+                elif "security" in k_lower:
+                    generic_deposit = parsed
+
+    return room_deposits, generic_deposit
+
+
+
+
+
+
+
+def extract_whole_property_price(soup):
+    """
+    Find price from:
+      <h3 class="feature__heading">£2,500 pcm <small>(whole property)</small></h3>
+    Returns int price_pcm or None
+    """
+    for h in soup.select("h3.feature__heading"):
+        txt = h.get_text(" ", strip=True)
+        if "(whole property)" in txt.lower() or "whole property" in txt.lower():
+            # Use your existing extract_price (handles commas and pw conversion)
+            p = extract_price(txt)
+            if p:
+                return int(p)
+    return None
+
+def detect_whole_property(soup):
+    """
+    Detect whole property via '(whole property)' marker or 'This ad is for a ...' paragraph.
+    Returns bool.
+    """
+    # strong marker
+    for h in soup.select("h3.feature__heading"):
+        if "whole property" in h.get_text(" ", strip=True).lower():
+            return True
+
+    # fallback: paragraph text
+    for p in soup.select("p.feature__paragraph"):
+        t = p.get_text(" ", strip=True).lower()
+        if "this ad is for" in t and ("studio" in t or "bed" in t or "flat" in t or "apartment" in t or "house" in t):
+            # not perfect, but usually whole property ads use this pattern
+            return True
+
+    return False
 def extract_coordinates(lat_text, lon_text):
     """Extract and validate coordinates"""
     try:
@@ -257,6 +402,47 @@ def scrape_listing_advanced(url, paying, profile_flag=""):
         if "The advertiser is not currently accepting applications" in html:
             print(f"🚫 Skipping {url} — advertiser not accepting applications.")
             return None
+        # ✅ Whole property detection + dedicated price extraction
+        is_whole_property = detect_whole_property(soup)
+        whole_property_price = extract_whole_property_price(soup) if is_whole_property else None
+        # ✅ Multi-room support (up to 6 rooms in one ad)
+        room_options = extract_room_options(soup, max_rooms=6)  # list of rooms
+        room_deposits, generic_deposit = extract_room_deposits(soup)            # dict {room_index: deposit}
+
+        # attach deposits to room options
+        for r in room_options:
+            idx = r.get("room_index")
+            if idx in room_deposits:
+                r["deposit"] = room_deposits[idx]
+            else:
+                r["deposit"] = None
+
+        room_count = len(room_options) if room_options else 1
+
+        room_prices = [r.get("price_pcm") for r in room_options if r.get("price_pcm") is not None]
+        min_room_price_pcm = min(room_prices) if room_prices else None
+        max_room_price_pcm = max(room_prices) if room_prices else None
+        # ✅ Recommended: if multi-room, make "price" = min room price for sorting in Sheets
+        # and avoid using a single "deposit" field (ambiguous). Deposits will live in room{i}_deposit.
+        if room_count > 1 and min_room_price_pcm is not None:
+            # override listing-level price later after it's parsed too
+            pass
+
+        # Flatten room1..room6 columns (always present)
+        flat_rooms = {}
+        for i in range(1, 7):
+            flat_rooms[f"room{i}_type"] = ""
+            flat_rooms[f"room{i}_price_pcm"] = ""
+            flat_rooms[f"room{i}_deposit"] = ""
+
+        for r in room_options:
+            i = r.get("room_index")
+            if i and 1 <= i <= 6:
+                flat_rooms[f"room{i}_type"] = r.get("room_type") or ""
+                flat_rooms[f"room{i}_price_pcm"] = r.get("price_pcm") or ""
+                flat_rooms[f"room{i}_deposit"] = r.get("deposit") or ""
+               
+        
 
         # Title
         title = "N/A"
@@ -344,7 +530,12 @@ def scrape_listing_advanced(url, paying, profile_flag=""):
                             break
             except:
                 continue
-
+        # ✅ Always use whole-property header price if available
+        if is_whole_property and whole_property_price is not None:
+            price = int(whole_property_price)
+        # ✅ If multi-room listing, use min room price as main price
+        if room_count > 1 and min_room_price_pcm is not None:
+            price = int(min_room_price_pcm)
         # ✅ Description (preserve emojis + newlines)
         description = None
         detaildesc_elem = soup.find("p", class_="detaildesc")
@@ -387,7 +578,19 @@ def scrape_listing_advanced(url, paying, profile_flag=""):
         available_date = features.get("Available")
         min_term = features.get("Minimum term")
         max_term = features.get("Maximum term")
+                # ✅ Deposit can be "Deposit" or "Security deposit"
         deposit = features.get("Deposit")
+        if not deposit:
+            deposit = features.get("Security deposit")
+
+        # If we found a numeric generic deposit in Extra cost,
+        # use it ONLY for single-room listings
+        if room_count == 1 and generic_deposit is not None:
+            deposit = generic_deposit
+
+        # If multi-room, listing-level deposit is ambiguous → clear it
+        if room_count > 1:
+            deposit = None
         bills_included = features.get("Bills included?")
         furnishings = features.get("Furnishings")
         parking = features.get("Parking")
@@ -450,6 +653,7 @@ def scrape_listing_advanced(url, paying, profile_flag=""):
             "profile_flag": profile_flag,
             "flag": "",  # ✅ Will be populated from profile or manual flags
             "flag_color": ""  # ✅ Will be populated from profile or manual flags
+            **flat_rooms,  # ✅ Flatten room1..room6 columns (always present)
         }
 
         return result
@@ -565,6 +769,18 @@ def main(listings):
     
     # 4️⃣ Clear everything EXCEPT the header row
     sheet.batch_clear(["A2:ZZ"])
+
+    # 4b️⃣ Drop columns that are entirely null or empty (only show columns with at least one value)
+    def _is_empty(val):
+        if pd.isna(val):
+            return True
+        s = str(val).strip()
+        return s == "" or s.lower() in ("nan", "none", "n/a")
+
+    cols_to_drop = [c for c in df_output.columns if df_output[c].apply(_is_empty).all()]
+    if cols_to_drop:
+        df_output = df_output.drop(columns=cols_to_drop)
+        print(f"\n📋 Dropped {len(cols_to_drop)} empty columns: {', '.join(cols_to_drop)}")
 
     # 5️⃣ Ensure headers match dataframe
     df_headers = df_output.columns.tolist()
