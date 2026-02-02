@@ -1781,7 +1781,10 @@ html {
                             @php
                                 $hasExtraCost = ($property->deposit !== null && $property->deposit !== '' && (string)$property->deposit !== 'N/A')
                                     || ($property->bills_included !== null && $property->bills_included !== '' && (string)$property->bills_included !== 'N/A');
-                                $totalRooms = (int) ($property->total_rooms ?? 1);
+                                // Use room_count (rooms in ad) for deposit rows; fallback to total_rooms then 1. Cap at 6.
+                                $roomCount = isset($property->room_count) && is_numeric($property->room_count) ? (int) $property->room_count : null;
+                                $totalRooms = $roomCount !== null && $roomCount >= 1 ? min($roomCount, 6) : (int) ($property->total_rooms ?? 1);
+                                $totalRooms = max(1, min(6, $totalRooms));
                                 $depositFormatted = $property->deposit;
                                 if ($property->deposit !== null && $property->deposit !== '' && (string)$property->deposit !== 'N/A' && is_numeric(preg_replace('/[^0-9.]/', '', $property->deposit))) {
                                     $depositFormatted = '£' . number_format((float) preg_replace('/[^0-9.]/', '', $property->deposit), 2);

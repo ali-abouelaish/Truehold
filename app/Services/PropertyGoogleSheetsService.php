@@ -517,6 +517,7 @@ class PropertyGoogleSheetsService
             'broadband_included' => 'broadband',
             'housemates' => 'housemates',
             'total_rooms' => 'total_rooms',
+            'room_count' => 'room_count',
             'smoker' => 'smoker',
             'smoking_ok' => 'smoking_ok',
             'pets' => 'pets',
