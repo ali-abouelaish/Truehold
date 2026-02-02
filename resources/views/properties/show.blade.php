@@ -1779,12 +1779,13 @@ html {
                                 @endif
 
                             @php
-                                $hasExtraCost = ($property->deposit !== null && $property->deposit !== '' && (string)$property->deposit !== 'N/A')
-                                    || ($property->bills_included !== null && $property->bills_included !== '' && (string)$property->bills_included !== 'N/A');
                                 // Use room_count (rooms in ad) for deposit rows; fallback to total_rooms then 1. Cap at 6.
                                 $roomCount = isset($property->room_count) && is_numeric($property->room_count) ? (int) $property->room_count : null;
                                 $totalRooms = $roomCount !== null && $roomCount >= 1 ? min($roomCount, 6) : (int) ($property->total_rooms ?? 1);
                                 $totalRooms = max(1, min(6, $totalRooms));
+                                $hasExtraCost = ($property->deposit !== null && $property->deposit !== '' && (string)$property->deposit !== 'N/A')
+                                    || ($property->bills_included !== null && $property->bills_included !== '' && (string)$property->bills_included !== 'N/A')
+                                    || ($totalRooms > 1);
                                 $depositFormatted = $property->deposit;
                                 if ($property->deposit !== null && $property->deposit !== '' && (string)$property->deposit !== 'N/A' && is_numeric(preg_replace('/[^0-9.]/', '', $property->deposit))) {
                                     $depositFormatted = '£' . number_format((float) preg_replace('/[^0-9.]/', '', $property->deposit), 2);
@@ -1794,23 +1795,47 @@ html {
                                 <div class="offer-section">
                                     <h3 class="offer-title">Extra cost</h3>
                                     <div class="offer-list">
-                                        @if($property->deposit !== null && $property->deposit !== '' && (string)$property->deposit !== 'N/A')
+                                        @if($property->deposit !== null && $property->deposit !== '' && (string)$property->deposit !== 'N/A' || $totalRooms > 1)
                                             @if($totalRooms > 1)
                                                 @for($r = 1; $r <= $totalRooms; $r++)
+                                                    @php
+                                                        $rt = $property->{ 'room' . $r . '_type' } ?? null;
+                                                        $rp = $property->{ 'room' . $r . '_price_pcm' } ?? null;
+                                                        $rd = $property->{ 'room' . $r . '_deposit' } ?? null;
+                                                        $hasRoomData = ($rt !== null && $rt !== '' && (string)$rt !== 'N/A')
+                                                            || ($rp !== null && $rp !== '' && (string)$rp !== 'N/A')
+                                                            || ($rd !== null && $rd !== '' && (string)$rd !== 'N/A');
+                                                        $rentFormatted = $rp;
+                                                        if ($rp !== null && $rp !== '' && (string)$rp !== 'N/A' && is_numeric(preg_replace('/[^0-9.]/', '', $rp))) {
+                                                            $rentFormatted = '£' . number_format((float) preg_replace('/[^0-9.]/', '', $rp), 2) . '/month';
+                                                        }
+                                                        $depositRoomFormatted = $rd;
+                                                        if ($rd !== null && $rd !== '' && (string)$rd !== 'N/A' && is_numeric(preg_replace('/[^0-9.]/', '', $rd))) {
+                                                            $depositRoomFormatted = '£' . number_format((float) preg_replace('/[^0-9.]/', '', $rd), 2);
+                                                        }
+                                                    @endphp
+                                                    @if($hasRoomData)
+                                                        <div class="offer-item">
+                                                            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                                                                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                                                            </svg>
+                                                            <span><strong>Room {{ $r }}</strong>
+                                                                @if($rt) {{ $rt }}@endif
+                                                                @if($rp) — {{ $rentFormatted }}@endif
+                                                                @if($rd) — Deposit {{ $depositRoomFormatted }}@endif
+                                                            </span>
+                                                        </div>
+                                                    @endif
+                                                @endfor
+                                            @else
+                                                @if($property->deposit !== null && $property->deposit !== '' && (string)$property->deposit !== 'N/A')
                                                     <div class="offer-item">
                                                         <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
                                                             <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
                                                         </svg>
-                                                        <span><strong>Deposit (Room {{ $r }})</strong> {{ $depositFormatted }}</span>
+                                                        <span><strong>Deposit</strong> {{ $depositFormatted }}</span>
                                                     </div>
-                                                @endfor
-                                            @else
-                                                <div class="offer-item">
-                                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                                                        <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
-                                                    </svg>
-                                                    <span><strong>Deposit</strong> {{ $depositFormatted }}</span>
-                                                </div>
+                                                @endif
                                             @endif
                                         @endif
                                         @if($property->bills_included !== null && $property->bills_included !== '' && (string)$property->bills_included !== 'N/A')
