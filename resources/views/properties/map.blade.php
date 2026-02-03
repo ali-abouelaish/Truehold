@@ -1888,9 +1888,6 @@ select.filter-input option {
             if (countElement) {
                 countElement.textContent = `${visibleCount} properties visible`;
             }
-            
-            // Optionally close the filters after applying
-            toggleMapFilters();
         }
         
         function clearMapFilters() {
@@ -1919,6 +1916,32 @@ select.filter-input option {
                 countElement.textContent = `${window.allProperties.length} properties loaded`;
             }
         }
+
+        // Auto-apply map filters on change (no need to click Apply)
+        (function initFilterAutoApply() {
+            let priceDebounce;
+            const runApply = () => applyMapFilters();
+            const selIds = ['filterPropertyType', 'filterCouplesAllowed', 'filterEnsuite'];
+            @auth
+            selIds.push('filterAgentName');
+            @endauth
+            selIds.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.addEventListener('change', runApply);
+            });
+            ['filterMinPrice', 'filterMaxPrice'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.addEventListener('input', () => {
+                        clearTimeout(priceDebounce);
+                        priceDebounce = setTimeout(runApply, 400);
+                    });
+                    el.addEventListener('change', runApply);
+                }
+            });
+            const payingEl = document.getElementById('filterPayingOnly');
+            if (payingEl) payingEl.addEventListener('change', runApply);
+        })();
     </script>
 </body>
 </html>

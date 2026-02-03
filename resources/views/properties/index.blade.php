@@ -1397,12 +1397,25 @@ select.filter-input option {
             });
         }
         
-        // Store current URL with filters before navigating to property detail
+        // Auto-apply filters on change (no need to click Apply)
         document.addEventListener('DOMContentLoaded', () => {
+            const form = document.getElementById('filtersContent');
+            if (form) {
+                let priceDebounce;
+                form.querySelectorAll('select.filter-input').forEach(sel => {
+                    sel.addEventListener('change', () => form.submit());
+                });
+                form.querySelectorAll('input.filter-input[type="number"]').forEach(inp => {
+                    inp.addEventListener('input', () => {
+                        clearTimeout(priceDebounce);
+                        priceDebounce = setTimeout(() => form.submit(), 400);
+                    });
+                    inp.addEventListener('change', () => form.submit());
+                });
+            }
             // Store current URL when clicking on property cards
             document.querySelectorAll('.property-card').forEach(card => {
                 card.addEventListener('click', (e) => {
-                    // Store the current page URL with all filters
                     sessionStorage.setItem('propertyListingUrl', window.location.href);
                 });
             });
