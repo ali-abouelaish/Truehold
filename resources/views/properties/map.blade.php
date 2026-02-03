@@ -905,6 +905,12 @@ select.filter-input option {
    ========================================== */
 
 @media (max-width: 768px) {
+    body,
+    .map-page {
+        overflow-x: hidden;
+        overflow-y: auto;
+    }
+
     .map-header {
         padding: 16px 0;
     }
@@ -964,6 +970,9 @@ select.filter-input option {
     .filters-content {
         padding: 20px 16px;
         margin-top: 12px;
+        max-height: 70vh;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
     }
     
     .filters-header h3 {
@@ -1620,7 +1629,7 @@ select.filter-input option {
                     ` : ''}
                 </div>
                                 <div class="info-window-footer">
-                                    <a href="/properties/${property.id}" class="info-window-btn" onclick="sessionStorage.setItem('propertyListingUrl', window.location.href);">
+                                    <a href="/properties/${property.id}" class="info-window-btn" target="_blank" rel="noopener noreferrer" onclick="sessionStorage.setItem('propertyListingUrl', window.location.href);">
                                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                             <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
                                             <circle cx="12" cy="12" r="3"/>

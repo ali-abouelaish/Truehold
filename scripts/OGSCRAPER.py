@@ -260,9 +260,14 @@ def extract_room_options(soup, max_rooms=6):
         price_text = dt.get_text(" ", strip=True) if dt else ""
         room_type_text = dd.get_text(" ", strip=True) if dd else ""
 
+        # Use extract_price so pw → pcm conversion is applied for multi-room properties
+        room_price_pcm = extract_price(price_text) if price_text else None
+        if room_price_pcm is None:
+            room_price_pcm = parse_money_to_int(price_text)
+
         rooms.append({
             "room_index": i,
-            "price_pcm": parse_money_to_int(price_text),  # this section is already pcm
+            "price_pcm": room_price_pcm,
             "room_type": normalize_room_type(room_type_text),
         })
     return rooms
