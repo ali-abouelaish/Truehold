@@ -483,6 +483,14 @@ select.filter-input option {
 }
 
 /* ==========================================
+   MAP WRAPPER (mobile: in-flow; desktop: contains fixed map)
+   ========================================== */
+
+.map-wrapper {
+    position: relative;
+}
+
+/* ==========================================
    MAP CONTROLS
    ========================================== */
 
@@ -578,7 +586,7 @@ select.filter-input option {
     text-align: center;
 }
 
-/* Loading Screen */
+/* Loading Screen (inside map-wrapper so it covers map area) */
 .loading-screen {
     position: absolute;
     top: 0;
@@ -914,59 +922,70 @@ select.filter-input option {
     .map-header {
         padding: 16px 0;
     }
-    
+
     .map-header-content {
         flex-wrap: wrap;
     }
-    
+
     .map-title {
         font-size: 24px;
     }
-    
+
     .properties-loaded {
         font-size: 14px;
     }
-    
-    .map-controls {
-        top: 265px;
-        left: 16px;
+
+    /* Mobile: map area in document flow so no overlap/gap with header/filters */
+    .map-wrapper {
+        position: relative;
+        width: 100%;
+        height: min(65vh, 520px);
+        min-height: 320px;
+        flex-shrink: 0;
     }
-    
+
+    .map-controls {
+        position: absolute;
+        top: 12px;
+        left: 12px;
+        right: auto;
+        z-index: 1000;
+    }
+
     .map-control-btn {
         padding: 9px 14px;
         font-size: 13px;
     }
-    
-    
+
     .map-container {
-        top: 250px;
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
     }
-    
+
     .nav-links {
         gap: 4px;
     }
-    
+
     .nav-link {
         padding: 10px 12px;
         font-size: 13px;
     }
-    
-    .filter-grid {
-        grid-template-columns: 1fr;
-    }
-    
+
     /* Filters */
     .filters-section {
         padding: 16px 0;
     }
-    
+
     .filters-toggle {
         width: 100%;
         justify-content: center;
         padding: 14px 20px;
         font-size: 15px;
     }
-    
+
     .filters-content {
         padding: 20px 16px;
         margin-top: 12px;
@@ -974,77 +993,73 @@ select.filter-input option {
         overflow-y: auto;
         -webkit-overflow-scrolling: touch;
     }
-    
+
     .filters-header h3 {
-            font-size: 18px;
-        }
-        
+        font-size: 18px;
+    }
+
     .filter-grid {
         grid-template-columns: 1fr;
         gap: 16px;
-        }
-        
-        .filter-label {
-        font-size: 13px;
-        }
-        
-        .filter-input {
-        padding: 12px 14px;
-                font-size: 14px;
     }
-    
+
+    .filter-label {
+        font-size: 13px;
+    }
+
+    .filter-input {
+        padding: 12px 14px;
+        font-size: 14px;
+    }
+
     .paying-filter-checkbox {
         padding: 12px 14px;
     }
-    
+
     .paying-filter-checkbox .checkbox-icon {
         width: 20px;
         height: 20px;
     }
-    
+
     .filter-actions {
         flex-direction: column;
     }
-    
+
     .filter-btn-apply,
     .filter-btn-clear {
-            width: 100%;
+        width: 100%;
         justify-content: center;
     }
-    
+
     /* Info window responsive adjustments */
     .gm-style .gm-style-iw-c {
         max-width: 210px !important;
     }
-    
+
     .info-window-image {
         height: 100px;
     }
-    
+
     .info-window-content {
         padding: 10px;
     }
-    
+
     .info-window-title {
         font-size: 11px;
     }
-    
+
     .info-window-price {
         font-size: 13px;
     }
-    
+
     .info-window-detail-item {
-        font-size: 8px;
+        font-size: 9px;
         gap: 5px;
     }
-    
+
     .info-window-btn {
         padding: 6px 12px;
         font-size: 9px;
-    }
-    
-    .info-window-detail-item {
-        font-size: 10px;
     }
 }
 
@@ -1260,32 +1275,35 @@ select.filter-input option {
                 </div>
     </section>
 
-    <!-- Map Controls -->
-    <div class="map-controls">
-        <button class="map-control-btn active" id="mapViewBtn" onclick="toggleMapView('roadmap')">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                <path d="M1 6v16l7-4 8 4 7-4V2l-7 4-8-4-7 4z" stroke-width="2"/>
-            </svg>
-            Map
-        </button>
-        <button class="map-control-btn" id="satelliteViewBtn" onclick="toggleMapView('hybrid')">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                <circle cx="12" cy="12" r="10" stroke-width="2"/>
-                <path d="M12 2v20M2 12h20" stroke-width="2"/>
-            </svg>
-            Satellite
-        </button>
+    <!-- Map wrapper: on mobile keeps map + controls in flow; on desktop they stay fixed -->
+    <div class="map-wrapper">
+        <!-- Map Controls -->
+        <div class="map-controls">
+            <button class="map-control-btn active" id="mapViewBtn" onclick="toggleMapView('roadmap')">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path d="M1 6v16l7-4 8 4 7-4V2l-7 4-8-4-7 4z" stroke-width="2"/>
+                </svg>
+                Map
+            </button>
+            <button class="map-control-btn" id="satelliteViewBtn" onclick="toggleMapView('hybrid')">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <circle cx="12" cy="12" r="10" stroke-width="2"/>
+                    <path d="M12 2v20M2 12h20" stroke-width="2"/>
+                </svg>
+                Satellite
+            </button>
         </div>
 
-    <!-- Loading Screen -->
-    <div class="loading-screen" id="loadingScreen">
-        <div class="loading-spinner"></div>
-        <div class="loading-text">Loading properties...</div>
-    </div>
+        <!-- Loading Screen -->
+        <div class="loading-screen" id="loadingScreen">
+            <div class="loading-spinner"></div>
+            <div class="loading-text">Loading properties...</div>
+        </div>
 
-    <!-- Map Container -->
-    <div class="map-container">
-    <div id="map"></div>
+        <!-- Map Container -->
+        <div class="map-container">
+            <div id="map"></div>
+        </div>
     </div>
 
     <!-- Properties Data (hidden) -->
