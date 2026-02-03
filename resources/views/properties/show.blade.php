@@ -622,6 +622,13 @@ html {
     color: var(--gold);
 }
 
+.rooms-available-text {
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--gray);
+    margin: 4px 0 8px 0;
+}
+
 .price-large {
     font-size: 36px;
     font-weight: 700;
@@ -1737,6 +1744,11 @@ html {
                         <div class="info-header">
                             <div>
                                 <h1 class="property-title-large">{{ $property->title }}</h1>
+                                @php
+                                    $roomsAvailable = isset($property->room_count) && is_numeric($property->room_count) ? (int) $property->room_count : (int) ($property->total_rooms ?? 1);
+                                    $roomsAvailable = $roomsAvailable >= 1 ? $roomsAvailable : 1;
+                                @endphp
+                                <p class="rooms-available-text">{{ $roomsAvailable }} {{ $roomsAvailable === 1 ? 'room' : 'rooms' }} available</p>
                                 <div class="property-location-large">
                                     <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
                                         <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
