@@ -1249,9 +1249,9 @@ select.filter-input option {
                 </div>
     </section>
     
-    <!-- Properties Grid -->
+    <!-- Properties Grid (only this container updates when filters change) -->
     <section class="properties-section">
-        <div class="container">
+        <div class="container" id="propertiesResultsContainer">
             @if($properties->count() > 0)
                 <div class="properties-grid">
                     @foreach($properties as $property)
@@ -1397,27 +1397,64 @@ select.filter-input option {
             });
         }
         
-        // Auto-apply filters on change (no need to click Apply)
+        // Auto-apply filters on change: update only the results container (no full page reload)
         document.addEventListener('DOMContentLoaded', () => {
             const form = document.getElementById('filtersContent');
-            if (form) {
-                let priceDebounce;
-                form.querySelectorAll('select.filter-input').forEach(sel => {
-                    sel.addEventListener('change', () => form.submit());
+            const container = document.getElementById('propertiesResultsContainer');
+            if (!form || !container) return;
+
+            function getFilterQueryString() {
+                const formData = new FormData(form);
+                const params = new URLSearchParams();
+                formData.forEach((value, key) => {
+                    if (value != null && value !== '') params.set(key, value);
                 });
-                form.querySelectorAll('input.filter-input[type="number"]').forEach(inp => {
-                    inp.addEventListener('input', () => {
-                        clearTimeout(priceDebounce);
-                        priceDebounce = setTimeout(() => form.submit(), 400);
-                    });
-                    inp.addEventListener('change', () => form.submit());
-                });
+                return params.toString();
             }
-            // Store current URL when clicking on property cards
-            document.querySelectorAll('.property-card').forEach(card => {
-                card.addEventListener('click', (e) => {
-                    sessionStorage.setItem('propertyListingUrl', window.location.href);
+
+            function loadResults() {
+                const qs = getFilterQueryString();
+                const url = '{{ route("properties.index") }}' + (qs ? '?' + qs : '');
+                container.style.opacity = '0.6';
+                container.style.pointerEvents = 'none';
+                fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+                    .then(r => r.text())
+                    .then(html => {
+                        const parser = new DOMParser();
+                        const doc = parser.parseFromString(html, 'text/html');
+                        const newContainer = doc.getElementById('propertiesResultsContainer');
+                        if (newContainer) {
+                            container.innerHTML = newContainer.innerHTML;
+                        }
+                        history.pushState({}, '', url);
+                    })
+                    .catch(() => { window.location.href = url; })
+                    .finally(() => {
+                        container.style.opacity = '';
+                        container.style.pointerEvents = '';
+                    });
+            }
+
+            form.addEventListener('submit', (e) => {
+                e.preventDefault();
+                loadResults();
+            });
+            let priceDebounce;
+            form.querySelectorAll('select.filter-input').forEach(sel => {
+                sel.addEventListener('change', loadResults);
+            });
+            form.querySelectorAll('input.filter-input[type="number"]').forEach(inp => {
+                inp.addEventListener('input', () => {
+                    clearTimeout(priceDebounce);
+                    priceDebounce = setTimeout(loadResults, 400);
                 });
+                inp.addEventListener('change', loadResults);
+            });
+            // Store current URL when clicking on property cards (delegation so AJAX-loaded cards work)
+            document.addEventListener('click', (e) => {
+                if (e.target.closest('.property-card')) {
+                    sessionStorage.setItem('propertyListingUrl', window.location.href);
+                }
             });
         });
     </script>
