@@ -2637,10 +2637,8 @@ public function generateCode()
             $paymentMethod = $code->payment_method ?? 'Cash';
             $clientCount = $code->client_count ?? 1;
 
-            $baseCommission = $totalFee;
-            if (in_array($paymentMethod, ['Transfer', 'Card machine'])) {
-                $baseCommission = $totalFee * 0.8;
-            }
+            // Calculate base commission after VAT and card machine fee (if applicable)
+            [$baseCommission, $vatAmount, $cardMachineFee] = $this->calculateBaseCommissionAndFees($totalFee, $paymentMethod);
 
             // Check if this agent is the rental agent or marketing agent
             $isRentalAgent = (int)($code->rental_agent_id ?? 0) === (int)$agentId;
@@ -2685,8 +2683,8 @@ public function generateCode()
             $agentData['total_earnings'] += $baseCommission;
             $agentData['transaction_count'] += 1;
 
-            if (in_array($paymentMethod, ['Transfer', 'Card machine'])) {
-                $vatAmount = $totalFee - $baseCommission;
+            // Track VAT deductions (exclude card machine fee)
+            if ($vatAmount > 0) {
                 $agentData['vat_deductions'] += $vatAmount;
             }
 
@@ -2704,7 +2702,8 @@ public function generateCode()
                 'base_commission' => $baseCommission,
                 'agency_cut' => $agencyCut,
                 'agent_cut' => $agentCut,
-                'vat_amount' => in_array($paymentMethod, ['Transfer', 'Card machine']) ? ($totalFee - $baseCommission) : 0,
+                'vat_amount' => $vatAmount,
+                'card_machine_fee' => $cardMachineFee,
                 'marketing_deduction' => $marketingDeduction,
                 'marketing_agent' => $isMarketingEarnings ? $agentUser->name : ($code->marketing_agent_name ?? null),
                 'client_count' => $clientCount,
