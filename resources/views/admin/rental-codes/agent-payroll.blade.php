@@ -1024,24 +1024,6 @@ body {
                             $totalPaid = $rt['paid'] + $marketingPaid;
                             $totalEntitled = $rt['entitled'] + $marketingEntitled;
                         @endphp
-                <div class="totals-bar">
-                    <div class="total-item">
-                        <div class="total-label">Rental Count</div>
-                        <div class="total-value">{{ $rt['count'] }}</div>
-                            </div>
-                    <div class="total-item">
-                        <div class="total-label">Agent Earnings</div>
-                        <div class="total-value success">£{{ number_format($totalAgentEarningsFromRentals, 2) }}</div>
-                            </div>
-                    <div class="total-item">
-                        <div class="total-label">Paid</div>
-                        <div class="total-value success">£{{ number_format($totalPaid, 2) }}</div>
-                            </div>
-                    <div class="total-item">
-                        <div class="total-label">To Be Paid</div>
-                        <div class="total-value warning">£{{ number_format($totalEntitled, 2) }}</div>
-                            </div>
-                        </div>
                         @auth
                         @if(auth()->user()->role === 'admin')
                 <div style="margin-bottom: 20px;">
@@ -1136,6 +1118,25 @@ body {
                                 @endif
                         </div>
                         @endforeach
+                        {{-- Totals bar pinned to the bottom of the rentals container --}}
+                        <div class="totals-bar" style="margin-top: 16px;">
+                            <div class="total-item">
+                                <div class="total-label">Rental Count</div>
+                                <div class="total-value">{{ $rt['count'] }}</div>
+                            </div>
+                            <div class="total-item">
+                                <div class="total-label">Agent Earnings</div>
+                                <div class="total-value success">£{{ number_format($totalAgentEarningsFromRentals, 2) }}</div>
+                            </div>
+                            <div class="total-item">
+                                <div class="total-label">Paid</div>
+                                <div class="total-value success">£{{ number_format($totalPaid, 2) }}</div>
+                            </div>
+                            <div class="total-item">
+                                <div class="total-label">To Be Paid</div>
+                                <div class="total-value warning">£{{ number_format($totalEntitled, 2) }}</div>
+                            </div>
+                        </div>
                     @else
                 <div class="empty-state">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -1165,24 +1166,6 @@ body {
                         @php
                             $bt = $agent['bonus_totals'] ?? ['count'=>0,'agent_commission'=>0,'paid'=>0,'entitled'=>0,'outstanding'=>0];
                         @endphp
-                <div class="totals-bar">
-                    <div class="total-item">
-                        <div class="total-label">Bonuses</div>
-                        <div class="total-value">{{ $bt['count'] }}</div>
-                            </div>
-                    <div class="total-item">
-                        <div class="total-label">Agent Commission</div>
-                        <div class="total-value success">£{{ number_format($bt['agent_commission'], 2) }}</div>
-                            </div>
-                    <div class="total-item">
-                        <div class="total-label">Paid</div>
-                        <div class="total-value success">£{{ number_format($bt['paid'], 2) }}</div>
-                            </div>
-                    <div class="total-item">
-                        <div class="total-label">To Be Paid</div>
-                        <div class="total-value warning">£{{ number_format($bt['entitled'], 2) }}</div>
-                            </div>
-                        </div>
                         @foreach($agent['landlord_bonuses'] as $bonus)
                 <div class="rental-card {{ ($bonus['status'] ?? 'pending') === 'paid' ? 'paid' : 'pending' }}">
                     <div class="rental-header">
@@ -1229,6 +1212,25 @@ body {
                                 @endif
                         </div>
                         @endforeach
+                        {{-- Totals bar pinned to the bottom of the bonuses container --}}
+                        <div class="totals-bar" style="margin-top: 16px;">
+                            <div class="total-item">
+                                <div class="total-label">Bonuses</div>
+                                <div class="total-value">{{ $bt['count'] }}</div>
+                            </div>
+                            <div class="total-item">
+                                <div class="total-label">Agent Commission</div>
+                                <div class="total-value success">£{{ number_format($bt['agent_commission'], 2) }}</div>
+                            </div>
+                            <div class="total-item">
+                                <div class="total-label">Paid</div>
+                                <div class="total-value success">£{{ number_format($bt['paid'], 2) }}</div>
+                            </div>
+                            <div class="total-item">
+                                <div class="total-label">To Be Paid</div>
+                                <div class="total-value warning">£{{ number_format($bt['entitled'], 2) }}</div>
+                            </div>
+                        </div>
                     @else
                 <div class="empty-state">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
