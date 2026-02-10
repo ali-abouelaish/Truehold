@@ -395,6 +395,30 @@ def extract_feature_list(soup):
                 features[key] = val
     return features
 
+
+def detect_property_type_from_key_features(soup):
+    ul = soup.find("ul", class_="key-features")
+    if not ul:
+        return None, False
+
+    items = ul.find_all("li", class_="key-features__feature")
+    if not items:
+        return None, False
+
+    first = items[0].get_text(" ", strip=True).lower()
+
+    # Anything "*share*" means room in shared property
+    if "share" in first:
+        return "Room", False
+
+    # Anything "*to rent*" means whole property
+    if "to rent" in first:
+        return "Flat", True
+
+    return None, False
+ 
+
+
 def scrape_listing_advanced(url, paying, profile_flag=""):
     try:
         headers = {
@@ -570,13 +594,13 @@ def scrape_listing_advanced(url, paying, profile_flag=""):
                         continue
 
         # Property type
-        property_type = None
-        type_keywords = ["room", "bedroom", "studio", "flat", "apartment", "house", "en-suite", "ensuite"]
-        search_text = (str(title) + " " + str(description)).lower()
-        for keyword in type_keywords:
-            if keyword in search_text:
-                property_type = keyword.title()
-                break
+                # Property type (reliable) + whole property override
+        property_type, is_whole_property_from_kf = detect_property_type_from_key_features(soup)
+
+        # If key-features says "to rent", treat as whole property
+        if is_whole_property_from_kf:
+            is_whole_property = True  # overrides earlier detection
+            
 
         # ✅ Extract structured features
         features = extract_feature_list(soup)
@@ -711,9 +735,28 @@ def main(listings):
     # ========================================
     print("\n📌 Preserving existing flags...")
     
-    # 1️⃣ Read existing data with flags
-    existing_data = sheet.get_all_records()
-    existing_headers = sheet.row_values(1)
+    # 1️⃣ Read existing data with flags (handle duplicate headers in sheet)
+    raw_headers = sheet.row_values(1)
+    all_values = sheet.get_all_values()
+    # Deduplicate headers so we can build dicts (first occurrence keeps name, rest get _2, _3, ...)
+    seen = {}
+    unique_headers = []
+    for h in raw_headers:
+        key = (h or "").strip() or f"_empty_{len(unique_headers)}"
+        if key in seen:
+            seen[key] += 1
+            unique_headers.append(f"{key}_{seen[key]}")
+        else:
+            seen[key] = 0
+            unique_headers.append(key)
+    existing_headers = raw_headers  # keep original for later comparison
+    existing_data = []
+    for row_values in (all_values[1:] if len(all_values) > 1 else []):
+        row_dict = {}
+        for i, val in enumerate(row_values):
+            if i < len(unique_headers):
+                row_dict[unique_headers[i]] = val
+        existing_data.append(row_dict)
     
     # Create a dictionary mapping URL -> (flag, flag_color)
     flag_map = {}

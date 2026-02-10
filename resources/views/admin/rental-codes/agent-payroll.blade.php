@@ -1123,6 +1123,9 @@ body {
                                     @if($transaction['vat_amount'] > 0)
                             <div class="deduction-item deduction-vat">VAT: £{{ number_format($transaction['vat_amount'], 2) }}</div>
                                     @endif
+                                    @if(($transaction['card_machine_fee'] ?? 0) > 0)
+                            <div class="deduction-item" style="color: #2563eb;">Card machine fee (1.75%): £{{ number_format($transaction['card_machine_fee'], 2) }}</div>
+                                    @endif
                                     @if($transaction['marketing_deduction'] > 0)
                             <div class="deduction-item deduction-marketing">Marketing: £{{ number_format($transaction['marketing_deduction'], 2) }}</div>
                                     @endif
