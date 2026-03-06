@@ -325,11 +325,11 @@ class LandlordBonusController extends Controller
             $invoice->items = $invoiceItems;
             $invoice->tax_rate = 0;
             
-            // Set company details
+            // Set company / banking details (same as main invoice creation)
             $invoice->company_name = 'Truehold Group Limited';
             $invoice->company_address = 'Business Banking';
-            $invoice->account_holder_name = 'TRUEHOLD GROUP LTD';
-            $invoice->account_number = '63935841';
+            $invoice->account_holder_name = 'HORIZON DREAMS LIMITED';
+            $invoice->account_number = '03630064';
             $invoice->sort_code = '20-41-50';
             $invoice->bank_name = 'Business Banking';
             
