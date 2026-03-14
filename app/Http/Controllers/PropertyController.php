@@ -72,12 +72,20 @@ class PropertyController extends Controller
                     $filters['agent_name'] = $request->agent_name;
                 }
 
+                if ($request->filled('paying_only') && auth()->check()) {
+                    $filters['paying_only'] = true;
+                }
+
                 if ($request->filled('couples_allowed')) {
                     $filters['couples_allowed'] = $request->couples_allowed;
                 }
 
                 if ($request->filled('ensuite')) {
                     $filters['ensuite'] = $request->ensuite;
+                }
+
+                if ($request->filled('room_count')) {
+                    $filters['room_count'] = $request->room_count;
                 }
 
                 // Get filtered properties from Google Sheets
@@ -90,6 +98,7 @@ class PropertyController extends Controller
                 $availableDates = $filterValues['available_dates'];
                 $agentNames = $filterValues['agent_names'];
                 $agentsWithPaying = $filterValues['agents_with_paying'];
+                $roomCounts = $filterValues['room_counts'];
 
                 // Convert properties to Property-like objects for view compatibility
                 $properties = $filteredProperties->map(function ($propertyData) {
@@ -134,7 +143,7 @@ class PropertyController extends Controller
             'spreadsheet_id' => config('services.google.properties.spreadsheet_id'),
         ]);
 
-        return view('properties.index', compact('properties', 'locations', 'propertyTypes', 'availableDates', 'agentNames', 'agentsWithPaying'));
+        return view('properties.index', compact('properties', 'locations', 'propertyTypes', 'availableDates', 'agentNames', 'agentsWithPaying', 'roomCounts'));
             } catch (\Exception $e) {
                 \Log::error('Error loading properties from Google Sheets, falling back to database', [
                     'error' => $e->getMessage(),
@@ -179,6 +188,11 @@ class PropertyController extends Controller
             $query->where('agent_name', 'like', "%{$request->agent_name}%");
         }
 
+        // Paying agents only - only for authenticated users
+        if ($request->filled('paying_only') && auth()->check()) {
+            $query->whereRaw("LOWER(TRIM(COALESCE(paying, ''))) = 'yes'");
+        }
+
         if ($request->filled('couples_allowed')) {
             $query->byCouplesAllowed($request->couples_allowed);
         }
@@ -187,10 +201,15 @@ class PropertyController extends Controller
             $query->byEnsuite($request->ensuite);
         }
 
+        if ($request->filled('room_count')) {
+            $query->where('total_rooms', $request->room_count);
+        }
+
         // Get unique values for filter dropdowns
         $locations = Property::distinct()->pluck('location')->filter()->sort()->values();
         $propertyTypes = Property::distinct()->pluck('property_type')->filter()->sort()->values();
         $availableDates = Property::distinct()->pluck('available_date')->filter()->sort()->values();
+        $roomCounts = Property::distinct()->pluck('total_rooms')->filter()->sort()->values();
         
         // Get agent names with paying status - only for authenticated users
         if (auth()->check()) {
@@ -228,7 +247,7 @@ class PropertyController extends Controller
             'google_sheets_configured' => !empty(config('services.google.properties.spreadsheet_id')),
         ]);
 
-        return view('properties.index', compact('properties', 'locations', 'propertyTypes', 'availableDates', 'agentNames', 'agentsWithPaying'));
+        return view('properties.index', compact('properties', 'locations', 'propertyTypes', 'availableDates', 'agentNames', 'agentsWithPaying', 'roomCounts'));
     }
 
     /**
@@ -338,6 +357,10 @@ class PropertyController extends Controller
                     $filters['ensuite'] = $request->ensuite;
                 }
 
+                if ($request->filled('room_count')) {
+                    $filters['room_count'] = $request->room_count;
+                }
+
                 // Get filtered properties from Google Sheets
                 $filteredProperties = $this->getSheetsService()->filterProperties($filters);
                 
@@ -420,6 +443,12 @@ class PropertyController extends Controller
                     if (!isset($propertyData['couples_allowed'])) {
                         $propertyData['couples_allowed'] = '';
                     }
+                    if (!isset($propertyData['total_rooms'])) {
+                        $propertyData['total_rooms'] = $propertyData['room_count'] ?? '';
+                    }
+                    if (!isset($propertyData['room_count'])) {
+                        $propertyData['room_count'] = $propertyData['total_rooms'] ?? '';
+                    }
                     return $propertyData;
                 })->take(400)->values()->all();
 
@@ -430,6 +459,7 @@ class PropertyController extends Controller
                 $availableDates = $filterValues['available_dates'];
                 $agentNames = $filterValues['agent_names'];
                 $agentsWithPaying = $filterValues['agents_with_paying'];
+                $roomCounts = $filterValues['room_counts'];
 
                 // Log validation results for debugging
                 \Log::info('Map query results (Google Sheets)', [
@@ -454,7 +484,8 @@ class PropertyController extends Controller
                     'propertyTypes' => $propertyTypes,
                     'availableDates' => $availableDates,
                     'agentNames' => $agentNames,
-                    'agentsWithPaying' => $agentsWithPaying
+                    'agentsWithPaying' => $agentsWithPaying,
+                    'roomCounts' => $roomCounts
                 ]);
             } catch (\Exception $e) {
                 \Log::error('Error loading properties from Google Sheets for map, falling back to database', [
@@ -505,6 +536,10 @@ class PropertyController extends Controller
             $query->byEnsuite($request->ensuite);
         }
 
+        if ($request->filled('room_count')) {
+            $query->where('total_rooms', $request->room_count);
+        }
+
         // Get properties with all necessary fields for map display
         // Sort by premium flag first, then by latest
         $properties = $query
@@ -517,6 +552,7 @@ class PropertyController extends Controller
         $locations = Property::distinct()->pluck('location')->filter()->sort()->values();
         $propertyTypes = Property::distinct()->pluck('property_type')->sort()->values();
         $availableDates = Property::distinct()->pluck('available_date')->sort()->values();
+        $roomCounts = Property::distinct()->pluck('total_rooms')->filter()->sort()->values();
         
         if (auth()->check()) {
             $agentNames = Property::distinct()->pluck('agent_name')->filter()->sort()->values();
@@ -552,6 +588,8 @@ class PropertyController extends Controller
                 'description' => $property->description ?? '',
                 'first_photo_url' => $property->first_photo_url,
                 'high_quality_photos_array' => $property->high_quality_photos_array,
+                'total_rooms' => $property->total_rooms ?? '',
+                'room_count' => $property->total_rooms ?? '',
             ];
         })->values()->all();
 
@@ -569,7 +607,8 @@ class PropertyController extends Controller
             'propertyTypes' => $propertyTypes,
             'availableDates' => $availableDates,
             'agentNames' => $agentNames,
-            'agentsWithPaying' => $agentsWithPaying
+            'agentsWithPaying' => $agentsWithPaying,
+            'roomCounts' => $roomCounts
         ]);
     }
 

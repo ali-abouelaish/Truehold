@@ -1218,7 +1218,7 @@ select.filter-input option {
                                 @if($agentName && $agentName !== 'N/A')
                                     <option value="{{ $agentName }}">
                                         {{ $agentName }}
-                                        @if(isset($agentsWithPaying) && (is_array($agentsWithPaying) ? in_array($agentName, $agentsWithPaying) : $agentsWithPaying->contains($agentName)))
+                                        @if(isset($agentsWithPaying) && (is_array($agentsWithPaying) ? in_array($agentName, $agentsWithPaying) : ($agentsWithPaying->has($agentName) ? $agentsWithPaying->get($agentName) : $agentsWithPaying->contains($agentName))))
                                             ⚡
                                         @endif
                                     </option>
@@ -1239,20 +1239,35 @@ select.filter-input option {
                         </div>
                     
                     <div class="filter-group">
-                        <label class="filter-label">Couples Allowed</label>
-                        <select id="filterCouplesAllowed" class="filter-input">
-                                    <option value="">All Properties</option>
-                            <option value="yes">Couples Welcome</option>
-                            <option value="no">Singles Only</option>
-                                </select>
+                        <label class="filter-label">Couple Allowed</label>
+                        <label class="filter-input" style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+                            <input type="checkbox" id="filterCouplesYes" value="yes" {{ request('couples_allowed') == 'yes' ? 'checked' : '' }} style="width: 18px; height: 18px;">
+                            <span>Couples welcome only</span>
+                        </label>
+                        <label class="filter-input" style="display: flex; align-items: center; gap: 10px; cursor: pointer; margin-top: 6px;">
+                            <input type="checkbox" id="filterCouplesNo" value="no" {{ request('couples_allowed') == 'no' ? 'checked' : '' }} style="width: 18px; height: 18px;">
+                            <span>Singles only</span>
+                        </label>
                     </div>
                     
                     <div class="filter-group">
-                        <label class="filter-label">Ensuite Rooms</label>
-                        <select id="filterEnsuite" class="filter-input">
-                                    <option value="">All Properties</option>
-                            <option value="yes">Ensuite Only</option>
-                                </select>
+                        <label class="filter-label">Ensuite</label>
+                        <label class="filter-input" style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+                            <input type="checkbox" id="filterEnsuite" value="yes" {{ request('ensuite') == 'yes' ? 'checked' : '' }} style="width: 18px; height: 18px;">
+                            <span>Ensuite only</span>
+                        </label>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label class="filter-label">Room count</label>
+                        <select id="filterRoomCount" class="filter-input">
+                            <option value="">All</option>
+                            @foreach($roomCounts ?? [] as $count)
+                                @if($count !== null && $count !== '')
+                                    <option value="{{ $count }}" {{ request('room_count') == (string)$count ? 'selected' : '' }}>{{ $count }} {{ $count == 1 ? 'room' : 'rooms' }}</option>
+                                @endif
+                            @endforeach
+                        </select>
                     </div>
                         </div>
                         
@@ -1741,8 +1756,11 @@ select.filter-input option {
             const propertyType = document.getElementById('filterPropertyType').value.toLowerCase();
             const minPrice = parseFloat(document.getElementById('filterMinPrice').value) || 0;
             const maxPrice = parseFloat(document.getElementById('filterMaxPrice').value) || Infinity;
-            const couplesAllowed = document.getElementById('filterCouplesAllowed').value.toLowerCase();
-            const ensuite = document.getElementById('filterEnsuite')?.value || '';
+            const couplesYesEl = document.getElementById('filterCouplesYes');
+            const couplesNoEl = document.getElementById('filterCouplesNo');
+            const couplesAllowed = (couplesYesEl?.checked ? 'yes' : '') || (couplesNoEl?.checked ? 'no' : '');
+            const ensuite = document.getElementById('filterEnsuite')?.checked ? 'yes' : '';
+            const roomCountFilter = (document.getElementById('filterRoomCount')?.value || '').trim();
             @auth
             const agentName = document.getElementById('filterAgentName')?.value.toLowerCase() || '';
             const payingOnly = document.getElementById('filterPayingOnly')?.checked || false;
@@ -1761,6 +1779,14 @@ select.filter-input option {
                     // Property type filter
                     if (propertyType && property.property_type?.toLowerCase() !== propertyType) {
                         visible = false;
+                    }
+                    
+                    // Room count filter
+                    if (roomCountFilter) {
+                        const propRooms = String(property.total_rooms ?? property.room_count ?? '').trim();
+                        if (propRooms !== roomCountFilter) {
+                            visible = false;
+                        }
                     }
                     
                     // Price filter
@@ -1913,9 +1939,14 @@ select.filter-input option {
             document.getElementById('filterPropertyType').value = '';
             document.getElementById('filterMinPrice').value = '';
             document.getElementById('filterMaxPrice').value = '';
-            document.getElementById('filterCouplesAllowed').value = '';
+            const couplesYes = document.getElementById('filterCouplesYes');
+            const couplesNo = document.getElementById('filterCouplesNo');
+            if (couplesYes) couplesYes.checked = false;
+            if (couplesNo) couplesNo.checked = false;
             const ensuiteFilter = document.getElementById('filterEnsuite');
-            if (ensuiteFilter) ensuiteFilter.value = '';
+            if (ensuiteFilter) ensuiteFilter.checked = false;
+            const roomCountFilter = document.getElementById('filterRoomCount');
+            if (roomCountFilter) roomCountFilter.value = '';
             @auth
             const agentFilter = document.getElementById('filterAgentName');
             if (agentFilter) agentFilter.value = '';
@@ -1939,11 +1970,22 @@ select.filter-input option {
         (function initFilterAutoApply() {
             let priceDebounce;
             const runApply = () => applyMapFilters();
-            const selIds = ['filterPropertyType', 'filterCouplesAllowed', 'filterEnsuite'];
+            const couplesYes = document.getElementById('filterCouplesYes');
+            const couplesNo = document.getElementById('filterCouplesNo');
+            if (couplesYes && couplesNo) {
+                couplesYes.addEventListener('change', function() { if (this.checked) couplesNo.checked = false; runApply(); });
+                couplesNo.addEventListener('change', function() { if (this.checked) couplesYes.checked = false; runApply(); });
+            }
+            const selIds = ['filterPropertyType', 'filterRoomCount'];
+            const checkboxIds = ['filterCouplesYes', 'filterCouplesNo', 'filterEnsuite'];
             @auth
             selIds.push('filterAgentName');
             @endauth
             selIds.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.addEventListener('change', runApply);
+            });
+            checkboxIds.forEach(id => {
                 const el = document.getElementById(id);
                 if (el) el.addEventListener('change', runApply);
             });

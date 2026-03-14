@@ -632,6 +632,26 @@ class PropertyGoogleSheetsService
                 return stripos($property['agent_name'] ?? '', $filters['agent_name']) !== false;
             });
         }
+
+        if (isset($filters['paying_only']) && auth()->check()) {
+            $properties = $properties->filter(function ($property) {
+                $paying = $property['paying'] ?? null;
+                if ($paying === null || $paying === '') {
+                    return false;
+                }
+                $paying = is_string($paying) ? strtolower(trim($paying)) : $paying;
+                return $paying === 'yes' || $paying === true || $paying === 1;
+            });
+        }
+
+        if (isset($filters['room_count']) && $filters['room_count'] !== '') {
+            $roomCountFilter = trim((string) $filters['room_count']);
+            $properties = $properties->filter(function ($property) use ($roomCountFilter) {
+                $totalRooms = isset($property['total_rooms']) ? trim((string) $property['total_rooms']) : '';
+                $roomCount = isset($property['room_count']) ? trim((string) $property['room_count']) : '';
+                return $totalRooms === $roomCountFilter || $roomCount === $roomCountFilter;
+            });
+        }
         
         if (isset($filters['couples_allowed'])) {
             $properties = $properties->filter(function ($property) use ($filters) {
@@ -793,14 +813,29 @@ class PropertyGoogleSheetsService
                         ->values()
                     : collect(),
                 'agents_with_paying' => auth()->check()
-                    ? $properties->where('paying', 'yes')
+                    ? $properties->filter(function ($property) {
+                        $paying = $property['paying'] ?? null;
+                        if ($paying === null || $paying === '') {
+                            return false;
+                        }
+                        $paying = is_string($paying) ? strtolower(trim($paying)) : $paying;
+                        return $paying === 'yes' || $paying === true || $paying === 1;
+                    })
                         ->pluck('agent_name')
                         ->filter()
                         ->unique()
-                        ->mapWithKeys(function ($agent) {
-                            return [$agent => true];
-                        })
+                        ->values()
                     : collect(),
+                'room_counts' => $properties->map(function ($property) {
+                    $v = $property['total_rooms'] ?? $property['room_count'] ?? null;
+                    return $v !== null && $v !== '' ? trim((string) $v) : null;
+                })
+                    ->filter()
+                    ->unique()
+                    ->sortBy(function ($v) {
+                        return is_numeric($v) ? (int) $v : $v;
+                    })
+                    ->values(),
             ];
         } catch (\Exception $e) {
             Log::error('Failed to get filter values from Google Sheets', [
@@ -814,6 +849,7 @@ class PropertyGoogleSheetsService
                 'available_dates' => collect(),
                 'agent_names' => collect(),
                 'agents_with_paying' => collect(),
+                'room_counts' => collect(),
             ];
         }
     }

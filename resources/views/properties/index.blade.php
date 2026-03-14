@@ -1126,7 +1126,7 @@ select.filter-input option {
                     </svg>
                 </button>
                 
-                @if(request()->hasAny(['location', 'property_type', 'min_price', 'max_price', 'couples_allowed', 'ensuite', 'agent_name']))
+                @if(request()->hasAny(['location', 'property_type', 'min_price', 'max_price', 'couples_allowed', 'ensuite', 'agent_name', 'paying_only', 'room_count']))
                     <div style="display: flex; align-items: center; gap: 8px; padding: 8px 16px; background: rgba(212, 175, 55, 0.15); border: 1px solid var(--gold); border-radius: 8px;">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="color: var(--gold);">
                             <path d="M10 18h4v-2h-4v2zM3 6v2h18V6H3zm3 7h12v-2H6v2z"/>
@@ -1148,6 +1148,15 @@ select.filter-input option {
                     </div>
                     
                 <div class="filter-grid">
+                    @auth
+                    <div class="filter-group">
+                        <label class="filter-label">Paying agents only</label>
+                        <label class="filter-input" style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+                            <input type="checkbox" name="paying_only" value="1" {{ request('paying_only') ? 'checked' : '' }} style="width: 18px; height: 18px;">
+                            <span>Show only paying agents ⚡</span>
+                        </label>
+                    </div>
+                    @endauth
                     <div class="filter-group">
                         <label class="filter-label">Location</label>
                         <select name="location" class="filter-input">
@@ -1179,7 +1188,7 @@ select.filter-input option {
                                     <option value="">All Agents</option>
                                     @foreach($agentNames as $agent)
                                         <option value="{{ $agent }}" {{ request('agent_name') == $agent ? 'selected' : '' }}>
-                                            {{ $agent }}@if(isset($agentsWithPaying[$agent]) && $agentsWithPaying[$agent]) ⚡@endif
+                                            {{ $agent }}@if(isset($agentsWithPaying) && (is_array($agentsWithPaying) ? in_array($agent, $agentsWithPaying) : ($agentsWithPaying->has($agent) ? $agentsWithPaying->get($agent) : $agentsWithPaying->contains($agent)))) ⚡@endif
                                         </option>
                                     @endforeach
                                 </select>
@@ -1212,20 +1221,35 @@ select.filter-input option {
                             </div>
                             
                     <div class="filter-group">
-                        <label class="filter-label">Couples Allowed</label>
-                        <select name="couples_allowed" class="filter-input">
-                                    <option value="">All Properties</option>
-                                    <option value="yes" {{ request('couples_allowed') == 'yes' ? 'selected' : '' }}>Couples Welcome</option>
-                                    <option value="no" {{ request('couples_allowed') == 'no' ? 'selected' : '' }}>Singles Only</option>
-                                </select>
+                        <label class="filter-label">Couple Allowed</label>
+                        <label class="filter-input" style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+                            <input type="checkbox" id="listingCouplesYes" name="couples_allowed" value="yes" {{ request('couples_allowed') == 'yes' ? 'checked' : '' }} style="width: 18px; height: 18px;">
+                            <span>Couples welcome only</span>
+                        </label>
+                        <label class="filter-input" style="display: flex; align-items: center; gap: 10px; cursor: pointer; margin-top: 6px;">
+                            <input type="checkbox" id="listingCouplesNo" name="couples_allowed" value="no" {{ request('couples_allowed') == 'no' ? 'checked' : '' }} style="width: 18px; height: 18px;">
+                            <span>Singles only</span>
+                        </label>
                     </div>
                     
                     <div class="filter-group">
-                        <label class="filter-label">Ensuite Rooms</label>
-                        <select name="ensuite" class="filter-input">
-                                    <option value="">All Properties</option>
-                                    <option value="yes" {{ request('ensuite') == 'yes' ? 'selected' : '' }}>Ensuite Only</option>
-                                </select>
+                        <label class="filter-label">Ensuite</label>
+                        <label class="filter-input" style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+                            <input type="checkbox" name="ensuite" value="yes" {{ request('ensuite') == 'yes' ? 'checked' : '' }} style="width: 18px; height: 18px;">
+                            <span>Ensuite only</span>
+                        </label>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label class="filter-label">Room count</label>
+                        <select name="room_count" class="filter-input">
+                            <option value="">All</option>
+                            @foreach($roomCounts ?? [] as $count)
+                                @if($count !== null && $count !== '')
+                                    <option value="{{ $count }}" {{ request('room_count') == $count ? 'selected' : '' }}>{{ $count }} {{ $count == 1 ? 'room' : 'rooms' }}</option>
+                                @endif
+                            @endforeach
+                        </select>
                     </div>
                             </div>
                             
@@ -1351,6 +1375,14 @@ select.filter-input option {
     </section>
 
     <script>
+        (function initCouplesCheckboxes() {
+            const yesEl = document.getElementById('listingCouplesYes');
+            const noEl = document.getElementById('listingCouplesNo');
+            if (yesEl && noEl) {
+                yesEl.addEventListener('change', function() { if (this.checked) noEl.checked = false; });
+                noEl.addEventListener('change', function() { if (this.checked) yesEl.checked = false; });
+            }
+        })();
         function toggleFilters() {
             const content = document.getElementById('filtersContent');
             const text = document.getElementById('filterToggleText');
