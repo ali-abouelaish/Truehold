@@ -337,11 +337,191 @@ body {
     transition: transform 0.3s ease;
 }
 
+.filters-active-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px;
+    background: #fff;
+    border: 1px solid rgba(212, 175, 55, 0.35);
+    border-radius: 999px;
+    box-shadow: 0 1px 4px rgba(15, 23, 42, 0.05);
+}
+
+.filters-active-pill svg {
+    color: var(--gold);
+}
+
+.filters-active-pill__text {
+    color: var(--primary-navy);
+    font-weight: 600;
+    font-size: 13px;
+}
+
+.filters-active-pill button {
+    background: none;
+    border: none;
+    color: var(--primary-navy);
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 12px;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    padding: 2px 4px;
+    border-radius: 4px;
+}
+
+.filters-collapse {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    margin-top: 16px;
+}
+
+.filters-collapse.active {
+    grid-template-rows: 1fr;
+}
+
+.filters-collapse__inner {
+    min-height: 0;
+    overflow: hidden;
+}
+
+.thf-card__scroll {
+    flex: 1;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 20px 22px 8px;
+}
+
+.thf-card__header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+.thf-card__header-main h3 {
+    margin: 0 0 4px 0;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #f8fafc;
+}
+
+.thf-card__header-main p {
+    margin: 0;
+    font-size: 14px;
+    color: rgba(248, 250, 252, 0.78);
+    line-height: 1.45;
+}
+
+.thf-filter-count {
+    font-size: 13px;
+    font-weight: 600;
+    color: #f8fafc;
+    background: rgba(212, 175, 55, 0.2);
+    border: 1px solid rgba(212, 175, 55, 0.35);
+    padding: 6px 12px;
+    border-radius: 999px;
+}
+
+.thf-section { margin-bottom: 22px; }
+.thf-section__head { margin-bottom: 12px; }
+.thf-section__title {
+    margin: 0;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: rgba(232, 197, 120, 0.95);
+}
+.thf-section__desc { margin: 4px 0 0 0; font-size: 13px; color: rgba(248, 250, 252, 0.65); }
+.thf-section__body { display: flex; flex-direction: column; gap: 14px; }
+
+.thf-fields-grid { display: grid; gap: 14px 16px; grid-template-columns: 1fr; }
+@media (min-width: 640px) { .thf-fields-grid--2 { grid-template-columns: repeat(2, 1fr); } }
+@media (min-width: 1024px) { .thf-fields-grid--3 { grid-template-columns: repeat(3, 1fr); } }
+
+.thf-field { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.thf-label { font-size: 12px; font-weight: 600; color: rgba(248, 250, 252, 0.86); }
+
+.thf-input,
+.thf-select {
+    width: 100%;
+    min-height: 46px;
+    padding: 0 14px;
+    font-size: 15px;
+    font-weight: 500;
+    color: #f8fafc;
+    background: rgba(0, 0, 0, 0.22);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 10px;
+}
+.thf-input::placeholder { color: rgba(248, 250, 252, 0.5); }
+.thf-input:focus, .thf-select:focus { outline: none; border-color: rgba(212, 175, 55, 0.65); box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.15); }
+.thf-select {
+    cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L6 6L11 1' stroke='%23e8c55c' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    padding-right: 40px;
+}
+.thf-select option { color: #f8fafc; background: #152a45; }
+
+.thf-price-row { display: grid; grid-template-columns: 1fr auto 1fr; gap: 10px; align-items: end; }
+.thf-price-row__sep { text-align: center; font-size: 13px; font-weight: 600; color: rgba(248, 250, 252, 0.7); padding-bottom: 12px; }
+
+.thf-segment { display: flex; flex-wrap: wrap; gap: 8px; padding: 4px; background: rgba(0, 0, 0, 0.18); border-radius: 12px; border: 1px solid rgba(255,255,255,.12); }
+.thf-segment__opt { flex: 1 1 0; min-width: 72px; text-align: center; cursor: pointer; margin: 0; }
+.thf-segment__opt input { position: absolute; opacity: 0; width: 0; height: 0; pointer-events: none; }
+.thf-segment__opt span { display: block; padding: 10px 12px; font-size: 14px; font-weight: 600; color: rgba(248,250,252,.82); border-radius: 8px; }
+.thf-segment__opt input:checked + span { background: rgba(255,255,255,.2); color: #fff; }
+
+.thf-pill-row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.thf-pill { position: relative; cursor: pointer; margin: 0; }
+.thf-pill input { position: absolute; opacity: 0; width: 0; height: 0; }
+.thf-pill__ui { display: inline-flex; align-items: center; gap: 8px; padding: 10px 16px; font-size: 14px; font-weight: 600; color: rgba(248,250,252,.9); border: 1px solid rgba(255,255,255,.2); border-radius: 999px; background: rgba(0,0,0,.2); }
+.thf-pill input:checked + .thf-pill__ui { background: linear-gradient(135deg, rgba(212,175,55,.15), rgba(212,175,55,.08)); border-color: rgba(212,175,55,.5); color: #fff; }
+
+.thf-switch-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 12px 14px; border: 1px solid rgba(255,255,255,.18); border-radius: 12px; background: rgba(0,0,0,.18); }
+.thf-switch-row__text { font-size: 14px; font-weight: 600; color: #f8fafc; }
+.thf-switch { position: relative; display: inline-block; width: 48px; height: 28px; }
+.thf-switch__input { opacity: 0; width: 0; height: 0; position: absolute; }
+.thf-switch__slider { position: absolute; inset: 0; background: rgba(15, 23, 42, 0.18); border-radius: 999px; }
+.thf-switch__slider::before { content:''; position:absolute; height:22px; width:22px; left:3px; bottom:3px; background:#fff; border-radius:50%; transition:transform .2s ease; }
+.thf-switch__input:checked + .thf-switch__slider { background: linear-gradient(135deg, var(--gold), var(--gold-light)); }
+.thf-switch__input:checked + .thf-switch__slider::before { transform: translateX(20px); }
+
+.thf-card__footer {
+    position: sticky;
+    bottom: 0;
+    z-index: 3;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 14px 18px 16px;
+    background: linear-gradient(180deg, rgba(0, 0, 0, 0.18) 0%, rgba(0, 0, 0, 0.28) 40%);
+    border-top: 1px solid rgba(255, 255, 255, 0.14);
+}
+.thf-card__footer-left { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.thf-card__footer-right { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-left: auto; }
+.thf-link-reset { background:none; border:none; padding:8px 6px; font-size:13px; font-weight:600; color:rgba(248,250,252,.75); text-decoration:underline; text-underline-offset:3px; cursor:pointer; }
+
 .filters-content {
     display: none;
     margin: 24px auto 0;
     width: 100%;
-    max-width: 75%;
+    max-width: 90%;
+    max-height: min(69vh, 720px);
+    display: flex;
+    flex-direction: column;
     padding: 0;
     background: linear-gradient(150deg, rgba(30, 58, 95, 0.78), rgba(21, 42, 69, 0.8));
     border-radius: 20px;
@@ -362,6 +542,9 @@ body {
 
 .filters-panel-inner {
     padding: 28px 32px 8px;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    flex: 1;
 }
 
 .filters-header {
@@ -1122,10 +1305,8 @@ select.filter-input option {
     .filters-content {
         margin-top: 12px;
         max-width: 100%;
+        max-height: min(66vh, 624px);
         border-radius: 16px;
-        max-height: 70vh;
-        overflow-y: auto;
-        -webkit-overflow-scrolling: touch;
     }
 
     .filters-panel-inner {
@@ -1312,11 +1493,17 @@ select.filter-input option {
             </div>
     </div>
 
+    @php
+        $thfFilterKeys = ['location', 'property_type', 'min_price', 'max_price', 'couples_allowed', 'ensuite', 'agent_name', 'paying_only', 'room_count'];
+        $thfActiveCount = collect($thfFilterKeys)->filter(fn ($k) => request()->filled($k))->count();
+        $thfCouples = request('couples_allowed');
+    @endphp
+
     <!-- Filters -->
-    <section class="filters-section">
+    <section class="filters-section" aria-label="Property search filters">
         <div class="container">
             <div class="filters-toolbar">
-                <button type="button" id="mapFiltersToggleBtn" class="filters-toggle" onclick="toggleMapFilters()">
+                <button type="button" id="filtersToggleBtn" class="filters-toggle" onclick="toggleMapFilters()" aria-expanded="false" aria-controls="filtersCollapse">
                     <span class="filters-toggle-icon" aria-hidden="true">
                         <svg viewBox="0 0 24 24" fill="currentColor">
                             <path d="M10 18h4v-2h-4v2zM3 6v2h18V6H3zm3 7h12v-2H6v2z"/>
@@ -1327,147 +1514,162 @@ select.filter-input option {
                         <path d="M6 9l6 6 6-6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                     </svg>
                 </button>
-            </div>
-                
-            <div class="filters-content" id="mapFiltersContent">
-                <div class="filters-panel-inner">
-                    <div class="filters-header">
-                        <div class="filters-header-icon" aria-hidden="true">
-                            <svg viewBox="0 0 24 24" fill="currentColor">
-                                <path d="M10 18h4v-2h-4v2zM3 6v2h18V6H3zm3 7h12v-2H6v2z"/>
-                            </svg>
-                        </div>
-                        <div class="filters-header-text">
-                            <h3>Map filters</h3>
-                            <p>Refine which pins you see. Changes apply to the map instantly.</p>
-                        </div>
+
+                @if($thfActiveCount > 0)
+                    <div class="filters-active-pill">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                            <path d="M10 18h4v-2h-4v2zM3 6v2h18V6H3zm3 7h12v-2H6v2z"/>
+                        </svg>
+                        <span class="filters-active-pill__text">{{ $thfActiveCount }} {{ $thfActiveCount === 1 ? 'filter' : 'filters' }} applied</span>
+                        <button type="button" onclick="clearMapFilters()">Clear all</button>
                     </div>
-                
-                    <div class="filter-grid">
-                        @auth
-                        <div class="filter-group paying-filter-wrap">
-                            <span class="filter-label">Paying agents</span>
-                            <label class="paying-filter-checkbox" for="filterPayingOnly" title="Show only paying agents">
-                                <input type="checkbox" id="filterPayingOnly">
-                                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" class="checkbox-icon" aria-hidden="true">
-                                    <path d="M13 2L3 14h8l-1 8 10-12h-8l1-8z"/>
-                                </svg>
-                            </label>
-                        </div>
-                        @endauth
-                    
-                        <div class="filter-group">
-                            <span class="filter-label">Location</span>
-                            <input type="search"
-                                   id="filterLocation"
-                                   class="filter-input"
-                                   value="{{ request('location') }}"
-                                   placeholder="Type to search areas..."
-                                   list="map-location-list"
-                                   autocomplete="off"
-                                   inputmode="search">
-                            <datalist id="map-location-list">
-                                @foreach($locations ?? [] as $location)
-                                    <option value="{{ $location }}"></option>
-                                @endforeach
-                            </datalist>
+                @endif
+            </div>
+
+            <div id="filtersCollapse" class="filters-collapse" aria-hidden="true">
+                <div class="filters-collapse__inner">
+                    <form class="filters-content thf-card" id="filtersContent" novalidate onsubmit="event.preventDefault(); applyMapFilters();">
+                        <div class="thf-card__scroll">
+                            <header class="thf-card__header">
+                                <div class="thf-card__header-main">
+                                    <h3>Search criteria</h3>
+                                    <p>Narrow down listings — map pins update when you apply or change filters.</p>
+                                </div>
+                                <span class="thf-filter-count" id="thfFilterCountBadge" data-count="{{ $thfActiveCount }}">{{ $thfActiveCount }} applied</span>
+                            </header>
+
+                            @auth
+                                <div class="thf-switch-row">
+                                    <span class="thf-switch-row__text">Paying agents only <span aria-hidden="true">⚡</span></span>
+                                    <label class="thf-switch">
+                                        <input type="checkbox" id="filterPayingOnly" name="paying_only" value="1" class="thf-switch__input" {{ request('paying_only') ? 'checked' : '' }} aria-label="Show only paying agents">
+                                        <span class="thf-switch__slider" aria-hidden="true"></span>
+                                    </label>
+                                </div>
+                            @endauth
+
+                            <x-filters.filter-section title="Where" description="Area and home style">
+                                <div class="thf-fields-grid thf-fields-grid--2 thf-fields-grid--3">
+                                    <x-filters.filter-field label="Location" for="thf_location">
+                                        <input type="search"
+                                               name="location"
+                                               id="thf_location"
+                                               class="thf-input"
+                                               value="{{ request('location') }}"
+                                               placeholder="Type to search areas…"
+                                               list="thf-location-list"
+                                               autocomplete="off"
+                                               inputmode="search">
+                                        <datalist id="thf-location-list">
+                                            @foreach($locations ?? [] as $location)
+                                                <option value="{{ $location }}"></option>
+                                            @endforeach
+                                        </datalist>
+                                    </x-filters.filter-field>
+
+                                    <x-filters.filter-field label="Property type" for="thf_property_type">
+                                        <select name="property_type" id="thf_property_type" class="thf-select">
+                                            <option value="">All types</option>
+                                            @foreach($propertyTypes ?? [] as $type)
+                                                @if($type && $type !== 'N/A')
+                                                    <option value="{{ $type }}" @selected(request('property_type') == $type)>{{ $type }}</option>
+                                                @endif
+                                            @endforeach
+                                        </select>
+                                    </x-filters.filter-field>
+
+                                    @auth
+                                        <x-filters.filter-field label="Agent" for="thf_agent_name">
+                                            <select name="agent_name" id="thf_agent_name" class="thf-select">
+                                                <option value="">All agents</option>
+                                                @foreach($agentNames ?? [] as $agentName)
+                                                    @if($agentName && $agentName !== 'N/A')
+                                                        <option value="{{ $agentName }}" @selected(request('agent_name') == $agentName)>
+                                                            {{ $agentName }}
+                                                            @if(isset($agentsWithPaying) && (is_array($agentsWithPaying) ? in_array($agentName, $agentsWithPaying) : ($agentsWithPaying->has($agentName) ? $agentsWithPaying->get($agentName) : $agentsWithPaying->contains($agentName))))
+                                                                ⚡
+                                                            @endif
+                                                        </option>
+                                                    @endif
+                                                @endforeach
+                                            </select>
+                                        </x-filters.filter-field>
+                                    @endauth
+                                </div>
+                            </x-filters.filter-section>
+
+                            <x-filters.filter-section title="Budget" description="Monthly rent range (£)">
+                                <div class="thf-price-row">
+                                    <x-filters.filter-field label="Min" for="thf_min_price">
+                                        <input type="number" id="thf_min_price" name="min_price" class="thf-input" value="{{ request('min_price') }}" placeholder="No min" min="0" step="1">
+                                    </x-filters.filter-field>
+                                    <span class="thf-price-row__sep" aria-hidden="true">—</span>
+                                    <x-filters.filter-field label="Max" for="thf_max_price">
+                                        <input type="number" id="thf_max_price" name="max_price" class="thf-input" value="{{ request('max_price') }}" placeholder="No max" min="0" step="1">
+                                    </x-filters.filter-field>
+                                </div>
+                            </x-filters.filter-section>
+
+                            <x-filters.filter-section title="Tenant preferences">
+                                <x-filters.filter-toggle-group label="Household">
+                                    <label class="thf-segment__opt">
+                                        <input type="radio" name="couples_allowed" id="filterCouplesAny" value="" @checked(!in_array($thfCouples, ['yes', 'no'], true))>
+                                        <span>Any</span>
+                                    </label>
+                                    <label class="thf-segment__opt">
+                                        <input type="radio" name="couples_allowed" id="filterCouplesYes" value="yes" @checked($thfCouples === 'yes')>
+                                        <span>Couples allowed</span>
+                                    </label>
+                                    <label class="thf-segment__opt">
+                                        <input type="radio" name="couples_allowed" id="filterCouplesNo" value="no" @checked($thfCouples === 'no')>
+                                        <span>Singles only</span>
+                                    </label>
+                                </x-filters.filter-toggle-group>
+                            </x-filters.filter-section>
+
+                            <x-filters.filter-section title="Features">
+                                <div class="thf-fields-grid thf-fields-grid--2">
+                                    <div class="thf-field">
+                                        <span class="thf-label">Room amenities</span>
+                                        <div class="thf-pill-row">
+                                            <label class="thf-pill">
+                                                <input type="checkbox" id="filterEnsuite" name="ensuite" value="yes" @checked(request('ensuite') == 'yes')>
+                                                <span class="thf-pill__ui">Ensuite only</span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <x-filters.filter-field label="Bedrooms" for="thf_room_count">
+                                        <select id="thf_room_count" name="room_count" class="thf-select">
+                                            <option value="">Any</option>
+                                            @foreach($roomCounts ?? [] as $count)
+                                                @if($count !== null && $count !== '')
+                                                    <option value="{{ $count }}" @selected(request('room_count') == (string)$count)>{{ $count }} {{ $count == 1 ? 'room' : 'rooms' }}</option>
+                                                @endif
+                                            @endforeach
+                                        </select>
+                                    </x-filters.filter-field>
+                                </div>
+                            </x-filters.filter-section>
                         </div>
 
-                        <div class="filter-group">
-                            <span class="filter-label">Property type</span>
-                            <select id="filterPropertyType" class="filter-input">
-                                <option value="">All types</option>
-                                @foreach($propertyTypes ?? [] as $type)
-                                    @if($type && $type !== 'N/A')
-                                        <option value="{{ $type }}">{{ $type }}</option>
-                                    @endif
-                                @endforeach
-                            </select>
-                        </div>
-                        
-                        @auth
-                        <div class="filter-group">
-                            <span class="filter-label">Agent</span>
-                            <select id="filterAgentName" class="filter-input">
-                                <option value="">All agents</option>
-                                @foreach($agentNames ?? [] as $agentName)
-                                    @if($agentName && $agentName !== 'N/A')
-                                        <option value="{{ $agentName }}">
-                                            {{ $agentName }}
-                                            @if(isset($agentsWithPaying) && (is_array($agentsWithPaying) ? in_array($agentName, $agentsWithPaying) : ($agentsWithPaying->has($agentName) ? $agentsWithPaying->get($agentName) : $agentsWithPaying->contains($agentName))))
-                                                ⚡
-                                            @endif
-                                        </option>
-                                    @endif
-                                @endforeach
-                            </select>
-                        </div>
-                        @endauth
-                        
-                        <div class="filter-group">
-                            <span class="filter-label">Min price</span>
-                            <input type="number" id="filterMinPrice" class="filter-input" placeholder="£0" min="0">
-                        </div>
-                        
-                        <div class="filter-group">
-                            <span class="filter-label">Max price</span>
-                            <input type="number" id="filterMaxPrice" class="filter-input" placeholder="£5000" min="0">
-                        </div>
-                    
-                        <div class="filter-group">
-                            <span class="filter-label">Couple allowed</span>
-                            <div class="filter-check-stack">
-                                <label class="filter-check-row">
-                                    <input type="radio" name="filterCouplesAllowedMap" id="filterCouplesAny" value="" {{ request('couples_allowed') ? '' : 'checked' }}>
-                                    <span>Any</span>
-                                </label>
-                                <label class="filter-check-row">
-                                    <input type="radio" name="filterCouplesAllowedMap" id="filterCouplesYes" value="yes" {{ request('couples_allowed') == 'yes' ? 'checked' : '' }}>
-                                    <span>Couples allowed</span>
-                                </label>
-                                <label class="filter-check-row">
-                                    <input type="radio" name="filterCouplesAllowedMap" id="filterCouplesNo" value="no" {{ request('couples_allowed') == 'no' ? 'checked' : '' }}>
-                                    <span>Singles only</span>
-                                </label>
+                        <footer class="thf-card__footer">
+                            <div class="thf-card__footer-left">
+                                <button type="button" class="thf-link-reset" onclick="clearMapFilters()">Reset all</button>
                             </div>
-                        </div>
-                    
-                        <div class="filter-group">
-                            <span class="filter-label">Ensuite</span>
-                            <label class="filter-check-row">
-                                <input type="checkbox" id="filterEnsuite" value="yes" {{ request('ensuite') == 'yes' ? 'checked' : '' }}>
-                                <span>Ensuite only</span>
-                            </label>
-                        </div>
-                    
-                        <div class="filter-group">
-                            <span class="filter-label">Room count</span>
-                            <select id="filterRoomCount" class="filter-input">
-                                <option value="">All</option>
-                                @foreach($roomCounts ?? [] as $count)
-                                    @if($count !== null && $count !== '')
-                                        <option value="{{ $count }}" {{ request('room_count') == (string)$count ? 'selected' : '' }}>{{ $count }} {{ $count == 1 ? 'room' : 'rooms' }}</option>
-                                    @endif
-                                @endforeach
-                            </select>
-                        </div>
-                    </div>
-                </div>
-                        
-                <div class="filter-actions">
-                    <button type="button" onclick="clearMapFilters()" class="filter-btn-clear">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                            <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2" stroke-width="2" stroke-linecap="round"/>
-                        </svg>
-                        Clear all
-                    </button>
-                    <button type="button" onclick="applyMapFilters()" class="filter-btn-apply">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                            <circle cx="11" cy="11" r="8" stroke-width="2"/>
-                            <path d="M21 21l-4.35-4.35" stroke-width="2" stroke-linecap="round"/>
-                        </svg>
-                        Apply to map
-                    </button>
+                            <div class="thf-card__footer-right">
+                                <button type="button" onclick="shareMapFilters()" class="filter-btn-share" title="Copy link with current filters">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                                        <path d="M18 8h-3m0 0a2 2 0 11-4 0 2 2 0 014 0zM3 21h18M3 10h18M13 13l5-5m0 0v4m0-4h-4" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                    <span id="shareButtonText">Share</span>
+                                </button>
+                                <button type="submit" class="filter-btn-apply">
+                                    <i class="fas fa-search" aria-hidden="true"></i>
+                                    Apply filters
+                                </button>
+                            </div>
+                        </footer>
+                    </form>
                 </div>
             </div>
         </div>
@@ -1936,22 +2138,25 @@ select.filter-input option {
         function toggleMapFilters() {
             const text = document.getElementById('filterToggleText');
             const chevron = document.getElementById('filterChevron');
-            const filtersContent = document.getElementById('mapFiltersContent');
+            const filtersContent = document.getElementById('filtersCollapse');
+            const toggleBtn = document.getElementById('filtersToggleBtn');
             const open = filtersContent.classList.toggle('active');
+            filtersContent.setAttribute('aria-hidden', open ? 'false' : 'true');
+            if (toggleBtn) toggleBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
             text.textContent = open ? 'Hide search' : 'Refine search';
             chevron.style.transform = open ? 'rotate(180deg)' : 'rotate(0deg)';
         }
         
         function applyMapFilters() {
-            const locationFilter = (document.getElementById('filterLocation')?.value || '').trim().toLowerCase();
-            const propertyType = document.getElementById('filterPropertyType').value.toLowerCase();
-            const minPrice = parseFloat(document.getElementById('filterMinPrice').value) || 0;
-            const maxPrice = parseFloat(document.getElementById('filterMaxPrice').value) || Infinity;
-            const couplesAllowed = (document.querySelector('input[name="filterCouplesAllowedMap"]:checked')?.value || '').toLowerCase();
+            const locationFilter = (document.getElementById('thf_location')?.value || '').trim().toLowerCase();
+            const propertyType = (document.getElementById('thf_property_type')?.value || '').toLowerCase();
+            const minPrice = parseFloat(document.getElementById('thf_min_price')?.value) || 0;
+            const maxPrice = parseFloat(document.getElementById('thf_max_price')?.value) || Infinity;
+            const couplesAllowed = (document.querySelector('input[name="couples_allowed"]:checked')?.value || '').toLowerCase();
             const ensuite = document.getElementById('filterEnsuite')?.checked ? 'yes' : '';
-            const roomCountFilter = (document.getElementById('filterRoomCount')?.value || '').trim();
+            const roomCountFilter = (document.getElementById('thf_room_count')?.value || '').trim();
             @auth
-            const agentName = document.getElementById('filterAgentName')?.value.toLowerCase() || '';
+            const agentName = document.getElementById('thf_agent_name')?.value.toLowerCase() || '';
             const payingOnly = document.getElementById('filterPayingOnly')?.checked || false;
             @endauth
             
@@ -2140,19 +2345,22 @@ select.filter-input option {
         
         function clearMapFilters() {
             // Reset all filter inputs
-            const locationInput = document.getElementById('filterLocation');
+            const locationInput = document.getElementById('thf_location');
             if (locationInput) locationInput.value = '';
-            document.getElementById('filterPropertyType').value = '';
-            document.getElementById('filterMinPrice').value = '';
-            document.getElementById('filterMaxPrice').value = '';
+            const propertyTypeInput = document.getElementById('thf_property_type');
+            if (propertyTypeInput) propertyTypeInput.value = '';
+            const minPriceInput = document.getElementById('thf_min_price');
+            if (minPriceInput) minPriceInput.value = '';
+            const maxPriceInput = document.getElementById('thf_max_price');
+            if (maxPriceInput) maxPriceInput.value = '';
             const couplesAny = document.getElementById('filterCouplesAny');
             if (couplesAny) couplesAny.checked = true;
             const ensuiteFilter = document.getElementById('filterEnsuite');
             if (ensuiteFilter) ensuiteFilter.checked = false;
-            const roomCountFilter = document.getElementById('filterRoomCount');
+            const roomCountFilter = document.getElementById('thf_room_count');
             if (roomCountFilter) roomCountFilter.value = '';
             @auth
-            const agentFilter = document.getElementById('filterAgentName');
+            const agentFilter = document.getElementById('thf_agent_name');
             if (agentFilter) agentFilter.value = '';
             const payingFilter = document.getElementById('filterPayingOnly');
             if (payingFilter) payingFilter.checked = false;
@@ -2179,11 +2387,11 @@ select.filter-input option {
         (function initFilterAutoApply() {
             let priceDebounce;
             const runApply = () => applyMapFilters();
-            const selIds = ['filterPropertyType', 'filterRoomCount'];
+            const selIds = ['thf_property_type', 'thf_room_count'];
             const checkboxIds = ['filterEnsuite'];
             const radioIds = ['filterCouplesAny', 'filterCouplesYes', 'filterCouplesNo'];
             @auth
-            selIds.push('filterAgentName');
+            selIds.push('thf_agent_name');
             @endauth
             selIds.forEach(id => {
                 const el = document.getElementById(id);
@@ -2197,7 +2405,7 @@ select.filter-input option {
                 const el = document.getElementById(id);
                 if (el) el.addEventListener('change', runApply);
             });
-            ['filterMinPrice', 'filterMaxPrice'].forEach(id => {
+            ['thf_min_price', 'thf_max_price'].forEach(id => {
                 const el = document.getElementById(id);
                 if (el) {
                     el.addEventListener('input', () => {
@@ -2207,7 +2415,7 @@ select.filter-input option {
                     el.addEventListener('change', runApply);
                 }
             });
-            const locationEl = document.getElementById('filterLocation');
+            const locationEl = document.getElementById('thf_location');
             if (locationEl) {
                 let locationDebounce;
                 locationEl.addEventListener('input', () => {
@@ -2219,6 +2427,28 @@ select.filter-input option {
             const payingEl = document.getElementById('filterPayingOnly');
             if (payingEl) payingEl.addEventListener('change', runApply);
         })();
+
+        function shareMapFilters() {
+            const qs = (typeof TrueholdPropertyFilters !== 'undefined')
+                ? TrueholdPropertyFilters.buildMapControlsQueryString()
+                : window.location.search.replace(/^\?/, '');
+            const url = '{{ route("properties.map") }}' + (qs ? ('?' + qs) : '');
+
+            navigator.clipboard.writeText(url).then(() => {
+                const shareButton = document.querySelector('.filter-btn-share');
+                const shareButtonText = document.getElementById('shareButtonText');
+                if (!shareButton || !shareButtonText) return;
+                const originalText = shareButtonText.textContent;
+                shareButton.classList.add('copied');
+                shareButtonText.textContent = 'Link Copied!';
+                setTimeout(() => {
+                    shareButton.classList.remove('copied');
+                    shareButtonText.textContent = originalText;
+                }, 1800);
+            }).catch(() => {
+                window.prompt('Copy this link:', url);
+            });
+        }
 
         document.addEventListener('DOMContentLoaded', function () {
             if (typeof TrueholdPropertyFilters === 'undefined') return;
@@ -2234,10 +2464,11 @@ select.filter-input option {
 
             // Dismiss filters when clicking outside the filter panel.
             document.addEventListener('mousedown', function (e) {
-                const filtersPanel = document.getElementById('mapFiltersContent');
-                const toggleBtn = document.getElementById('mapFiltersToggleBtn');
+                const filtersPanel = document.getElementById('filtersCollapse');
+                const toggleBtn = document.getElementById('filtersToggleBtn');
                 if (!filtersPanel || !filtersPanel.classList.contains('active')) return;
-                const clickedInsidePanel = filtersPanel.contains(e.target);
+                const formPanel = document.getElementById('filtersContent');
+                const clickedInsidePanel = formPanel ? formPanel.contains(e.target) : filtersPanel.contains(e.target);
                 const clickedToggle = toggleBtn && toggleBtn.contains(e.target);
                 if (!clickedInsidePanel && !clickedToggle) {
                     toggleMapFilters();

@@ -457,10 +457,10 @@ button {
 .filters-content.thf-card {
     margin: 0 auto;
     width: 100%;
-    max-width: 75%;
+    max-width: 90%;
     display: flex;
     flex-direction: column;
-    max-height: min(88vh, 920px);
+    max-height: min(69vh, 720px);
     background: linear-gradient(145deg, rgba(30, 58, 95, 0.76), rgba(21, 42, 69, 0.78));
     border: 1px solid rgba(255, 255, 255, 0.18);
     border-radius: 16px;
@@ -1351,7 +1351,7 @@ button {
 
     .filters-content.thf-card {
         border-radius: 14px;
-        max-height: min(85vh, 800px);
+        max-height: min(66vh, 624px);
         max-width: 100%;
     }
 

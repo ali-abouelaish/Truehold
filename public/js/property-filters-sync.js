@@ -94,13 +94,13 @@
 
         buildMapControlsQueryString: function () {
             var params = new URLSearchParams();
-            var loc = document.getElementById('filterLocation');
+            var loc = document.getElementById('thf_location') || document.getElementById('filterLocation');
             if (loc && loc.value) params.set('location', loc.value);
-            var pt = document.getElementById('filterPropertyType');
+            var pt = document.getElementById('thf_property_type') || document.getElementById('filterPropertyType');
             if (pt && pt.value) params.set('property_type', pt.value);
-            var minP = document.getElementById('filterMinPrice');
+            var minP = document.getElementById('thf_min_price') || document.getElementById('filterMinPrice');
             if (minP && minP.value !== '') params.set('min_price', minP.value);
-            var maxP = document.getElementById('filterMaxPrice');
+            var maxP = document.getElementById('thf_max_price') || document.getElementById('filterMaxPrice');
             if (maxP && maxP.value !== '') params.set('max_price', maxP.value);
             if (document.getElementById('filterCouplesYes') && document.getElementById('filterCouplesYes').checked) {
                 params.set('couples_allowed', 'yes');
@@ -109,9 +109,9 @@
             }
             var ens = document.getElementById('filterEnsuite');
             if (ens && ens.checked) params.set('ensuite', 'yes');
-            var rc = document.getElementById('filterRoomCount');
+            var rc = document.getElementById('thf_room_count') || document.getElementById('filterRoomCount');
             if (rc && rc.value) params.set('room_count', rc.value);
-            var ag = document.getElementById('filterAgentName');
+            var ag = document.getElementById('thf_agent_name') || document.getElementById('filterAgentName');
             if (ag && ag.value) params.set('agent_name', ag.value);
             var pay = document.getElementById('filterPayingOnly');
             if (pay && pay.checked) params.set('paying_only', '1');
@@ -162,13 +162,13 @@
 
         applyQueryStringToMapControls: function (qs) {
             var params = parseQueryString(qs || '');
-            var loc = document.getElementById('filterLocation');
+            var loc = document.getElementById('thf_location') || document.getElementById('filterLocation');
             if (loc && params.has('location')) loc.value = params.get('location');
-            var pt = document.getElementById('filterPropertyType');
+            var pt = document.getElementById('thf_property_type') || document.getElementById('filterPropertyType');
             if (pt && params.has('property_type')) pt.value = params.get('property_type');
-            var minP = document.getElementById('filterMinPrice');
+            var minP = document.getElementById('thf_min_price') || document.getElementById('filterMinPrice');
             if (minP && params.has('min_price')) minP.value = params.get('min_price');
-            var maxP = document.getElementById('filterMaxPrice');
+            var maxP = document.getElementById('thf_max_price') || document.getElementById('filterMaxPrice');
             if (maxP && params.has('max_price')) maxP.value = params.get('max_price');
             var cy = document.getElementById('filterCouplesYes');
             var cn = document.getElementById('filterCouplesNo');
@@ -180,9 +180,9 @@
             if (params.get('couples_allowed') === 'no' && cn) cn.checked = true;
             var ens = document.getElementById('filterEnsuite');
             if (ens) ens.checked = params.get('ensuite') === 'yes';
-            var rc = document.getElementById('filterRoomCount');
+            var rc = document.getElementById('thf_room_count') || document.getElementById('filterRoomCount');
             if (rc && params.has('room_count')) rc.value = params.get('room_count');
-            var ag = document.getElementById('filterAgentName');
+            var ag = document.getElementById('thf_agent_name') || document.getElementById('filterAgentName');
             if (ag && params.has('agent_name')) ag.value = params.get('agent_name');
             var pay = document.getElementById('filterPayingOnly');
             if (pay) pay.checked = params.get('paying_only') === '1' || params.get('paying_only') === 'true';
