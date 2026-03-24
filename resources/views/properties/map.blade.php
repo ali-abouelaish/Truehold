@@ -443,7 +443,10 @@ body {
 
 .thf-fields-grid { display: grid; gap: 14px 16px; grid-template-columns: 1fr; }
 @media (min-width: 640px) { .thf-fields-grid--2 { grid-template-columns: repeat(2, 1fr); } }
-@media (min-width: 1024px) { .thf-fields-grid--3 { grid-template-columns: repeat(3, 1fr); } }
+@media (min-width: 1024px) {
+    .thf-fields-grid--2 { grid-template-columns: repeat(3, 1fr); }
+    .thf-fields-grid--3 { grid-template-columns: repeat(4, 1fr); }
+}
 
 .thf-field { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
 .thf-label { font-size: 12px; font-weight: 600; color: rgba(248, 250, 252, 0.86); }

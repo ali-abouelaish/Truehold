@@ -567,8 +567,11 @@ button {
 }
 
 @media (min-width: 1024px) {
-    .thf-fields-grid--3 {
+    .thf-fields-grid--2 {
         grid-template-columns: repeat(3, 1fr);
+    }
+    .thf-fields-grid--3 {
+        grid-template-columns: repeat(4, 1fr);
     }
 }
 
