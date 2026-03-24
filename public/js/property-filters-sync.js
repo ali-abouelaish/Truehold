@@ -94,6 +94,8 @@
 
         buildMapControlsQueryString: function () {
             var params = new URLSearchParams();
+            var loc = document.getElementById('filterLocation');
+            if (loc && loc.value) params.set('location', loc.value);
             var pt = document.getElementById('filterPropertyType');
             if (pt && pt.value) params.set('property_type', pt.value);
             var minP = document.getElementById('filterMinPrice');
@@ -160,6 +162,8 @@
 
         applyQueryStringToMapControls: function (qs) {
             var params = parseQueryString(qs || '');
+            var loc = document.getElementById('filterLocation');
+            if (loc && params.has('location')) loc.value = params.get('location');
             var pt = document.getElementById('filterPropertyType');
             if (pt && params.has('property_type')) pt.value = params.get('property_type');
             var minP = document.getElementById('filterMinPrice');
@@ -168,6 +172,8 @@
             if (maxP && params.has('max_price')) maxP.value = params.get('max_price');
             var cy = document.getElementById('filterCouplesYes');
             var cn = document.getElementById('filterCouplesNo');
+            var ca = document.getElementById('filterCouplesAny');
+            if (ca) ca.checked = true;
             if (cy) cy.checked = false;
             if (cn) cn.checked = false;
             if (params.get('couples_allowed') === 'yes' && cy) cy.checked = true;

@@ -455,16 +455,20 @@ button {
 }
 
 .filters-content.thf-card {
-    margin: 0;
+    margin: 0 auto;
+    width: 100%;
+    max-width: 75%;
     display: flex;
     flex-direction: column;
     max-height: min(88vh, 920px);
-    background: #ffffff;
-    border: 1px solid rgba(15, 23, 42, 0.08);
+    background: linear-gradient(145deg, rgba(30, 58, 95, 0.76), rgba(21, 42, 69, 0.78));
+    border: 1px solid rgba(255, 255, 255, 0.18);
     border-radius: 16px;
+    backdrop-filter: blur(16px) saturate(120%);
+    -webkit-backdrop-filter: blur(16px) saturate(120%);
     box-shadow:
-        0 4px 6px -1px rgba(15, 23, 42, 0.06),
-        0 12px 24px -4px rgba(15, 23, 42, 0.08);
+        0 12px 28px -8px rgba(15, 23, 42, 0.4),
+        0 1px 0 rgba(255, 255, 255, 0.12) inset;
     overflow: hidden;
 }
 
@@ -496,14 +500,14 @@ button {
     margin: 0 0 4px 0;
     font-size: 1.25rem;
     font-weight: 700;
-    color: var(--primary-navy);
+    color: #f8fafc;
     letter-spacing: -0.02em;
 }
 
 .thf-card__header-main p {
     margin: 0;
     font-size: 14px;
-    color: var(--gray);
+    color: rgba(248, 250, 252, 0.78);
     line-height: 1.45;
     max-width: 36rem;
 }
@@ -511,9 +515,9 @@ button {
 .thf-filter-count {
     font-size: 13px;
     font-weight: 600;
-    color: var(--primary-navy);
-    background: rgba(212, 175, 55, 0.14);
-    border: 1px solid rgba(212, 175, 55, 0.25);
+    color: #f8fafc;
+    background: rgba(212, 175, 55, 0.2);
+    border: 1px solid rgba(212, 175, 55, 0.35);
     padding: 6px 12px;
     border-radius: 999px;
     white-space: nowrap;
@@ -534,13 +538,13 @@ button {
     font-weight: 700;
     letter-spacing: 0.06em;
     text-transform: uppercase;
-    color: rgba(30, 58, 95, 0.55);
+    color: rgba(232, 197, 120, 0.95);
 }
 
 .thf-section__desc {
     margin: 4px 0 0 0;
     font-size: 13px;
-    color: var(--gray);
+    color: rgba(248, 250, 252, 0.65);
     line-height: 1.4;
 }
 
@@ -579,12 +583,12 @@ button {
 .thf-label {
     font-size: 12px;
     font-weight: 600;
-    color: rgba(30, 58, 95, 0.75);
+    color: rgba(248, 250, 252, 0.86);
 }
 
 .thf-label__optional {
     font-weight: 500;
-    color: var(--gray);
+    color: rgba(248, 250, 252, 0.65);
 }
 
 .thf-input,
@@ -594,20 +598,20 @@ button {
     padding: 0 14px;
     font-size: 15px;
     font-weight: 500;
-    color: var(--text-dark);
-    background: #fff;
-    border: 1px solid rgba(15, 23, 42, 0.12);
+    color: #f8fafc;
+    background: rgba(0, 0, 0, 0.22);
+    border: 1px solid rgba(255, 255, 255, 0.18);
     border-radius: 10px;
     transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
 .thf-input::placeholder {
-    color: rgba(100, 116, 139, 0.85);
+    color: rgba(248, 250, 252, 0.5);
 }
 
 .thf-input:hover,
 .thf-select:hover {
-    border-color: rgba(15, 23, 42, 0.2);
+    border-color: rgba(255, 255, 255, 0.3);
 }
 
 .thf-input:focus,
@@ -620,14 +624,15 @@ button {
 .thf-select {
     cursor: pointer;
     appearance: none;
-    background-image: url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L6 6L11 1' stroke='%231e3a5f' stroke-width='2' stroke-opacity='0.45' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-image: url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L6 6L11 1' stroke='%23e8c55c' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
     background-position: right 14px center;
     padding-right: 40px;
 }
 
 .thf-select option {
-    color: var(--text-dark);
+    color: #f8fafc;
+    background: #152a45;
 }
 
 .thf-price-row {
@@ -641,7 +646,7 @@ button {
     text-align: center;
     font-size: 13px;
     font-weight: 600;
-    color: var(--gray);
+    color: rgba(248, 250, 252, 0.7);
     padding-bottom: 12px;
 }
 
@@ -672,9 +677,9 @@ button {
     flex-wrap: wrap;
     gap: 8px;
     padding: 4px;
-    background: rgba(15, 23, 42, 0.04);
+    background: rgba(0, 0, 0, 0.18);
     border-radius: 12px;
-    border: 1px solid rgba(15, 23, 42, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.12);
 }
 
 .thf-segment__opt {
@@ -698,14 +703,14 @@ button {
     padding: 10px 12px;
     font-size: 14px;
     font-weight: 600;
-    color: rgba(30, 58, 95, 0.65);
+    color: rgba(248, 250, 252, 0.82);
     border-radius: 8px;
     transition: background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
 }
 
 .thf-segment__opt:hover span {
-    color: var(--primary-navy);
-    background: rgba(255, 255, 255, 0.7);
+    color: #fff;
+    background: rgba(255, 255, 255, 0.14);
 }
 
 .thf-segment__opt input:focus-visible + span {
@@ -714,9 +719,9 @@ button {
 }
 
 .thf-segment__opt input:checked + span {
-    background: #fff;
-    color: var(--primary-navy);
-    box-shadow: 0 1px 4px rgba(15, 23, 42, 0.1);
+    background: rgba(255, 255, 255, 0.2);
+    color: #fff;
+    box-shadow: 0 1px 6px rgba(15, 23, 42, 0.25);
 }
 
 /* Toggle pills */
@@ -747,10 +752,10 @@ button {
     padding: 10px 16px;
     font-size: 14px;
     font-weight: 600;
-    color: rgba(30, 58, 95, 0.7);
-    border: 1px solid rgba(15, 23, 42, 0.12);
+    color: rgba(248, 250, 252, 0.9);
+    border: 1px solid rgba(255, 255, 255, 0.2);
     border-radius: 999px;
-    background: #fff;
+    background: rgba(0, 0, 0, 0.2);
     transition: border-color 0.15s ease, background 0.15s ease, color 0.15s ease;
 }
 
@@ -776,15 +781,15 @@ button {
     justify-content: space-between;
     gap: 16px;
     padding: 12px 14px;
-    border: 1px solid rgba(15, 23, 42, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.18);
     border-radius: 12px;
-    background: rgba(15, 23, 42, 0.02);
+    background: rgba(0, 0, 0, 0.18);
 }
 
 .thf-switch-row__text {
     font-size: 14px;
     font-weight: 600;
-    color: var(--primary-navy);
+    color: #f8fafc;
 }
 
 .thf-switch {
@@ -840,12 +845,12 @@ button {
 .filter-notice {
     padding: 14px 16px;
     border-radius: 12px;
-    border: 1px solid rgba(15, 23, 42, 0.1);
-    background: rgba(30, 58, 95, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    background: rgba(0, 0, 0, 0.2);
 }
 
 .filter-notice p {
-    color: var(--text-dark);
+    color: rgba(248, 250, 252, 0.9);
     font-size: 13px;
     margin: 0 0 10px 0;
     line-height: 1.5;
@@ -879,9 +884,9 @@ button {
     justify-content: space-between;
     gap: 12px;
     padding: 14px 18px 16px;
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.92) 0%, #fff 35%);
-    border-top: 1px solid rgba(15, 23, 42, 0.08);
-    box-shadow: 0 -8px 24px rgba(15, 23, 42, 0.04);
+    background: linear-gradient(180deg, rgba(0, 0, 0, 0.18) 0%, rgba(0, 0, 0, 0.28) 40%);
+    border-top: 1px solid rgba(255, 255, 255, 0.14);
+    box-shadow: 0 -8px 24px rgba(15, 23, 42, 0.2);
 }
 
 @media (min-width: 769px) {
@@ -911,7 +916,7 @@ button {
     padding: 8px 6px;
     font-size: 13px;
     font-weight: 600;
-    color: var(--gray);
+    color: rgba(248, 250, 252, 0.75);
     text-decoration: underline;
     text-underline-offset: 3px;
     cursor: pointer;
@@ -919,7 +924,7 @@ button {
 }
 
 .thf-link-reset:hover {
-    color: var(--primary-navy);
+    color: #fff;
 }
 
 .filter-btn-apply {
@@ -978,9 +983,9 @@ button {
 .filter-btn-share {
     padding: 10px 16px;
     min-height: 44px;
-    background: #fff;
-    color: var(--primary-navy);
-    border: 1px solid rgba(15, 23, 42, 0.12);
+    background: rgba(255, 255, 255, 0.12);
+    color: #f8fafc;
+    border: 1px solid rgba(255, 255, 255, 0.24);
     border-radius: 10px;
     font-weight: 600;
     font-size: 14px;
@@ -1347,6 +1352,7 @@ button {
     .filters-content.thf-card {
         border-radius: 14px;
         max-height: min(85vh, 800px);
+        max-width: 100%;
     }
 
     .thf-card__scroll {
@@ -2058,6 +2064,21 @@ button {
             form.querySelectorAll('input[type="checkbox"]').forEach(cb => {
                 cb.addEventListener('change', () => { updateThfFilterCountBadge(); loadResults(); });
             });
+
+            // Dismiss filters when clicking outside the container.
+            document.addEventListener('mousedown', (e) => {
+                const wrap = document.getElementById('filtersCollapse');
+                const toggleBtn = document.getElementById('filtersToggleBtn');
+                if (!wrap || !wrap.classList.contains('active')) return;
+                const card = document.getElementById('filtersContent');
+                if (!card) return;
+                const clickedInsidePanel = card.contains(e.target);
+                const clickedToggle = toggleBtn && toggleBtn.contains(e.target);
+                if (!clickedInsidePanel && !clickedToggle) {
+                    toggleFilters();
+                }
+            });
+
             // Store current URL when clicking on property cards (delegation so AJAX-loaded cards work)
             document.addEventListener('click', (e) => {
                 if (e.target.closest('.property-card')) {

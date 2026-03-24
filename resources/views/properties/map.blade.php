@@ -339,15 +339,18 @@ body {
 
 .filters-content {
     display: none;
-    margin-top: 24px;
+    margin: 24px auto 0;
+    width: 100%;
+    max-width: 75%;
     padding: 0;
-    background: linear-gradient(155deg, #1a3354 0%, var(--primary-navy) 42%, var(--navy-dark) 100%);
+    background: linear-gradient(150deg, rgba(30, 58, 95, 0.78), rgba(21, 42, 69, 0.8));
     border-radius: 20px;
-    border: 1px solid rgba(212, 175, 55, 0.22);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(16px) saturate(120%);
+    -webkit-backdrop-filter: blur(16px) saturate(120%);
     box-shadow:
-        0 4px 6px rgba(0, 0, 0, 0.04),
-        0 24px 48px rgba(21, 42, 69, 0.35),
-        0 0 0 1px rgba(255, 255, 255, 0.04) inset;
+        0 10px 28px rgba(15, 23, 42, 0.45),
+        0 1px 0 rgba(255, 255, 255, 0.12) inset;
     overflow: hidden;
     position: relative;
     z-index: 100;
@@ -1118,6 +1121,7 @@ select.filter-input option {
 
     .filters-content {
         margin-top: 12px;
+        max-width: 100%;
         border-radius: 16px;
         max-height: 70vh;
         overflow-y: auto;
@@ -1312,7 +1316,7 @@ select.filter-input option {
     <section class="filters-section">
         <div class="container">
             <div class="filters-toolbar">
-                <button type="button" class="filters-toggle" onclick="toggleMapFilters()">
+                <button type="button" id="mapFiltersToggleBtn" class="filters-toggle" onclick="toggleMapFilters()">
                     <span class="filters-toggle-icon" aria-hidden="true">
                         <svg viewBox="0 0 24 24" fill="currentColor">
                             <path d="M10 18h4v-2h-4v2zM3 6v2h18V6H3zm3 7h12v-2H6v2z"/>
@@ -1352,6 +1356,23 @@ select.filter-input option {
                         </div>
                         @endauth
                     
+                        <div class="filter-group">
+                            <span class="filter-label">Location</span>
+                            <input type="search"
+                                   id="filterLocation"
+                                   class="filter-input"
+                                   value="{{ request('location') }}"
+                                   placeholder="Type to search areas..."
+                                   list="map-location-list"
+                                   autocomplete="off"
+                                   inputmode="search">
+                            <datalist id="map-location-list">
+                                @foreach($locations ?? [] as $location)
+                                    <option value="{{ $location }}"></option>
+                                @endforeach
+                            </datalist>
+                        </div>
+
                         <div class="filter-group">
                             <span class="filter-label">Property type</span>
                             <select id="filterPropertyType" class="filter-input">
@@ -1397,11 +1418,15 @@ select.filter-input option {
                             <span class="filter-label">Couple allowed</span>
                             <div class="filter-check-stack">
                                 <label class="filter-check-row">
-                                    <input type="checkbox" id="filterCouplesYes" value="yes" {{ request('couples_allowed') == 'yes' ? 'checked' : '' }}>
-                                    <span>Couples welcome only</span>
+                                    <input type="radio" name="filterCouplesAllowedMap" id="filterCouplesAny" value="" {{ request('couples_allowed') ? '' : 'checked' }}>
+                                    <span>Any</span>
                                 </label>
                                 <label class="filter-check-row">
-                                    <input type="checkbox" id="filterCouplesNo" value="no" {{ request('couples_allowed') == 'no' ? 'checked' : '' }}>
+                                    <input type="radio" name="filterCouplesAllowedMap" id="filterCouplesYes" value="yes" {{ request('couples_allowed') == 'yes' ? 'checked' : '' }}>
+                                    <span>Couples allowed</span>
+                                </label>
+                                <label class="filter-check-row">
+                                    <input type="radio" name="filterCouplesAllowedMap" id="filterCouplesNo" value="no" {{ request('couples_allowed') == 'no' ? 'checked' : '' }}>
                                     <span>Singles only</span>
                                 </label>
                             </div>
@@ -1918,12 +1943,11 @@ select.filter-input option {
         }
         
         function applyMapFilters() {
+            const locationFilter = (document.getElementById('filterLocation')?.value || '').trim().toLowerCase();
             const propertyType = document.getElementById('filterPropertyType').value.toLowerCase();
             const minPrice = parseFloat(document.getElementById('filterMinPrice').value) || 0;
             const maxPrice = parseFloat(document.getElementById('filterMaxPrice').value) || Infinity;
-            const couplesYesEl = document.getElementById('filterCouplesYes');
-            const couplesNoEl = document.getElementById('filterCouplesNo');
-            const couplesAllowed = (couplesYesEl?.checked ? 'yes' : '') || (couplesNoEl?.checked ? 'no' : '');
+            const couplesAllowed = (document.querySelector('input[name="filterCouplesAllowedMap"]:checked')?.value || '').toLowerCase();
             const ensuite = document.getElementById('filterEnsuite')?.checked ? 'yes' : '';
             const roomCountFilter = (document.getElementById('filterRoomCount')?.value || '').trim();
             @auth
@@ -1944,6 +1968,14 @@ select.filter-input option {
                     // Property type filter
                     if (propertyType && property.property_type?.toLowerCase() !== propertyType) {
                         visible = false;
+                    }
+
+                    // Location filter
+                    if (locationFilter) {
+                        const propertyLocation = (property.location || '').toLowerCase();
+                        if (!propertyLocation.includes(locationFilter)) {
+                            visible = false;
+                        }
                     }
                     
                     // Room count filter
@@ -2108,13 +2140,13 @@ select.filter-input option {
         
         function clearMapFilters() {
             // Reset all filter inputs
+            const locationInput = document.getElementById('filterLocation');
+            if (locationInput) locationInput.value = '';
             document.getElementById('filterPropertyType').value = '';
             document.getElementById('filterMinPrice').value = '';
             document.getElementById('filterMaxPrice').value = '';
-            const couplesYes = document.getElementById('filterCouplesYes');
-            const couplesNo = document.getElementById('filterCouplesNo');
-            if (couplesYes) couplesYes.checked = false;
-            if (couplesNo) couplesNo.checked = false;
+            const couplesAny = document.getElementById('filterCouplesAny');
+            if (couplesAny) couplesAny.checked = true;
             const ensuiteFilter = document.getElementById('filterEnsuite');
             if (ensuiteFilter) ensuiteFilter.checked = false;
             const roomCountFilter = document.getElementById('filterRoomCount');
@@ -2147,14 +2179,9 @@ select.filter-input option {
         (function initFilterAutoApply() {
             let priceDebounce;
             const runApply = () => applyMapFilters();
-            const couplesYes = document.getElementById('filterCouplesYes');
-            const couplesNo = document.getElementById('filterCouplesNo');
-            if (couplesYes && couplesNo) {
-                couplesYes.addEventListener('change', function() { if (this.checked) couplesNo.checked = false; runApply(); });
-                couplesNo.addEventListener('change', function() { if (this.checked) couplesYes.checked = false; runApply(); });
-            }
             const selIds = ['filterPropertyType', 'filterRoomCount'];
-            const checkboxIds = ['filterCouplesYes', 'filterCouplesNo', 'filterEnsuite'];
+            const checkboxIds = ['filterEnsuite'];
+            const radioIds = ['filterCouplesAny', 'filterCouplesYes', 'filterCouplesNo'];
             @auth
             selIds.push('filterAgentName');
             @endauth
@@ -2163,6 +2190,10 @@ select.filter-input option {
                 if (el) el.addEventListener('change', runApply);
             });
             checkboxIds.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.addEventListener('change', runApply);
+            });
+            radioIds.forEach(id => {
                 const el = document.getElementById(id);
                 if (el) el.addEventListener('change', runApply);
             });
@@ -2176,6 +2207,15 @@ select.filter-input option {
                     el.addEventListener('change', runApply);
                 }
             });
+            const locationEl = document.getElementById('filterLocation');
+            if (locationEl) {
+                let locationDebounce;
+                locationEl.addEventListener('input', () => {
+                    clearTimeout(locationDebounce);
+                    locationDebounce = setTimeout(runApply, 350);
+                });
+                locationEl.addEventListener('change', runApply);
+            }
             const payingEl = document.getElementById('filterPayingOnly');
             if (payingEl) payingEl.addEventListener('change', runApply);
         })();
@@ -2190,6 +2230,18 @@ select.filter-input option {
                     const base = a.getAttribute('href').split('?')[0];
                     window.location.href = base + (qs ? '?' + qs : '');
                 });
+            });
+
+            // Dismiss filters when clicking outside the filter panel.
+            document.addEventListener('mousedown', function (e) {
+                const filtersPanel = document.getElementById('mapFiltersContent');
+                const toggleBtn = document.getElementById('mapFiltersToggleBtn');
+                if (!filtersPanel || !filtersPanel.classList.contains('active')) return;
+                const clickedInsidePanel = filtersPanel.contains(e.target);
+                const clickedToggle = toggleBtn && toggleBtn.contains(e.target);
+                if (!clickedInsidePanel && !clickedToggle) {
+                    toggleMapFilters();
+                }
             });
         });
     </script>
