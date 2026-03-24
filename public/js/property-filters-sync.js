@@ -133,7 +133,12 @@
                     el.value = params.get(name);
                 }
             };
-            setSelect('location');
+            var locEl = form.querySelector('[name="location"]');
+            if (locEl && params.has('location')) {
+                locEl.value = params.get('location');
+            } else {
+                setSelect('location');
+            }
             setSelect('property_type');
             setSelect('agent_name');
             setSelect('room_count');
@@ -143,12 +148,10 @@
             if (payCb && payCb.type === 'checkbox') {
                 payCb.checked = params.get('paying_only') === '1' || params.get('paying_only') === 'true';
             }
-            var cy = document.getElementById('listingCouplesYes');
-            var cn = document.getElementById('listingCouplesNo');
-            if (cy) cy.checked = false;
-            if (cn) cn.checked = false;
-            if (params.get('couples_allowed') === 'yes' && cy) cy.checked = true;
-            if (params.get('couples_allowed') === 'no' && cn) cn.checked = true;
+            var coupleVal = params.has('couples_allowed') ? params.get('couples_allowed') : '';
+            form.querySelectorAll('input[name="couples_allowed"]').forEach(function (r) {
+                r.checked = r.value === coupleVal || (coupleVal === '' && r.value === '');
+            });
             var ensCb = form.querySelector('[name="ensuite"][value="yes"]');
             if (ensCb && ensCb.type === 'checkbox') {
                 ensCb.checked = params.get('ensuite') === 'yes';
