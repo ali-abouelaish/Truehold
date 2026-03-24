@@ -1302,7 +1302,7 @@ select.filter-input option {
 
     .filters-content {
         margin-top: 12px;
-        max-width: 100%;
+        max-width: 98%;
         max-height: min(53vh, 500px);
         border-radius: 16px;
     }

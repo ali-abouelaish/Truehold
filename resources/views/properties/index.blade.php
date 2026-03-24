@@ -1351,7 +1351,7 @@ button {
     .filters-content.thf-card {
         border-radius: 14px;
         max-height: min(53vh, 500px);
-        max-width: 100%;
+        max-width: 98%;
     }
 
     .thf-card__scroll {
