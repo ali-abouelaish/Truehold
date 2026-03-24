@@ -390,7 +390,7 @@ body {
 .thf-card__scroll {
     flex: 1;
     overflow: visible;
-    padding: 20px 22px 8px;
+    padding: 24px 24px 20px;
 }
 
 .thf-card__header {
@@ -442,10 +442,13 @@ body {
 .thf-section__body { display: flex; flex-direction: column; gap: 14px; }
 
 .thf-fields-grid { display: grid; gap: 14px 16px; grid-template-columns: 1fr; }
-@media (min-width: 640px) { .thf-fields-grid--2 { grid-template-columns: repeat(2, 1fr); } }
+@media (min-width: 640px) {
+    .thf-fields-grid--2 { grid-template-columns: repeat(2, 1fr); }
+    .thf-fields-grid--3 { grid-template-columns: repeat(2, 1fr); }
+}
 @media (min-width: 1024px) {
     .thf-fields-grid--2 { grid-template-columns: repeat(3, 1fr); }
-    .thf-fields-grid--3 { grid-template-columns: repeat(4, 1fr); }
+    .thf-fields-grid--3 { grid-template-columns: repeat(3, 1fr); }
 }
 
 .thf-field { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
@@ -475,8 +478,8 @@ body {
 }
 .thf-select option { color: #f8fafc; background: #152a45; }
 
-.thf-price-row { display: grid; grid-template-columns: 1fr auto 1fr; gap: 10px; align-items: end; }
-.thf-price-row__sep { text-align: center; font-size: 13px; font-weight: 600; color: rgba(248, 250, 252, 0.7); padding-bottom: 12px; }
+.thf-price-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px 16px; align-items: end; }
+.thf-price-row__sep { display: none; }
 
 .thf-segment { display: flex; flex-wrap: wrap; gap: 8px; padding: 4px; background: rgba(0, 0, 0, 0.18); border-radius: 12px; border: 1px solid rgba(255,255,255,.12); }
 .thf-segment__opt { flex: 1 1 0; min-width: 72px; text-align: center; cursor: pointer; margin: 0; }
@@ -500,9 +503,7 @@ body {
 .thf-switch__input:checked + .thf-switch__slider::before { transform: translateX(20px); }
 
 .thf-card__footer {
-    position: sticky;
-    bottom: 0;
-    z-index: 3;
+    position: static;
     display: flex;
     flex-wrap: wrap;
     align-items: center;
@@ -520,8 +521,8 @@ body {
     display: none;
     margin: 24px auto 0;
     width: 100%;
-    max-width: 98%;
-    max-height: min(55vh, 576px);
+    max-width: 1320px;
+    height: auto;
     display: flex;
     flex-direction: column;
     padding: 0;
@@ -533,7 +534,7 @@ body {
     box-shadow:
         0 10px 28px rgba(15, 23, 42, 0.45),
         0 1px 0 rgba(255, 255, 255, 0.12) inset;
-    overflow: hidden;
+    overflow: visible;
     position: relative;
     z-index: 100;
 }
@@ -1305,13 +1306,12 @@ select.filter-input option {
 
     .filters-content {
         margin-top: 12px;
-        max-width: 98%;
-        max-height: min(53vh, 500px);
+        max-width: 100%;
         border-radius: 16px;
     }
 
     .filters-panel-inner {
-        padding: 20px 16px 8px;
+        padding: 20px 16px 16px;
     }
 
     .filters-header {

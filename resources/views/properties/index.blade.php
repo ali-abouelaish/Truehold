@@ -457,10 +457,10 @@ button {
 .filters-content.thf-card {
     margin: 0 auto;
     width: 100%;
-    max-width: 98%;
+    max-width: 1320px;
     display: flex;
     flex-direction: column;
-    max-height: min(55vh, 576px);
+    height: auto;
     background: linear-gradient(145deg, rgba(30, 58, 95, 0.76), rgba(21, 42, 69, 0.78));
     border: 1px solid rgba(255, 255, 255, 0.18);
     border-radius: 16px;
@@ -469,13 +469,13 @@ button {
     box-shadow:
         0 12px 28px -8px rgba(15, 23, 42, 0.4),
         0 1px 0 rgba(255, 255, 255, 0.12) inset;
-    overflow: hidden;
+    overflow: visible;
 }
 
 .thf-card__scroll {
     flex: 1;
     overflow: visible;
-    padding: 20px 22px 8px;
+    padding: 24px 24px 20px;
 }
 
 @media (min-width: 769px) {
@@ -564,6 +564,9 @@ button {
     .thf-fields-grid--2 {
         grid-template-columns: repeat(2, 1fr);
     }
+    .thf-fields-grid--3 {
+        grid-template-columns: repeat(2, 1fr);
+    }
 }
 
 @media (min-width: 1024px) {
@@ -571,7 +574,7 @@ button {
         grid-template-columns: repeat(3, 1fr);
     }
     .thf-fields-grid--3 {
-        grid-template-columns: repeat(4, 1fr);
+        grid-template-columns: repeat(3, 1fr);
     }
 }
 
@@ -639,17 +642,13 @@ button {
 
 .thf-price-row {
     display: grid;
-    grid-template-columns: 1fr auto 1fr;
-    gap: 10px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px 16px;
     align-items: end;
 }
 
 .thf-price-row__sep {
-    text-align: center;
-    font-size: 13px;
-    font-weight: 600;
-    color: rgba(248, 250, 252, 0.7);
-    padding-bottom: 12px;
+    display: none;
 }
 
 @media (max-width: 480px) {
@@ -877,9 +876,7 @@ button {
 
 /* Sticky footer */
 .thf-card__footer {
-    position: sticky;
-    bottom: 0;
-    z-index: 3;
+    position: static;
     display: flex;
     flex-wrap: wrap;
     align-items: center;
@@ -1353,12 +1350,11 @@ button {
 
     .filters-content.thf-card {
         border-radius: 14px;
-        max-height: min(53vh, 500px);
-        max-width: 98%;
+        max-width: 100%;
     }
 
     .thf-card__scroll {
-        padding: 16px 14px 8px;
+        padding: 16px 14px 16px;
     }
 
     .thf-card__footer {
