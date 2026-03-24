@@ -389,8 +389,7 @@ body {
 
 .thf-card__scroll {
     flex: 1;
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
+    overflow: visible;
     padding: 20px 22px 8px;
 }
 
@@ -518,8 +517,8 @@ body {
     display: none;
     margin: 24px auto 0;
     width: 100%;
-    max-width: 90%;
-    max-height: min(69vh, 720px);
+    max-width: 98%;
+    max-height: min(55vh, 576px);
     display: flex;
     flex-direction: column;
     padding: 0;
@@ -542,8 +541,7 @@ body {
 
 .filters-panel-inner {
     padding: 28px 32px 8px;
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
+    overflow: visible;
     flex: 1;
 }
 
@@ -1305,7 +1303,7 @@ select.filter-input option {
     .filters-content {
         margin-top: 12px;
         max-width: 100%;
-        max-height: min(66vh, 624px);
+        max-height: min(53vh, 500px);
         border-radius: 16px;
     }
 
