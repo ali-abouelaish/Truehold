@@ -260,54 +260,95 @@ body {
 }
 
 /* ==========================================
-   FILTERS SECTION
+   FILTERS SECTION — Premium (navy + gold)
    ========================================== */
 
 .filters-section {
-    padding: 24px 0;
-    background-color: var(--white);
-    border-bottom: 1px solid var(--light-gray);
+    padding: 28px 0 32px;
+    background: linear-gradient(180deg, #fafbfc 0%, var(--white) 40%, var(--off-white) 100%);
+    border-bottom: 1px solid rgba(30, 58, 95, 0.08);
     position: relative;
     z-index: 10;
 }
 
-.filters-toggle {
+.filters-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, transparent, var(--gold), var(--gold-light), var(--gold), transparent);
+    opacity: 0.85;
+}
+
+.filters-toolbar {
     display: flex;
     align-items: center;
-    gap: 10px;
-    padding: 12px 24px;
-    background-color: var(--white);
-    border: 2px solid var(--light-gray);
-    border-radius: 10px;
+    justify-content: flex-start;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.filters-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 26px;
+    background: var(--white);
+    border: 1px solid rgba(30, 58, 95, 0.12);
+    border-radius: 12px;
     color: var(--primary-navy);
     font-weight: 600;
     font-size: 15px;
+    letter-spacing: 0.02em;
     transition: var(--transition);
     width: fit-content;
     cursor: pointer;
+    box-shadow: 0 2px 12px rgba(30, 58, 95, 0.06), 0 1px 0 rgba(255, 255, 255, 0.8) inset;
 }
 
 .filters-toggle:hover {
-    border-color: var(--primary-navy);
-    background-color: var(--off-white);
+    border-color: rgba(212, 175, 55, 0.45);
+    box-shadow: 0 4px 20px rgba(30, 58, 95, 0.08), 0 0 0 1px rgba(212, 175, 55, 0.15);
 }
 
-.filters-toggle svg:first-child {
+.filters-toggle-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, rgba(30, 58, 95, 0.08), rgba(30, 58, 95, 0.04));
     color: var(--gold);
+    flex-shrink: 0;
+}
+
+.filters-toggle-icon svg {
+    width: 20px;
+    height: 20px;
 }
 
 .filters-toggle .chevron {
-    margin-left: 8px;
+    margin-left: 4px;
+    color: var(--primary-navy);
+    opacity: 0.55;
     transition: transform 0.3s ease;
 }
 
 .filters-content {
     display: none;
     margin-top: 24px;
-    padding: 32px;
-    background: linear-gradient(135deg, #475569 0%, #3f4a5c 100%);
-    border-radius: 16px;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    padding: 0;
+    background: linear-gradient(155deg, #1a3354 0%, var(--primary-navy) 42%, var(--navy-dark) 100%);
+    border-radius: 20px;
+    border: 1px solid rgba(212, 175, 55, 0.22);
+    box-shadow:
+        0 4px 6px rgba(0, 0, 0, 0.04),
+        0 24px 48px rgba(21, 42, 69, 0.35),
+        0 0 0 1px rgba(255, 255, 255, 0.04) inset;
+    overflow: hidden;
     position: relative;
     z-index: 100;
 }
@@ -316,101 +357,176 @@ body {
     display: block;
 }
 
+.filters-panel-inner {
+    padding: 28px 32px 8px;
+}
+
 .filters-header {
     display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    margin-bottom: 28px;
+    padding-bottom: 22px;
+    border-bottom: 1px solid rgba(212, 175, 55, 0.18);
+}
+
+.filters-header-icon {
+    flex-shrink: 0;
+    width: 48px;
+    height: 48px;
+    border-radius: 14px;
+    display: flex;
     align-items: center;
-    gap: 12px;
-    margin-bottom: 24px;
-    padding-bottom: 16px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.filters-header svg {
+    justify-content: center;
+    background: rgba(212, 175, 55, 0.12);
+    border: 1px solid rgba(212, 175, 55, 0.25);
     color: var(--gold);
-    font-size: 24px;
 }
 
-.filters-header h3 {
+.filters-header-icon svg {
+    width: 24px;
+    height: 24px;
+}
+
+.filters-header-text h3 {
     color: var(--white);
-    font-size: 20px;
+    font-size: 22px;
     font-weight: 700;
+    margin: 0 0 6px 0;
+    letter-spacing: -0.02em;
+}
+
+.filters-header-text p {
     margin: 0;
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.55);
+    font-weight: 500;
+    line-height: 1.45;
 }
 
 .filter-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 20px;
-    margin-bottom: 24px;
+    gap: 22px 24px;
+    margin-bottom: 8px;
 }
 
 .filter-group {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 10px;
 }
 
 .filter-label {
-    color: rgba(255, 255, 255, 0.9);
-    font-size: 14px;
-    font-weight: 600;
-    letter-spacing: 0.3px;
+    color: rgba(232, 197, 120, 0.95);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
 }
 
 .filter-input {
     padding: 14px 16px;
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 10px;
     font-size: 14px;
     font-weight: 500;
-    color: rgba(255, 255, 255, 0.95);
-    background-color: rgba(30, 41, 59, 0.5);
-    transition: var(--transition);
+    color: var(--white);
+    background: rgba(0, 0, 0, 0.2);
+    backdrop-filter: blur(8px);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
 }
 
 .filter-input::placeholder {
-    color: rgba(255, 255, 255, 0.5);
+    color: rgba(255, 255, 255, 0.38);
 }
 
 .filter-input:focus {
     outline: none;
-    border-color: var(--gold);
-    background-color: rgba(30, 41, 59, 0.7);
-    box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.1);
+    border-color: rgba(212, 175, 55, 0.55);
+    background: rgba(0, 0, 0, 0.28);
+    box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.12);
 }
 
 select.filter-input {
     cursor: pointer;
     appearance: none;
-    background-image: url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L6 6L11 1' stroke='rgba(255,255,255,0.7)' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-image: url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L6 6L11 1' stroke='%23d4af37' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
-    background-position: right 12px center;
-    padding-right: 36px;
+    background-color: rgba(0, 0, 0, 0.2);
+    background-position: right 14px center;
+    padding-right: 40px;
+}
+
+select.filter-input:focus {
+    background-color: rgba(0, 0, 0, 0.28);
 }
 
 select.filter-input option {
-    background-color: #1e293b;
+    background-color: #152a45;
     color: var(--white);
 }
 
-/* Paying Agents Only Checkbox */
+.filter-check-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.filter-check-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(0, 0, 0, 0.15);
+    cursor: pointer;
+    transition: border-color 0.2s ease, background 0.2s ease;
+    font-size: 14px;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.92);
+}
+
+.filter-check-row:hover {
+    border-color: rgba(212, 175, 55, 0.3);
+    background: rgba(0, 0, 0, 0.22);
+}
+
+.filter-check-row input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+    accent-color: var(--gold);
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+/* Paying agents — icon toggle */
+.paying-filter-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
 .paying-filter-checkbox {
     display: flex;
     align-items: center;
     justify-content: center;
     position: relative;
-    padding: 14px 16px;
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    border-radius: 8px;
-    background-color: rgba(30, 41, 59, 0.5);
+    min-height: 52px;
+    padding: 12px 16px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 10px;
+    background: rgba(0, 0, 0, 0.2);
     cursor: pointer;
-    transition: var(--transition);
+    transition: border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
 }
 
 .paying-filter-checkbox:hover {
-    border-color: var(--gold);
-    background-color: rgba(30, 41, 59, 0.7);
-    box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.1);
+    border-color: rgba(212, 175, 55, 0.4);
+    background: rgba(0, 0, 0, 0.28);
+    box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.08);
 }
 
 .paying-filter-checkbox input[type="checkbox"] {
@@ -421,65 +537,79 @@ select.filter-input option {
 }
 
 .paying-filter-checkbox .checkbox-icon {
-    color: rgba(255, 255, 255, 0.4);
+    color: rgba(255, 255, 255, 0.35);
     transition: var(--transition);
 }
 
 .paying-filter-checkbox:hover .checkbox-icon {
-    color: rgba(255, 255, 255, 0.6);
+    color: rgba(255, 255, 255, 0.55);
 }
 
 .paying-filter-checkbox input[type="checkbox"]:checked ~ .checkbox-icon {
     color: var(--gold);
-    filter: drop-shadow(0 0 8px rgba(212, 175, 55, 0.6));
+    filter: drop-shadow(0 0 10px rgba(212, 175, 55, 0.55));
 }
 
 .filter-actions {
     display: flex;
+    flex-wrap: wrap;
     gap: 12px;
     justify-content: flex-end;
-    padding-top: 16px;
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    align-items: center;
+    padding: 24px 32px 28px;
+    margin: 8px -32px -32px;
+    background: rgba(0, 0, 0, 0.18);
+    border-top: 1px solid rgba(212, 175, 55, 0.12);
 }
 
 .filter-btn-apply {
-    padding: 12px 32px;
+    padding: 14px 28px;
     background: linear-gradient(135deg, var(--gold), var(--gold-light));
-    color: var(--white);
+    color: var(--primary-navy);
     border: none;
-    border-radius: 8px;
-    font-weight: 600;
+    border-radius: 10px;
+    font-weight: 700;
     font-size: 14px;
+    letter-spacing: 0.02em;
     cursor: pointer;
     transition: var(--transition);
-    display: flex;
+    display: inline-flex;
     align-items: center;
-    gap: 8px;
+    gap: 10px;
+    box-shadow: 0 2px 12px rgba(212, 175, 55, 0.25);
 }
 
 .filter-btn-apply:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 16px rgba(212, 175, 55, 0.4);
+    box-shadow: 0 8px 24px rgba(212, 175, 55, 0.35);
+}
+
+.filter-btn-apply svg {
+    stroke: currentColor;
 }
 
 .filter-btn-clear {
-    padding: 12px 24px;
-    background-color: transparent;
-    color: rgba(255, 255, 255, 0.9);
-    border: 2px solid rgba(255, 255, 255, 0.3);
-    border-radius: 8px;
+    padding: 14px 22px;
+    background: transparent;
+    color: rgba(255, 255, 255, 0.88);
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    border-radius: 10px;
     font-weight: 600;
     font-size: 14px;
     cursor: pointer;
     transition: var(--transition);
-    display: flex;
+    display: inline-flex;
     align-items: center;
     gap: 8px;
 }
 
 .filter-btn-clear:hover {
-    background-color: rgba(255, 255, 255, 0.1);
-    border-color: rgba(255, 255, 255, 0.5);
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.35);
+}
+
+.filter-btn-clear svg {
+    stroke: currentColor;
 }
 
 /* ==========================================
@@ -976,7 +1106,7 @@ select.filter-input option {
 
     /* Filters */
     .filters-section {
-        padding: 16px 0;
+        padding: 16px 0 20px;
     }
 
     .filters-toggle {
@@ -987,24 +1117,41 @@ select.filter-input option {
     }
 
     .filters-content {
-        padding: 20px 16px;
         margin-top: 12px;
+        border-radius: 16px;
         max-height: 70vh;
         overflow-y: auto;
         -webkit-overflow-scrolling: touch;
     }
 
-    .filters-header h3 {
+    .filters-panel-inner {
+        padding: 20px 16px 8px;
+    }
+
+    .filters-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+        margin-bottom: 20px;
+        padding-bottom: 18px;
+    }
+
+    .filters-header-icon {
+        width: 44px;
+        height: 44px;
+    }
+
+    .filters-header-text h3 {
         font-size: 18px;
+    }
+
+    .filters-header-text p {
+        font-size: 13px;
     }
 
     .filter-grid {
         grid-template-columns: 1fr;
         gap: 16px;
-    }
-
-    .filter-label {
-        font-size: 13px;
     }
 
     .filter-input {
@@ -1013,16 +1160,19 @@ select.filter-input option {
     }
 
     .paying-filter-checkbox {
+        min-height: 48px;
         padding: 12px 14px;
     }
 
     .paying-filter-checkbox .checkbox-icon {
-        width: 20px;
-        height: 20px;
+        width: 22px;
+        height: 22px;
     }
 
     .filter-actions {
         flex-direction: column;
+        margin: 12px -16px -20px;
+        padding: 20px 16px 22px;
     }
 
     .filter-btn-apply,
@@ -1091,7 +1241,7 @@ select.filter-input option {
     <nav class="navbar">
         <div class="container">
             <div class="nav-content">
-                <a href="{{ route('properties.index') }}" class="logo">
+                <a href="{{ route('properties.index') }}" class="logo js-truehold-to-listing">
                     <div class="logo-icon">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                             <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" stroke-width="2"/>
@@ -1101,7 +1251,7 @@ select.filter-input option {
                     <span class="logo-text">TRUEHOLD</span>
                 </a>
                 <ul class="nav-links">
-                    <li><a href="{{ route('properties.index') }}" class="nav-link">
+                    <li><a href="{{ route('properties.index') }}" class="nav-link js-truehold-to-listing">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                             <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" stroke-width="2"/>
                         </svg>
@@ -1147,7 +1297,7 @@ select.filter-input option {
             </div>
         </div>
                 <div class="map-header-actions">
-                    <a href="{{ route('properties.index') }}" class="btn-list-view">
+                    <a href="{{ route('properties.index') }}" class="btn-list-view js-truehold-to-listing">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                             <path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01" stroke-width="2" stroke-linecap="round"/>
                         </svg>
@@ -1161,133 +1311,141 @@ select.filter-input option {
     <!-- Filters -->
     <section class="filters-section">
         <div class="container">
-            <button class="filters-toggle" onclick="toggleMapFilters()">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M10 18h4v-2h-4v2zM3 6v2h18V6H3zm3 7h12v-2H6v2z"/>
-                </svg>
-                    <span id="filterToggleText">Show Filters</span>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" class="chevron" id="filterChevron">
-                    <path d="M6 9l6 6 6-6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-                </button>
-                
-            <!-- Filters Content -->
-            <div class="filters-content" id="mapFiltersContent">
-                <div class="filters-header">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M10 18h4v-2h-4v2zM3 6v2h18V6H3zm3 7h12v-2H6v2z"/>
+            <div class="filters-toolbar">
+                <button type="button" class="filters-toggle" onclick="toggleMapFilters()">
+                    <span class="filters-toggle-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M10 18h4v-2h-4v2zM3 6v2h18V6H3zm3 7h12v-2H6v2z"/>
+                        </svg>
+                    </span>
+                    <span id="filterToggleText">Refine search</span>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" class="chevron" id="filterChevron">
+                        <path d="M6 9l6 6 6-6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                     </svg>
-                    <h3>Search Filters</h3>
-                </div>
+                </button>
+            </div>
                 
-                <div class="filter-grid">
-                    @auth
-                    <div class="filter-group">
-                        <label class="filter-label">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" style="color: var(--gold);">
-                                <path d="M13 2L3 14h8l-1 8 10-12h-8l1-8z"/>
+            <div class="filters-content" id="mapFiltersContent">
+                <div class="filters-panel-inner">
+                    <div class="filters-header">
+                        <div class="filters-header-icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M10 18h4v-2h-4v2zM3 6v2h18V6H3zm3 7h12v-2H6v2z"/>
                             </svg>
-                        </label>
-                        <label class="paying-filter-checkbox" for="filterPayingOnly" title="Show only paying agents">
-                            <input type="checkbox" id="filterPayingOnly">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" class="checkbox-icon">
-                                <path d="M13 2L3 14h8l-1 8 10-12h-8l1-8z"/>
-                            </svg>
-                        </label>
                         </div>
-                    @endif
+                        <div class="filters-header-text">
+                            <h3>Map filters</h3>
+                            <p>Refine which pins you see. Changes apply to the map instantly.</p>
+                        </div>
+                    </div>
+                
+                    <div class="filter-grid">
+                        @auth
+                        <div class="filter-group paying-filter-wrap">
+                            <span class="filter-label">Paying agents</span>
+                            <label class="paying-filter-checkbox" for="filterPayingOnly" title="Show only paying agents">
+                                <input type="checkbox" id="filterPayingOnly">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" class="checkbox-icon" aria-hidden="true">
+                                    <path d="M13 2L3 14h8l-1 8 10-12h-8l1-8z"/>
+                                </svg>
+                            </label>
+                        </div>
+                        @endauth
                     
-                    <div class="filter-group">
-                        <label class="filter-label">Property Type</label>
-                        <select id="filterPropertyType" class="filter-input">
-                                <option value="">All Types</option>
-                            @foreach($propertyTypes ?? [] as $type)
-                                @if($type && $type !== 'N/A')
-                                    <option value="{{ $type }}">{{ $type }}</option>
-                                @endif
+                        <div class="filter-group">
+                            <span class="filter-label">Property type</span>
+                            <select id="filterPropertyType" class="filter-input">
+                                <option value="">All types</option>
+                                @foreach($propertyTypes ?? [] as $type)
+                                    @if($type && $type !== 'N/A')
+                                        <option value="{{ $type }}">{{ $type }}</option>
+                                    @endif
                                 @endforeach
                             </select>
                         </div>
                         
                         @auth
-                    <div class="filter-group">
-                        <label class="filter-label">Agent Name</label>
-                        <select id="filterAgentName" class="filter-input">
-                                <option value="">All Agents</option>
-                            @foreach($agentNames ?? [] as $agentName)
-                                @if($agentName && $agentName !== 'N/A')
-                                    <option value="{{ $agentName }}">
-                                        {{ $agentName }}
-                                        @if(isset($agentsWithPaying) && (is_array($agentsWithPaying) ? in_array($agentName, $agentsWithPaying) : ($agentsWithPaying->has($agentName) ? $agentsWithPaying->get($agentName) : $agentsWithPaying->contains($agentName))))
-                                            ⚡
-                                        @endif
-                                    </option>
-                                @endif
+                        <div class="filter-group">
+                            <span class="filter-label">Agent</span>
+                            <select id="filterAgentName" class="filter-input">
+                                <option value="">All agents</option>
+                                @foreach($agentNames ?? [] as $agentName)
+                                    @if($agentName && $agentName !== 'N/A')
+                                        <option value="{{ $agentName }}">
+                                            {{ $agentName }}
+                                            @if(isset($agentsWithPaying) && (is_array($agentsWithPaying) ? in_array($agentName, $agentsWithPaying) : ($agentsWithPaying->has($agentName) ? $agentsWithPaying->get($agentName) : $agentsWithPaying->contains($agentName))))
+                                                ⚡
+                                            @endif
+                                        </option>
+                                    @endif
                                 @endforeach
                             </select>
                         </div>
-                    @endif
+                        @endauth
                         
-                    <div class="filter-group">
-                        <label class="filter-label">Min Price</label>
-                        <input type="number" id="filterMinPrice" class="filter-input" placeholder="£0" min="0">
+                        <div class="filter-group">
+                            <span class="filter-label">Min price</span>
+                            <input type="number" id="filterMinPrice" class="filter-input" placeholder="£0" min="0">
                         </div>
                         
-                    <div class="filter-group">
-                        <label class="filter-label">Max Price</label>
-                        <input type="number" id="filterMaxPrice" class="filter-input" placeholder="£5000" min="0">
+                        <div class="filter-group">
+                            <span class="filter-label">Max price</span>
+                            <input type="number" id="filterMaxPrice" class="filter-input" placeholder="£5000" min="0">
                         </div>
                     
-                    <div class="filter-group">
-                        <label class="filter-label">Couple Allowed</label>
-                        <label class="filter-input" style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
-                            <input type="checkbox" id="filterCouplesYes" value="yes" {{ request('couples_allowed') == 'yes' ? 'checked' : '' }} style="width: 18px; height: 18px;">
-                            <span>Couples welcome only</span>
-                        </label>
-                        <label class="filter-input" style="display: flex; align-items: center; gap: 10px; cursor: pointer; margin-top: 6px;">
-                            <input type="checkbox" id="filterCouplesNo" value="no" {{ request('couples_allowed') == 'no' ? 'checked' : '' }} style="width: 18px; height: 18px;">
-                            <span>Singles only</span>
-                        </label>
-                    </div>
-                    
-                    <div class="filter-group">
-                        <label class="filter-label">Ensuite</label>
-                        <label class="filter-input" style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
-                            <input type="checkbox" id="filterEnsuite" value="yes" {{ request('ensuite') == 'yes' ? 'checked' : '' }} style="width: 18px; height: 18px;">
-                            <span>Ensuite only</span>
-                        </label>
-                    </div>
-                    
-                    <div class="filter-group">
-                        <label class="filter-label">Room count</label>
-                        <select id="filterRoomCount" class="filter-input">
-                            <option value="">All</option>
-                            @foreach($roomCounts ?? [] as $count)
-                                @if($count !== null && $count !== '')
-                                    <option value="{{ $count }}" {{ request('room_count') == (string)$count ? 'selected' : '' }}>{{ $count }} {{ $count == 1 ? 'room' : 'rooms' }}</option>
-                                @endif
-                            @endforeach
-                        </select>
-                    </div>
+                        <div class="filter-group">
+                            <span class="filter-label">Couple allowed</span>
+                            <div class="filter-check-stack">
+                                <label class="filter-check-row">
+                                    <input type="checkbox" id="filterCouplesYes" value="yes" {{ request('couples_allowed') == 'yes' ? 'checked' : '' }}>
+                                    <span>Couples welcome only</span>
+                                </label>
+                                <label class="filter-check-row">
+                                    <input type="checkbox" id="filterCouplesNo" value="no" {{ request('couples_allowed') == 'no' ? 'checked' : '' }}>
+                                    <span>Singles only</span>
+                                </label>
+                            </div>
                         </div>
+                    
+                        <div class="filter-group">
+                            <span class="filter-label">Ensuite</span>
+                            <label class="filter-check-row">
+                                <input type="checkbox" id="filterEnsuite" value="yes" {{ request('ensuite') == 'yes' ? 'checked' : '' }}>
+                                <span>Ensuite only</span>
+                            </label>
+                        </div>
+                    
+                        <div class="filter-group">
+                            <span class="filter-label">Room count</span>
+                            <select id="filterRoomCount" class="filter-input">
+                                <option value="">All</option>
+                                @foreach($roomCounts ?? [] as $count)
+                                    @if($count !== null && $count !== '')
+                                        <option value="{{ $count }}" {{ request('room_count') == (string)$count ? 'selected' : '' }}>{{ $count }} {{ $count == 1 ? 'room' : 'rooms' }}</option>
+                                    @endif
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
+                </div>
                         
                 <div class="filter-actions">
                     <button type="button" onclick="clearMapFilters()" class="filter-btn-clear">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                             <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2" stroke-width="2" stroke-linecap="round"/>
                         </svg>
-                        Clear Filters
-                            </button>
+                        Clear all
+                    </button>
                     <button type="button" onclick="applyMapFilters()" class="filter-btn-apply">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                             <circle cx="11" cy="11" r="8" stroke-width="2"/>
                             <path d="M21 21l-4.35-4.35" stroke-width="2" stroke-linecap="round"/>
                         </svg>
-                        Apply Filters
-                                </button>
-                            </div>
-                        </div>
+                        Apply to map
+                    </button>
                 </div>
+            </div>
+        </div>
     </section>
 
     <!-- Map wrapper: on mobile keeps map + controls in flow; on desktop they stay fixed -->
@@ -1335,6 +1493,7 @@ select.filter-input option {
         </script>
     @endif
 
+    <script src="{{ asset('js/property-filters-sync.js') }}"></script>
     <script>
         let map;
         let markers = [];
@@ -1539,6 +1698,19 @@ select.filter-input option {
                 // Fit map to bounds
                 fitMapToProperties(validProperties);
 
+                if (typeof TrueholdPropertyFilters !== 'undefined') {
+                    if (!TrueholdPropertyFilters.hasFilterParamsInSearch()) {
+                        const stored = TrueholdPropertyFilters.getStoredQueryString();
+                        if (stored) {
+                            TrueholdPropertyFilters.applyQueryStringToMapControls(stored);
+                            history.replaceState({}, '', '{{ route("properties.map") }}' + '?' + stored);
+                        }
+                    } else {
+                        TrueholdPropertyFilters.saveFromLocationSearch();
+                    }
+                    applyMapFilters();
+                }
+
                     } catch (error) {
                 console.error('❌ Error loading properties:', error);
                 alert('Failed to load properties: ' + error.message);
@@ -1740,16 +1912,9 @@ select.filter-input option {
             const text = document.getElementById('filterToggleText');
             const chevron = document.getElementById('filterChevron');
             const filtersContent = document.getElementById('mapFiltersContent');
-            
-            if (text.textContent === 'Show Filters') {
-                text.textContent = 'Hide Filters';
-                chevron.style.transform = 'rotate(180deg)';
-                filtersContent.classList.add('active');
-            } else {
-                text.textContent = 'Show Filters';
-                chevron.style.transform = 'rotate(0deg)';
-                filtersContent.classList.remove('active');
-            }
+            const open = filtersContent.classList.toggle('active');
+            text.textContent = open ? 'Hide search' : 'Refine search';
+            chevron.style.transform = open ? 'rotate(180deg)' : 'rotate(0deg)';
         }
         
         function applyMapFilters() {
@@ -1932,6 +2097,13 @@ select.filter-input option {
             if (countElement) {
                 countElement.textContent = `${visibleCount} properties visible`;
             }
+
+            if (typeof TrueholdPropertyFilters !== 'undefined') {
+                const qs = TrueholdPropertyFilters.buildMapControlsQueryString();
+                TrueholdPropertyFilters.saveFromQueryString(qs);
+                const mapBase = '{{ route("properties.map") }}';
+                history.replaceState({}, '', qs ? (mapBase + '?' + qs) : mapBase);
+            }
         }
         
         function clearMapFilters() {
@@ -1963,6 +2135,11 @@ select.filter-input option {
             const countElement = document.getElementById('propertyCount');
             if (countElement && window.allProperties) {
                 countElement.textContent = `${window.allProperties.length} properties loaded`;
+            }
+
+            if (typeof TrueholdPropertyFilters !== 'undefined') {
+                TrueholdPropertyFilters.clearStored();
+                history.replaceState({}, '', '{{ route("properties.map") }}');
             }
         }
 
@@ -2002,6 +2179,19 @@ select.filter-input option {
             const payingEl = document.getElementById('filterPayingOnly');
             if (payingEl) payingEl.addEventListener('change', runApply);
         })();
+
+        document.addEventListener('DOMContentLoaded', function () {
+            if (typeof TrueholdPropertyFilters === 'undefined') return;
+            document.querySelectorAll('a.js-truehold-to-listing').forEach(function (a) {
+                a.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const qs = TrueholdPropertyFilters.buildMapControlsQueryString() || TrueholdPropertyFilters.getStoredQueryString();
+                    TrueholdPropertyFilters.saveFromQueryString(qs);
+                    const base = a.getAttribute('href').split('?')[0];
+                    window.location.href = base + (qs ? '?' + qs : '');
+                });
+            });
+        });
     </script>
 </body>
 </html>

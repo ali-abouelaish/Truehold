@@ -316,204 +316,400 @@ button {
 }
 
 /* ==========================================
-   FILTERS SECTION
+   FILTERS SECTION — Premium (navy + gold)
    ========================================== */
 
-        .filters-section {
-    padding: 24px 0;
-    background-color: var(--white);
-    border-bottom: 1px solid var(--light-gray);
+.filters-section {
+    padding: 28px 0 32px;
+    background: linear-gradient(180deg, #fafbfc 0%, var(--white) 40%, var(--off-white) 100%);
+    border-bottom: 1px solid rgba(30, 58, 95, 0.08);
+    position: relative;
+}
+
+.filters-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, transparent, var(--gold), var(--gold-light), var(--gold), transparent);
+    opacity: 0.85;
+}
+
+.filters-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
 }
 
 .filters-toggle {
-            display: flex;
+    display: inline-flex;
     align-items: center;
-    gap: 10px;
-    padding: 12px 24px;
-    background-color: var(--white);
-    border: 2px solid var(--light-gray);
-    border-radius: 10px;
+    gap: 12px;
+    padding: 14px 26px;
+    background: var(--white);
+    border: 1px solid rgba(30, 58, 95, 0.12);
+    border-radius: 12px;
     color: var(--primary-navy);
     font-weight: 600;
     font-size: 15px;
+    letter-spacing: 0.02em;
     transition: var(--transition);
     width: fit-content;
+    cursor: pointer;
+    box-shadow: 0 2px 12px rgba(30, 58, 95, 0.06), 0 1px 0 rgba(255, 255, 255, 0.8) inset;
 }
 
 .filters-toggle:hover {
-    border-color: var(--primary-navy);
-    background-color: var(--off-white);
+    border-color: rgba(212, 175, 55, 0.45);
+    box-shadow: 0 4px 20px rgba(30, 58, 95, 0.08), 0 0 0 1px rgba(212, 175, 55, 0.15);
 }
 
-.filters-toggle svg:first-child {
+.filters-toggle-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, rgba(30, 58, 95, 0.08), rgba(30, 58, 95, 0.04));
     color: var(--gold);
+    flex-shrink: 0;
+}
+
+.filters-toggle-icon svg {
+    width: 20px;
+    height: 20px;
 }
 
 .filters-toggle .chevron {
-    margin-left: 8px;
+    margin-left: 4px;
+    color: var(--primary-navy);
+    opacity: 0.55;
     transition: transform 0.3s ease;
+}
+
+.filters-active-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 18px;
+    background: linear-gradient(135deg, rgba(30, 58, 95, 0.06), rgba(212, 175, 55, 0.08));
+    border: 1px solid rgba(212, 175, 55, 0.35);
+    border-radius: 999px;
+    box-shadow: 0 2px 12px rgba(212, 175, 55, 0.12);
+}
+
+.filters-active-pill svg {
+    color: var(--gold);
+    flex-shrink: 0;
+}
+
+.filters-active-pill span {
+    color: var(--primary-navy);
+    font-weight: 600;
+    font-size: 13px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.filters-active-pill button {
+    background: none;
+    border: none;
+    color: var(--gold-dark);
+    cursor: pointer;
+    font-weight: 700;
+    font-size: 12px;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    padding: 0 0 0 4px;
+}
+
+.filters-active-pill button:hover {
+    color: var(--primary-navy);
 }
 
 .filters-content {
     display: none;
     margin-top: 24px;
-    padding: 32px;
-    background: linear-gradient(135deg, #475569 0%, #3f4a5c 100%);
-    border-radius: 16px;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    padding: 0;
+    background: linear-gradient(155deg, #1a3354 0%, var(--primary-navy) 42%, var(--navy-dark) 100%);
+    border-radius: 20px;
+    border: 1px solid rgba(212, 175, 55, 0.22);
+    box-shadow:
+        0 4px 6px rgba(0, 0, 0, 0.04),
+        0 24px 48px rgba(21, 42, 69, 0.35),
+        0 0 0 1px rgba(255, 255, 255, 0.04) inset;
+    overflow: hidden;
 }
 
 .filters-content.active {
     display: block;
 }
 
+.filters-panel-inner {
+    padding: 28px 32px 32px;
+}
+
 .filters-header {
-            display: flex;
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    margin-bottom: 28px;
+    padding-bottom: 22px;
+    border-bottom: 1px solid rgba(212, 175, 55, 0.18);
+}
+
+.filters-header-icon {
+    flex-shrink: 0;
+    width: 48px;
+    height: 48px;
+    border-radius: 14px;
+    display: flex;
     align-items: center;
-    gap: 12px;
-    margin-bottom: 24px;
-    padding-bottom: 16px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.filters-header svg {
+    justify-content: center;
+    background: rgba(212, 175, 55, 0.12);
+    border: 1px solid rgba(212, 175, 55, 0.25);
     color: var(--gold);
-    font-size: 24px;
 }
 
-.filters-header h3 {
+.filters-header-icon svg {
+    width: 24px;
+    height: 24px;
+}
+
+.filters-header-text h3 {
     color: var(--white);
-    font-size: 20px;
+    font-size: 22px;
     font-weight: 700;
+    margin: 0 0 6px 0;
+    letter-spacing: -0.02em;
+}
+
+.filters-header-text p {
     margin: 0;
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.55);
+    font-weight: 500;
+    line-height: 1.45;
 }
 
 .filter-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 20px;
-    margin-bottom: 24px;
+    gap: 22px 24px;
+    margin-bottom: 8px;
 }
 
 .filter-group {
-            display: flex;
+    display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 10px;
 }
 
 .filter-label {
-    color: rgba(255, 255, 255, 0.9);
-    font-size: 14px;
-            font-weight: 600;
-    letter-spacing: 0.3px;
+    color: rgba(232, 197, 120, 0.95);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
 }
 
 .filter-input {
     padding: 14px 16px;
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 10px;
     font-size: 14px;
     font-weight: 500;
-    color: rgba(255, 255, 255, 0.95);
-    background-color: rgba(30, 41, 59, 0.5);
-    transition: var(--transition);
+    color: var(--white);
+    background: rgba(0, 0, 0, 0.2);
+    backdrop-filter: blur(8px);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
 }
 
 .filter-input::placeholder {
-    color: rgba(255, 255, 255, 0.5);
+    color: rgba(255, 255, 255, 0.38);
 }
 
 .filter-input:focus {
     outline: none;
-    border-color: var(--gold);
-    background-color: rgba(30, 41, 59, 0.7);
-    box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.1);
+    border-color: rgba(212, 175, 55, 0.55);
+    background: rgba(0, 0, 0, 0.28);
+    box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.12);
 }
 
 select.filter-input {
     cursor: pointer;
     appearance: none;
-    background-image: url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L6 6L11 1' stroke='rgba(255,255,255,0.7)' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-image: url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L6 6L11 1' stroke='%23d4af37' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
-    background-position: right 12px center;
-    padding-right: 36px;
+    background-color: rgba(0, 0, 0, 0.2);
+    background-position: right 14px center;
+    padding-right: 40px;
+}
+
+select.filter-input:focus {
+    background-color: rgba(0, 0, 0, 0.28);
 }
 
 select.filter-input option {
-    background-color: #1e293b;
+    background-color: #152a45;
     color: var(--white);
+}
+
+.filter-check-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.filter-check-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(0, 0, 0, 0.15);
+    cursor: pointer;
+    transition: border-color 0.2s ease, background 0.2s ease;
+    font-size: 14px;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.92);
+}
+
+.filter-check-row:hover {
+    border-color: rgba(212, 175, 55, 0.3);
+    background: rgba(0, 0, 0, 0.22);
+}
+
+.filter-check-row input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+    accent-color: var(--gold);
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+.filter-notice {
+    padding: 16px 18px;
+    border-radius: 12px;
+    border: 1px solid rgba(212, 175, 55, 0.2);
+    background: rgba(0, 0, 0, 0.2);
+}
+
+.filter-notice p {
+    color: rgba(255, 255, 255, 0.88);
+    font-size: 13px;
+    margin: 0 0 12px 0;
+    line-height: 1.5;
+}
+
+.filter-notice a {
+    display: inline-flex;
+    align-items: center;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 700;
+    text-decoration: none;
+    background: linear-gradient(135deg, var(--gold-dark), var(--gold));
+    color: var(--primary-navy);
+    transition: var(--transition);
+}
+
+.filter-notice a:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 14px rgba(212, 175, 55, 0.35);
 }
 
 .filter-actions {
     display: flex;
+    flex-wrap: wrap;
     gap: 12px;
     justify-content: flex-end;
-    padding-top: 16px;
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    align-items: center;
+    padding: 24px 32px 28px;
+    margin: 8px -32px -32px;
+    background: rgba(0, 0, 0, 0.18);
+    border-top: 1px solid rgba(212, 175, 55, 0.12);
 }
 
 .filter-btn-apply {
-    padding: 12px 32px;
+    padding: 14px 28px;
     background: linear-gradient(135deg, var(--gold), var(--gold-light));
-    color: var(--white);
+    color: var(--primary-navy);
     border: none;
-    border-radius: 8px;
-            font-weight: 600;
+    border-radius: 10px;
+    font-weight: 700;
     font-size: 14px;
-            cursor: pointer;
+    letter-spacing: 0.02em;
+    cursor: pointer;
     transition: var(--transition);
-    display: flex;
-            align-items: center;
-    gap: 8px;
-        }
-        
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    box-shadow: 0 2px 12px rgba(212, 175, 55, 0.25);
+}
+
 .filter-btn-apply:hover {
-            transform: translateY(-2px);
-    box-shadow: 0 4px 16px rgba(212, 175, 55, 0.4);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(212, 175, 55, 0.35);
+}
+
+.filter-btn-apply i {
+    color: inherit;
 }
 
 .filter-btn-clear {
-    padding: 12px 24px;
-    background-color: transparent;
-    color: rgba(255, 255, 255, 0.9);
-    border: 2px solid rgba(255, 255, 255, 0.3);
-    border-radius: 8px;
-            font-weight: 600;
-    font-size: 14px;
-            cursor: pointer;
-    transition: var(--transition);
-    display: flex;
-            align-items: center;
-    gap: 8px;
-}
-
-.filter-btn-clear:hover {
-    background-color: rgba(255, 255, 255, 0.1);
-    border-color: rgba(255, 255, 255, 0.5);
-}
-
-.filter-btn-share {
-    padding: 12px 24px;
-    background: linear-gradient(135deg, #3b82f6, #2563eb);
-    color: var(--white);
-    border: none;
-    border-radius: 8px;
+    padding: 14px 22px;
+    background: transparent;
+    color: rgba(255, 255, 255, 0.88);
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    border-radius: 10px;
     font-weight: 600;
     font-size: 14px;
     cursor: pointer;
     transition: var(--transition);
-    display: flex;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.filter-btn-clear:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.35);
+}
+
+.filter-btn-share {
+    padding: 14px 22px;
+    background: rgba(212, 175, 55, 0.08);
+    color: var(--gold-light);
+    border: 1px solid rgba(212, 175, 55, 0.4);
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    transition: var(--transition);
+    display: inline-flex;
     align-items: center;
     gap: 8px;
 }
 
 .filter-btn-share:hover {
-            transform: translateY(-2px);
-    box-shadow: 0 4px 16px rgba(59, 130, 246, 0.4);
+    background: rgba(212, 175, 55, 0.16);
+    border-color: rgba(212, 175, 55, 0.55);
+    color: #f0d78c;
 }
 
 .filter-btn-share.copied {
-    background: linear-gradient(135deg, #10b981, #059669);
+    background: rgba(16, 185, 129, 0.2);
+    border-color: rgba(16, 185, 129, 0.5);
+    color: #6ee7b7;
 }
 
 .filter-btn-share svg {
@@ -843,12 +1039,33 @@ select.filter-input option {
     }
     
     .filters-content {
-        padding: 20px 16px;
         margin-top: 12px;
+        border-radius: 16px;
+    }
+
+    .filters-panel-inner {
+        padding: 20px 16px 8px;
     }
     
-    .filters-header h3 {
+    .filters-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+        margin-bottom: 20px;
+        padding-bottom: 18px;
+    }
+
+    .filters-header-icon {
+        width: 44px;
+        height: 44px;
+    }
+
+    .filters-header-text h3 {
         font-size: 18px;
+    }
+
+    .filters-header-text p {
+        font-size: 13px;
     }
     
     .filter-grid {
@@ -868,7 +1085,8 @@ select.filter-input option {
     .filter-actions {
         flex-direction: column;
         gap: 10px;
-        margin-top: 20px;
+        margin: 12px -16px -20px;
+        padding: 20px 16px 22px;
     }
     
     .filter-btn-apply,
@@ -1044,7 +1262,7 @@ select.filter-input option {
                         </svg>
                         Properties
                     </a></li>
-                    <li><a href="{{ route('properties.map') }}" class="nav-link">
+                    <li><a href="{{ route('properties.map') }}" class="nav-link" id="trueholdNavMapLink">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                             <path d="M1 6v16l7-4 8 4 7-4V2l-7 4-8-4-7 4z" stroke-width="2"/>
                         </svg>
@@ -1115,44 +1333,50 @@ select.filter-input option {
     <!-- Filters -->
     <section class="filters-section">
         <div class="container">
-            <div style="display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;">
-                <button class="filters-toggle" onclick="toggleFilters()">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M10 18h4v-2h-4v2zM3 6v2h18V6H3zm3 7h12v-2H6v2z"/>
-                    </svg>
-                    <span id="filterToggleText">Show Filters</span>
+            <div class="filters-toolbar">
+                <button type="button" class="filters-toggle" onclick="toggleFilters()">
+                    <span class="filters-toggle-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M10 18h4v-2h-4v2zM3 6v2h18V6H3zm3 7h12v-2H6v2z"/>
+                        </svg>
+                    </span>
+                    <span id="filterToggleText">Refine search</span>
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" class="chevron" id="filterChevron">
                         <path d="M6 9l6 6 6-6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                     </svg>
                 </button>
                 
                 @if(request()->hasAny(['location', 'property_type', 'min_price', 'max_price', 'couples_allowed', 'ensuite', 'agent_name', 'paying_only', 'room_count']))
-                    <div style="display: flex; align-items: center; gap: 8px; padding: 8px 16px; background: rgba(212, 175, 55, 0.15); border: 1px solid var(--gold); border-radius: 8px;">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="color: var(--gold);">
+                    <div class="filters-active-pill">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                             <path d="M10 18h4v-2h-4v2zM3 6v2h18V6H3zm3 7h12v-2H6v2z"/>
                         </svg>
-                        <span style="color: var(--gold); font-weight: 600; font-size: 14px;">Filters Active</span>
-                        <button onclick="clearFilters()" style="background: none; border: none; color: var(--gold); cursor: pointer; font-weight: 600; text-decoration: underline;">
-                            Clear All
-                        </button>
-                            </div>
+                        <span>Filters active</span>
+                        <button type="button" onclick="clearFilters()">Clear all</button>
+                    </div>
                 @endif
-                        </div>
+            </div>
             
             <form method="GET" action="{{ route('properties.index') }}" class="filters-content" id="filtersContent">
+                <div class="filters-panel-inner">
                 <div class="filters-header">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M10 18h4v-2h-4v2zM3 6v2h18V6H3zm3 7h12v-2H6v2z"/>
-                    </svg>
-                    <h3>Search Filters</h3>
+                    <div class="filters-header-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M10 18h4v-2h-4v2zM3 6v2h18V6H3zm3 7h12v-2H6v2z"/>
+                        </svg>
                     </div>
+                    <div class="filters-header-text">
+                        <h3>Search criteria</h3>
+                        <p>Adjust filters to match your ideal property. Results update as you change options.</p>
+                    </div>
+                </div>
                     
                 <div class="filter-grid">
                     @auth
                     <div class="filter-group">
-                        <label class="filter-label">Paying agents only</label>
-                        <label class="filter-input" style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
-                            <input type="checkbox" name="paying_only" value="1" {{ request('paying_only') ? 'checked' : '' }} style="width: 18px; height: 18px;">
+                        <span class="filter-label">Paying agents</span>
+                        <label class="filter-check-row">
+                            <input type="checkbox" name="paying_only" value="1" {{ request('paying_only') ? 'checked' : '' }}>
                             <span>Show only paying agents ⚡</span>
                         </label>
                     </div>
@@ -1196,15 +1420,10 @@ select.filter-input option {
                     @else
                         @if(request('agent_name'))
                             <div class="filter-group">
-                                <label class="filter-label">Agent Name 🔒</label>
-                                <div style="padding: 12px; background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.3); border-radius: 8px;">
-                                    <p style="color: rgba(255, 255, 255, 0.9); font-size: 13px; margin: 0 0 8px 0;">
-                                        <i class="fas fa-lock" style="color: #3b82f6;"></i> Agent filter is for registered users only
-                                    </p>
-                                    <a href="{{ route('login', ['redirect' => url()->current()]) }}" 
-                                       style="display: inline-block; padding: 6px 12px; background: linear-gradient(135deg, #3b82f6, #2563eb); color: white; border-radius: 6px; font-size: 12px; font-weight: 600; text-decoration: none;">
-                                        Login to Apply Agent Filter
-                                    </a>
+                                <span class="filter-label">Agent <i class="fas fa-lock" style="opacity:0.7;font-size:10px;"></i></span>
+                                <div class="filter-notice">
+                                    <p><i class="fas fa-user-lock" style="color: var(--gold); margin-right: 6px;"></i>Agent filtering is available to registered users.</p>
+                                    <a href="{{ route('login', ['redirect' => url()->current()]) }}">Sign in to unlock</a>
                                 </div>
                             </div>
                         @endif
@@ -1221,21 +1440,23 @@ select.filter-input option {
                             </div>
                             
                     <div class="filter-group">
-                        <label class="filter-label">Couple Allowed</label>
-                        <label class="filter-input" style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
-                            <input type="checkbox" id="listingCouplesYes" name="couples_allowed" value="yes" {{ request('couples_allowed') == 'yes' ? 'checked' : '' }} style="width: 18px; height: 18px;">
-                            <span>Couples welcome only</span>
-                        </label>
-                        <label class="filter-input" style="display: flex; align-items: center; gap: 10px; cursor: pointer; margin-top: 6px;">
-                            <input type="checkbox" id="listingCouplesNo" name="couples_allowed" value="no" {{ request('couples_allowed') == 'no' ? 'checked' : '' }} style="width: 18px; height: 18px;">
-                            <span>Singles only</span>
-                        </label>
+                        <span class="filter-label">Couple allowed</span>
+                        <div class="filter-check-stack">
+                            <label class="filter-check-row">
+                                <input type="checkbox" id="listingCouplesYes" name="couples_allowed" value="yes" {{ request('couples_allowed') == 'yes' ? 'checked' : '' }}>
+                                <span>Couples welcome only</span>
+                            </label>
+                            <label class="filter-check-row">
+                                <input type="checkbox" id="listingCouplesNo" name="couples_allowed" value="no" {{ request('couples_allowed') == 'no' ? 'checked' : '' }}>
+                                <span>Singles only</span>
+                            </label>
+                        </div>
                     </div>
                     
                     <div class="filter-group">
-                        <label class="filter-label">Ensuite</label>
-                        <label class="filter-input" style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
-                            <input type="checkbox" name="ensuite" value="yes" {{ request('ensuite') == 'yes' ? 'checked' : '' }} style="width: 18px; height: 18px;">
+                        <span class="filter-label">Ensuite</span>
+                        <label class="filter-check-row">
+                            <input type="checkbox" name="ensuite" value="yes" {{ request('ensuite') == 'yes' ? 'checked' : '' }}>
                             <span>Ensuite only</span>
                         </label>
                     </div>
@@ -1251,7 +1472,8 @@ select.filter-input option {
                             @endforeach
                         </select>
                     </div>
-                            </div>
+                </div>
+                </div>
                             
                 <div class="filter-actions">
                     <button type="button" onclick="clearFilters()" class="filter-btn-clear">
@@ -1374,6 +1596,7 @@ select.filter-input option {
     </div>
     </section>
 
+    <script src="{{ asset('js/property-filters-sync.js') }}"></script>
     <script>
         (function initCouplesCheckboxes() {
             const yesEl = document.getElementById('listingCouplesYes');
@@ -1390,16 +1613,19 @@ select.filter-input option {
             
             if (content.classList.contains('active')) {
                 content.classList.remove('active');
-                text.textContent = 'Show Filters';
+                text.textContent = 'Refine search';
                 chevron.style.transform = 'rotate(0deg)';
                 } else {
                 content.classList.add('active');
-                text.textContent = 'Hide Filters';
+                text.textContent = 'Hide search';
                 chevron.style.transform = 'rotate(180deg)';
             }
         }
         
         function clearFilters() {
+            if (typeof TrueholdPropertyFilters !== 'undefined') {
+                TrueholdPropertyFilters.clearStored();
+            }
             window.location.href = '{{ route("properties.index") }}';
         }
 
@@ -1436,6 +1662,9 @@ select.filter-input option {
             if (!form || !container) return;
 
             function getFilterQueryString() {
+                if (typeof TrueholdPropertyFilters !== 'undefined') {
+                    return TrueholdPropertyFilters.listingFormQueryString(form);
+                }
                 const formData = new FormData(form);
                 const params = new URLSearchParams();
                 formData.forEach((value, key) => {
@@ -1459,12 +1688,39 @@ select.filter-input option {
                             container.innerHTML = newContainer.innerHTML;
                         }
                         history.pushState({}, '', url);
+                        if (typeof TrueholdPropertyFilters !== 'undefined') {
+                            TrueholdPropertyFilters.saveFromLocationSearch();
+                        }
                     })
                     .catch(() => { window.location.href = url; })
                     .finally(() => {
                         container.style.opacity = '';
                         container.style.pointerEvents = '';
                     });
+            }
+
+            if (typeof TrueholdPropertyFilters !== 'undefined') {
+                if (!TrueholdPropertyFilters.hasFilterParamsInSearch()) {
+                    const stored = TrueholdPropertyFilters.getStoredQueryString();
+                    if (stored) {
+                        TrueholdPropertyFilters.applyQueryStringToListingForm(form, stored);
+                        const u = '{{ route("properties.index") }}' + '?' + stored;
+                        history.replaceState({}, '', u);
+                        loadResults();
+                    }
+                } else {
+                    TrueholdPropertyFilters.saveFromLocationSearch();
+                }
+            }
+
+            const mapNav = document.getElementById('trueholdNavMapLink');
+            if (mapNav && typeof TrueholdPropertyFilters !== 'undefined') {
+                mapNav.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const qs = TrueholdPropertyFilters.listingFormQueryString(form) || TrueholdPropertyFilters.getStoredQueryString();
+                    TrueholdPropertyFilters.saveFromQueryString(qs);
+                    window.location.href = '{{ route("properties.map") }}' + (qs ? '?' + qs : '');
+                });
             }
 
             form.addEventListener('submit', (e) => {
@@ -1481,6 +1737,9 @@ select.filter-input option {
                     priceDebounce = setTimeout(loadResults, 400);
                 });
                 inp.addEventListener('change', loadResults);
+            });
+            form.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+                cb.addEventListener('change', loadResults);
             });
             // Store current URL when clicking on property cards (delegation so AJAX-loaded cards work)
             document.addEventListener('click', (e) => {

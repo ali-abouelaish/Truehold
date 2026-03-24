@@ -25,16 +25,19 @@ return [
     | Session Lifetime
     |--------------------------------------------------------------------------
     |
-    | Here you may specify the number of minutes that you wish the session
-    | to be allowed to remain idle before it expires. If you want them
-    | to expire immediately when the browser is closed then you may
-    | indicate that via the expire_on_close configuration option.
+    | Minutes of inactivity before the session expires. Each request refreshes
+    | the timer. Default is one year (525600 minutes) so users stay signed in
+    | until they log out or clear site data/cookies. Override with SESSION_LIFETIME
+    | in .env (e.g. 120 for two hours).
+    |
+    | Set SESSION_EXPIRE_ON_CLOSE=true only if sessions should end when the
+    | browser window is closed.
     |
     */
 
-    'lifetime' => (int) env('SESSION_LIFETIME', 120),
+    'lifetime' => (int) env('SESSION_LIFETIME', 525600),
 
-    'expire_on_close' => env('SESSION_EXPIRE_ON_CLOSE', false),
+    'expire_on_close' => (bool) env('SESSION_EXPIRE_ON_CLOSE', false),
 
     /*
     |--------------------------------------------------------------------------
