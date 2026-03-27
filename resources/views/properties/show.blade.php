@@ -1965,6 +1965,17 @@ html {
                                 <div style="padding: 16px; background: var(--off-white); border-radius: 10px;">
                                     <p style="font-weight: 600; color: var(--primary-navy); margin-bottom: 8px;">
                                     {{ $property->agent_name }}
+                                    @php
+                                        $payingValue = $property->paying ?? null;
+                                        $isPayingAgent = false;
+                                        if ($payingValue !== null && $payingValue !== '') {
+                                            $normalizedPaying = is_string($payingValue) ? strtolower(trim($payingValue)) : $payingValue;
+                                            $isPayingAgent = $normalizedPaying === 'yes' || $normalizedPaying === true || $normalizedPaying === 1 || $normalizedPaying === '1';
+                                        }
+                                    @endphp
+                                    @if($isPayingAgent)
+                                        <span title="Paying agent" style="color: var(--gold); margin-left: 6px;">⚡</span>
+                                    @endif
                                     </p>
                                     @if($property->agent_phone && $property->agent_phone !== 'N/A')
                                         <p style="color: var(--gray); font-size: 14px;">

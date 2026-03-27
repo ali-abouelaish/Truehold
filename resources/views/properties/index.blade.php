@@ -1918,12 +1918,9 @@ button {
         }
 
         function shareFilters() {
-            const form = document.getElementById('filtersContent');
-            let currentUrl = window.location.href;
-            if (form && typeof TrueholdPropertyFilters !== 'undefined') {
-                const qs = TrueholdPropertyFilters.listingFormQueryString(form);
-                currentUrl = '{{ route("properties.index") }}' + (qs ? '?' + qs : '');
-            }
+            // Share the exact current URL so hidden/locked params (e.g. paying_only
+            // for non-auth users) are preserved in the copied link.
+            const currentUrl = window.location.href;
 
             navigator.clipboard.writeText(currentUrl).then(() => {
                 // Visual feedback
