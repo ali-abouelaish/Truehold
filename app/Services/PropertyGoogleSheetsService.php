@@ -627,13 +627,15 @@ class PropertyGoogleSheetsService
             });
         }
         
-        if (isset($filters['agent_name']) && auth()->check()) {
+        $allowRestricted = (bool) ($filters['allow_restricted'] ?? false);
+
+        if (isset($filters['agent_name']) && (auth()->check() || $allowRestricted)) {
             $properties = $properties->filter(function ($property) use ($filters) {
                 return stripos($property['agent_name'] ?? '', $filters['agent_name']) !== false;
             });
         }
 
-        if (isset($filters['paying_only']) && auth()->check()) {
+        if (isset($filters['paying_only']) && (auth()->check() || $allowRestricted)) {
             $properties = $properties->filter(function ($property) {
                 $paying = $property['paying'] ?? null;
                 if ($paying === null || $paying === '') {

@@ -1918,11 +1918,29 @@ button {
         }
 
         function shareFilters() {
-            // Share the exact current URL so hidden/locked params (e.g. paying_only
-            // for non-auth users) are preserved in the copied link.
-            const currentUrl = window.location.href;
+            const form = document.getElementById('filtersContent');
+            let params = new URLSearchParams(window.location.search);
+            if (form && typeof TrueholdPropertyFilters !== 'undefined') {
+                params = new URLSearchParams(TrueholdPropertyFilters.listingFormQueryString(form));
+            }
 
-            navigator.clipboard.writeText(currentUrl).then(() => {
+            const filters = {};
+            params.forEach((value, key) => {
+                if (value != null && String(value).trim() !== '') filters[key] = value;
+            });
+
+            fetch('{{ route("properties.share-token") }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Accept': 'application/json',
+                },
+                body: JSON.stringify({ filters, view: 'listing' }),
+            })
+            .then(r => r.ok ? r.json() : Promise.reject(new Error('Failed to create share token')))
+            .then(data => navigator.clipboard.writeText(data.share_url || window.location.href))
+            .then(() => {
                 // Visual feedback
                 const shareButton = document.querySelector('.filter-btn-share');
                 const shareButtonText = document.getElementById('shareButtonText');
@@ -1936,10 +1954,10 @@ button {
                     shareButton.classList.remove('copied');
                     shareButtonText.textContent = originalText;
                 }, 2000);
-            }).catch(err => {
-                // Fallback for browsers that don't support clipboard API
-                alert('Link copied to clipboard:\n' + currentUrl);
-                console.error('Failed to copy:', err);
+            })
+            .catch(err => {
+                console.error('Failed to create tokenized share link:', err);
+                alert('Unable to create share link right now. Please try again.');
             });
         }
         

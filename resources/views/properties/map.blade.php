@@ -2433,9 +2433,24 @@ select.filter-input option {
             const qs = (typeof TrueholdPropertyFilters !== 'undefined')
                 ? TrueholdPropertyFilters.buildMapControlsQueryString()
                 : window.location.search.replace(/^\?/, '');
-            const url = '{{ route("properties.map") }}' + (qs ? ('?' + qs) : '');
+            const params = new URLSearchParams(qs);
+            const filters = {};
+            params.forEach((value, key) => {
+                if (value != null && String(value).trim() !== '') filters[key] = value;
+            });
 
-            navigator.clipboard.writeText(url).then(() => {
+            fetch('{{ route("properties.share-token") }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Accept': 'application/json',
+                },
+                body: JSON.stringify({ filters, view: 'map' }),
+            })
+            .then(r => r.ok ? r.json() : Promise.reject(new Error('Failed to create share token')))
+            .then(data => navigator.clipboard.writeText(data.share_url || ('{{ route("properties.map") }}' + (qs ? ('?' + qs) : ''))))
+            .then(() => {
                 const shareButton = document.querySelector('.filter-btn-share');
                 const shareButtonText = document.getElementById('shareButtonText');
                 if (!shareButton || !shareButtonText) return;
@@ -2447,7 +2462,7 @@ select.filter-input option {
                     shareButtonText.textContent = originalText;
                 }, 1800);
             }).catch(() => {
-                window.prompt('Copy this link:', url);
+                window.prompt('Unable to create tokenized link. Copy this URL instead:', window.location.href);
             });
         }
 

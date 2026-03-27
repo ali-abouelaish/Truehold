@@ -43,6 +43,7 @@ Route::get('/', function () {
 
 // Public routes - no authentication required
 Route::get('/properties', [PropertyController::class, 'index'])->name('properties.index');
+Route::post('/properties/share-token', [PropertyController::class, 'createShareToken'])->name('properties.share-token');
 Route::get('/properties/create', [PropertyController::class, 'create'])->name('properties.create');
 Route::post('/properties', [PropertyController::class, 'store'])->name('properties.store');
 Route::get('/properties/map', [PropertyController::class, 'map'])->name('properties.map');

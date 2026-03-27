@@ -8,10 +8,31 @@ use App\Models\PropertyFromSheet;
 use App\Models\Client;
 use App\Services\PropertyGoogleSheetsService;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Validator;
 
 class PropertyController extends Controller
 {
+    /**
+     * Filter keys allowed to be tokenized/shared.
+     *
+     * @var array<int, string>
+     */
+    protected array $shareableFilterKeys = [
+        'location',
+        'property_type',
+        'min_price',
+        'max_price',
+        'available_date',
+        'management_company',
+        'couples_allowed',
+        'ensuite',
+        'agent_name',
+        'paying_only',
+        'room_count',
+    ];
+
     /**
      * Get the Google Sheets service only when properties spreadsheet is configured.
      * This avoids loading the Google API client when not using Sheets.
@@ -25,10 +46,89 @@ class PropertyController extends Controller
     }
 
     /**
+     * Resolve tokenized filters (f=...) into the request query.
+     * Existing query params win over token values.
+     */
+    protected function applyTokenizedFilters(Request $request): void
+    {
+        $token = trim((string) $request->query('f', ''));
+        if ($token === '') {
+            return;
+        }
+
+        $cacheKey = "property_filter_token:{$token}";
+        $stored = Cache::get($cacheKey);
+        if (!is_array($stored)) {
+            return;
+        }
+        $request->attributes->set('shared_filter_token', true);
+
+        $merge = [];
+        foreach ($this->shareableFilterKeys as $key) {
+            if (!$request->filled($key) && isset($stored[$key]) && $stored[$key] !== '') {
+                $merge[$key] = (string) $stored[$key];
+            }
+        }
+
+        if (!empty($merge)) {
+            $request->merge($merge);
+        }
+    }
+
+    /**
+     * Restricted filters are normally auth-only, but we allow them when
+     * a valid shared token is being resolved.
+     */
+    protected function canUseRestrictedFilters(Request $request): bool
+    {
+        return auth()->check() || (bool) $request->attributes->get('shared_filter_token', false);
+    }
+
+    /**
+     * Create a tokenized share URL for current filters.
+     */
+    public function createShareToken(Request $request)
+    {
+        $filters = $request->input('filters', []);
+        if (!is_array($filters)) {
+            $filters = [];
+        }
+
+        $sanitized = [];
+        foreach ($this->shareableFilterKeys as $key) {
+            if (!array_key_exists($key, $filters)) {
+                continue;
+            }
+            $value = $filters[$key];
+            if (is_array($value) || is_object($value) || $value === null) {
+                continue;
+            }
+            $value = trim((string) $value);
+            if ($value !== '') {
+                $sanitized[$key] = Str::limit($value, 255, '');
+            }
+        }
+
+        $token = Str::random(16);
+        Cache::put("property_filter_token:{$token}", $sanitized, now()->addDays(30));
+
+        $view = $request->input('view', 'listing') === 'map' ? 'map' : 'listing';
+        $baseUrl = $view === 'map' ? route('properties.map') : route('properties.index');
+
+        return response()->json([
+            'token' => $token,
+            'share_url' => $baseUrl . '?f=' . $token,
+        ]);
+    }
+
+    /**
      * Display a listing of the resource.
      */
     public function index(Request $request)
     {
+        $this->applyTokenizedFilters($request);
+        $canUseRestrictedFilters = $this->canUseRestrictedFilters($request);
+
         // Check if Google Sheets is configured
         $useGoogleSheets = !empty(config('services.google.properties.spreadsheet_id'));
         $sheetsService = $this->getSheetsService();
@@ -68,12 +168,13 @@ class PropertyController extends Controller
                     $filters['management_company'] = $request->management_company;
                 }
 
-                if ($request->filled('agent_name') && auth()->check()) {
+                if ($request->filled('agent_name') && $canUseRestrictedFilters) {
                     $filters['agent_name'] = $request->agent_name;
                 }
 
-                if ($request->filled('paying_only') && auth()->check()) {
+                if ($request->filled('paying_only') && $canUseRestrictedFilters) {
                     $filters['paying_only'] = true;
+                    $filters['allow_restricted'] = true;
                 }
 
                 if ($request->filled('couples_allowed')) {
@@ -184,12 +285,12 @@ class PropertyController extends Controller
         }
 
         // Agent name filtering - only for authenticated users
-        if ($request->filled('agent_name') && auth()->check()) {
+        if ($request->filled('agent_name') && $canUseRestrictedFilters) {
             $query->where('agent_name', 'like', "%{$request->agent_name}%");
         }
 
-        // Paying agents only - only for authenticated users
-        if ($request->filled('paying_only') && auth()->check()) {
+        // Paying agents only (auth or resolved shared token)
+        if ($request->filled('paying_only') && $canUseRestrictedFilters) {
             $query->whereRaw("LOWER(TRIM(COALESCE(paying, ''))) = 'yes'");
         }
 
@@ -313,6 +414,9 @@ class PropertyController extends Controller
      */
     public function map(Request $request)
     {
+        $this->applyTokenizedFilters($request);
+        $canUseRestrictedFilters = $this->canUseRestrictedFilters($request);
+
         // Check if Google Sheets is configured
         $useGoogleSheets = !empty(config('services.google.properties.spreadsheet_id'));
         
@@ -345,8 +449,13 @@ class PropertyController extends Controller
                     $filters['management_company'] = $request->management_company;
                 }
 
-                if ($request->filled('agent_name') && auth()->check()) {
+                if ($request->filled('agent_name') && $canUseRestrictedFilters) {
                     $filters['agent_name'] = $request->agent_name;
+                }
+
+                if ($request->filled('paying_only') && $canUseRestrictedFilters) {
+                    $filters['paying_only'] = true;
+                    $filters['allow_restricted'] = true;
                 }
 
                 if ($request->filled('couples_allowed')) {
@@ -524,8 +633,12 @@ class PropertyController extends Controller
             $query->byManagementCompany($request->management_company);
         }
 
-        if ($request->filled('agent_name') && auth()->check()) {
+        if ($request->filled('agent_name') && $canUseRestrictedFilters) {
             $query->where('agent_name', 'like', "%{$request->agent_name}%");
+        }
+
+        if ($request->filled('paying_only') && $canUseRestrictedFilters) {
+            $query->whereRaw("LOWER(TRIM(COALESCE(paying, ''))) = 'yes'");
         }
 
         if ($request->filled('couples_allowed')) {
