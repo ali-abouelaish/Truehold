@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:api.anthropic.com)",
+      "PowerShell($src = \"C:\\\\Users\\\\Ali\\\\.claude\\\\projects\\\\d--Truehold\\\\fe9fd6bb-2c13-4d24-ae69-78fbab5e12a6\\\\tool-results\\\\webfetch-1779453014337-r52gd7.bin\"; $dest = \"C:\\\\Users\\\\Ali\\\\.claude\\\\projects\\\\d--Truehold\\\\design-truehold\"; New-Item -ItemType Directory -Force -Path $dest | Out-Null; $bytes = [System.IO.File]::ReadAllBytes\\($src\\); Write-Output \\(\"First bytes: \" + \\($bytes[0..7] | ForEach-Object { $_.ToString\\('X2'\\) }\\)\\); Write-Output \\(\"Total size: \" + $bytes.Length\\))",
+      "PowerShell($src = \"C:\\\\Users\\\\Ali\\\\.claude\\\\projects\\\\d--Truehold\\\\fe9fd6bb-2c13-4d24-ae69-78fbab5e12a6\\\\tool-results\\\\webfetch-1779453014337-r52gd7.bin\"; $dest = \"C:\\\\Users\\\\Ali\\\\.claude\\\\projects\\\\d--Truehold\\\\design-truehold\"; New-Item -ItemType Directory -Force -Path $dest | Out-Null; $tarPath = Join-Path $dest \"design.tar\"; $inStream = [System.IO.File]::OpenRead\\($src\\); $outStream = [System.IO.File]::Create\\($tarPath\\); $gzip = New-Object System.IO.Compression.GZipStream\\($inStream, [System.IO.Compression.CompressionMode]::Decompress\\); $gzip.CopyTo\\($outStream\\); $gzip.Dispose\\(\\); $outStream.Dispose\\(\\); $inStream.Dispose\\(\\); Write-Output \\(\"Decompressed size: \" + \\(Get-Item $tarPath\\).Length\\))",
+      "Read(//c/Users/Ali/.claude/projects/d--Truehold/design-truehold/extracted/**)",
+      "PowerShell(npm run build 2>&1)",
+      "PowerShell(npm install 2>&1)",
+      "PowerShell(php artisan serve --port=8765 2>&1)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://127.0.0.1:8765/)",
+      "Bash(curl -s -o /tmp/th_index.html -w \"HTTP %{http_code}, %{size_download} bytes, %{time_total}s\\\\n\" http://127.0.0.1:8765/properties)",
+      "Read(//tmp/**)",
+      "Bash(curl -s -o /tmp/th_show.html -w \"show: HTTP %{http_code}, %{size_download} bytes, %{time_total}s\\\\n\" \"http://127.0.0.1:8765/properties/sheet_fed77de94df08142f0b59aabaf15ecff\")",
+      "Bash(curl -s \"http://127.0.0.1:8765/properties?ensuite=yes\" -o /tmp/th_filtered.html -w \"filtered: HTTP %{http_code}, %{size_download} bytes\\\\n\")",
+      "Bash(curl -s http://127.0.0.1:8765/build/assets/app-ByW0VTRm.js -o /tmp/app.js -w \"Size: %{size_download}\\\\n\")",
+      "Bash(curl -s http://127.0.0.1:8765/properties -o /tmp/idx.html)"
+    ]
+  }
+}

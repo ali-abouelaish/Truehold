@@ -30,7 +30,36 @@ property_flags = df_profiles.iloc[:, 2].fillna("").tolist() if len(df_profiles.c
 # 2) Scraper setup
 # -----------------------------
 base_url = "https://www.spareroom.co.uk"
-headers = {"User-Agent": "Mozilla/5.0"}
+
+# HTTP session with retry/backoff and a realistic User-Agent
+from requests.adapters import HTTPAdapter
+try:
+    from urllib3.util.retry import Retry
+except ImportError:  # pragma: no cover
+    from requests.packages.urllib3.util.retry import Retry
+
+
+def _make_session():
+    s = requests.Session()
+    retry = Retry(
+        total=3,
+        backoff_factor=1.5,
+        status_forcelist=[429, 500, 502, 503, 504],
+        allowed_methods=frozenset(["GET"]),
+    )
+    adapter = HTTPAdapter(max_retries=retry, pool_connections=10, pool_maxsize=10)
+    s.mount("https://", adapter)
+    s.mount("http://", adapter)
+    s.headers.update({
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+                      "(KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+        "Accept-Language": "en-GB,en;q=0.7,en-US;q=0.5",
+    })
+    return s
+
+
+SESSION = _make_session()
 
 all_results = []   # ← this is now your main array
 
@@ -52,7 +81,7 @@ for profile_url, paying_flag, property_flag in zip(profiles, paying_flags, prope
         )
 
         try:
-            response = requests.get(page_url, headers=headers, timeout=10)
+            response = SESSION.get(page_url, timeout=15)
             response.raise_for_status()
             soup = BeautifulSoup(response.text, "html.parser")
 
@@ -419,18 +448,241 @@ def detect_property_type_from_key_features(soup):
  
 
 
+# -----------------------------
+# Canonical data extraction from embedded _sr JS object
+# -----------------------------
+_UK_POSTCODE_AREA = r"[A-Z]{1,2}\d[A-Z\d]?"
+_DISTANCE_RE = re.compile(
+    r"(\d+(?:\.\d+)?)\s*(minutes?|mins?|miles?|mi|km|metres?|meters?|m)\b",
+    re.IGNORECASE,
+)
+_TRANSPORT_KEYWORDS = (
+    "underground", "tube", "overground", "national-rail", "national_rail",
+    "rail", "dlr", "bus", "tram", "ferry",
+)
+
+
+def extract_sr_data(html):
+    """Pull useful fields from the embedded _sr JS object and surrounding script vars."""
+    data = {}
+
+    # Static string fields under _sr.ecommerce...products[0]
+    for field in ("variant", "ad_verified", "ad_profile_photo", "ad_pics",
+                  "ad_video", "dimension11", "dimension12", "dimension13",
+                  "dimension22"):
+        m = re.search(rf"\b{field}\s*:\s*'([^']*)'", html)
+        if m:
+            data[field] = m.group(1)
+
+    # accommodation type ('room', 'studio', etc.)
+    acc = re.search(r"var\s+accomodationType\s*=\s*'([^']*)'", html)
+    if acc:
+        data["accommodation_type"] = acc.group(1)
+
+    # propertyType built as 'X bed ' + '' + 'flat'
+    pt = re.search(r"var\s+propertyType\s*=\s*((?:'[^']*'\s*\+\s*)+'[^']*')", html)
+    if pt:
+        parts = re.findall(r"'([^']*)'", pt.group(1))
+        joined = "".join(parts).strip()
+        if joined:
+            data["property_type_full"] = joined
+
+    # category line contains '/SE10' as the postcode literal
+    cat = re.search(r"\bcategory\s*:\s*([^\n]+)", html)
+    if cat:
+        m_pc = re.search(rf"'/({_UK_POSTCODE_AREA}(?:\s?\d[A-Z]{{2}})?)'", cat.group(1))
+        if m_pc:
+            data["postcode_area"] = m_pc.group(1)
+
+    # share_title often ends with postcode in parens: "... (SE10)"
+    if "postcode_area" not in data:
+        share = re.search(r'share_title\s*:\s*"([^"]+)"', html)
+        if share:
+            m_pc = re.search(rf"\(({_UK_POSTCODE_AREA}(?:\s?\d[A-Z]{{2}})?)\)", share.group(1))
+            if m_pc:
+                data["postcode_area"] = m_pc.group(1)
+
+    # brand: derive from featured / premium_ad / earlyBird js vars
+    featured = re.search(r"var\s+featured\s*=\s*parseInt\(\s*'([^']*)'", html)
+    premium = re.search(r"var\s+premium_ad\s*=\s*(true|false)", html)
+    earlybird = re.search(r"var\s+earlyBird\s*=\s*\(\s*'([^']*)'\s*==\s*'Y'\s*\)", html)
+    fnum = featured.group(1).strip() if featured else ""
+    if fnum.isdigit() and int(fnum) > 0:
+        data["brand"] = "featured"
+    elif premium and premium.group(1) == "true":
+        data["brand"] = "bold"
+    elif earlybird and earlybird.group(1) == "Y":
+        data["brand"] = "early_bird"
+    else:
+        data["brand"] = "free"
+
+    # ad_status: <num> ? 'expired ...' : 'open'  → first operand 0 means 'open'
+    status = re.search(r"ad_status\s*:\s*(\S+?)\s*\?\s*'([^']+)'\s*:\s*'([^']+)'", html)
+    if status:
+        first = status.group(1).strip().strip("\"'")
+        data["ad_status"] = status.group(3) if first in ("0", "") else status.group(2)
+
+    # fees apply: function returns 'y' if first operand truthy, else 'n'
+    fees = re.search(r"function\s+feesApply\(\)\{\s*return\s+'([^']*)'", html)
+    if fees:
+        data["fees_apply"] = "y" if fees.group(1) else "n"
+
+    # canonical lat/long from _sr.page.location
+    loc = re.search(
+        r'location\s*:\s*\{[^}]*latitude\s*:\s*"([0-9.\-]+)"[^}]*longitude\s*:\s*"([0-9.\-]+)"',
+        html,
+    )
+    if loc:
+        data["sr_latitude"] = loc.group(1)
+        data["sr_longitude"] = loc.group(2)
+
+    return data
+
+
+def extract_postcode(soup, sr_data, title=None, location=None):
+    """Return postcode area (e.g. 'SE10') from the most reliable source available."""
+    if sr_data.get("postcode_area"):
+        return sr_data["postcode_area"]
+
+    for source in (title, location):
+        if not source:
+            continue
+        m = re.search(rf"\b({_UK_POSTCODE_AREA}(?:\s?\d[A-Z]{{2}})?)\b", source)
+        if m:
+            return m.group(1)
+
+    for tag in (soup.find("link", rel="canonical"),
+                soup.find("meta", attrs={"property": "og:url"}),
+                soup.find("meta", attrs={"property": "og:description"}),
+                soup.find("meta", attrs={"name": "description"})):
+        if not tag:
+            continue
+        text = tag.get("href") or tag.get("content") or ""
+        m = re.search(rf"\b({_UK_POSTCODE_AREA}(?:\s?\d[A-Z]{{2}})?)\b", text)
+        if m:
+            return m.group(1)
+
+    return None
+
+
+def _detect_transport_type(li):
+    for el in li.find_all(True):
+        cls = " ".join(el.get("class") or []).lower()
+        for t in _TRANSPORT_KEYWORDS:
+            if t in cls:
+                return t.replace("-", "_")
+    img = li.find("img")
+    if img and img.get("alt"):
+        alt = img["alt"].lower()
+        for t in ("underground", "tube", "overground", "national rail",
+                  "rail", "dlr", "bus", "tram", "ferry"):
+            if t in alt:
+                return t.replace(" ", "_").replace("-", "_")
+    return None
+
+
+def extract_nearest_stations(soup, max_stations=4):
+    """Extract up to `max_stations` nearby stations with name, distance, type, image."""
+    stations = []
+    seen = set()
+
+    def add_station(name, distance, transport_type, image):
+        if not name:
+            return
+        name = re.sub(r"\s+", " ", name).strip(" ,-:–—•·")
+        # Strip a stray "Station" suffix only when bare
+        if not name or len(name) > 80:
+            return
+        key = name.lower()
+        if key in seen:
+            return
+        seen.add(key)
+        stations.append({
+            "name": name,
+            "distance": distance,
+            "transport_type": transport_type,
+            "image": image,
+        })
+
+    # Strategy 1: dedicated stations/transport section by class
+    section = None
+    for sel in (
+        "section.feature--stations", "section.feature--transport",
+        "section.feature--travel", "section.feature--nearby",
+        "div.nearest-stations", "ul.nearest-stations",
+        "div.stations", "ul.stations",
+    ):
+        section = soup.select_one(sel)
+        if section:
+            break
+
+    # Strategy 2: header text "nearest station(s)" / "transport links"
+    if section is None:
+        for h in soup.find_all(["h2", "h3", "h4"]):
+            t = h.get_text(" ", strip=True).lower()
+            if any(k in t for k in ("nearest station", "closest station",
+                                     "transport link", "nearby station")):
+                container = h.find_next(["ul", "ol", "dl", "div"])
+                if container:
+                    section = container
+                    break
+
+    items = []
+    if section is not None:
+        items = section.find_all("li")
+        if not items:
+            dts = section.find_all("dt")
+            dds = section.find_all("dd")
+            for dt, dd in zip(dts, dds):
+                items.append(dt)
+                items.append(dd)
+
+    # Strategy 3: scan all <li>s for a station + distance combo
+    if not items:
+        for li in soup.find_all("li"):
+            text = li.get_text(" ", strip=True)
+            if not text:
+                continue
+            if (re.search(r"\b(station|tube|underground|rail|overground|dlr)\b", text, re.I)
+                    and _DISTANCE_RE.search(text)):
+                items.append(li)
+
+    for li in items:
+        text = li.get_text(" ", strip=True)
+        if not text:
+            continue
+
+        dist_match = _DISTANCE_RE.search(text)
+        distance = dist_match.group(0).strip() if dist_match else None
+        name = text[: dist_match.start()] if dist_match else text
+
+        img = li.find("img")
+        station_image = None
+        if img and img.get("src"):
+            src = img["src"].strip()
+            if src:
+                station_image = src if src.startswith("http") else base_url + src
+
+        transport_type = _detect_transport_type(li)
+        add_station(name, distance, transport_type, station_image)
+        if len(stations) >= max_stations:
+            break
+
+    return stations
+
+
 def scrape_listing_advanced(url, paying, profile_flag=""):
     try:
-        headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
-        }
-        resp = requests.get(url, headers=headers)
+        resp = SESSION.get(url, timeout=15)
         resp.raise_for_status()
         soup = BeautifulSoup(resp.text, "html.parser")
         html = resp.text
         if "The advertiser is not currently accepting applications" in html:
             print(f"🚫 Skipping {url} — advertiser not accepting applications.")
             return None
+
+        # ✅ Canonical structured data from embedded _sr JS object
+        sr_data = extract_sr_data(html)
         # ✅ Whole property detection + dedicated price extraction
         is_whole_property = detect_whole_property(soup)
         whole_property_price = extract_whole_property_price(soup) if is_whole_property else None
@@ -494,56 +746,44 @@ def scrape_listing_advanced(url, paying, profile_flag=""):
           location = items[1].get_text(strip=True)  # ✅ "Devons Road"
 
 
-        # Latitude / Longitude
-        latitude, longitude = "N/A", "N/A"
-        script_tags = soup.find_all("script")
-        for script in script_tags:
-            if script.string:
-                script_content = script.string
-                lat_match = re.search(r'latitude["\s]*:["\s]*"?([0-9.-]+)"?', script_content)
-                lon_match = re.search(r'longitude["\s]*:["\s]*"?([0-9.-]+)"?', script_content)
-                if lat_match:
-                    latitude = lat_match.group(1)
-                if lon_match:
-                    longitude = lon_match.group(1)
-                location_match = re.search(
+        # Latitude / Longitude — prefer canonical _sr.page.location, fall back to script regex
+        latitude = sr_data.get("sr_latitude", "N/A")
+        longitude = sr_data.get("sr_longitude", "N/A")
+        if latitude == "N/A" or longitude == "N/A":
+            for script in soup.find_all("script"):
+                if not script.string:
+                    continue
+                m = re.search(
                     r'location["\s]*:["\s]*{[^}]*latitude["\s]*:["\s]*"?([0-9.-]+)"?[^}]*longitude["\s]*:["\s]*"?([0-9.-]+)"?',
-                    script_content
+                    script.string,
                 )
-                if location_match:
-                    latitude, longitude = location_match.group(1), location_match.group(2)
+                if m:
+                    latitude, longitude = m.group(1), m.group(2)
+                    break
 
-            all_photo_urls = []
+        # Photo gallery (dedented out of the script loop where it was previously trapped)
+        all_photo_urls = []
+        photo_href_re = re.compile(
+            r"^https://photos2\.spareroom\.co\.uk/images/flatshare/listings/large/[0-9]+/[0-9]+/[0-9]+\.jpg$"
+        )
+        for sel in ("dl.photo-gallery__main-image-wrapper",
+                    "div.photo-gallery__thumbnails"):
+            container = soup.select_one(sel)
+            if not container:
+                continue
+            for link in container.find_all("a", href=photo_href_re):
+                photo_url = link.get("href")
+                if photo_url and photo_url not in all_photo_urls:
+                    all_photo_urls.append(photo_url)
 
-            # ✅ Main image container
-            main_gallery = soup.select_one("dl.photo-gallery__main-image-wrapper")
-            if main_gallery:
-                main_links = main_gallery.find_all("a", href=re.compile(
-                    r"^https://photos2\.spareroom\.co\.uk/images/flatshare/listings/large/[0-9]+/[0-9]+/[0-9]+\.jpg$"
-                ))
-                for link in main_links:
-                    photo_url = link.get("href")
-                    if photo_url and photo_url not in all_photo_urls:
-                        all_photo_urls.append(photo_url)
+        first_photo_url = all_photo_urls[0] if all_photo_urls else None
+        photo_count = len(all_photo_urls)
+        all_photos = ", ".join(all_photo_urls) if all_photo_urls else None
 
-            # ✅ Thumbnail gallery container
-            thumb_gallery = soup.select_one("div.photo-gallery__thumbnails")
-            if thumb_gallery:
-                thumb_links = thumb_gallery.find_all("a", href=re.compile(
-                    r"^https://photos2\.spareroom\.co\.uk/images/flatshare/listings/large/[0-9]+/[0-9]+/[0-9]+\.jpg$"
-                ))
-                for link in thumb_links:
-                    photo_url = link.get("href")
-                    if photo_url and photo_url not in all_photo_urls:
-                        all_photo_urls.append(photo_url)
-
-            first_photo_url = all_photo_urls[0] if all_photo_urls else None
-            photo_count = len(all_photo_urls)
-            all_photos = ", ".join(all_photo_urls) if all_photo_urls else None
-            # 🚫 Skip listings with NO images
-            if photo_count == 0:
-                print(f"🖼️ Skipping {url} — no images found.")
-                return None
+        # 🚫 Skip listings with NO images
+        if photo_count == 0:
+            print(f"🖼️ Skipping {url} — no images found.")
+            return None
 
         # Price
         price = None
@@ -639,6 +879,34 @@ def scrape_listing_advanced(url, paying, profile_flag=""):
         min_age = features.get("Min age")
         max_age = features.get("Max age")
 
+        # ✅ Postcode (best source: _sr.ecommerce.category, falls back to title/location/canonical)
+        postcode = extract_postcode(soup, sr_data, title=title, location=location)
+
+        # ✅ Nearest stations (up to 4)
+        nearby_stations = extract_nearest_stations(soup, max_stations=4)
+        station_count = len(nearby_stations)
+        flat_stations = {}
+        for i in range(1, station_count + 1):
+            flat_stations[f"station{i}_name"] = ""
+            flat_stations[f"station{i}_distance"] = ""
+            flat_stations[f"station{i}_type"] = ""
+            flat_stations[f"station{i}_image"] = ""
+        for i, st in enumerate(nearby_stations, start=1):
+            flat_stations[f"station{i}_name"] = st.get("name") or ""
+            flat_stations[f"station{i}_distance"] = st.get("distance") or ""
+            flat_stations[f"station{i}_type"] = st.get("transport_type") or ""
+            flat_stations[f"station{i}_image"] = st.get("image") or ""
+
+        # ✅ Derived listing metadata from _sr
+        ad_status = sr_data.get("ad_status") or "available"
+        advertiser_type = sr_data.get("variant")          # 'agent' or 'private'
+        ad_brand = sr_data.get("brand")                    # bold/free/featured/early_bird
+        ad_verified = sr_data.get("ad_verified")           # yes/no
+        ad_video = sr_data.get("ad_video")                 # yes/no
+        ad_freshness = sr_data.get("dimension22")          # 'new today' / 'X days ago'
+        fees_apply = sr_data.get("fees_apply")             # y/n
+        property_type_full = sr_data.get("property_type_full")  # '3 bed flat'
+
         # Final result dictionary
         lat, lon = extract_coordinates(latitude, longitude)
         result = {
@@ -646,12 +914,19 @@ def scrape_listing_advanced(url, paying, profile_flag=""):
             "title": title,
             "agent_name": agent_name,
             "location": location,
+            "postcode": postcode,
             "latitude": lat,
             "longitude": lon,
-            "status": "available",
+            "status": ad_status,
             "price": price,
             "description": description,  # ✅ emojis + newlines preserved
-            "property_type": property_type,
+            "property_type": property_type_full or property_type,
+            "advertiser_type": advertiser_type,
+            "ad_tier": ad_brand,
+            "ad_verified": ad_verified,
+            "ad_video": ad_video,
+            "freshness": ad_freshness,
+            "fees_apply": fees_apply,
             "available_date": available_date,
             "min_term": min_term,
             "max_term": max_term,
@@ -685,7 +960,9 @@ def scrape_listing_advanced(url, paying, profile_flag=""):
             "room_count": room_count,
             "min_room_price_pcm": min_room_price_pcm,
             "max_room_price_pcm": max_room_price_pcm,
+            "station_count": station_count,
             **flat_rooms,  # room1_type, room1_price_pcm, room1_deposit ... only for rooms that exist
+            **flat_stations,  # station1_name, station1_distance, station1_type, station1_image
         }
 
         return result
@@ -857,8 +1134,8 @@ def main(listings):
         print(f"✓ Updated headers: {df_headers}")
 
     # 6️⃣ Append new rows with preserved flags
-    rows = df_output.astype(str).values.tolist()
-    sheet.append_rows(rows, value_input_option="RAW")
+    rows = df_output.fillna("").astype(str).values.tolist()
+    sheet.append_rows(rows, value_input_option="RAW")   
 
     print(f"\n✅ Successfully uploaded {len(df_output)} listings to Sheet with preserved flags!")
 
