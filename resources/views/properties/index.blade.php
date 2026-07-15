@@ -23,8 +23,14 @@
     $couplesOn = $req->input('couples_allowed') === 'yes';
     $payingOn  = $req->boolean('paying_only');
 
-    $toggle = fn($key, $value, $on) => $req->fullUrlWithQuery([$key => $on ? null : $value, 'page' => null]);
+    // qf=1 marks an in-app filter action so the server treats it as authoritative
+    // (letting you clear the last filter instead of it being restored from session).
+    $toggle = fn($key, $value, $on) => $req->fullUrlWithQuery([$key => $on ? null : $value, 'qf' => '1', 'page' => null]);
     $setLayout = fn($v) => $req->fullUrlWithQuery(['layout' => $v]);
+
+    // Keys not represented as visible controls in the hero search bar — carried
+    // through as hidden inputs so a hero search doesn't drop other active filters.
+    $heroPassthrough = ['available_date', 'management_company', 'couples_allowed', 'ensuite', 'agent_name', 'paying_only', 'room_count'];
 @endphp
 
 <div class="th-page">
@@ -67,15 +73,37 @@
                     </select>
                 </div>
                 <div class="th-search-field">
-                    <label for="th-budget">Budget</label>
-                    <select name="max_price" id="th-budget" onchange="this.form.submit()">
-                        <option value="">Any</option>
+                    <label for="th-min-budget">Min budget</label>
+                    <select name="min_price" id="th-min-budget" onchange="this.form.submit()">
+                        <option value="">No min</option>
+                        <option value="400"  @selected($req->input('min_price') === '400')>£400+</option>
+                        <option value="600"  @selected($req->input('min_price') === '600')>£600+</option>
+                        <option value="800"  @selected($req->input('min_price') === '800')>£800+</option>
+                        <option value="1000" @selected($req->input('min_price') === '1000')>£1,000+</option>
+                        <option value="1200" @selected($req->input('min_price') === '1200')>£1,200+</option>
+                        <option value="1500" @selected($req->input('min_price') === '1500')>£1,500+</option>
+                        <option value="2000" @selected($req->input('min_price') === '2000')>£2,000+</option>
+                    </select>
+                </div>
+                <div class="th-search-field">
+                    <label for="th-max-budget">Max budget</label>
+                    <select name="max_price" id="th-max-budget" onchange="this.form.submit()">
+                        <option value="">No max</option>
                         <option value="800"  @selected($req->input('max_price') === '800')>Up to £800</option>
+                        <option value="1000" @selected($req->input('max_price') === '1000')>Up to £1,000</option>
                         <option value="1200" @selected($req->input('max_price') === '1200')>Up to £1,200</option>
-                        <option value="1600" @selected($req->input('max_price') === '1600')>Up to £1,600</option>
+                        <option value="1500" @selected($req->input('max_price') === '1500')>Up to £1,500</option>
+                        <option value="1800" @selected($req->input('max_price') === '1800')>Up to £1,800</option>
+                        <option value="2200" @selected($req->input('max_price') === '2200')>Up to £2,200</option>
                         <option value="2500" @selected($req->input('max_price') === '2500')>Up to £2,500</option>
                     </select>
                 </div>
+                @foreach($heroPassthrough as $pk)
+                    @if($req->filled($pk))
+                        <input type="hidden" name="{{ $pk }}" value="{{ $req->input($pk) }}">
+                    @endif
+                @endforeach
+                <input type="hidden" name="qf" value="1">
                 <button type="button" class="th-search-go" onclick="thFilterOpen()">
                     <x-th.icon name="filter" size="16"/> More filters
                 </button>
@@ -129,7 +157,7 @@
                 <h2 class="th-section-h" style="margin-bottom: 8px;">No listings match those filters.</h2>
                 <p>Try widening your search — fewer areas, a higher budget, or remove some &ldquo;must haves&rdquo;.</p>
                 <p style="margin-top: 16px;">
-                    <a href="{{ route('properties.index') }}" class="th-btn th-btn-primary">Reset all filters</a>
+                    <a href="{{ route('properties.index', ['reset' => 1]) }}" class="th-btn th-btn-primary">Reset all filters</a>
                 </p>
             </div>
         @endforelse
@@ -163,7 +191,11 @@
 
 </div>
 
-<x-th.filter-panel :locations="$locations" :propertyTypes="$propertyTypes"/>
+<x-th.filter-panel
+    :locations="$locations"
+    :propertyTypes="$propertyTypes"
+    :agentNames="$agentNames ?? collect()"
+    :agentsWithPaying="$agentsWithPaying ?? collect()"/>
 
 @stack('scripts')
 

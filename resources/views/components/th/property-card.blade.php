@@ -2,10 +2,13 @@
 
 @php
     $p = $property;
-    $photos = method_exists($p, 'getHighQualityPhotosArrayAttribute') || isset($p->high_quality_photos_array)
-        ? ($p->high_quality_photos_array ?? [])
-        : [];
-    $img = $photos[0] ?? ($p->first_photo_url ?? null);
+    // Call the accessor directly — PropertyFromSheet::__isset() doesn't report
+    // magic accessors, so `??` would short-circuit before __get runs.
+    $photos = $p->high_quality_photos_array;
+    if (!is_array($photos)) {
+        $photos = [];
+    }
+    $img = $photos[0] ?? $p->first_photo_url ?? null;
 
     $location = (string) ($p->location ?? '');
     $area = $location !== '' ? trim(explode(',', $location)[0]) : '';

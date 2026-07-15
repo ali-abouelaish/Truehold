@@ -617,6 +617,8 @@ body:has(.th-page) { background: var(--th-bg); margin: 0; padding: 0; }
 }
 .th-crumb-inner {
   width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
   padding: 16px 32px;
   display: flex;
   align-items: center;
@@ -640,18 +642,34 @@ body:has(.th-page) { background: var(--th-bg); margin: 0; padding: 0; }
 }
 .th-gallery-inner {
   display: grid;
-  grid-template-columns: 1fr 220px;
+  grid-template-columns: 1fr 200px;
   gap: 12px;
-  height: 540px;
+  height: 460px;
+  max-width: 1200px;
+  margin: 0 auto;
 }
 .th-gal-main {
   position: relative;
-  background-size: cover;
-  background-position: center;
   background-color: var(--th-bg-soft);
   border-radius: var(--th-radius);
   overflow: hidden;
+  cursor: zoom-in;
 }
+.th-gal-main-img {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  /* contain so the full photo is shown at its native aspect ratio —
+     never cropped or stretched. The blurred backdrop fills the letterbox. */
+  object-fit: contain;
+  object-position: center;
+  display: block;
+  user-select: none;
+}
+.th-gal-arrow,
+.th-gal-counter,
+.th-gal-allphotos { z-index: 2; }
 .th-gal-arrow {
   position: absolute;
   top: 50%;
@@ -735,6 +753,71 @@ body:has(.th-page) { background: var(--th-bg); margin: 0; padding: 0; }
   backdrop-filter: blur(4px);
 }
 
+[x-cloak] { display: none !important; }
+
+.th-lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: rgba(14, 27, 45, .94);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 5vmin;
+}
+.th-lightbox-img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  border-radius: 4px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, .4);
+  user-select: none;
+  -webkit-user-drag: none;
+}
+.th-lightbox-close,
+.th-lightbox-arrow {
+  position: absolute;
+  background: rgba(255, 255, 255, .12);
+  border: 0;
+  color: #fff;
+  border-radius: 50%;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background .15s, transform .15s;
+}
+.th-lightbox-close:hover,
+.th-lightbox-arrow:hover { background: rgba(255, 255, 255, .22); }
+.th-lightbox-close {
+  top: 20px;
+  right: 24px;
+  width: 44px;
+  height: 44px;
+}
+.th-lightbox-arrow {
+  top: 50%;
+  width: 56px;
+  height: 56px;
+  transform: translateY(-50%);
+}
+.th-lightbox-arrow:hover { transform: translateY(-50%) scale(1.05); }
+.th-lightbox-arrow-l { left: 24px; }
+.th-lightbox-arrow-r { right: 24px; }
+.th-lightbox-counter {
+  position: absolute;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(255, 255, 255, .14);
+  color: #fff;
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-size: 13px;
+  letter-spacing: .03em;
+  backdrop-filter: blur(6px);
+}
+
 /* ========================================
    DETAIL — body
    ======================================== */
@@ -744,6 +827,8 @@ body:has(.th-page) { background: var(--th-bg); margin: 0; padding: 0; }
 }
 .th-detail-inner {
   width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
   padding: 48px 32px;
   display: grid;
   grid-template-columns: 1fr 380px;
@@ -866,6 +951,77 @@ body:has(.th-page) { background: var(--th-bg); margin: 0; padding: 0; }
   line-height: 1.1;
   margin: 0 0 20px;
 }
+.th-rooms-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 26px;
+  height: 26px;
+  padding: 0 8px;
+  margin-left: 8px;
+  border-radius: 999px;
+  background: var(--th-accent-soft);
+  color: var(--th-accent-ink);
+  font-family: var(--th-font-body);
+  font-size: 14px;
+  font-weight: 600;
+  vertical-align: middle;
+}
+
+/* Rooms available — one row per advertised room in a shared/HMO post */
+.th-rooms {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.th-room {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 18px;
+  background: var(--th-surface);
+  border: 1px solid var(--th-border-soft);
+  border-radius: var(--th-radius);
+  transition: border-color .15s;
+}
+.th-room:hover { border-color: var(--th-border); }
+.th-room-mark {
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--th-bg-soft);
+  color: var(--th-accent);
+}
+.th-room-info { flex: 1; min-width: 0; }
+.th-room-type {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--th-ink);
+}
+.th-room-sub {
+  font-size: 12px;
+  color: var(--th-muted);
+  margin-top: 2px;
+}
+.th-room-price {
+  flex-shrink: 0;
+  text-align: right;
+  white-space: nowrap;
+}
+.th-room-price-amt {
+  font-family: var(--th-font-display);
+  font-size: 24px;
+  color: var(--th-ink);
+  letter-spacing: -.01em;
+}
+.th-room-poa {
+  font-size: 13px;
+  color: var(--th-muted);
+}
 .th-section-body {
   font-size: 16px;
   line-height: 1.65;
@@ -905,6 +1061,26 @@ body:has(.th-page) { background: var(--th-bg); margin: 0; padding: 0; }
 }
 .th-spec dt { color: var(--th-ink-soft); }
 .th-spec dd { margin: 0; color: var(--th-ink); font-weight: 500; text-align: right; }
+
+.th-about-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 320px;
+  gap: 48px;
+  align-items: start;
+  margin-bottom: 48px;
+}
+.th-about-grid.is-single { grid-template-columns: minmax(0, 1fr); }
+.th-about-grid .th-section { margin-bottom: 0; }
+.th-about-spec { position: sticky; top: 24px; }
+.th-spec-stacked {
+  grid-template-columns: 1fr;
+  gap: 20px;
+  padding: 22px;
+}
+.th-spec-stacked .th-spec-col + .th-spec-col {
+  padding-top: 20px;
+  border-top: 1px solid var(--th-border-soft);
+}
 
 /* Fake map */
 .th-fakemap {
@@ -1055,6 +1231,31 @@ body:has(.th-page) { background: var(--th-bg); margin: 0; padding: 0; }
   gap: 4px;
 }
 .th-agent-trust svg { color: var(--th-positive); }
+
+.th-landlord-link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 10px 12px;
+  border: 1px solid var(--th-border-soft);
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--th-ink);
+  transition: background .15s, border-color .15s;
+}
+.th-landlord-link.has-agent { margin-top: 12px; }
+.th-landlord-link:hover {
+  background: var(--th-bg-soft);
+  border-color: var(--th-ink);
+}
+.th-landlord-link-txt {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.th-landlord-link svg { color: var(--th-ink-soft); }
 
 .th-actioncard-quick {
   display: grid;
@@ -1428,6 +1629,28 @@ body:has(.th-page) { background: var(--th-bg); margin: 0; padding: 0; }
 }
 .th-filter-musts { flex-direction: column; gap: 8px; }
 
+.th-filter-select {
+  width: 100%;
+  background: var(--th-surface);
+  border: 1px solid var(--th-border);
+  border-radius: 10px;
+  padding: 11px 14px;
+  font-size: 14px;
+  color: var(--th-ink);
+  font-weight: 500;
+  outline: none;
+  cursor: pointer;
+  transition: border-color .15s;
+}
+.th-filter-select:hover { border-color: var(--th-ink-soft); }
+.th-filter-select:focus { border-color: var(--th-ink); }
+
+.th-bolt {
+  font-style: normal;
+  line-height: 1;
+  font-size: .95em;
+}
+
 .th-switch {
   position: relative;
   width: 44px;
@@ -1655,24 +1878,98 @@ body:has(.th-page) { background: var(--th-bg); margin: 0; padding: 0; }
    RESPONSIVE
    ======================================== */
 
+/* ---- Small desktop / large tablet ---- */
 @media (max-width: 1100px) {
   .th-grid-4col { grid-template-columns: repeat(3, 1fr); }
-  .th-detail-inner { grid-template-columns: 1fr; }
+  .th-detail-inner { grid-template-columns: 1fr; gap: 40px; }
   .th-detail-aside { position: static; }
+  .th-detail-aside .th-actioncard { max-width: 460px; }
   .th-gallery-inner { grid-template-columns: 1fr; height: auto; }
   .th-gal-main { aspect-ratio: 16 / 10; }
   .th-gal-side { grid-template-columns: repeat(4, 1fr); grid-template-rows: none; height: 100px; }
   .th-mapsplit { grid-template-columns: 360px 1fr; }
+  .th-about-grid { grid-template-columns: minmax(0, 1fr); }
+  .th-about-spec { position: static; }
 }
-@media (max-width: 780px) {
+
+/* ---- Tablet portrait ---- */
+@media (max-width: 860px) {
   .th-grid-3col, .th-grid-4col { grid-template-columns: repeat(2, 1fr); }
+  .th-card-list { grid-template-columns: 200px 1fr; gap: 16px; }
+}
+
+/* ---- Phone ---- */
+@media (max-width: 780px) {
   .th-nav-links { display: none; }
+  .th-nav-inner { padding: 16px 20px; gap: 16px; }
+
   .th-hero-inner { padding: 48px 20px 32px; }
-  .th-search-bar { flex-wrap: wrap; }
-  .th-keyfacts { grid-template-columns: repeat(2, 1fr); }
-  .th-spec { grid-template-columns: 1fr; gap: 20px; }
-  .th-detail-head { grid-template-columns: 1fr; }
+  .th-hero.is-compact .th-hero-inner { padding: 28px 20px 24px; }
+
+  /* Search bar → individual bordered fields that wrap cleanly */
+  .th-search-bar {
+    flex-wrap: wrap;
+    background: transparent;
+    box-shadow: none;
+    padding: 0;
+    gap: 8px;
+    max-width: none;
+  }
+  .th-search-field {
+    flex: 1 1 calc(50% - 4px);
+    border: 1px solid var(--th-border);
+    border-radius: var(--th-radius) !important;
+    background: var(--th-surface);
+  }
+  .th-search-go,
+  .th-search-primary {
+    flex: 1 1 calc(50% - 4px);
+    justify-content: center;
+    border-radius: var(--th-radius);
+    border-left: none;
+    padding: 13px;
+  }
+
+  .th-controls-inner { padding: 14px 20px; gap: 12px; flex-wrap: wrap; }
+  .th-controls-right { margin-left: auto; }
+
+  .th-results { padding: 24px 20px; gap: 24px 16px; }
+
+  /* Detail */
+  .th-crumb-inner { padding: 14px 20px; }
+  .th-gallery { padding: 16px 20px 0; }
+  .th-detail-inner { padding: 32px 20px; gap: 32px; }
+  .th-detail-head { grid-template-columns: 1fr; gap: 14px; }
   .th-detail-price { text-align: left; }
+  .th-keyfacts { grid-template-columns: repeat(2, 1fr); padding: 18px; }
+  .th-spec { grid-template-columns: 1fr; gap: 20px; }
+
+  .th-foot-inner { grid-template-columns: 1fr; gap: 32px; padding-left: 20px; padding-right: 20px; }
+
+  /* ---- Map: stack, map on top with fixed height, list scrolls with page ---- */
+  .th-page-map { height: auto; overflow: visible; }
+  .th-map-bar-inner { padding: 12px 20px; flex-wrap: wrap; gap: 10px; }
+  .th-map-title { white-space: normal; }
+  .th-map-bar-controls { margin-left: 0; width: 100%; flex-wrap: wrap; }
   .th-mapsplit { grid-template-columns: 1fr; }
-  .th-foot-inner { grid-template-columns: 1fr; gap: 32px; }
+  .th-mapcanvas { order: -1; height: 52vh; min-height: 300px; }
+  .th-mapside {
+    order: 1;
+    border-right: none;
+    border-top: 1px solid var(--th-border);
+    padding: 16px 20px;
+  }
+}
+
+/* ---- Small phone ---- */
+@media (max-width: 560px) {
+  .th-grid-3col, .th-grid-4col { grid-template-columns: 1fr; }
+  .th-card-list { grid-template-columns: 1fr; gap: 12px; }
+  .th-card-media-list { aspect-ratio: 16 / 10; }
+  .th-search-field,
+  .th-search-go,
+  .th-search-primary { flex-basis: 100%; }
+  .th-keyfacts { grid-template-columns: 1fr 1fr; }
+  .th-gal-side { height: 72px; }
+  .th-mapcard { grid-template-columns: 100px 1fr; gap: 12px; }
 }

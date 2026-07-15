@@ -14,7 +14,13 @@
       "Bash(curl -s -o /tmp/th_show.html -w \"show: HTTP %{http_code}, %{size_download} bytes, %{time_total}s\\\\n\" \"http://127.0.0.1:8765/properties/sheet_fed77de94df08142f0b59aabaf15ecff\")",
       "Bash(curl -s \"http://127.0.0.1:8765/properties?ensuite=yes\" -o /tmp/th_filtered.html -w \"filtered: HTTP %{http_code}, %{size_download} bytes\\\\n\")",
       "Bash(curl -s http://127.0.0.1:8765/build/assets/app-ByW0VTRm.js -o /tmp/app.js -w \"Size: %{size_download}\\\\n\")",
-      "Bash(curl -s http://127.0.0.1:8765/properties -o /tmp/idx.html)"
+      "Bash(curl -s http://127.0.0.1:8765/properties -o /tmp/idx.html)",
+      "Bash(curl -s \"http://127.0.0.1:8765/properties/sheet_fed77de94df08142f0b59aabaf15ecff\" -o /tmp/show.html)",
+      "Bash(php artisan tinker '--execute= *)",
+      "Bash(curl -s \"http://127.0.0.1:8765/properties/sheet_e3a0a660a35017e76d6485432aafa741\" -o /tmp/show2.html)",
+      "Bash(curl -s \"http://127.0.0.1:8765/properties/sheet_e3a0a660a35017e76d6485432aafa741\" -o /tmp/show3.html)",
+      "Bash(curl -s \"http://127.0.0.1:8765/properties/sheet_e3a0a660a35017e76d6485432aafa741\" -o /tmp/show4.html)",
+      "Bash(curl -s \"http://127.0.0.1:8765/properties/sheet_e3a0a660a35017e76d6485432aafa741\" -o /tmp/show_fixed.html)"
     ]
   }
 }

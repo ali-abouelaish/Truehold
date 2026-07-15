@@ -1,0 +1,174 @@
+<?php
+
+namespace App\Services;
+
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
+
+/**
+ * Primary property feed: Harbor Ops scraped-listings public API.
+ *
+ * Pages through GET /api/public/scraped-listings (per-tenant public API key,
+ * scraped_listings:read scope) and maps rows to the same property-array shape
+ * the Google Sheets feed produces, so PropertyFromSheet and the views work
+ * unchanged.
+ */
+class ScrapedListingsApiService
+{
+    use Concerns\FiltersPropertyCollection;
+
+    protected const CACHE_KEY = 'properties_harborops_all';
+    protected const PAGE_SIZE = 200; // API clamps limit to 1-200
+    protected const MAX_PAGES = 50;  // safety cap: 10k listings
+
+    protected ?string $baseUrl;
+    protected ?string $apiKey;
+    protected int $cacheTimeout;
+    protected ?string $portalDomain;
+
+    public function __construct()
+    {
+        $this->baseUrl = config('services.harborops.base_url');
+        $this->apiKey = config('services.harborops.api_key');
+        $this->cacheTimeout = (int) config('services.harborops.cache_timeout', 300);
+        $this->portalDomain = config('services.harborops.portal_domain');
+    }
+
+    public static function isConfigured(): bool
+    {
+        return !empty(config('services.harborops.base_url'))
+            && !empty(config('services.harborops.api_key'));
+    }
+
+    /**
+     * Get all properties from the Harbor Ops API (cached).
+     */
+    public function getAllProperties(): Collection
+    {
+        return Cache::remember(self::CACHE_KEY, $this->cacheTimeout, function () {
+            return $this->fetchAllListings();
+        });
+    }
+
+    /**
+     * Get a single property by ID (scraped_listings row uuid).
+     */
+    public function getPropertyById($id): ?array
+    {
+        return $this->getAllProperties()->firstWhere('id', (string) $id);
+    }
+
+    public function clearCache(): void
+    {
+        Cache::forget(self::CACHE_KEY);
+        Log::info('Harbor Ops properties cache cleared', ['cache_key' => self::CACHE_KEY]);
+    }
+
+    /**
+     * Page through the API until has_more is false.
+     *
+     * @throws \RuntimeException when the API is unreachable and nothing was fetched,
+     *                           so callers can fall back to another source.
+     */
+    protected function fetchAllListings(): Collection
+    {
+        $endpoint = rtrim($this->baseUrl, '/') . '/api/public/scraped-listings';
+        $properties = collect();
+        $offset = 0;
+
+        for ($page = 0; $page < self::MAX_PAGES; $page++) {
+            $response = Http::withToken($this->apiKey)
+                ->acceptJson()
+                ->timeout(30)
+                ->retry(2, 250, throw: false)
+                ->get($endpoint, [
+                    'limit' => self::PAGE_SIZE,
+                    'offset' => $offset,
+                    'sort' => 'created_at.desc',
+                ]);
+
+            if ($response->failed()) {
+                Log::error('Harbor Ops scraped-listings request failed', [
+                    'status' => $response->status(),
+                    'offset' => $offset,
+                    'body' => mb_substr($response->body(), 0, 500),
+                ]);
+
+                if ($properties->isEmpty()) {
+                    throw new \RuntimeException(
+                        'Harbor Ops scraped-listings API request failed with status ' . $response->status()
+                    );
+                }
+
+                // Partial fetch: serve what we have rather than nothing
+                break;
+            }
+
+            $json = $response->json();
+            $rows = $json['data'] ?? [];
+
+            foreach ($rows as $row) {
+                if (is_array($row)) {
+                    $properties->push($this->mapRowToProperty($row));
+                }
+            }
+
+            $hasMore = (bool) ($json['pagination']['has_more'] ?? false);
+            if (!$hasMore || count($rows) === 0) {
+                break;
+            }
+
+            $offset += self::PAGE_SIZE;
+        }
+
+        Log::info('Properties fetched from Harbor Ops scraped-listings API', [
+            'count' => $properties->count(),
+            'pages' => $page + 1,
+        ]);
+
+        return $properties;
+    }
+
+    /**
+     * Map a scraped_listings row to the property-array shape the views expect
+     * (same shape the Google Sheets feed produces).
+     */
+    protected function mapRowToProperty(array $row): array
+    {
+        $property = $row;
+
+        $property['id'] = (string) ($row['id'] ?? '');
+
+        // Views and PropertyFromSheet::url read the listing URL from 'link'
+        $property['link'] = $row['url'] ?? null;
+
+        // Rows carry landlord_id (uuid), not a display name
+        $property['agent_id'] = $row['landlord_id'] ?? null;
+        $property['agent_name'] = $row['agent_name'] ?? ($row['landlord_name'] ?? null);
+
+        // Login-gated deep link into Harbor Ops (step 4 of the integration doc)
+        if (!empty($row['landlord_id']) && !empty($this->portalDomain)) {
+            $property['landlord_profile_url'] = 'https://' . $this->portalDomain
+                . '/go/landlord/' . $row['landlord_id'];
+        }
+
+        foreach (['latitude', 'longitude'] as $coord) {
+            $value = $row[$coord] ?? null;
+            if (is_string($value)) {
+                $value = str_replace(',', '.', trim($value));
+            }
+            $property[$coord] = is_numeric($value) ? (float) $value : null;
+        }
+
+        $property['photo_count'] = is_numeric($row['photo_count'] ?? null)
+            ? (int) $row['photo_count']
+            : 0;
+
+        $property['status'] = $row['status'] ?? 'available';
+        $property['updatable'] = false;
+
+        return $property;
+    }
+}

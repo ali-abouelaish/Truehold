@@ -52,6 +52,15 @@ return [
         ],
     ],
 
+    'harborops' => [
+        // Primary property feed: Harbor Ops scraped-listings public API
+        'base_url' => env('HARBOROPS_API_URL'),
+        'api_key' => env('HARBOROPS_API_KEY'),
+        'cache_timeout' => env('HARBOROPS_CACHE_TIMEOUT', 300), // 5 minutes
+        // Portal domain used to build login-gated landlord deep links (/go/landlord/<id>)
+        'portal_domain' => env('HARBOROPS_PORTAL_DOMAIN', 'harborops.co.uk'),
+    ],
+
     'twilio' => [
         'account_sid' => env('TWILIO_ACCOUNT_SID'),
         'auth_token' => env('TWILIO_AUTH_TOKEN'),

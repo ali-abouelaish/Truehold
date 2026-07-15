@@ -7,6 +7,7 @@ use App\Models\Property;
 use App\Models\PropertyFromSheet;
 use App\Models\Client;
 use App\Services\PropertyGoogleSheetsService;
+use App\Services\ScrapedListingsApiService;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
@@ -46,6 +47,21 @@ class PropertyController extends Controller
     }
 
     /**
+     * Resolve the property feed. The Harbor Ops scraped-listings API is the
+     * main feed; Google Sheets remains as a fallback while migrating off it.
+     * Returns null when neither is configured (database fallback).
+     *
+     * @return ScrapedListingsApiService|PropertyGoogleSheetsService|null
+     */
+    protected function getFeedService()
+    {
+        if (ScrapedListingsApiService::isConfigured()) {
+            return app(ScrapedListingsApiService::class);
+        }
+        return $this->getSheetsService();
+    }
+
+    /**
      * Resolve tokenized filters (f=...) into the request query.
      * Existing query params win over token values.
      */
@@ -82,6 +98,84 @@ class PropertyController extends Controller
     protected function canUseRestrictedFilters(Request $request): bool
     {
         return auth()->check() || (bool) $request->attributes->get('shared_filter_token', false);
+    }
+
+    /**
+     * Session key used to remember the visitor's active listing filters so they
+     * persist across every navigation (list <-> map, detail -> back, nav links).
+     */
+    protected string $filterSessionKey = 'th_property_filters';
+
+    /**
+     * Make filters sticky across navigation.
+     *
+     * - Requests that express a filter state (any filter value, or the qf=1
+     *   marker emitted by in-app filter controls) are authoritative: we store
+     *   exactly what they carry (an empty set clears the memory).
+     * - "Bare" navigations (nav links, the detail-page breadcrumb, a plain
+     *   visit) carry no filter state, so we restore the remembered filters by
+     *   redirecting to the same route with them applied.
+     * - reset=1 forgets everything and returns a clean URL.
+     *
+     * @return \Illuminate\Http\RedirectResponse|null  redirect to apply/clear, or null to continue
+     */
+    protected function applyStickyFilters(Request $request, string $routeName)
+    {
+        // Shared tokens (f=...) are self-contained and shareable — don't interfere.
+        if ($request->filled('f')) {
+            return null;
+        }
+
+        $session = $request->session();
+
+        // Explicit reset: forget remembered filters and land on a clean URL.
+        if ($request->boolean('reset')) {
+            $session->forget($this->filterSessionKey);
+            return redirect()->route($routeName);
+        }
+
+        $keys = $this->shareableFilterKeys;
+
+        // Does this request explicitly express a filter state?
+        $expressesFilters = $request->has('qf');
+        if (!$expressesFilters) {
+            foreach ($keys as $key) {
+                if ($request->filled($key)) {
+                    $expressesFilters = true;
+                    break;
+                }
+            }
+        }
+
+        if ($expressesFilters) {
+            // Authoritative — remember exactly what this request carries.
+            $store = [];
+            foreach ($keys as $key) {
+                if ($request->filled($key)) {
+                    $store[$key] = $request->input($key);
+                }
+            }
+
+            if (empty($store)) {
+                $session->forget($this->filterSessionKey);
+            } else {
+                $session->put($this->filterSessionKey, $store);
+            }
+
+            return null;
+        }
+
+        // Bare navigation — restore remembered filters, if any.
+        $store = $session->get($this->filterSessionKey, []);
+        if (!empty($store) && is_array($store)) {
+            $params = array_merge($store, ['qf' => 1]);
+            if ($request->filled('layout')) {
+                $params['layout'] = $request->query('layout');
+            }
+            return redirect()->route($routeName, $params);
+        }
+
+        return null;
     }
 
     /**
@@ -127,19 +221,21 @@ class PropertyController extends Controller
     public function index(Request $request)
     {
         $this->applyTokenizedFilters($request);
+        if ($redirect = $this->applyStickyFilters($request, 'properties.index')) {
+            return $redirect;
+        }
         $canUseRestrictedFilters = $this->canUseRestrictedFilters($request);
 
-        // Check if Google Sheets is configured
-        $useGoogleSheets = !empty(config('services.google.properties.spreadsheet_id'));
-        $sheetsService = $this->getSheetsService();
+        // Main feed: Harbor Ops scraped-listings API, then Google Sheets fallback
+        $feedService = $this->getFeedService();
 
         // Force clear cache if requested (for debugging)
-        if ($request->has('clear_cache') && $sheetsService) {
-            $sheetsService->clearCache();
+        if ($request->has('clear_cache') && $feedService) {
+            $feedService->clearCache();
             \Log::info('Properties cache manually cleared');
         }
-        
-        if ($useGoogleSheets) {
+
+        if ($feedService) {
             try {
                 // Build filters array
                 $filters = [];
@@ -189,11 +285,11 @@ class PropertyController extends Controller
                     $filters['room_count'] = $request->room_count;
                 }
 
-                // Get filtered properties from Google Sheets
-                $filteredProperties = $sheetsService->filterProperties($filters);
-                
+                // Get filtered properties from the feed
+                $filteredProperties = $feedService->filterProperties($filters);
+
                 // Get filter values for dropdowns
-                $filterValues = $sheetsService->getFilterValues();
+                $filterValues = $feedService->getFilterValues();
                 $locations = $filterValues['locations'];
                 $propertyTypes = $filterValues['propertyTypes'];
                 $availableDates = $filterValues['available_dates'];
@@ -212,9 +308,13 @@ class PropertyController extends Controller
                     $aIsPremium = !empty($a->flag) && strtolower($a->flag) === 'premium';
                     $bIsPremium = !empty($b->flag) && strtolower($b->flag) === 'premium';
                     
-                    // If both are premium or both are not premium, sort by ID descending
+                    // If both are premium or both are not premium, sort newest first.
+                    // API rows carry created_at; sheet rows fall back to ID descending.
                     if ($aIsPremium === $bIsPremium) {
-                        return $b->id <=> $a->id; // Descending by ID
+                        if (!empty($a->created_at) && !empty($b->created_at)) {
+                            return strcmp((string) $b->created_at, (string) $a->created_at);
+                        }
+                        return $b->id <=> $a->id;
                     }
                     
                     // Premium properties come first
@@ -235,18 +335,18 @@ class PropertyController extends Controller
                 );
 
         // Log filter results for debugging
-        \Log::info('Property index filters applied (Google Sheets)', [
+        \Log::info('Property index filters applied (feed)', [
             'filters' => $filters,
             'total_results' => $properties->total(),
             'current_page' => $properties->currentPage(),
             'per_page' => $properties->perPage(),
-            'data_source' => 'google_sheets',
-            'spreadsheet_id' => config('services.google.properties.spreadsheet_id'),
+            'data_source' => class_basename($feedService),
         ]);
 
         return view('properties.index', compact('properties', 'locations', 'propertyTypes', 'availableDates', 'agentNames', 'agentsWithPaying', 'roomCounts'));
             } catch (\Exception $e) {
-                \Log::error('Error loading properties from Google Sheets, falling back to database', [
+                \Log::error('Error loading properties from feed, falling back to database', [
+                    'data_source' => class_basename($feedService),
                     'error' => $e->getMessage(),
                     'trace' => $e->getTraceAsString()
                 ]);
@@ -254,7 +354,7 @@ class PropertyController extends Controller
             }
         }
         
-        // Fallback to database if Google Sheets not configured or fails
+        // Fallback to database if no feed configured or the feed fails
         $query = Property::query();
 
         // Apply filters
@@ -356,13 +456,12 @@ class PropertyController extends Controller
      */
     public function show(string $id)
     {
-        // Check if Google Sheets is configured
-        $useGoogleSheets = !empty(config('services.google.properties.spreadsheet_id'));
-        
-        if ($useGoogleSheets) {
+        // Try the configured property feed first (API or Google Sheets)
+        $feedService = $this->getFeedService();
+
+        if ($feedService) {
             try {
-                // Try to get from Google Sheets first
-                $propertyData = $this->getSheetsService()->getPropertyById($id);
+                $propertyData = $feedService->getPropertyById($id);
                 
                 if ($propertyData) {
                     $property = new PropertyFromSheet($propertyData);
@@ -390,15 +489,16 @@ class PropertyController extends Controller
                     return view('properties.show', compact('property', 'clients'));
                 }
             } catch (\Exception $e) {
-                \Log::error('Error loading property from Google Sheets, falling back to database', [
+                \Log::error('Error loading property from feed, falling back to database', [
                     'id' => $id,
+                    'data_source' => class_basename($feedService),
                     'error' => $e->getMessage()
                 ]);
                 // Fall through to database fallback
             }
         }
-        
-        // Fallback to database if not found in sheets or Google Sheets not configured
+
+        // Fallback to database if not found in the feed or no feed configured
         $property = Property::with(['interests.client', 'interestedClients'])->findOrFail($id);
         
         $clients = collect();
@@ -415,12 +515,15 @@ class PropertyController extends Controller
     public function map(Request $request)
     {
         $this->applyTokenizedFilters($request);
+        if ($redirect = $this->applyStickyFilters($request, 'properties.map')) {
+            return $redirect;
+        }
         $canUseRestrictedFilters = $this->canUseRestrictedFilters($request);
 
-        // Check if Google Sheets is configured
-        $useGoogleSheets = !empty(config('services.google.properties.spreadsheet_id'));
-        
-        if ($useGoogleSheets) {
+        // Main feed: Harbor Ops scraped-listings API, then Google Sheets fallback
+        $feedService = $this->getFeedService();
+
+        if ($feedService) {
             try {
                 // Build filters array
                 $filters = [];
@@ -470,8 +573,8 @@ class PropertyController extends Controller
                     $filters['room_count'] = $request->room_count;
                 }
 
-                // Get filtered properties from Google Sheets
-                $filteredProperties = $this->getSheetsService()->filterProperties($filters);
+                // Get filtered properties from the feed
+                $filteredProperties = $feedService->filterProperties($filters);
                 
                 // Filter properties with valid coordinates
                 $properties = $filteredProperties->filter(function ($property) {
@@ -522,9 +625,13 @@ class PropertyController extends Controller
                     $aIsPremium = !empty($a['flag']) && strtolower($a['flag']) === 'premium';
                     $bIsPremium = !empty($b['flag']) && strtolower($b['flag']) === 'premium';
                     
-                    // If both are premium or both are not premium, sort by ID descending
+                    // If both are premium or both are not premium, sort newest first.
+                    // API rows carry created_at; sheet rows fall back to ID descending.
                     if ($aIsPremium === $bIsPremium) {
-                        return ($b['id'] ?? 0) <=> ($a['id'] ?? 0); // Descending by ID
+                        if (!empty($a['created_at']) && !empty($b['created_at'])) {
+                            return strcmp((string) $b['created_at'], (string) $a['created_at']);
+                        }
+                        return ($b['id'] ?? 0) <=> ($a['id'] ?? 0);
                     }
                     
                     // Premium properties come first
@@ -562,7 +669,7 @@ class PropertyController extends Controller
                 })->take(400)->values()->all();
 
                 // Get filter values for dropdowns
-                $filterValues = $this->getSheetsService()->getFilterValues();
+                $filterValues = $feedService->getFilterValues();
                 $locations = $filterValues['locations'];
                 $propertyTypes = $filterValues['propertyTypes'];
                 $availableDates = $filterValues['available_dates'];
@@ -571,7 +678,8 @@ class PropertyController extends Controller
                 $roomCounts = $filterValues['room_counts'];
 
                 // Log validation results for debugging
-                \Log::info('Map query results (Google Sheets)', [
+                \Log::info('Map query results (feed)', [
+                    'data_source' => class_basename($feedService),
                     'total_properties' => $propertyObjects->count(),
                     'properties_with_coords' => collect($propertiesForJson)->filter(function($p) {
                         return !empty($p['latitude']) && !empty($p['longitude']);
@@ -597,15 +705,16 @@ class PropertyController extends Controller
                     'roomCounts' => $roomCounts
                 ]);
             } catch (\Exception $e) {
-                \Log::error('Error loading properties from Google Sheets for map, falling back to database', [
+                \Log::error('Error loading properties from feed for map, falling back to database', [
+                    'data_source' => class_basename($feedService),
                     'error' => $e->getMessage(),
                     'trace' => $e->getTraceAsString()
                 ]);
                 // Fall through to database fallback
             }
         }
-        
-        // Fallback to database if Google Sheets not configured or fails
+
+        // Fallback to database if no feed configured or the feed fails
         $query = Property::query()->withValidCoordinates();
 
         // Apply filters

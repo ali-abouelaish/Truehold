@@ -33,16 +33,20 @@ Route::domain('ap.truehold.co.uk')->group(function () {
     Route::get('/properties/{ap_property}', [ApPublicPropertyController::class, 'show'])->name('ap.public.show');
 });
 
-Route::get('/', function () {
-    if (request()->getHost() === 'ap.truehold.co.uk') {
+// Listings index now lives at the domain root ("/") instead of "/properties".
+Route::get('/', function (Request $request, PropertyController $controller) {
+    if ($request->getHost() === 'ap.truehold.co.uk') {
         return redirect()->route('ap.public.index');
     }
-    return redirect('/properties');
-});
+    return $controller->index($request);
+})->name('properties.index');
 
 
 // Public routes - no authentication required
-Route::get('/properties', [PropertyController::class, 'index'])->name('properties.index');
+// Legacy "/properties" URL — permanently redirect to root, preserving any query string.
+Route::get('/properties', function (Request $request) {
+    return redirect('/' . ($request->getQueryString() ? '?' . $request->getQueryString() : ''), 301);
+});
 Route::post('/properties/share-token', [PropertyController::class, 'createShareToken'])->name('properties.share-token');
 Route::get('/properties/create', [PropertyController::class, 'create'])->name('properties.create');
 Route::post('/properties', [PropertyController::class, 'store'])->name('properties.store');
@@ -524,7 +528,7 @@ Route::middleware('auth')->group(function () {
 // Logout route
 Route::post('/logout', function () {
     auth()->logout();
-    return redirect('/properties');
+    return redirect('/');
 })->middleware('auth')->name('logout');
 
 // Localhost fallback for AP public views (when not using subdomain)

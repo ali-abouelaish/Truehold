@@ -142,7 +142,12 @@
 
     </div>
 
-    <x-th.filter-panel :locations="$locations" :propertyTypes="$propertyTypes ?? collect()"/>
+    <x-th.filter-panel
+        :locations="$locations"
+        :propertyTypes="$propertyTypes ?? collect()"
+        :agentNames="$agentNames ?? collect()"
+        :agentsWithPaying="$agentsWithPaying ?? collect()"
+        :action="route('properties.map')"/>
 
 </div>
 
@@ -216,7 +221,9 @@
                 d.addEventListener('mouseenter', () => thMapHover(this.property.id, true));
                 d.addEventListener('mouseleave', () => thMapHover(this.property.id, false));
                 this.div = d;
-                this.getPanes().floatPane.appendChild(d);
+                // overlayMouseTarget sits just below floatPane (where InfoWindow lives),
+                // so an opened popup naturally stacks above other pins.
+                this.getPanes().overlayMouseTarget.appendChild(d);
             }
             draw() {
                 const proj = this.getProjection();

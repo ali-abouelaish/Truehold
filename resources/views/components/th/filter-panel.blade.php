@@ -1,7 +1,14 @@
-@props(['locations' => [], 'propertyTypes' => []])
+@props([
+    'locations' => [],
+    'propertyTypes' => [],
+    'agentNames' => [],
+    'agentsWithPaying' => [],
+    'action' => null,
+])
 
 @php
     $req = request();
+    $formAction = $action ?: route('properties.index');
     $defaults = [
         'min_price' => $req->input('min_price', 400),
         'max_price' => $req->input('max_price', 2500),
@@ -12,6 +19,23 @@
         'paying_only' => $req->boolean('paying_only'),
         'available_date' => $req->input('available_date', ''),
     ];
+
+    // Landlord/agent select data. The feed returns `agents_with_paying` as a
+    // flat list of paying agent names; the DB fallback returns a name => bool
+    // map. Normalise both into a set of paying agent names.
+    $awp = collect($agentsWithPaying ?? []);
+    $payingNames = $awp->contains(fn($v) => is_bool($v))
+        ? $awp->filter()->keys()
+        : $awp->values();
+    $payingSet = $payingNames->map(fn($n) => (string) $n)->filter()->unique()->all();
+
+    $agentList = collect($agentNames ?? [])
+        ->map(fn($n) => (string) $n)
+        ->filter()
+        ->unique()
+        ->sort()
+        ->values();
+    $selectedAgent = (string) $req->input('agent_name', '');
 @endphp
 
 {{-- Open/close is plain JS (vanilla class toggle) so the drawer works even if Alpine breaks elsewhere on the page. Alpine still drives the form state inside. --}}
@@ -19,7 +43,15 @@
 
 <aside class="th-filter" id="thFilter">
     <div x-data="thFilterPanel(@js($defaults))" style="display:contents;">
-        <form method="GET" action="{{ route('properties.index') }}" x-ref="form">
+        <form method="GET" action="{{ $formAction }}" x-ref="form">
+            {{-- Mark this as an authoritative in-app filter submit + carry filters
+                 that have no visible control here so they aren't dropped. --}}
+            <input type="hidden" name="qf" value="1">
+            @foreach(['available_date', 'management_company', 'room_count'] as $pk)
+                @if($req->filled($pk))
+                    <input type="hidden" name="{{ $pk }}" value="{{ $req->input($pk) }}">
+                @endif
+            @endforeach
             <header class="th-filter-head">
                 <div>
                     <div class="th-filter-eyebrow">Refine</div>
@@ -45,6 +77,21 @@
                             <input type="hidden" name="paying_only" :value="paying ? '1' : ''">
                         </div>
                     </section>
+
+                    @if($agentList->isNotEmpty())
+                        <section class="th-filter-section">
+                            <div class="th-filter-h">Landlord / agent</div>
+                            <div class="th-filter-sub" style="margin-bottom: 10px;">
+                                <span class="th-bolt">⚡</span> marks paying agents — verified, faster replies
+                            </div>
+                            <select name="agent_name" class="th-filter-select">
+                                <option value="">All landlords</option>
+                                @foreach($agentList as $name)
+                                    <option value="{{ $name }}" @selected($selectedAgent === $name)>{{ in_array($name, $payingSet, true) ? '⚡ ' : '' }}{{ $name }}</option>
+                                @endforeach
+                            </select>
+                        </section>
+                    @endif
                 @endauth
 
                 {{-- Preserve the location chosen in the hero "Where" select on submit --}}
@@ -125,7 +172,7 @@
             </div>
 
             <footer class="th-filter-foot">
-                <a href="{{ route('properties.index') }}" class="th-link-soft">Reset all</a>
+                <a href="{{ $formAction }}?reset=1" class="th-link-soft">Reset all</a>
                 <div style="display:flex; gap:8px;">
                     <button type="button" class="th-btn th-btn-ghost" onclick="thFilterClose()">Cancel</button>
                     <button type="submit" class="th-btn th-btn-primary">Show results</button>

@@ -18,8 +18,13 @@
 @php
     $p = $property;
 
-    // Photos — fall back gracefully across the various accessors
-    $gallery = $p->high_quality_photos_array ?? [];
+    // Photos — call the accessor directly. Don't use `??` here because
+    // PropertyFromSheet::__isset() only reports raw attributes, so `?? []`
+    // would short-circuit to [] before __get even runs.
+    $gallery = $p->high_quality_photos_array;
+    if (!is_array($gallery)) {
+        $gallery = [];
+    }
     if (empty($gallery) && !empty($p->first_photo_url)) {
         $gallery = [$p->first_photo_url];
     }
@@ -58,14 +63,51 @@
     $isStudio  = stripos($type, 'studio') !== false;
     $bathroomLabel = $isEnsuite ? 'Private ensuite' : ($isStudio ? 'Private' : 'Shared bathroom');
 
+    // Rooms — a single post can advertise several rooms (room1..room4),
+    // each with its own type / price / deposit.
+    $fmtMoney = fn($v) => (is_numeric($v) && (float) $v > 0) ? '£' . number_format((float) $v, 0) : null;
+    $rooms = [];
+    for ($i = 1; $i <= 4; $i++) {
+        $rType    = trim((string) ($p->{"room{$i}_type"} ?? ''));
+        $rPrice   = $p->{"room{$i}_price_pcm"} ?? null;
+        $rDeposit = $p->{"room{$i}_deposit"} ?? null;
+        $rPriceFmt = $fmtMoney($rPrice);
+        if ($rType !== '' || $rPriceFmt !== null) {
+            $rooms[] = [
+                'type'      => $rType !== '' ? ucfirst(strtolower($rType)) : 'Room',
+                'price'     => $rPriceFmt,
+                'price_raw' => (is_numeric($rPrice) && (float) $rPrice > 0) ? (float) $rPrice : null,
+                'deposit'   => $fmtMoney($rDeposit),
+            ];
+        }
+    }
+    $roomsAvailable = count($rooms);
+    $isMultiRoom = $roomsAvailable > 1;
+
     // Bedroom label
-    $bedroomLabel = $isStudio ? 'Studio' : 'Room available';
+    $bedroomLabel = $isStudio
+        ? 'Studio'
+        : ($isMultiRoom ? $roomsAvailable . ' rooms available' : 'Room available');
 
     // Price
     $price = $p->price ?? null;
     $priceFormatted = is_numeric($price) ? '£' . number_format((float) $price, 0) : (string) ($p->formatted_price ?? '£' . $price);
     $deposit = $p->deposit ?? null;
     $depositFormatted = is_numeric($deposit) ? '£' . number_format((float) $deposit, 0) : ($deposit ? (string) $deposit : null);
+
+    // Price display — for multi-room posts show a per-room range (from the room
+    // prices, falling back to the min/max_room_price_pcm summary columns).
+    $roomPriceVals = array_values(array_filter(array_column($rooms, 'price_raw')));
+    $minRoom = $roomPriceVals ? min($roomPriceVals) : ($p->min_room_price_pcm ?? null);
+    $maxRoom = $roomPriceVals ? max($roomPriceVals) : ($p->max_room_price_pcm ?? null);
+    $hasRoomRange = $isMultiRoom
+        && is_numeric($minRoom) && is_numeric($maxRoom)
+        && (float) $minRoom > 0 && (float) $maxRoom > 0
+        && (float) $minRoom != (float) $maxRoom;
+    $priceDisplay = $hasRoomRange
+        ? '£' . number_format((float) $minRoom, 0) . '–£' . number_format((float) $maxRoom, 0)
+        : $priceFormatted;
+    $pricePeriod = $hasRoomRange ? 'per room / month' : 'per month';
 
     // Agent
     $agentName = (string) ($p->agent_name ?? '');
@@ -75,6 +117,10 @@
 
     $payingRaw = $p->paying ?? null;
     $isPayingAgent = $payingRaw !== null && in_array(strtolower(trim((string) $payingRaw)), ['yes', 'true', '1'], true);
+
+    // Login-gated deep link into the landlord's profile (Harbor Ops)
+    $landlordUrl = trim((string) ($p->landlord_profile_url ?? ''));
+    $hasLandlord = $landlordUrl !== '' && strtolower($landlordUrl) !== 'n/a';
 
     // Description
     $description = trim((string) ($p->description ?? ''));
@@ -121,7 +167,12 @@
                  && $p->latitude !== 'N/A' && $p->longitude !== 'N/A';
 @endphp
 
-<div class="th-page" x-data="{ active: 0, photos: @js(array_values($gallery)) }">
+<div class="th-page"
+     x-data="{ active: 0, photos: @js(array_values($gallery)), expanded: false }"
+     x-on:keydown.escape.window="expanded = false"
+     x-on:keydown.arrow-left.window="if (expanded) active = (active - 1 + photos.length) % photos.length"
+     x-on:keydown.arrow-right.window="if (expanded) active = (active + 1) % photos.length"
+     x-effect="document.body.style.overflow = expanded ? 'hidden' : ''">
 
     <x-th.nav current="list"/>
 
@@ -141,15 +192,27 @@
         <section class="th-gallery">
             <div class="th-gallery-inner">
                 <div class="th-gal-main"
-                     :style="`background-image: url('${photos[active]}')`">
+                     role="button"
+                     tabindex="0"
+                     x-on:click="expanded = true"
+                     x-on:keydown.enter="expanded = true"
+                     aria-label="Open photo viewer">
+                    <img class="th-gal-main-img"
+                         :src="photos[active]"
+                         alt="{{ e($p->title) }}"
+                         loading="eager"
+                         fetchpriority="high"
+                         draggable="false">
                     @if(count($gallery) > 1)
                         <button class="th-gal-arrow th-gal-arrow-l"
-                                x-on:click="active = (active - 1 + photos.length) % photos.length"
+                                type="button"
+                                x-on:click.stop="active = (active - 1 + photos.length) % photos.length"
                                 aria-label="Previous photo">
                             <x-th.icon name="chevron-left" size="20"/>
                         </button>
                         <button class="th-gal-arrow th-gal-arrow-r"
-                                x-on:click="active = (active + 1) % photos.length"
+                                type="button"
+                                x-on:click.stop="active = (active + 1) % photos.length"
                                 aria-label="Next photo">
                             <x-th.icon name="chevron-right" size="20"/>
                         </button>
@@ -158,9 +221,9 @@
                         <span x-text="active + 1"></span> / {{ count($gallery) }}
                     </span>
                     @if($totalPhotos > 0)
-                        <span class="th-gal-allphotos">
+                        <button type="button" class="th-gal-allphotos" x-on:click.stop="expanded = true">
                             <x-th.icon name="grid" size="14"/> All {{ $totalPhotos }} photos
-                        </span>
+                        </button>
                     @endif
                 </div>
                 <div class="th-gal-side">
@@ -177,6 +240,35 @@
                 </div>
             </div>
         </section>
+
+        <div class="th-lightbox"
+             x-show="expanded"
+             x-transition.opacity
+             x-cloak
+             style="display:none;"
+             x-on:click.self="expanded = false">
+            <button class="th-lightbox-close" type="button" x-on:click="expanded = false" aria-label="Close photo viewer">
+                <x-th.icon name="close" size="22"/>
+            </button>
+            <img class="th-lightbox-img" :src="photos[active]" alt="{{ e($p->title) }}" draggable="false">
+            @if(count($gallery) > 1)
+                <button class="th-lightbox-arrow th-lightbox-arrow-l"
+                        type="button"
+                        x-on:click.stop="active = (active - 1 + photos.length) % photos.length"
+                        aria-label="Previous photo">
+                    <x-th.icon name="chevron-left" size="24"/>
+                </button>
+                <button class="th-lightbox-arrow th-lightbox-arrow-r"
+                        type="button"
+                        x-on:click.stop="active = (active + 1) % photos.length"
+                        aria-label="Next photo">
+                    <x-th.icon name="chevron-right" size="24"/>
+                </button>
+            @endif
+            <span class="th-lightbox-counter">
+                <span x-text="active + 1"></span> / {{ count($gallery) }}
+            </span>
+        </div>
     @endif
 
     <section class="th-detail">
@@ -200,8 +292,8 @@
                         </div>
                     </div>
                     <div class="th-detail-price">
-                        <span class="th-price-amount-lg">{{ $priceFormatted }}</span>
-                        <span class="th-price-period">per month</span>
+                        <span class="th-price-amount-lg">{{ $priceDisplay }}</span>
+                        <span class="th-price-period">{{ $pricePeriod }}</span>
                         @if($depositFormatted || $billsIncluded)
                             <div class="th-detail-price-foot">
                                 @if($depositFormatted) Deposit {{ $depositFormatted }} @endif
@@ -258,43 +350,82 @@
                     </div>
                 </div>
 
-                @if($description !== '')
+                @if($isMultiRoom)
                     <section class="th-section">
-                        <h2 class="th-section-h">About this place</h2>
-                        <p class="th-section-body" style="white-space: pre-line;">{{ $description }}</p>
+                        <h2 class="th-section-h">
+                            Rooms available
+                            <span class="th-rooms-count">{{ $roomsAvailable }}</span>
+                        </h2>
+                        <div class="th-rooms">
+                            @foreach($rooms as $room)
+                                <div class="th-room">
+                                    <div class="th-room-mark"><x-th.icon name="bed" size="18"/></div>
+                                    <div class="th-room-info">
+                                        <div class="th-room-type">{{ $room['type'] }} room</div>
+                                        @if($room['deposit'])
+                                            <div class="th-room-sub">Deposit {{ $room['deposit'] }}</div>
+                                        @endif
+                                    </div>
+                                    <div class="th-room-price">
+                                        @if($room['price'])
+                                            <span class="th-room-price-amt">{{ $room['price'] }}</span>
+                                            <span class="th-price-period">/mo</span>
+                                        @else
+                                            <span class="th-room-poa">Price on request</span>
+                                        @endif
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
                     </section>
                 @endif
 
-                @if(count($specCosts) || count($specProperty) || count($specHouse))
-                    <section class="th-section">
-                        <h2 class="th-section-h">The details</h2>
-                        <div class="th-spec">
-                            @if(count($specCosts))
-                                <div class="th-spec-col">
-                                    <div class="th-spec-h">Costs</div>
-                                    @foreach($specCosts as $k => $v)
-                                        <dl><dt>{{ $k }}</dt><dd>{{ $v }}</dd></dl>
-                                    @endforeach
+                @php
+                    $hasDescription = $description !== '';
+                    $hasDetails = count($specCosts) || count($specProperty) || count($specHouse);
+                @endphp
+
+                @if($hasDescription || $hasDetails)
+                    <div class="th-about-grid {{ $hasDescription && $hasDetails ? '' : 'is-single' }}">
+                        @if($hasDescription)
+                            <section class="th-section th-about-desc">
+                                <h2 class="th-section-h">About this place</h2>
+                                <p class="th-section-body" style="white-space: pre-line;">{{ $description }}</p>
+                            </section>
+                        @endif
+
+                        @if($hasDetails)
+                            <aside class="th-section th-about-spec">
+                                <h2 class="th-section-h">The details</h2>
+                                <div class="th-spec th-spec-stacked">
+                                    @if(count($specCosts))
+                                        <div class="th-spec-col">
+                                            <div class="th-spec-h">Costs</div>
+                                            @foreach($specCosts as $k => $v)
+                                                <dl><dt>{{ $k }}</dt><dd>{{ $v }}</dd></dl>
+                                            @endforeach
+                                        </div>
+                                    @endif
+                                    @if(count($specProperty))
+                                        <div class="th-spec-col">
+                                            <div class="th-spec-h">Property</div>
+                                            @foreach($specProperty as $k => $v)
+                                                <dl><dt>{{ $k }}</dt><dd>{{ $v }}</dd></dl>
+                                            @endforeach
+                                        </div>
+                                    @endif
+                                    @if(count($specHouse))
+                                        <div class="th-spec-col">
+                                            <div class="th-spec-h">Housemates</div>
+                                            @foreach($specHouse as $k => $v)
+                                                <dl><dt>{{ $k }}</dt><dd>{{ $v }}</dd></dl>
+                                            @endforeach
+                                        </div>
+                                    @endif
                                 </div>
-                            @endif
-                            @if(count($specProperty))
-                                <div class="th-spec-col">
-                                    <div class="th-spec-h">Property</div>
-                                    @foreach($specProperty as $k => $v)
-                                        <dl><dt>{{ $k }}</dt><dd>{{ $v }}</dd></dl>
-                                    @endforeach
-                                </div>
-                            @endif
-                            @if(count($specHouse))
-                                <div class="th-spec-col">
-                                    <div class="th-spec-h">Housemates</div>
-                                    @foreach($specHouse as $k => $v)
-                                        <dl><dt>{{ $k }}</dt><dd>{{ $v }}</dd></dl>
-                                    @endforeach
-                                </div>
-                            @endif
-                        </div>
-                    </section>
+                            </aside>
+                        @endif
+                    </div>
                 @endif
 
                 <section class="th-section">
@@ -342,44 +473,56 @@
             <aside class="th-detail-aside">
                 <div class="th-actioncard">
                     <div class="th-actioncard-price">
-                        <span class="th-price-amount-lg">{{ $priceFormatted }}</span>
-                        <span class="th-price-period">/ month</span>
+                        <span class="th-price-amount-lg">{{ $priceDisplay }}</span>
+                        <span class="th-price-period">{{ $hasRoomRange ? '/ room / mo' : '/ month' }}</span>
                     </div>
                     <div class="th-actioncard-sub">
-                        @if($billsIncluded) Includes bills · @endif No fees · {{ $availablePill }}
+                        @if($isMultiRoom) {{ $roomsAvailable }} rooms available · @endif @if($billsIncluded) Includes bills · @endif No fees · {{ $availablePill }}
                     </div>
 
-                    @auth
-                        <a href="mailto:?subject=Viewing request: {{ urlencode($p->title) }}" class="th-btn th-btn-primary th-btn-block">
-                            Request a viewing
-                        </a>
-                        @if($agentName !== '' && $agentName !== 'N/A')
-                            <a href="mailto:?subject=Question about {{ urlencode($p->title) }}" class="th-btn th-btn-outline th-btn-block">
-                                Message the agent
-                            </a>
-                        @endif
-                    @else
-                        <a href="{{ route('login', ['redirect' => url()->current()]) }}" class="th-btn th-btn-primary th-btn-block">
-                            Contact your agent to request a viewing
-                        </a>
-                    @endauth
+                    @php
+                        $mapsQuery = $hasCoords
+                            ? $p->latitude . ',' . $p->longitude
+                            : trim(($location !== '' ? $location : $area));
+                        $mapsUrl = 'https://www.google.com/maps/search/?api=1&query=' . urlencode($mapsQuery);
+                    @endphp
+                    <a href="{{ $mapsUrl }}" target="_blank" rel="noopener" class="th-btn th-btn-primary th-btn-block">
+                        <x-th.icon name="map" size="16"/> Open location in Google Maps
+                    </a>
 
                     @auth
-                        @if($agentName !== '' && $agentName !== 'N/A')
+                        @php $hasAgent = $agentName !== '' && $agentName !== 'N/A'; @endphp
+                        @if($hasAgent || $hasLandlord)
                             <div class="th-actioncard-meta">
-                                <div class="th-actioncard-agent">
-                                    <div class="th-agent-mark">{{ $agentInitials }}</div>
-                                    <div>
-                                        <div class="th-agent-name">{{ $agentName }}</div>
-                                        <div class="th-agent-trust">
-                                            @if($isPayingAgent)
-                                                <x-th.icon name="check" size="12"/> Paying agent · faster replies
-                                            @else
-                                                <x-th.icon name="check" size="12"/> Verified
-                                            @endif
+                                @if($hasAgent)
+                                    <div class="th-actioncard-agent">
+                                        <div class="th-agent-mark">{{ $agentInitials }}</div>
+                                        <div>
+                                            <div class="th-agent-name">
+                                                {{ $agentName }}
+                                                @if($isPayingAgent)
+                                                    <span class="th-bolt" title="Paying agent — verified, faster replies" aria-label="Paying agent">⚡</span>
+                                                @endif
+                                            </div>
+                                            <div class="th-agent-trust">
+                                                @if($isPayingAgent)
+                                                    <x-th.icon name="check" size="12"/> Paying agent · faster replies
+                                                @else
+                                                    <x-th.icon name="check" size="12"/> Verified
+                                                @endif
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
+                                @endif
+                                @if($hasLandlord)
+                                    <a href="{{ $landlordUrl }}" target="_blank" rel="noopener"
+                                       class="th-landlord-link {{ $hasAgent ? 'has-agent' : '' }}">
+                                        <span class="th-landlord-link-txt">
+                                            <x-th.icon name="home" size="14"/> View landlord profile
+                                        </span>
+                                        <x-th.icon name="chevron-right" size="16"/>
+                                    </a>
+                                @endif
                             </div>
                         @endif
                     @endauth
